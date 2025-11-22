@@ -1,611 +1,557 @@
 # Product Requirements Document (PRD)
-## CRM Healthcare - Customer Relationship Management untuk Industri Farmasi
+## CRM Healthcare/Pharmaceutical Platform
 
-**Versi:** 1.0  
-**Tanggal:** 2024  
-**Status:** Draft
+**Versi**: 1.0  
+**Status**: Draft  
+**Last Updated**: 2025-01-15  
+**Target Release**: MVP Q1 2025
 
 ---
 
 ## 📋 Daftar Isi
 
 1. [Executive Summary](#executive-summary)
-2. [Visi & Misi](#visi--misi)
-3. [Target Market](#target-market)
-4. [Modul Utama](#modul-utama)
-5. [Arsitektur Sistem](#arsitektur-sistem)
-6. [Tech Stack](#tech-stack)
-7. [Roadmap Implementasi](#roadmap-implementasi)
-8. [Success Metrics](#success-metrics)
+2. [Product Overview](#product-overview)
+3. [Target Users](#target-users)
+4. [Business Objectives](#business-objectives)
+5. [Functional Requirements](#functional-requirements)
+6. [Non-Functional Requirements](#non-functional-requirements)
+7. [User Stories](#user-stories)
+8. [Technical Requirements](#technical-requirements)
+9. [Success Metrics](#success-metrics)
+10. [Timeline & Milestones](#timeline--milestones)
+11. [Risks & Mitigation](#risks--mitigation)
 
 ---
 
 ## Executive Summary
 
-CRM Healthcare adalah platform **Customer Relationship Management (CRM) berbasis SaaS** yang dirancang khusus untuk industri farmasi di Indonesia. Platform ini memfasilitasi Medical Representative (MedRep) untuk merencanakan kunjungan dokter (Call Plan), melaporkan hasil kunjungan (Call Report), mengelola produk dan stok sample, serta memberikan insights untuk meningkatkan efektivitas penjualan.
+CRM Healthcare/Pharmaceutical Platform adalah sistem manajemen hubungan pelanggan (CRM) yang dirancang khusus untuk industri kesehatan dan farmasi. Platform ini membantu klinik, rumah sakit, apotek, dan perusahaan farmasi mengelola pasien, dokter, janji temu, resep, rekam medis, inventori obat, dan operasi bisnis mereka secara terintegrasi.
 
-### Value Proposition
+### Key Value Propositions
 
-- **Real-time Tracking**: GPS-based visit validation untuk memastikan kunjungan valid
-- **Efektif**: Call Plan & Call Report terintegrasi untuk optimasi waktu MedRep
-- **Terstruktur**: Manajemen produk, sample, dan detailing yang sistematis
-- **Insightful**: Analytics dan laporan untuk evaluasi kinerja
-- **Mobile-First**: Aplikasi mobile untuk MedRep di lapangan
-- **Scalable**: Dukungan multi-tenant untuk perusahaan farmasi
-
----
-
-## Visi & Misi
-
-### Visi
-Menjadi platform CRM terdepan di Indonesia untuk industri farmasi yang memberdayakan Medical Representative dan perusahaan farmasi untuk meningkatkan efektivitas penjualan melalui teknologi modern.
-
-### Misi
-1. Memfasilitasi perencanaan dan pelaporan kunjungan dokter secara real-time
-2. Memastikan validitas kunjungan melalui geo-tagging dan validasi lokasi
-3. Memberikan insights yang actionable melalui analitik dan laporan
-4. Meningkatkan efisiensi operasional MedRep di lapangan
+- **Integrated Patient Management**: Manajemen data pasien yang terpusat dan aman
+- **Streamlined Workflow**: Otomatisasi proses dari appointment hingga billing
+- **Regulatory Compliance**: Memenuhi standar kesehatan dan farmasi Indonesia
+- **Real-time Inventory**: Manajemen stok obat yang akurat dan real-time
+- **Comprehensive Reporting**: Laporan dan analitik untuk pengambilan keputusan
 
 ---
 
-## Target Market
+## Product Overview
 
-### Primary Target
-- **Perusahaan Farmasi**: Perusahaan farmasi nasional dan multinasional
-- **Distributor Farmasi**: Distributor yang memiliki tim Medical Representative
-- **Agen Farmasi**: Agen yang mengelola tim sales di bidang farmasi
+### Vision
 
-### Secondary Target
-- **Perusahaan Alat Kesehatan**: Perusahaan yang menjual alat kesehatan ke rumah sakit/klinik
-- **Perusahaan Nutrisi Medis**: Perusahaan yang fokus pada nutrisi medis
+Menjadi platform CRM terdepan untuk industri kesehatan dan farmasi di Indonesia yang memungkinkan penyedia layanan kesehatan memberikan perawatan yang lebih baik sambil mengoptimalkan operasi bisnis mereka.
 
-### User Personas
+### Mission
 
-1. **Medical Representative (MedRep)**
-   - Butuh aplikasi mobile untuk call plan dan call report
-   - Fokus pada kunjungan dokter dan detailing produk
-   - Butuh validasi GPS untuk check-in/check-out
-   - Mengelola stok sample yang dibawa
+Menyediakan solusi teknologi yang komprehensif, mudah digunakan, dan mematuhi regulasi untuk membantu transformasi digital industri kesehatan dan farmasi Indonesia.
 
-2. **Sales Manager / Area Manager**
-   - Monitor real-time aktivitas MedRep
-   - Review call plan dan realization
-   - Analisis performa tim dan produk
-   - Approve force check-in jika diperlukan
+### Product Goals
 
-3. **Admin / Data Entry**
-   - Manage data dokter, produk, dan user
-   - Setup area dan teritori
-   - Generate laporan dan analytics
+1. **Improve Patient Experience**: Mempermudah pasien dalam mengakses layanan kesehatan
+2. **Operational Efficiency**: Mengurangi beban administratif dan meningkatkan efisiensi operasional
+3. **Data-Driven Decisions**: Memberikan insights yang actionable melalui data dan analitik
+4. **Regulatory Compliance**: Memastikan kepatuhan terhadap regulasi kesehatan dan farmasi
+5. **Scalability**: Mendukung pertumbuhan bisnis dari klinik kecil hingga jaringan besar
 
 ---
 
-## Modul Utama
+## Target Users
 
-Platform CRM Healthcare terdiri dari modul-modul berikut dengan **Visit Management** sebagai modul paling krusial:
+### Primary Users
 
-1. **[Modul Visit Management (Call Plan & Call Report)](./modules/01-visit-management.md)** ⭐ **PRIORITAS UTAMA**
-   - Call Plan (Perencanaan Kunjungan)
-   - Visit Execution (Check-in dengan GPS validation)
-   - Call Report (Detailing produk & Sample drop)
-   - Visit History & Analytics
+1. **Administrator Klinik/Rumah Sakit**
+   - Mengelola seluruh operasi klinik
+   - Mengatur user dan permissions
+   - Melihat laporan dan analitik
 
-2. **[Modul Master Data](./modules/02-master-data.md)**
-   - Manajemen Dokter (Customer)
-   - Manajemen Produk
-   - Manajemen User (MedRep, Manager, Admin)
-   - Manajemen Area & Teritori
+2. **Dokter/Physician**
+   - Mengelola jadwal appointment
+   - Membuat rekam medis
+   - Menulis resep
 
-3. **[Modul Sample Management](./modules/03-sample-management.md)**
-   - Stok Sample MedRep
-   - Distribusi Sample
-   - Tracking Batch & Expiry
-   - Laporan Sample Usage
+3. **Apoteker/Pharmacist**
+   - Mengelola inventori obat
+   - Memproses resep
+   - Melakukan dispensing
 
-4. **[Modul Analytics & Reporting](./modules/04-analytics-reporting.md)**
-   - Dashboard Real-time
-   - Laporan Call Plan vs Realization
-   - Product Performance Analytics
-   - MedRep Performance Tracking
+4. **Front Desk/Receptionist**
+   - Mencatat appointment
+   - Mengelola data pasien
+   - Memproses pembayaran
 
-5. **[Modul User Management](./modules/05-user-management.md)**
-   - Role-based Access Control (RBAC)
-   - Hierarki Organisasi
-   - Audit Log
+5. **Kasir/Billing Staff**
+   - Memproses tagihan
+   - Mengelola pembayaran
+   - Mencetak invoice
 
-### Fitur Per Paket Detail
+### Secondary Users
 
-#### Free (Rp 0/bulan)
-- ✅ Kasir POS dasar
-  - Transaksi penjualan
-  - Scan barcode (kamera)
-  - Keranjang & checkout
-  - Pembayaran: Tunai, QRIS
-- ✅ Manajemen produk dasar
-  - CRUD produk (maks 50 produk)
-  - Kategori sederhana (maks 5 kategori)
-  - Stok dasar (single gudang, tanpa stock opname)
-  - Upload gambar produk (maks 1 gambar per produk)
-- ✅ Laporan sangat dasar
-  - Laporan penjualan harian (30 hari terakhir)
-  - Total omzet hari ini
-  - Jumlah transaksi hari ini
-  - Tidak ada export Excel/PDF
-- ✅ Nota digital
-  - Email nota (tanpa WhatsApp)
-  - Download PDF nota
-- ✅ 1 perangkat aktif
-- ✅ 1 outlet
-- ✅ 1 user (owner)
-- ✅ Support: Dokumentasi & community forum
+1. **Pasien/Patient** (Future: Patient Portal)
+   - Melihat riwayat medis
+   - Booking appointment online
+   - Melihat resep dan tagihan
 
-**Batasan Free Plan:**
-- ❌ Maks 50 produk
-- ❌ Maks 5 kategori
-- ❌ Maks 30 hari history penjualan (data lama di-archive)
-- ❌ Tidak ada multi-user
-- ❌ Tidak ada loyalty program
-- ❌ Tidak ada diskon/promo
-- ❌ Tidak ada WhatsApp notifikasi
-- ❌ Tidak ada e-wallet (hanya tunai & QRIS)
-- ❌ Tidak ada stock opname
-- ❌ Tidak ada laporan analitik
-- ❌ Tidak ada export data
-- ❌ Tidak ada offline mode (online only)
-
-#### Basic (Rp 99.000/bulan)
-- ✅ Semua fitur Free
-- ✅ **Unlimited produk** (tidak ada batas 50 produk)
-- ✅ **Unlimited kategori** (tidak ada batas 5 kategori)
-- ✅ **Unlimited history penjualan** (tidak ada batas 30 hari)
-- ✅ Multi user (hingga 3 user)
-- ✅ Export laporan ke Excel/PDF
-- ✅ Laporan analitik dasar
-- ✅ Diskon & promo
-- ✅ 1 perangkat aktif
-- ✅ 1 outlet
-- ✅ Support email
-
-#### Pro (Rp 199.000/bulan)
-- ✅ Semua fitur Basic
-- ✅ Multi user (hingga 5 user)
-- ✅ Stok lengkap (multi gudang, stock opname)
-- ✅ Laporan lengkap (penjualan, produk, keuangan)
-- ✅ Notifikasi WhatsApp otomatis
-- ✅ Pembayaran: + E-wallet, Transfer
-- ✅ Loyalty program & poin pelanggan
-- ✅ Diskon & promo
-- ✅ 3 perangkat aktif
-- ✅ 1 outlet
-- ✅ Support email + chat
-
-#### Business (Rp 399.000/bulan)
-- ✅ Semua fitur Pro
-- ✅ Multi outlet (hingga 5 outlet)
-- ✅ Transfer stok antar outlet
-- ✅ Role-based access control (RBAC)
-- ✅ Laporan konsolidasi multi-outlet
-- ✅ API dasar untuk integrasi
-- ✅ Dashboard mobile owner
-- ✅ 10 perangkat aktif
-- ✅ 5 outlet
-- ✅ Support prioritas
-
-#### Enterprise (Custom)
-- ✅ Semua fitur Business
-- ✅ Unlimited outlet & perangkat
-- ✅ Integrasi ERP (Accurate, Jurnal.id)
-- ✅ Custom report & dashboard
-- ✅ White-label option
-- ✅ Dedicated support
-- ✅ SLA guarantee
-- ✅ Custom training
-
-### Model Pembayaran
-- **Bulanan**: Pembayaran per bulan
-- **Tahunan**: Diskon 20% (bayar 10 bulan, dapat 12 bulan)
-- **Free Plan**: Selamanya gratis, tidak perlu kartu kredit
-
-### Add-ons Berbayar (Opsional)
-
-Add-ons dapat ditambahkan ke paket Free, Basic, atau Pro untuk fitur tambahan:
-
-| Add-on | Harga (IDR) | Deskripsi | Cocok untuk Paket |
-|--------|-------------|-----------|-------------------|
-| **Unlimited Sales History** | Rp 75.000/bulan per outlet | Akses history penjualan tanpa batas waktu (untuk Free Plan) | Free, Basic |
-| **Employee Management** | Rp 375.000/bulan per outlet | Multi-user, RBAC, shift management, audit log | Free, Basic |
-| **Advanced Inventory** | Rp 375.000/bulan per outlet | Multi gudang, stock opname, transfer stok, stock movement tracking | Free, Basic |
-| **WhatsApp Notifications** | Rp 50.000/bulan per outlet | Notifikasi otomatis via WhatsApp (nota, promo, reminder) | Free, Basic |
-| **Loyalty Program** | Rp 100.000/bulan per outlet | Poin pelanggan, tier member, promo otomatis | Free, Basic |
-| **E-Wallet Payment** | Rp 50.000/bulan per outlet | Pembayaran via GoPay, OVO, ShopeePay, DANA | Free, Basic |
-| **Offline Mode** | Rp 75.000/bulan per outlet | Mode offline dengan sync otomatis saat online kembali | Free, Basic |
-
-**Catatan:**
-- Add-ons sudah termasuk di paket **Pro** dan **Business** (tidak perlu bayar terpisah)
-- Add-ons dapat diaktifkan/nonaktifkan kapan saja
-- Harga add-ons per outlet (jika multi-outlet, bayar per outlet)
-- Semua add-ons termasuk 14 hari free trial
-
-### Strategi Upgrade Path
-
-**Free → Basic** (Rp 99.000/bulan)
-- **Trigger**: Produk > 50, butuh history > 30 hari, butuh multi-user
-- **Value Proposition**: "Unlock unlimited products & full history"
-- **Conversion Goal**: 15-20% free users upgrade ke Basic
-
-**Basic → Pro** (Rp 199.000/bulan)
-- **Trigger**: Butuh WhatsApp, loyalty program, stok lengkap, multi-user lebih banyak
-- **Value Proposition**: "Grow your business with advanced features"
-- **Conversion Goal**: 30-40% Basic users upgrade ke Pro
-
-**Pro → Business** (Rp 399.000/bulan)
-- **Trigger**: Buka cabang kedua, butuh RBAC, API, multi-outlet
-- **Value Proposition**: "Scale to multiple locations"
-- **Conversion Goal**: 20-30% Pro users upgrade ke Business
-
-**Keuntungan Model Freemium:**
-- ✅ Lower barrier to entry: Gratis untuk mulai
-- ✅ Viral growth: Pengguna gratis bisa jadi referensi
-- ✅ Data acquisition: Lebih banyak pengguna = lebih banyak data untuk insights
-- ✅ Competitive advantage: Sejalan dengan model Loyverse
-- ✅ Upsell opportunities: Add-ons memberikan fleksibilitas
+2. **Manager/Owner**
+   - Melihat dashboard dan laporan
+   - Analisis bisnis
+   - Pengambilan keputusan strategis
 
 ---
 
-## Arsitektur Sistem
+## Business Objectives
 
-### High-Level Architecture
+### Short-term (MVP - 3 bulan)
 
-```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   Web Frontend  │     │  Mobile App     │     │  Admin Portal   │
-│   (Next.js 16)  │     │  (Flutter)      │     │  (Next.js 16)   │
-│   Manager/Admin │     │  MedRep App     │     │  Data Entry    │
-└────────┬────────┘     └────────┬────────┘     └────────┬────────┘
-         │                       │                       │
-         └───────────────────────┼───────────────────────┘
-                                 │
-                    ┌─────────────▼─────────────┐
-                    │   API Gateway / Load      │
-                    │   Balancer (Cloudflare)   │
-                    └─────────────┬─────────────┘
-                                  │
-                    ┌─────────────▼─────────────┐
-                    │   Backend API (Go + Gin)  │
-                    │   - REST API              │
-                    │   - GPS Validation        │
-                    │   - Background workers     │
-                    └─────────────┬─────────────┘
-                                  │
-         ┌────────────────────────┼────────────────────────┐
-         │                        │                        │
-┌────────▼────────┐    ┌─────────▼─────────┐   ┌─────────▼─────────┐
-│   PostgreSQL    │    │   Redis (Cache)    │   │  Cloudflare R2    │
-│   (Multi-tenant)│    │   (Sessions)       │   │  (Object Storage) │
-│   - Visits       │    │   - GPS Cache      │   │  - Visit Reports  │
-│   - Doctors      │    │   - Hot Data      │   │  - Signatures     │
-│   - Products     │    │                    │   │  - Documents      │
-│   - Samples      │    │                    │   │                   │
-└─────────────────┘    └────────────────────┘   └───────────────────┘
-         │
-         │
-┌────────▼──────────────────────────────────────────────┐
-│   External Services                                   │
-│   - Google Maps API (Geocoding, Distance Matrix)     │
-│   - WhatsApp API (Fonnte/Qontak) - Notifikasi        │
-│   - Push Notifications (FCM)                          │
-└───────────────────────────────────────────────────────┘
-```
+1. **Core Functionality**: Implementasi fitur-fitur inti untuk operasi harian
+2. **User Adoption**: Onboarding minimal 10 klinik/apotek
+3. **Data Accuracy**: Akurasi data > 95%
+4. **System Uptime**: Uptime > 99%
 
-### Komponen Utama
+### Medium-term (6-12 bulan)
 
-1. **Frontend Web** (Next.js 16)
-   - Dashboard Manager/Admin
-   - Call Plan Calendar
-   - Analytics & Reporting
-   - Master Data Management
+1. **Market Expansion**: Ekspansi ke 50+ klinik/apotek
+2. **Feature Enhancement**: Penambahan fitur advanced berdasarkan feedback
+3. **Integration**: Integrasi dengan sistem eksternal (BPJS, payment gateway)
+4. **Mobile App**: Aplikasi mobile untuk dokter dan pasien
 
-2. **Mobile App** (Flutter)
-   - Visit Execution (Check-in/Check-out)
-   - Call Report Form (Detailing & Sample)
-   - Daily Visit Dashboard
-   - Offline-first dengan sync
+### Long-term (12+ bulan)
 
-3. **Backend API** (Go + Gin)
-   - REST API untuk web & mobile
-   - GPS validation & distance calculation
-   - Background workers untuk analytics
-
-4. **Database** (PostgreSQL)
-   - Multi-tenant dengan shared schema
-   - Row-level security (RLS)
-   - Relasi Many-to-Many untuk Visit-Product
-
-5. **Storage** (Cloudflare R2)
-   - Visit reports & documents
-   - Digital signatures
-   - Backup data
-
-6. **Cache** (Redis)
-   - Session storage
-   - GPS data caching
-   - Hot data caching
+1. **Market Leadership**: Menjadi market leader di Indonesia
+2. **AI/ML Integration**: Implementasi AI untuk diagnosis support dan prediksi
+3. **Telemedicine**: Fitur telemedicine terintegrasi
+4. **Analytics Platform**: Platform analitik advanced untuk healthcare insights
 
 ---
 
-## Tech Stack
+## Functional Requirements
 
-### Frontend (Next.js 16)
-- **Framework**: Next.js 16 + React + TypeScript
-  - Improved routing, caching, Turbopack untuk build cepat
-  - SSR / SSG / Edge rendering untuk dashboard & landing
-- **UI Library**: TailwindCSS + shadcn/ui / Radix UI
-  - Accessible primitives, design system konsisten
-  - Icons: lucide-icons / Heroicons
-- **State Management**: 
-  - **TanStack Query (React Query)** untuk server state + optimistic updates
-  - **Zustand** untuk global state (simple) atau **Redux Toolkit** untuk kompleksitas tinggi
-- **Forms**: React Hook Form + Zod untuk schema validation
-- **Auth**: NextAuth.js (OIDC) atau Clerk/Auth0 untuk managed auth
-- **Internationalization**: next-intl atau i18next (bahasa Indonesia default)
-- **Edge & Caching**: Next.js Edge functions + Cloudflare untuk static assets
+### 1. Authentication & Authorization
 
-### Mobile (Flutter)
-- **Framework**: Flutter (Dart) - Android & iOS native
-- **State Management**: Riverpod (modern, testable) atau BLoC
-- **Network**: 
-  - **Dio** untuk HTTP dengan interceptors & retry
-  - **gRPC** (grpc-dart) untuk mobile sync & high performance (optional)
-- **Local Storage / Offline**: 
-  - **Hive** atau **Sqflite** untuk structured data
-  - **sembast** untuk simple key-value
-  - **flutter_secure_storage** untuk tokens
-- **Sync Strategy**: Local write-ahead log (WAL) + background sync + idempotent APIs
-- **GPS & Location**: 
-  - **geolocator** untuk GPS tracking
-  - **geocoding** untuk reverse geocoding
-  - **google_maps_flutter** untuk peta (optional)
-- **Push Notifications**: Firebase Cloud Messaging (FCM) atau OneSignal
-- **Native Integration**: 
-  - Camera untuk foto dokumentasi
-  - Signature pad untuk tanda tangan digital
-  - File picker untuk upload dokumen
+#### 1.1 User Authentication
+- **FR-1.1.1**: Sistem harus mendukung login dengan email dan password
+- **FR-1.1.2**: Sistem harus mendukung multi-factor authentication (MFA)
+- **FR-1.1.3**: Sistem harus mendukung password reset via email
+- **FR-1.1.4**: Sistem harus mendukung session management dengan token-based authentication
+- **FR-1.1.5**: Sistem harus mendukung remember me functionality
 
-### Backend (Go + Gin)
-- **Language**: Golang
-- **Web Framework**: Gin (fast) atau chi (minimalism)
-- **Database Tools**: 
-  - **sqlc** (type-safe SQL generation) - recommended
-  - **ent** (schema-driven) sebagai alternatif
-- **Migrations**: golang-migrate
-- **Auth & Authorization**: 
-  - JWT access token + refresh tokens (rotate refresh tokens)
-  - Refresh tokens stored in Redis
-  - **Casbin** (Go) untuk RBAC/ABAC
-- **API Styles**: 
-  - REST (OpenAPI) untuk web
-  - **gRPC** untuk mobile & internal sync endpoints (optional, high performance)
-- **Background Workers**: 
-  - Go routines + NATS / RabbitMQ untuk tasks (email, invoice retries, settlement jobs)
-  - Scheduled jobs untuk subscription billing
-- **File Uploads**: Presigned URLs ke Cloudflare R2 (S3 compatible)
-- **Security**: 
-  - TLS everywhere
-  - Vulnerability scanning (Snyk)
-  - Rate-limiting (Cloudflare + Gin middleware)
-  - WAF via Cloudflare
+#### 1.2 Role-Based Access Control (RBAC)
+- **FR-1.2.1**: Sistem harus mendukung multiple roles (Admin, Doctor, Pharmacist, Receptionist, Cashier)
+- **FR-1.2.2**: Sistem harus mendukung permission-based access control
+- **FR-1.2.3**: Sistem harus mendukung role assignment per user
+- **FR-1.2.4**: Sistem harus mendukung audit log untuk semua akses
 
-### Database & Multi-Tenant Strategy
-- **Primary DB**: PostgreSQL (managed)
-  - **Neon** / **Supabase** (developer-friendly, serverless)
-  - **Amazon RDS** / **Google Cloud SQL** (enterprise)
-  - Read replicas untuk reporting
-- **Multi-Tenant Approach**: 
-  - **Phase 1**: Shared schema + tenant_id column + Row-Level Security (RLS)
-    - Simple queries, easy horizontal scaling
-    - Operational simplicity
-  - **Phase 2+**: Schema-per-tenant atau Database-per-tenant untuk enterprise
-    - Better isolation, per-tenant backup/restore
-- **Backup & Recovery**: 
-  - Regular DB snapshots (daily) + point-in-time recovery
-  - Store backups in Cloudflare R2 dengan versioning + lifecycle
-  - RTO/RPO SLAs sesuai paket
+### 2. Patient Management
 
-### Object Storage & CDN
-- **Cloudflare R2**: 
-  - S3-compatible, zero egress fees
-  - Images produk, invoice PDFs, backups
-  - Presigned URLs untuk secure uploads/downloads
-- **CDN**: Cloudflare CDN + Workers
-  - Edge caching & edge logic (image resizing, caching static assets)
-- **Static Assets**: Deploy via Vercel untuk Next.js
+#### 2.1 Patient Registration
+- **FR-2.1.1**: Sistem harus memungkinkan registrasi pasien baru dengan data lengkap
+- **FR-2.1.2**: Sistem harus memvalidasi NIK (Nomor Induk Kependudukan) untuk pasien Indonesia
+- **FR-2.1.3**: Sistem harus memvalidasi nomor BPJS jika tersedia
+- **FR-2.1.4**: Sistem harus mendukung upload foto pasien
+- **FR-2.1.5**: Sistem harus mendukung multiple contact methods (phone, email, address)
 
-### Payments & Subscriptions
-- **Local-First (Indonesia)**: 
-  - **Xendit**: Subscriptions API + QRIS + local channels (recommended)
-  - **Midtrans**: Recurring/Subscription + Snap/Core APIs (alternative)
-- **International**: 
-  - **Stripe**: Global card processing & Stripe Billing (availability terbatas di Indonesia)
-- **Design Pattern**: 
-  - Provider-managed subscriptions (Xendit/Midtrans)
-  - Local subscription state mirror + webhook reconciliation
-  - Failed payment handling: retry/backoff + dunning emails/WhatsApp
-  - Invoice & VAT: attach tax lines, generate PDFs (store to R2), send via email/WhatsApp
-- **Billing Microservice**: 
-  - Manage plans, coupons, pro-rata calculations
-  - Usage metering (per-device/per-outlet billing)
+#### 2.2 Patient Profile
+- **FR-2.2.1**: Sistem harus menyimpan informasi demografis pasien (nama, tanggal lahir, gender, alamat)
+- **FR-2.2.2**: Sistem harus menyimpan informasi medis dasar (golongan darah, alergi, kondisi kronis)
+- **FR-2.2.3**: Sistem harus menyimpan informasi kontak darurat
+- **FR-2.2.4**: Sistem harus mendukung riwayat keluarga medis
+- **FR-2.2.5**: Sistem harus mendukung multiple insurance providers
 
-### Message Queue & Events
-- **NATS** (lightweight) untuk MVP
-- **RabbitMQ** / **Kafka** untuk skala besar (future)
+#### 2.3 Patient Search & Filter
+- **FR-2.3.1**: Sistem harus memungkinkan pencarian pasien berdasarkan nama, NIK, nomor telepon
+- **FR-2.3.2**: Sistem harus memungkinkan filter berdasarkan status, tanggal registrasi, dll
+- **FR-2.3.3**: Sistem harus mendukung pagination untuk daftar pasien
 
-### Cache & Session
-- **Redis**: 
-  - **Upstash** (serverless) atau **Redis Enterprise** / **ElastiCache**
-  - Session storage
-  - Hot data caching
-  - Refresh token storage
+### 3. Doctor/Physician Management
 
-### Observability & Monitoring
-- **Tracing**: OpenTelemetry (Go & JS clients)
-- **Metrics**: Prometheus + Grafana untuk server metrics
-- **Logs**: Loki atau ELK stack; integrate dengan Cloudflare logs
-- **Error Tracking**: Sentry untuk frontend & backend
-- **Uptime/Alerts**: PagerDuty atau OpsGenie + Grafana alerting
-- **Product Analytics**: Amplitude atau PostHog (optional)
+#### 3.1 Doctor Registration
+- **FR-3.1.1**: Sistem harus memungkinkan registrasi dokter dengan informasi lengkap
+- **FR-3.1.2**: Sistem harus memvalidasi STR (Surat Tanda Registrasi) dokter
+- **FR-3.1.3**: Sistem harus menyimpan spesialisasi dokter
+- **FR-3.1.4**: Sistem harus menyimpan jadwal praktik dokter
 
-### DevOps & Infrastructure
+#### 3.2 Doctor Profile
+- **FR-3.2.1**: Sistem harus menyimpan informasi personal dokter
+- **FR-3.2.2**: Sistem harus menyimpan informasi profesional (pendidikan, sertifikasi, pengalaman)
+- **FR-3.2.3**: Sistem harus menyimpan informasi kontak dan jadwal
+- **FR-3.2.4**: Sistem harus mendukung multiple specializations
+
+### 4. Appointment Scheduling
+
+#### 4.1 Appointment Booking
+- **FR-4.1.1**: Sistem harus memungkinkan booking appointment untuk pasien
+- **FR-4.1.2**: Sistem harus memvalidasi ketersediaan slot waktu dokter
+- **FR-4.1.3**: Sistem harus mendukung multiple appointment types (konsultasi, follow-up, emergency)
+- **FR-4.1.4**: Sistem harus mendukung reminder via SMS/Email
+- **FR-4.1.5**: Sistem harus mendukung reschedule dan cancel appointment
+
+#### 4.2 Appointment Management
+- **FR-4.2.1**: Sistem harus menampilkan calendar view untuk appointments
+- **FR-4.2.2**: Sistem harus menampilkan list view untuk appointments
+- **FR-4.2.3**: Sistem harus mendukung filter berdasarkan dokter, tanggal, status
+- **FR-4.2.4**: Sistem harus mendukung status tracking (scheduled, confirmed, in-progress, completed, cancelled)
+- **FR-4.2.5**: Sistem harus mendukung walk-in appointments
+
+### 5. Medical Records
+
+#### 5.1 Medical Record Creation
+- **FR-5.1.1**: Sistem harus memungkinkan dokter membuat rekam medis setelah appointment
+- **FR-5.1.2**: Sistem harus menyimpan chief complaint (keluhan utama)
+- **FR-5.1.3**: Sistem harus menyimpan physical examination results
+- **FR-5.1.4**: Sistem harus menyimpan diagnosis
+- **FR-5.1.5**: Sistem harus menyimpan treatment plan
+- **FR-5.1.6**: Sistem harus mendukung upload file (lab results, X-ray, dll)
+
+#### 5.2 Medical Record History
+- **FR-5.2.1**: Sistem harus menampilkan riwayat rekam medis pasien
+- **FR-5.2.2**: Sistem harus mendukung filter berdasarkan tanggal, dokter, diagnosis
+- **FR-5.2.3**: Sistem harus mendukung search dalam rekam medis
+- **FR-5.2.4**: Sistem harus memastikan privacy dan security rekam medis
+
+### 6. Prescription Management
+
+#### 6.1 Prescription Creation
+- **FR-6.1.1**: Sistem harus memungkinkan dokter membuat resep
+- **FR-6.1.2**: Sistem harus memvalidasi ketersediaan obat di apotek
+- **FR-6.1.3**: Sistem harus mendukung multiple medications dalam satu resep
+- **FR-6.1.4**: Sistem harus menyimpan dosage, frequency, dan duration
+- **FR-6.1.5**: Sistem harus mendukung prescription notes
+- **FR-6.1.6**: Sistem harus memvalidasi drug interactions
+
+#### 6.2 Prescription Processing
+- **FR-6.2.1**: Sistem harus memungkinkan apoteker memproses resep
+- **FR-6.2.2**: Sistem harus memvalidasi stok obat
+- **FR-6.2.3**: Sistem harus mendukung partial fulfillment
+- **FR-6.2.4**: Sistem harus mendukung prescription status (pending, processing, fulfilled, cancelled)
+- **FR-6.2.5**: Sistem harus mencetak label obat
+
+### 7. Pharmacy/Inventory Management
+
+#### 7.1 Medicine Management
+- **FR-7.1.1**: Sistem harus memungkinkan registrasi obat baru
+- **FR-7.1.2**: Sistem harus menyimpan informasi obat (nama, generic name, manufacturer, batch number, expiry date)
+- **FR-7.1.3**: Sistem harus memvalidasi nomor registrasi BPOM
+- **FR-7.1.4**: Sistem harus menyimpan harga beli dan harga jual
+- **FR-7.1.5**: Sistem harus mendukung barcode scanning
+
+#### 7.2 Stock Management
+- **FR-7.2.1**: Sistem harus melacak stok obat real-time
+- **FR-7.2.2**: Sistem harus mendukung stock adjustment (masuk, keluar, adjustment)
+- **FR-7.2.3**: Sistem harus memberikan alert untuk stok rendah
+- **FR-7.2.4**: Sistem harus memberikan alert untuk obat mendekati expiry date
+- **FR-7.2.5**: Sistem harus mendukung multiple warehouses/locations
+- **FR-7.2.6**: Sistem harus mendukung stock transfer antar lokasi
+
+#### 7.3 Purchase Management
+- **FR-7.3.1**: Sistem harus memungkinkan pembuatan purchase order
+- **FR-7.3.2**: Sistem harus memungkinkan penerimaan barang (goods receipt)
+- **FR-7.3.3**: Sistem harus memvalidasi invoice supplier
+- **FR-7.3.4**: Sistem harus mendukung multiple suppliers
+
+### 8. Billing & Invoicing
+
+#### 8.1 Invoice Creation
+- **FR-8.1.1**: Sistem harus memungkinkan pembuatan invoice untuk layanan medis
+- **FR-8.1.2**: Sistem harus memungkinkan pembuatan invoice untuk obat
+- **FR-8.1.3**: Sistem harus mendukung multiple payment methods (cash, transfer, credit card, BPJS)
+- **FR-8.1.4**: Sistem harus mendukung discount dan promo
+- **FR-8.1.5**: Sistem harus menghitung tax secara otomatis
+
+#### 8.2 Payment Processing
+- **FR-8.2.1**: Sistem harus memproses pembayaran
+- **FR-8.2.2**: Sistem harus mencetak receipt
+- **FR-8.2.3**: Sistem harus mendukung partial payment
+- **FR-8.2.4**: Sistem harus mendukung refund
+- **FR-8.2.5**: Sistem harus memvalidasi pembayaran BPJS
+
+#### 8.3 Insurance Integration
+- **FR-8.3.1**: Sistem harus mendukung verifikasi BPJS
+- **FR-8.3.2**: Sistem harus menghitung co-payment
+- **FR-8.3.3**: Sistem harus memproses klaim BPJS
+- **FR-8.3.4**: Sistem harus menyimpan informasi asuransi swasta
+
+### 9. Reports & Analytics
+
+#### 9.1 Dashboard
+- **FR-9.1.1**: Sistem harus menampilkan dashboard dengan key metrics
+- **FR-9.1.2**: Sistem harus menampilkan appointment statistics
+- **FR-9.1.3**: Sistem harus menampilkan revenue statistics
+- **FR-9.1.4**: Sistem harus menampilkan inventory alerts
+- **FR-9.1.5**: Sistem harus menampilkan top doctors, top medications
+
+#### 9.2 Reports
+- **FR-9.2.1**: Sistem harus menghasilkan laporan harian, mingguan, bulanan
+- **FR-9.2.2**: Sistem harus menghasilkan laporan pasien
+- **FR-9.2.3**: Sistem harus menghasilkan laporan penjualan obat
+- **FR-9.2.4**: Sistem harus menghasilkan laporan inventory
+- **FR-9.2.5**: Sistem harus menghasilkan laporan keuangan
+- **FR-9.2.6**: Sistem harus mendukung export ke PDF, Excel
+
+### 10. System Administration
+
+#### 10.1 User Management
+- **FR-10.1.1**: Sistem harus memungkinkan admin mengelola users
+- **FR-10.1.2**: Sistem harus memungkinkan assign roles dan permissions
+- **FR-10.1.3**: Sistem harus memungkinkan enable/disable users
+- **FR-10.1.4**: Sistem harus menyimpan audit log untuk semua user actions
+
+#### 10.2 Settings
+- **FR-10.2.1**: Sistem harus memungkinkan konfigurasi sistem (clinic info, business hours, dll)
+- **FR-10.2.2**: Sistem harus memungkinkan konfigurasi notification settings
+- **FR-10.2.3**: Sistem harus memungkinkan konfigurasi payment methods
+- **FR-10.2.4**: Sistem harus memungkinkan konfigurasi tax rates
+
+---
+
+## Non-Functional Requirements
+
+### 1. Performance
+- **NFR-1.1**: Sistem harus dapat menangani minimal 100 concurrent users
+- **NFR-1.2**: Response time untuk CRUD operations < 500ms
+- **NFR-1.3**: Response time untuk reports < 3 seconds
+- **NFR-1.4**: Sistem harus mendukung pagination untuk semua list views
+
+### 2. Security
+- **NFR-2.1**: Semua data harus dienkripsi dalam transit (HTTPS)
+- **NFR-2.2**: Data sensitif harus dienkripsi di rest (encryption at rest)
+- **NFR-2.3**: Sistem harus mematuhi HIPAA/standar privasi data kesehatan Indonesia
+- **NFR-2.4**: Sistem harus mendukung audit logging untuk compliance
+- **NFR-2.5**: Sistem harus mendukung data backup dan recovery
+
+### 3. Availability
+- **NFR-3.1**: Sistem harus memiliki uptime > 99.5%
+- **NFR-3.2**: Sistem harus mendukung maintenance mode dengan graceful degradation
+- **NFR-3.3**: Sistem harus memiliki disaster recovery plan
+
+### 4. Scalability
+- **NFR-4.1**: Sistem harus dapat scale horizontal
+- **NFR-4.2**: Database harus dapat handle minimal 1M records per table
+- **NFR-4.3**: Sistem harus mendukung multi-tenant architecture
+
+### 5. Usability
+- **NFR-5.1**: UI harus responsive (mobile, tablet, desktop)
+- **NFR-5.2**: Sistem harus mendukung bilingual (Bahasa Indonesia & English)
+- **NFR-5.3**: Sistem harus memiliki intuitive navigation
+- **NFR-5.4**: Sistem harus mendukung keyboard shortcuts untuk power users
+
+### 6. Compatibility
+- **NFR-6.1**: Sistem harus support modern browsers (Chrome, Firefox, Safari, Edge)
+- **NFR-6.2**: Sistem harus support mobile browsers
+- **NFR-6.3**: Sistem harus support printing untuk receipts, invoices, prescriptions
+
+---
+
+## User Stories
+
+### Epic 1: Patient Management
+
+**US-1.1**: Sebagai receptionist, saya ingin dapat mendaftarkan pasien baru dengan data lengkap agar dapat melayani pasien dengan baik.
+
+**US-1.2**: Sebagai dokter, saya ingin dapat melihat riwayat medis pasien lengkap agar dapat memberikan diagnosis yang akurat.
+
+**US-1.3**: Sebagai admin, saya ingin dapat mencari pasien berdasarkan berbagai kriteria agar dapat menemukan data pasien dengan cepat.
+
+### Epic 2: Appointment Scheduling
+
+**US-2.1**: Sebagai receptionist, saya ingin dapat membuat appointment untuk pasien dengan dokter tertentu agar pasien dapat dijadwalkan dengan tepat.
+
+**US-2.2**: Sebagai dokter, saya ingin dapat melihat jadwal appointment saya hari ini agar dapat mempersiapkan konsultasi.
+
+**US-2.3**: Sebagai sistem, saya ingin mengirim reminder appointment ke pasien 24 jam sebelum jadwal agar mengurangi no-show rate.
+
+### Epic 3: Medical Records
+
+**US-3.1**: Sebagai dokter, saya ingin dapat membuat rekam medis setelah konsultasi agar data medis pasien tersimpan dengan baik.
+
+**US-3.2**: Sebagai dokter, saya ingin dapat melihat riwayat rekam medis pasien sebelumnya agar dapat memberikan continuity of care.
+
+**US-3.3**: Sebagai admin, saya ingin memastikan rekam medis hanya dapat diakses oleh authorized personnel agar privasi pasien terjaga.
+
+### Epic 4: Prescription Management
+
+**US-4.1**: Sebagai dokter, saya ingin dapat membuat resep dengan multiple medications agar dapat memberikan treatment yang komprehensif.
+
+**US-4.2**: Sebagai apoteker, saya ingin dapat melihat resep yang perlu diproses agar dapat mempersiapkan obat dengan tepat.
+
+**US-4.3**: Sebagai sistem, saya ingin memvalidasi drug interactions sebelum resep dibuat agar dapat mencegah medication errors.
+
+### Epic 5: Inventory Management
+
+**US-5.1**: Sebagai apoteker, saya ingin dapat melihat stok obat real-time agar dapat mengetahui ketersediaan obat.
+
+**US-5.2**: Sebagai admin, saya ingin menerima alert ketika stok obat rendah agar dapat melakukan restocking tepat waktu.
+
+**US-5.3**: Sebagai admin, saya ingin menerima alert untuk obat yang mendekati expiry date agar dapat mengelola stok dengan baik.
+
+### Epic 6: Billing
+
+**US-6.1**: Sebagai kasir, saya ingin dapat membuat invoice untuk layanan medis dan obat agar dapat memproses pembayaran.
+
+**US-6.2**: Sebagai kasir, saya ingin dapat memproses pembayaran dengan multiple payment methods agar dapat memberikan fleksibilitas kepada pasien.
+
+**US-6.3**: Sebagai admin, saya ingin dapat melihat laporan keuangan harian agar dapat memantau cash flow.
+
+---
+
+## Technical Requirements
+
+### Technology Stack
+
+#### Frontend
+- **Framework**: Next.js 16 (App Router, Server Components)
+- **Styling**: Tailwind CSS v4
+- **State Management**: Zustand
+- **UI Components**: shadcn/ui v4
+- **Internationalization**: next-intl (Bahasa Indonesia & English)
+
+#### Backend
+- **Language**: Go
+- **Framework**: Gin
+- **Database**: PostgreSQL
+- **ORM**: GORM
+- **Cache**: Redis
+- **Message Queue**: RabbitMQ (optional)
+
+#### Infrastructure
+- **Hosting**: Cloud (AWS/GCP/Azure)
 - **Containerization**: Docker
-- **Orchestration**: 
-  - **Start**: Managed services (Cloud Run / Fly.io / Render untuk Go, Vercel untuk Next.js)
-  - **Scale**: Kubernetes (EKS/GKE) jika diperlukan
 - **CI/CD**: GitHub Actions
-  - Run tests, build containers
-  - Infrastructure plan via Terraform
-- **Infrastructure as Code**: Terraform + Terragrunt untuk environment isolation (dev/staging/prod)
-- **Secrets Management**: Vault / Cloud KMS / GitHub Secrets
-- **SRE Playbooks**: Snapshot restore, failover DB, incident runbooks
+- **Monitoring**: Prometheus + Grafana
+- **Logging**: ELK Stack
 
-### Data Privacy & Compliance
-- **Localization**: Bahasa Indonesia, currency (IDR), date/time formats
-- **Data Protection**: 
-  - Encrypt sensitive data at rest
-  - PII access controls
-  - PCI-DSS compliance (via payment providers)
-- **Data Residency**: Store backups in Jakarta region jika diperlukan
+### API Standards
+- Mengikuti API Response Standards yang sudah didefinisikan
+- RESTful API design
+- API versioning (v1, v2, dll)
+- Bilingual error messages (ID & EN)
 
----
+### Database Design
+- Normalized database schema
+- Soft delete untuk data penting
+- Audit trails untuk compliance
+- Indexing untuk performance
 
-## Roadmap Implementasi
-
-### Pertimbangan Teknis untuk Free Plan
-
-**Rate Limiting & Resource Management:**
-- Rate limiting untuk API calls (prevent abuse)
-- Data retention policy: Archive data > 30 hari untuk Free Plan
-- Storage limits: Maks 50 produk, 5 kategori
-- Bandwidth limits: Maks 1GB per bulan untuk upload gambar
-- Database query optimization untuk free users (prevent resource hogging)
-
-**Feature Gating:**
-- Feature flags untuk enable/disable fitur berdasarkan plan
-- UI/UX indicators untuk batasan Free Plan (upgrade prompts)
-- Soft limits dengan warning sebelum hard limit (contoh: warning di 45 produk)
-- Graceful degradation saat limit tercapai
-
-**Data Management:**
-- Auto-archive transaksi > 30 hari untuk Free Plan
-- Export data sebelum archive (opsional, untuk user yang mau upgrade)
-- Backup data tetap dilakukan (untuk compliance & recovery)
-
-**Conversion Optimization:**
-- In-app upgrade prompts (non-intrusive)
-- Usage analytics untuk track conversion triggers
-- Email campaigns untuk free users yang mendekati limit
-- Onboarding flow yang highlight value paid plans
-
-### Phase 1: MVP (1-3 bulan) - Visit Management Focus
-- ✅ Visit Management Core (Call Plan & Call Report)
-- ✅ GPS validation & distance calculation
-- ✅ Master Data (Doctors, Products, Users)
-- ✅ Sample Management (Inventory tracking)
-- ✅ PostgreSQL shared schema dengan relasi Many-to-Many
-- ✅ Next.js dashboard (Manager/Admin) + Flutter mobile app (MedRep)
-- ✅ Offline-first mobile dengan sync
-
-### Phase 2: Growth (3-6 bulan)
-- ✅ Analytics & Reporting (Call Plan vs Realization)
-- ✅ Multi-user & RBAC
-- ✅ Advanced GPS features (route optimization)
-- ✅ Digital signature untuk dokter
-- ✅ Observability + backups
-- ✅ CI/CD pipelines
-
-### Phase 3: Scale (6-12 bulan)
-- ✅ Multi-tenant hardening (RLS)
-- ✅ Advanced analytics (Product performance, MedRep performance)
-- ✅ WhatsApp notifications
-- ✅ Push notifications untuk reminder
-- ✅ Enterprise features (custom reports, white-label)
-
-### Phase 4: Enterprise
-- ✅ Custom SLAs
-- ✅ Dedicated DBs
-- ✅ Audit/compliance
-- ✅ 24/7 support
-- ✅ Dedicated onboarding
+### Security
+- JWT-based authentication
+- Role-based access control (RBAC)
+- Data encryption (at rest & in transit)
+- SQL injection prevention
+- XSS prevention
+- CSRF protection
 
 ---
 
 ## Success Metrics
 
-### Business Metrics
-- **Active MedRep**: Jumlah MedRep yang aktif melakukan visit per bulan
-- **Visit Completion Rate**: % Call Plan yang ter-realize (target > 80%)
-- **GPS Validation Success Rate**: % visit yang valid secara GPS (target > 95%)
-- **Sample Distribution Accuracy**: Akurasi tracking sample (target > 98%)
-- **User Adoption**: 80% active users per bulan
-- **Customer Retention**: 90% perusahaan tetap menggunakan platform setelah 3 bulan
+### User Adoption
+- **Target**: 10+ clinics/pharmacies onboarded dalam 3 bulan pertama
+- **Metric**: Number of active users, number of daily logins
 
-### Product Metrics
-- **Feature Usage**: 70% MedRep menggunakan fitur core (Call Plan, Call Report)
-- **Performance**: < 2s page load time (web), < 1s response time (mobile)
-- **Uptime**: 99.9% availability
-- **Mobile App Rating**: > 4.5 stars
-- **Offline Sync Success Rate**: > 99%
-- **GPS Accuracy**: Distance calculation error < 5%
+### System Performance
+- **Target**: 99.5% uptime
+- **Metric**: System availability, response time, error rate
+
+### Data Quality
+- **Target**: > 95% data accuracy
+- **Metric**: Data validation errors, data completeness
 
 ### User Satisfaction
-- **NPS (Net Promoter Score)**: > 50
-- **Support Response Time**: < 2 jam
-- **MedRep Satisfaction**: > 4.5/5 untuk kemudahan penggunaan mobile app
-- **Manager Satisfaction**: > 4.5/5 untuk analytics & reporting
+- **Target**: NPS > 50
+- **Metric**: User surveys, feedback, support tickets
+
+### Business Impact
+- **Target**: 30% reduction in administrative time
+- **Metric**: Time saved per transaction, efficiency metrics
+
+---
+
+## Timeline & Milestones
+
+### Phase 1: MVP (Months 1-3)
+
+#### Month 1: Foundation
+- Authentication & Authorization
+- User Management
+- Patient Management (Basic)
+- Doctor Management (Basic)
+
+#### Month 2: Core Features
+- Appointment Scheduling
+- Medical Records (Basic)
+- Prescription Management (Basic)
+
+#### Month 3: Business Features
+- Inventory Management (Basic)
+- Billing & Invoicing (Basic)
+- Dashboard & Basic Reports
+
+### Phase 2: Enhancement (Months 4-6)
+- Advanced Reports
+- BPJS Integration
+- Mobile Responsive Optimization
+- Performance Optimization
+
+### Phase 3: Scale (Months 7-12)
+- Multi-tenant Support
+- Advanced Analytics
+- API for Third-party Integration
+- Mobile App (Future)
+
+---
+
+## Risks & Mitigation
+
+### Technical Risks
+
+**Risk 1**: Performance issues dengan large dataset
+- **Mitigation**: Implement proper indexing, pagination, caching strategy
+
+**Risk 2**: Security vulnerabilities
+- **Mitigation**: Regular security audits, penetration testing, code reviews
+
+**Risk 3**: Integration complexity dengan BPJS
+- **Mitigation**: Early research, proof of concept, phased integration
+
+### Business Risks
+
+**Risk 1**: Low user adoption
+- **Mitigation**: User training, excellent UX, responsive support
+
+**Risk 2**: Regulatory compliance issues
+- **Mitigation**: Early consultation with legal/regulatory experts, compliance audits
+
+**Risk 3**: Competition from established players
+- **Mitigation**: Focus on unique value propositions, excellent customer service
+
+### Operational Risks
+
+**Risk 1**: Data loss
+- **Mitigation**: Regular backups, disaster recovery plan, data redundancy
+
+**Risk 2**: System downtime
+- **Mitigation**: High availability architecture, monitoring, alerting
 
 ---
 
 ## Appendix
 
-### Referensi Dokumentasi
+### Glossary
 
-**Frontend & Mobile**
-- [Next.js 16 Documentation](https://nextjs.org/docs)
-- [Flutter Documentation](https://docs.flutter.dev/)
-- [TanStack Query Documentation](https://tanstack.com/query/latest)
-- [shadcn/ui Components](https://ui.shadcn.com/)
+- **BPJS**: Badan Penyelenggara Jaminan Sosial (Social Security Agency)
+- **BPOM**: Badan Pengawas Obat dan Makanan (Food and Drug Authority)
+- **STR**: Surat Tanda Registrasi (Registration Certificate for Doctors)
+- **HIPAA**: Health Insurance Portability and Accountability Act
+- **NIK**: Nomor Induk Kependudukan (National ID Number)
 
-**Backend & Database**
-- [Go Documentation](https://go.dev/doc/)
-- [Gin Framework](https://gin-gonic.com/docs/)
-- [sqlc Documentation](https://docs.sqlc.dev/)
-- [PostgreSQL Documentation](https://www.postgresql.org/docs/)
-- [API Response Standards](./api-response-standards.md) - Standar format API response
-- [API Error Codes](./api-error-codes.md) - Daftar lengkap error codes
-- [API Implementation Example](./api-implementation-example.go) - Contoh implementasi Go
+### References
 
-**Infrastructure & Storage**
-- [Cloudflare R2 Documentation](https://developers.cloudflare.com/r2/)
-- [Cloudflare Workers](https://developers.cloudflare.com/workers/)
-- [Vercel Documentation](https://vercel.com/docs)
-- [Terraform Documentation](https://www.terraform.io/docs)
-
-**Payments & Subscriptions**
-- [Xendit Subscriptions](https://docs.xendit.co/docs/how-subscriptions-work)
-- [Xendit Payment API](https://docs.xendit.co/)
-- [Midtrans Documentation](https://docs.midtrans.com/)
-- [Stripe Indonesia Requirements](https://support.stripe.com/questions/requirements-to-open-a-stripe-account-in-indonesia)
-
-**Observability**
-- [OpenTelemetry](https://opentelemetry.io/docs/)
-- [Prometheus Documentation](https://prometheus.io/docs/)
-- [Grafana Documentation](https://grafana.com/docs/)
-- [Sentry Documentation](https://docs.sentry.io/)
-
-### Kontak
-- **Product Owner**: [Nama]
-- **Tech Lead**: [Nama]
-- **Email**: support@gipos.id
+- API Response Standards: `/docs/api-standart/api-response-standards.md`
+- API Error Codes: `/docs/api-standart/api-error-codes.md`
+- Modules Documentation: `/docs/modules/01-modules.md`
 
 ---
 
-**Dokumen ini akan diupdate secara berkala sesuai dengan perkembangan produk.**
+**Dokumen ini akan diupdate sesuai dengan perkembangan development dan feedback dari stakeholders.**
 
