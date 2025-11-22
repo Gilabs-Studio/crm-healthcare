@@ -1,0 +1,57 @@
+---
+alwaysApply: true
+---
+Project Standards (Folder Structure, Types, State, Hooks, Services, Components, Suspense)
+
+Technology baseline
+- Use Next.js 16 (App Router, Server Components, Server Actions). Prefer route-level `loading.tsx`/`error.tsx`, cache-aware data fetching, and `Suspense` per guidance below. See `https://nextjs.org/blog/next-16`.
+- Use Tailwind CSS v4. Simplified setup with `@import "tailwindcss"`, automatic content detection, and modern CSS features. See `https://tailwindcss.com/blog/tailwindcss-v4`.
+
+Folder structure (per feature)
+- Place features under `apps/web/src/features/<featureName>/`:
+  - `types/` — only type declarations. Prefer `index.d.ts` or topic-based `*.d.ts`.
+  - `stores/` — Zustand state. One store per domain, named `use<Domain>Store.ts`.
+  - `hooks/` — feature-scoped React hooks, named `use<Thing>.ts`.
+  - `services/` — API/side-effects. One module per remote domain.
+  - `components/` — UI components. Keep small, focused, and reusable.
+  - `messages/` — Translation component en and id
+
+Types
+- Use `.d.ts` for ambient/shared declarations inside `types/`.
+- Export DTOs and domain types from `types/` and import everywhere else.
+- Never import React or runtime code inside `.d.ts` files.
+
+Zustand stores (`stores/`)
+- File name: `use<Domain>Store.ts`. Export the hook as default or named.
+- Keep state minimal: persist only necessary primitives/ids; derive the rest in selectors.
+- Use slices for complex domains; colocate actions with their slice.
+- If persistence is required, isolate it (e.g., middleware) and document keys.
+
+Hooks (`hooks/`)
+- Prefix with `use`. One responsibility per hook. SSR-safe by default.
+- Do not reach into stores from hooks unless the hook’s purpose is state access.
+- Side-effects live in hooks; UI logic lives in components.
+
+Services (`services/`)
+- Isolate all network calls. No UI/state code.
+- Return typed results (DTOs → map to domain types as needed).
+- Centralize endpoints/constants. Handle errors close to the edge; throw typed errors.
+
+Components (`components/`)
+- Prefer controlled, stateless components. Accept props; avoid hidden state.
+- Split: `ui/` (pure UI) and `containers/` (store/hooks wiring) when helpful.
+- Keep feature components inside the feature; only promote to `shared/` when reused broadly.
+
+Smart Suspense usage (Next.js App Router)
+- Prioritize static/above-the-fold UI:
+  - Use route-level `loading.tsx` for coarse skeletons.
+  - Wrap only truly async subtrees in `Suspense` with lightweight fallbacks.
+- Prefer multiple small Suspense boundaries over one large boundary.
+- Do not suspend global layout chrome; suspend leaf/async components instead.
+- For lists, show static shell (headers, filters) immediately; suspend the data region.
+- Combine with `error.tsx` for graceful failures; never block the entire page for one widget.
+
+Naming & conventions
+- Kebab-case directories, PascalCase components, camelCase functions/variables.
+- Each folder can have an `index.ts` barrel only when it improves DX and tree-shaking.
+- Keep files short and cohesive; extract when a file grows beyond one responsibility.
