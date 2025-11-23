@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: crm-healthcare-api
+    ports:
+      - "8080:8080"
+    environment:
+      - GIN_MODE=release
+      - PORT=8080
+    restart: unless-stopped
+    networks:
+      - crm-network
+
+networks:
+  crm-network:
+    driver: bridge
+

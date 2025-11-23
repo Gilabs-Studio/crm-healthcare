@@ -58,9 +58,9 @@ Setiap sprint mencakup:
 **Goal**: Setup project structure, database, authentication foundation
 
 **Backend Tasks**:
-- [ ] Setup Go project structure
+- [x] Setup Go project structure
 - [ ] Setup database connection (PostgreSQL)
-- [ ] Setup Gin router and middleware
+- [x] Setup Gin router and middleware
 - [ ] Implement authentication middleware (JWT)
 - [ ] Create base API response helpers
 - [ ] Setup error handling
