@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import { 
   Home, 
   Star, 
@@ -18,10 +18,10 @@ import {
   Search
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { useAuthStore } from "@/features/auth/stores/useAuthStore";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
+  id: string;
   label: string;
   href: string;
   icon?: React.ReactNode;
@@ -30,61 +30,62 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: "Home", href: "/dashboard", icon: <Home className="h-4 w-4" /> },
+  { id: "home", label: "Home", href: "/dashboard", icon: <Home className="h-4 w-4" /> },
   { 
+    id: "saved",
     label: "Saved", 
     href: "/saved",
     icon: <Star className="h-4 w-4" />,
     badge: 24
   },
   {
+    id: "dashboard",
     label: "Dashboard",
-    href: "/dashboard",
+    href: "/dashboard/overview",
     icon: <LayoutDashboard className="h-4 w-4" />,
     children: [
-      { label: "Trends", href: "/dashboard/trends", icon: <TrendingUp className="h-4 w-4" /> },
-      { label: "Analytics", href: "/dashboard/analytics", icon: <BarChart3 className="h-4 w-4" /> },
-      { label: "Historical", href: "/dashboard/historical", icon: <FileCheck className="h-4 w-4" /> },
+      { id: "trends", label: "Trends", href: "/dashboard/trends", icon: <TrendingUp className="h-4 w-4" /> },
+      { id: "analytics", label: "Analytics", href: "/dashboard/analytics", icon: <BarChart3 className="h-4 w-4" /> },
+      { id: "historical", label: "Historical", href: "/dashboard/historical", icon: <FileCheck className="h-4 w-4" /> },
     ],
   },
-  { label: "Projects", href: "/projects", icon: <FolderKanban className="h-4 w-4" /> },
-  { label: "Documents", href: "/documents", icon: <FileText className="h-4 w-4" /> },
+  { id: "projects", label: "Projects", href: "/projects", icon: <FolderKanban className="h-4 w-4" /> },
+  { id: "documents", label: "Documents", href: "/documents", icon: <FileText className="h-4 w-4" /> },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { user, logout } = useAuthStore();
-  const [expandedItems, setExpandedItems] = useState<string[]>(["/dashboard"]);
+  const [expandedItems, setExpandedItems] = useState<string[]>(["dashboard"]);
 
-  const toggleExpand = (href: string) => {
+  const toggleExpand = (id: string) => {
     setExpandedItems((prev) =>
-      prev.includes(href)
-        ? prev.filter((item) => item !== href)
-        : [...prev, href]
+      prev.includes(id)
+        ? prev.filter((item) => item !== id)
+        : [...prev, id]
     );
   };
 
-  const isActive = (href: string) => pathname === href;
+  const isActive = (href: string) => pathname === href || pathname.startsWith(href + "/");
   const isParentActive = (item: NavItem) => {
     if (isActive(item.href)) return true;
     return item.children?.some((child) => isActive(child.href)) ?? false;
   };
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-64 border-r bg-sidebar text-sidebar-foreground flex flex-col">
+    <aside className="fixed left-0 top-0 h-screen w-64 border-r border border-sidebar-border bg-sidebar text-sidebar-foreground flex flex-col">
       {/* Logo */}
-      <div className="p-6 border-b">
+      <div className="p-6 border-b border border-sidebar-border">
         <h1 className="font-bold text-lg">Logo</h1>
       </div>
 
       {/* Search */}
-      <div className="p-4 border-b">
+      <div className="p-4 border-b border border-sidebar-border">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
             placeholder="Search"
-            className="pl-10 h-9 bg-background"
+            className="pl-10 h-9 bg-background border-input"
           />
         </div>
       </div>
@@ -93,14 +94,13 @@ export function Sidebar() {
       <nav className="flex-1 overflow-y-auto p-4 space-y-1">
         {navItems.map((item) => {
           const hasChildren = item.children && item.children.length > 0;
-          const isExpanded = expandedItems.includes(item.href);
+          const isExpanded = expandedItems.includes(item.id);
           const active = isParentActive(item);
 
           return (
-            <div key={item.href}>
+            <div key={item.id}>
               <Link href={item.href}>
-                <motion.div
-                  whileHover={{ x: 4 }}
+                <div
                   className={cn(
                     "flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer",
                     active
@@ -110,7 +110,7 @@ export function Sidebar() {
                   onClick={(e) => {
                     if (hasChildren) {
                       e.preventDefault();
-                      toggleExpand(item.href);
+                      toggleExpand(item.id);
                     }
                   }}
                 >
@@ -120,14 +120,16 @@ export function Sidebar() {
                   </div>
                   <div className="flex items-center gap-2">
                     {item.badge && (
-                      <span className="flex h-5 w-5 items-center justify-center rounded-full border text-xs">
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full border border-sidebar-border text-xs">
                         {item.badge}
                       </span>
                     )}
                     {hasChildren && (
-                      <motion.svg
-                        animate={{ rotate: isExpanded ? 180 : 0 }}
-                        className="h-4 w-4"
+                      <svg
+                        className={cn(
+                          "h-4 w-4 transition-transform",
+                          isExpanded && "rotate-180"
+                        )}
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -138,41 +140,32 @@ export function Sidebar() {
                           strokeWidth={2}
                           d="M19 9l-7 7-7-7"
                         />
-                      </motion.svg>
+                      </svg>
                     )}
                   </div>
-                </motion.div>
+                </div>
               </Link>
 
               {hasChildren && (
                 <AnimatePresence>
                   {isExpanded && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="pl-7 pt-1 space-y-1">
-                        {item.children.map((child) => (
-                          <Link key={child.href} href={child.href}>
-                            <motion.div
-                              whileHover={{ x: 4 }}
-                              className={cn(
-                                "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
-                                isActive(child.href)
-                                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                                  : "hover:bg-sidebar-accent/50"
-                              )}
-                            >
-                              {child.icon}
-                              <span>{child.label}</span>
-                            </motion.div>
-                          </Link>
-                        ))}
-                      </div>
-                    </motion.div>
+                    <div className="pl-7 pt-1 space-y-1">
+                      {item.children.map((child) => (
+                        <Link key={child.id} href={child.href}>
+                          <div
+                            className={cn(
+                              "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
+                              isActive(child.href)
+                                ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                                : "hover:bg-sidebar-accent/50"
+                            )}
+                          >
+                            {child.icon}
+                            <span>{child.label}</span>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
                   )}
                 </AnimatePresence>
               )}
@@ -182,27 +175,20 @@ export function Sidebar() {
       </nav>
 
       {/* Bottom Section */}
-      <div className="border-t p-4 space-y-1">
+      <div className="border-t border border-sidebar-border p-4 space-y-1">
         <Link href="/support">
-          <motion.div
-            whileHover={{ x: 4 }}
-            className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium hover:bg-sidebar-accent/50 transition-colors"
-          >
+          <div className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium hover:bg-sidebar-accent/50 transition-colors">
             <HelpCircle className="h-4 w-4" />
             <span>Support</span>
-          </motion.div>
+          </div>
         </Link>
         <Link href="/settings">
-          <motion.div
-            whileHover={{ x: 4 }}
-            className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium hover:bg-sidebar-accent/50 transition-colors"
-          >
+          <div className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium hover:bg-sidebar-accent/50 transition-colors">
             <Settings className="h-4 w-4" />
             <span>Settings</span>
-          </motion.div>
+          </div>
         </Link>
       </div>
     </aside>
   );
 }
-

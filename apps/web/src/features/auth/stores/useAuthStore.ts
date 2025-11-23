@@ -34,6 +34,8 @@ export const useAuthStore = create<AuthStore>()(
             if (typeof window !== "undefined") {
               localStorage.setItem("token", token);
               localStorage.setItem("refreshToken", refresh_token);
+              // Set cookie for middleware
+              document.cookie = `token=${token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
             }
             set({
               user,
@@ -68,6 +70,8 @@ export const useAuthStore = create<AuthStore>()(
           if (typeof window !== "undefined") {
             localStorage.removeItem("token");
             localStorage.removeItem("refreshToken");
+            // Remove cookie
+            document.cookie = "token=; path=/; max-age=0";
           }
           set({
             user: null,
@@ -91,6 +95,8 @@ export const useAuthStore = create<AuthStore>()(
             if (typeof window !== "undefined") {
               localStorage.setItem("token", token);
               localStorage.setItem("refreshToken", refresh_token);
+              // Update cookie
+              document.cookie = `token=${token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
             }
             set({
               token,
@@ -112,6 +118,7 @@ export const useAuthStore = create<AuthStore>()(
         set({ token });
         if (typeof window !== "undefined" && token) {
           localStorage.setItem("token", token);
+          document.cookie = `token=${token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
         }
       },
 
@@ -127,6 +134,36 @@ export const useAuthStore = create<AuthStore>()(
         refreshToken: state.refreshToken,
         isAuthenticated: state.isAuthenticated,
       }),
+      onRehydrateStorage: () => (state) => {
+        // After rehydration, check if we have token in localStorage
+        if (typeof window !== "undefined" && state) {
+          const token = localStorage.getItem("token");
+          if (token) {
+            // Token exists, restore state
+            if (!state.token) {
+              state.token = token;
+            }
+            const refreshToken = localStorage.getItem("refreshToken");
+            if (refreshToken && !state.refreshToken) {
+              state.refreshToken = refreshToken;
+            }
+            // Set authenticated if we have token
+            if (!state.isAuthenticated) {
+              state.isAuthenticated = true;
+            }
+            // Set cookie if not exists
+            if (!document.cookie.includes("token=")) {
+              document.cookie = `token=${token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
+            }
+          } else if (!token && state.isAuthenticated) {
+            // No token but store says authenticated, clear it
+            state.isAuthenticated = false;
+            state.user = null;
+            state.token = null;
+            state.refreshToken = null;
+          }
+        }
+      },
     }
   )
 );

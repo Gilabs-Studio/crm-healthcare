@@ -114,33 +114,24 @@ function DashboardContent() {
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <motion.button
-                whileHover={{ x: 4 }}
-                className="w-full text-left p-3 rounded-lg hover:bg-muted transition-colors"
-              >
+              <button className="w-full text-left p-3 rounded-lg hover:bg-muted transition-colors">
                 <div className="font-medium">Register New Patient</div>
                 <div className="text-sm text-muted-foreground">
                   Add a new patient to the system
                 </div>
-              </motion.button>
-              <motion.button
-                whileHover={{ x: 4 }}
-                className="w-full text-left p-3 rounded-lg hover:bg-muted transition-colors"
-              >
+              </button>
+              <button className="w-full text-left p-3 rounded-lg hover:bg-muted transition-colors">
                 <div className="font-medium">Schedule Appointment</div>
                 <div className="text-sm text-muted-foreground">
                   Book a new appointment
                 </div>
-              </motion.button>
-              <motion.button
-                whileHover={{ x: 4 }}
-                className="w-full text-left p-3 rounded-lg hover:bg-muted transition-colors"
-              >
+              </button>
+              <button className="w-full text-left p-3 rounded-lg hover:bg-muted transition-colors">
                 <div className="font-medium">View Reports</div>
                 <div className="text-sm text-muted-foreground">
                   Access system reports
                 </div>
-              </motion.button>
+              </button>
             </CardContent>
           </Card>
 
