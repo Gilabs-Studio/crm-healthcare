@@ -14,6 +14,16 @@ export function useUsers(params?: {
   return useQuery({
     queryKey: ["users", params],
     queryFn: () => userService.list(params),
+    retry: (failureCount, error) => {
+      // Don't retry on 404 errors (might be expected)
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as { response?: { status?: number } };
+        if (axiosError.response?.status === 404) {
+          return false;
+        }
+      }
+      return failureCount < 1;
+    },
   });
 }
 

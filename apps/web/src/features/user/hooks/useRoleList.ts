@@ -29,9 +29,9 @@ export function useRoleList() {
     try {
       await createRole.mutateAsync(formData);
       setIsCreateDialogOpen(false);
-      toast.success("Role berhasil dibuat");
+      toast.success("Role created successfully");
     } catch (error) {
-      // Error sudah dihandle di api-client interceptor
+      // Error already handled in api-client interceptor
     }
   };
 
@@ -40,9 +40,9 @@ export function useRoleList() {
       try {
         await updateRole.mutateAsync({ id: editingRole, data: formData });
         setEditingRole(null);
-        toast.success("Role berhasil diperbarui");
+        toast.success("Role updated successfully");
       } catch (error) {
-        // Error sudah dihandle di api-client interceptor
+        // Error already handled in api-client interceptor
       }
     }
   };
@@ -51,9 +51,9 @@ export function useRoleList() {
     if (confirm("Are you sure you want to delete this role?")) {
       try {
         await deleteRole.mutateAsync(id);
-        toast.success("Role berhasil dihapus");
+        toast.success("Role deleted successfully");
       } catch (error) {
-        // Error sudah dihandle di api-client interceptor
+        // Error already handled in api-client interceptor
       }
     }
   };
@@ -80,4 +80,3 @@ export function useRoleList() {
     updateRole,
   };
 }
-

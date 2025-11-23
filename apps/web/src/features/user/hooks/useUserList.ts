@@ -29,9 +29,9 @@ export function useUserList() {
     try {
       await createUser.mutateAsync(formData);
       setIsCreateDialogOpen(false);
-      toast.success("User berhasil dibuat");
+      toast.success("User created successfully");
     } catch (error) {
-      // Error sudah dihandle di api-client interceptor
+      // Error already handled in api-client interceptor
     }
   };
 
@@ -40,9 +40,9 @@ export function useUserList() {
       try {
         await updateUser.mutateAsync({ id: editingUser, data: formData });
         setEditingUser(null);
-        toast.success("User berhasil diperbarui");
+        toast.success("User updated successfully");
       } catch (error) {
-        // Error sudah dihandle di api-client interceptor
+        // Error already handled in api-client interceptor
       }
     }
   };
@@ -51,9 +51,9 @@ export function useUserList() {
     if (confirm("Are you sure you want to delete this user?")) {
       try {
         await deleteUser.mutateAsync(id);
-        toast.success("User berhasil dihapus");
+        toast.success("User deleted successfully");
       } catch (error) {
-        // Error sudah dihandle di api-client interceptor
+        // Error already handled in api-client interceptor
       }
     }
   };
@@ -88,4 +88,3 @@ export function useUserList() {
     updateUser,
   };
 }
-

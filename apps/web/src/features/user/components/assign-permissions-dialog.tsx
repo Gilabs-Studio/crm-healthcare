@@ -55,10 +55,10 @@ export function AssignPermissionsDialog({ roleId, onClose }: AssignPermissionsDi
         roleId,
         permissionIds: selectedPermissions,
       });
-      toast.success("Permissions berhasil di-assign");
+      toast.success("Permissions assigned successfully");
       onClose();
     } catch (error) {
-      // Error sudah dihandle di api-client interceptor
+      // Error already handled in api-client interceptor
     }
   };
 
@@ -84,14 +84,14 @@ export function AssignPermissionsDialog({ roleId, onClose }: AssignPermissionsDi
 
         {isLoadingPermissions || isLoadingRole ? (
           <div className="space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <Skeleton key={i} className="h-32 w-full" />
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={`skeleton-${i}`} className="h-32 w-full" />
             ))}
           </div>
         ) : (
-            <div className="space-y-4">
-              {Object.entries(groupedPermissions).map(([menuName, menuPermissions]) => (
-                <Card key={`menu-${menuName}`}>
+          <div className="space-y-4">
+            {Object.entries(groupedPermissions).map(([menuName, menuPermissions]) => (
+              <Card key={`menu-${menuName}`}>
                 <CardHeader>
                   <CardTitle className="text-sm">{menuName}</CardTitle>
                 </CardHeader>
@@ -134,4 +134,3 @@ export function AssignPermissionsDialog({ roleId, onClose }: AssignPermissionsDi
     </Dialog>
   );
 }
-
