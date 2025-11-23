@@ -1,10 +1,10 @@
 package routes
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/gilabs/crm-healthcare/api/internal/api/handlers"
 	"github.com/gilabs/crm-healthcare/api/internal/api/middleware"
 	"github.com/gilabs/crm-healthcare/api/pkg/jwt"
+	"github.com/gin-gonic/gin"
 )
 
 func SetupPermissionRoutes(router *gin.RouterGroup, permissionHandler *handlers.PermissionHandler, jwtManager *jwt.JWTManager) {

@@ -103,9 +103,20 @@ func (r *repository) GetUserPermissions(userID string) (*permission.GetUserPermi
 		}
 	}
 
-	// Get all menus with hierarchy
+	// Get all menus with hierarchy (recursive preload)
 	var menus []permission.Menu
-	err = r.db.Where("parent_id IS NULL").Preload("Children").Order("\"order\" ASC").Find(&menus).Error
+	err = r.db.Where("parent_id IS NULL").
+		Preload("Children", func(db *gorm.DB) *gorm.DB {
+			return db.Order("\"order\" ASC")
+		}).
+		Preload("Children.Children", func(db *gorm.DB) *gorm.DB {
+			return db.Order("\"order\" ASC")
+		}).
+		Preload("Children.Children.Children", func(db *gorm.DB) *gorm.DB {
+			return db.Order("\"order\" ASC")
+		}).
+		Order("\"order\" ASC").
+		Find(&menus).Error
 	if err != nil {
 		return nil, err
 	}

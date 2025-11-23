@@ -2,7 +2,7 @@ package seeders
 
 // SeedAll runs all seeders
 func SeedAll() error {
-	// Seed in order: roles -> permissions -> menus -> users
+	// Seed in order: roles -> menus -> permissions -> users -> master data
 	if err := SeedRoles(); err != nil {
 		return err
 	}
@@ -11,11 +11,25 @@ func SeedAll() error {
 		return err
 	}
 
+	// Update menu structure for existing menus (migration)
+	if err := UpdateMenuStructure(); err != nil {
+		return err
+	}
+
 	if err := SeedPermissions(); err != nil {
 		return err
 	}
 
 	if err := SeedUsers(); err != nil {
+		return err
+	}
+
+	// Seed master data
+	if err := SeedDiagnoses(); err != nil {
+		return err
+	}
+
+	if err := SeedProcedures(); err != nil {
 		return err
 	}
 

@@ -23,6 +23,7 @@ import {
   Store,
   Grid,
   Briefcase,
+  Heart,
 } from "lucide-react";
 
 const iconMap: Record<string, React.ReactNode> = {
@@ -50,6 +51,7 @@ const iconMap: Record<string, React.ReactNode> = {
   mappin: <MapPin className="h-4 w-4" />,
   ruler: <Ruler className="h-4 w-4" />,
   store: <Store className="h-4 w-4" />,
+  heart: <Heart className="h-4 w-4" />,
 };
 
 export function getMenuIcon(iconName: string): React.ReactNode {

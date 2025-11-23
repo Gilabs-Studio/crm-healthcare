@@ -583,6 +583,342 @@
       ]
     },
     {
+      "name": "Master Data",
+      "item": [
+        {
+          "name": "Diagnosis",
+          "item": [
+            {
+              "name": "List Diagnoses",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/master-data/diagnosis?page=1&per_page=20",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "master-data", "diagnosis"],
+                  "query": [
+                    {"key": "page", "value": "1"},
+                    {"key": "per_page", "value": "20"},
+                    {"key": "search", "value": "", "disabled": true},
+                    {"key": "status", "value": "", "disabled": true}
+                  ]
+                },
+                "description": "Get list of diagnoses with pagination"
+              }
+            },
+            {
+              "name": "Get Diagnosis by ID",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/master-data/diagnosis/:id",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "master-data", "diagnosis", ":id"],
+                  "variable": [
+                    {"key": "id", "value": "diagnosis_id"}
+                  ]
+                },
+                "description": "Get diagnosis details by ID"
+              }
+            },
+            {
+              "name": "Search Diagnoses",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/master-data/diagnosis/search?query=diabetes&limit=10",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "master-data", "diagnosis", "search"],
+                  "query": [
+                    {"key": "query", "value": "diabetes"},
+                    {"key": "limit", "value": "10", "disabled": true},
+                    {"key": "status", "value": "", "disabled": true}
+                  ]
+                },
+                "description": "Search diagnoses by code or name"
+              }
+            },
+            {
+              "name": "Create Diagnosis",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"A00.0\",\n  \"name\": \"Kolera karena Vibrio cholerae 01, biovar cholerae\",\n  \"name_en\": \"Cholera due to Vibrio cholerae 01, biovar cholerae\",\n  \"category\": \"Penyakit Menular\",\n  \"description\": \"Kolera akut\",\n  \"status\": \"active\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/master-data/diagnosis",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "master-data", "diagnosis"]
+                },
+                "description": "Create a new diagnosis (ICD-10)"
+              }
+            },
+            {
+              "name": "Update Diagnosis",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Updated Diagnosis Name\",\n  \"name_en\": \"Updated English Name\",\n  \"category\": \"Updated Category\",\n  \"description\": \"Updated description\",\n  \"status\": \"active\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/master-data/diagnosis/:id",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "master-data", "diagnosis", ":id"],
+                  "variable": [
+                    {"key": "id", "value": "diagnosis_id"}
+                  ]
+                },
+                "description": "Update diagnosis information"
+              }
+            },
+            {
+              "name": "Delete Diagnosis",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/master-data/diagnosis/:id",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "master-data", "diagnosis", ":id"],
+                  "variable": [
+                    {"key": "id", "value": "diagnosis_id"}
+                  ]
+                },
+                "description": "Delete a diagnosis"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Procedures",
+          "item": [
+            {
+              "name": "List Procedures",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/master-data/procedures?page=1&per_page=20",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "master-data", "procedures"],
+                  "query": [
+                    {"key": "page", "value": "1"},
+                    {"key": "per_page", "value": "20"},
+                    {"key": "search", "value": "", "disabled": true},
+                    {"key": "status", "value": "", "disabled": true}
+                  ]
+                },
+                "description": "Get list of procedures with pagination"
+              }
+            },
+            {
+              "name": "Get Procedure by ID",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/master-data/procedures/:id",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "master-data", "procedures", ":id"],
+                  "variable": [
+                    {"key": "id", "value": "procedure_id"}
+                  ]
+                },
+                "description": "Get procedure details by ID"
+              }
+            },
+            {
+              "name": "Search Procedures",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/master-data/procedures/search?query=injection&limit=10",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "master-data", "procedures", "search"],
+                  "query": [
+                    {"key": "query", "value": "injection"},
+                    {"key": "limit", "value": "10", "disabled": true},
+                    {"key": "status", "value": "", "disabled": true}
+                  ]
+                },
+                "description": "Search procedures by code or name"
+              }
+            },
+            {
+              "name": "Create Procedure",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"PROC-001\",\n  \"name\": \"Suntik Intramuskular\",\n  \"name_en\": \"Intramuscular Injection\",\n  \"category\": \"Injection\",\n  \"description\": \"Prosedur suntik intramuskular\",\n  \"price\": 50000,\n  \"status\": \"active\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/master-data/procedures",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "master-data", "procedures"]
+                },
+                "description": "Create a new procedure"
+              }
+            },
+            {
+              "name": "Update Procedure",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Updated Procedure Name\",\n  \"name_en\": \"Updated English Name\",\n  \"category\": \"Updated Category\",\n  \"description\": \"Updated description\",\n  \"price\": 75000,\n  \"status\": \"active\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/master-data/procedures/:id",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "master-data", "procedures", ":id"],
+                  "variable": [
+                    {"key": "id", "value": "procedure_id"}
+                  ]
+                },
+                "description": "Update procedure information"
+              }
+            },
+            {
+              "name": "Delete Procedure",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/master-data/procedures/:id",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "master-data", "procedures", ":id"],
+                  "variable": [
+                    {"key": "id", "value": "procedure_id"}
+                  ]
+                },
+                "description": "Delete a procedure"
+              }
+            }
+          ]
+        }
+      ],
+      "description": "Endpoints untuk master data (diagnosis dan procedures)"
+    },
+    {
       "name": "Health Check",
       "item": [
         {

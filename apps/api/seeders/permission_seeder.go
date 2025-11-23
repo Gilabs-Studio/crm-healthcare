@@ -19,11 +19,10 @@ func SeedPermissions() error {
 	}
 
 	// Get menus
-	var systemMenu, usersMenu, userPageMenu permission.Menu
+	var userPageMenu permission.Menu
 	var dataMasterMenu, companyMgmtMenu, companyMenu, divisionMenu, jobPositionMenu, employeeMenu permission.Menu
+	var healthcareMenu, diagnosisMenu, procedureMenu permission.Menu
 
-	database.DB.Where("url = ?", "/system").First(&systemMenu)
-	database.DB.Where("url = ?", "/system/users").First(&usersMenu)
 	database.DB.Where("url = ?", "/users").First(&userPageMenu)
 	database.DB.Where("url = ?", "/data-master").First(&dataMasterMenu)
 	database.DB.Where("url = ?", "/data-master/company").First(&companyMgmtMenu)
@@ -31,6 +30,9 @@ func SeedPermissions() error {
 	database.DB.Where("url = ?", "/data-master/company/division").First(&divisionMenu)
 	database.DB.Where("url = ?", "/data-master/company/job-position").First(&jobPositionMenu)
 	database.DB.Where("url = ?", "/data-master/company/employee").First(&employeeMenu)
+	database.DB.Where("url = ?", "/master-data").First(&healthcareMenu)
+	database.DB.Where("url = ?", "/master-data/diagnosis").First(&diagnosisMenu)
+	database.DB.Where("url = ?", "/master-data/procedures").First(&procedureMenu)
 
 	// Define actions for each menu
 	actions := []struct {
@@ -40,9 +42,6 @@ func SeedPermissions() error {
 		action   string
 		menu     *permission.Menu
 	}{
-		// Users Management actions (FIRST - most important)
-		{usersMenu.ID, "VIEW_USERS_MANAGEMENT", "View Users Management", "VIEW", &usersMenu},
-		
 		// Users page actions (CREATE includes roles & permissions setup)
 		{userPageMenu.ID, "VIEW_USERS", "View Users", "VIEW", &userPageMenu},
 		{userPageMenu.ID, "CREATE_USERS", "Create Users", "CREATE", &userPageMenu}, // Includes roles & permissions
@@ -88,6 +87,23 @@ func SeedPermissions() error {
 		{employeeMenu.ID, "DETAIL_EMPLOYEE", "Detail Employee", "DETAIL", &employeeMenu},
 		{employeeMenu.ID, "IMPORT_EMPLOYEE", "Import Employee", "IMPORT", &employeeMenu},
 		{employeeMenu.ID, "EXPORT_EMPLOYEE", "Export Employee", "EXPORT", &employeeMenu},
+
+		// Healthcare Master Data actions
+		{healthcareMenu.ID, "VIEW_HEALTHCARE_MASTER", "View Healthcare Master Data", "VIEW", &healthcareMenu},
+
+		// Diagnosis actions
+		{diagnosisMenu.ID, "VIEW_DIAGNOSIS", "View Diagnosis", "VIEW", &diagnosisMenu},
+		{diagnosisMenu.ID, "CREATE_DIAGNOSIS", "Create Diagnosis", "CREATE", &diagnosisMenu},
+		{diagnosisMenu.ID, "EDIT_DIAGNOSIS", "Edit Diagnosis", "EDIT", &diagnosisMenu},
+		{diagnosisMenu.ID, "DELETE_DIAGNOSIS", "Delete Diagnosis", "DELETE", &diagnosisMenu},
+		{diagnosisMenu.ID, "SEARCH_DIAGNOSIS", "Search Diagnosis", "VIEW", &diagnosisMenu},
+
+		// Procedure actions
+		{procedureMenu.ID, "VIEW_PROCEDURE", "View Procedure", "VIEW", &procedureMenu},
+		{procedureMenu.ID, "CREATE_PROCEDURE", "Create Procedure", "CREATE", &procedureMenu},
+		{procedureMenu.ID, "EDIT_PROCEDURE", "Edit Procedure", "EDIT", &procedureMenu},
+		{procedureMenu.ID, "DELETE_PROCEDURE", "Delete Procedure", "DELETE", &procedureMenu},
+		{procedureMenu.ID, "SEARCH_PROCEDURE", "Search Procedure", "VIEW", &procedureMenu},
 	}
 
 	// Create permissions

@@ -151,38 +151,40 @@ Setiap sprint mencakup:
 **Goal**: Master data untuk diagnosis (ICD-10) dan procedures
 
 **Backend Tasks**:
-- [ ] Create diagnosis model and migration
-- [ ] Create procedure model and migration
-- [ ] Implement diagnosis list API (`GET /api/v1/master-data/diagnosis`)
-- [ ] Implement diagnosis detail API (`GET /api/v1/master-data/diagnosis/:id`)
-- [ ] Implement create diagnosis API (`POST /api/v1/master-data/diagnosis`)
-- [ ] Implement update diagnosis API (`PUT /api/v1/master-data/diagnosis/:id`)
-- [ ] Implement diagnosis search API (`GET /api/v1/master-data/diagnosis/search`)
-- [ ] Implement procedure list API (`GET /api/v1/master-data/procedures`)
-- [ ] Implement procedure detail API (`GET /api/v1/master-data/procedures/:id`)
-- [ ] Implement create procedure API (`POST /api/v1/master-data/procedures`)
-- [ ] Implement update procedure API (`PUT /api/v1/master-data/procedures/:id`)
-- [ ] Implement procedure search API (`GET /api/v1/master-data/procedures/search`)
+- [x] Create diagnosis model and migration
+- [x] Create procedure model and migration
+- [x] Implement diagnosis list API (`GET /api/v1/master-data/diagnosis`)
+- [x] Implement diagnosis detail API (`GET /api/v1/master-data/diagnosis/:id`)
+- [x] Implement create diagnosis API (`POST /api/v1/master-data/diagnosis`)
+- [x] Implement update diagnosis API (`PUT /api/v1/master-data/diagnosis/:id`)
+- [x] Implement diagnosis search API (`GET /api/v1/master-data/diagnosis/search`)
+- [x] Implement procedure list API (`GET /api/v1/master-data/procedures`)
+- [x] Implement procedure detail API (`GET /api/v1/master-data/procedures/:id`)
+- [x] Implement create procedure API (`POST /api/v1/master-data/procedures`)
+- [x] Implement update procedure API (`PUT /api/v1/master-data/procedures/:id`)
+- [x] Implement procedure search API (`GET /api/v1/master-data/procedures/search`)
+- [x] Add access menu seeder for permission menu sidebar
 
 **Frontend Tasks**:
-- [ ] Create master data store (`useMasterDataStore`)
-- [ ] Create diagnosis service (`diagnosisService`)
-- [ ] Create procedure service (`procedureService`)
-- [ ] Create diagnosis types (`types/diagnosis.d.ts`)
-- [ ] Create procedure types (`types/procedure.d.ts`)
-- [ ] Create diagnosis list page (`/master-data/diagnosis`)
-- [ ] Create diagnosis form component (`DiagnosisForm`)
-- [ ] Create diagnosis selector component (`DiagnosisSelector`)
-- [ ] Create procedure list page (`/master-data/procedures`)
-- [ ] Create procedure form component (`ProcedureForm`)
-- [ ] Create procedure selector component (`ProcedureSelector`)
+- [x] Create diagnosis service (`diagnosisService`)
+- [x] Create procedure service (`procedureService`)
+- [x] Create diagnosis types (`types/index.d.ts`)
+- [x] Create procedure types (`types/index.d.ts`)
+- [x] Create diagnosis list page (`/master-data/diagnosis`)
+- [x] Create diagnosis form component (`DiagnosisForm`)
+- [x] Create diagnosis selector component (`DiagnosisSelector`)
+- [x] Create procedure list page (`/master-data/procedures`)
+- [x] Create procedure form component (`ProcedureForm`)
+- [x] Create procedure selector component (`ProcedureSelector`)
 
 **Acceptance Criteria**:
-- ✅ Admin dapat manage diagnosis (CRUD)
-- ✅ Admin dapat manage procedures (CRUD)
-- ✅ Diagnosis selector dapat digunakan di form lain
-- ✅ Procedure selector dapat digunakan di form lain
-- ✅ Search functionality bekerja
+- [x] Admin dapat manage diagnosis (CRUD)
+- [x] Admin dapat manage procedures (CRUD)
+- [x] Diagnosis selector dapat digunakan di form lain
+- [x] Procedure selector dapat digunakan di form lain
+- [x] Search functionality bekerja
+- [x] Menu sidebar menggunakan permissions dari API
+- [x] Backend master data saling berhubungan (dapat digunakan di modul lain)
 
 **Testing**:
 - Test diagnosis CRUD
