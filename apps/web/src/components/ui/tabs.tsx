@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
+import { motion } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 
@@ -12,7 +13,7 @@ function Tabs({
   return (
     <TabsPrimitive.Root
       data-slot="tabs"
-      className={cn("flex flex-col gap-2", className)}
+      className={cn("flex flex-col gap-4", className)}
       {...props}
     />
   );
@@ -26,7 +27,7 @@ function TabsList({
     <TabsPrimitive.List
       data-slot="tabs-list"
       className={cn(
-        "bg-muted text-muted-foreground inline-flex h-9 w-fit items-center justify-center rounded-lg p-[3px]",
+        "relative inline-flex h-10 items-center justify-start gap-1 border-b border-border",
         className
       )}
       {...props}
@@ -38,30 +39,90 @@ function TabsTrigger({
   className,
   ...props
 }: React.ComponentProps<typeof TabsPrimitive.Trigger>) {
+  const triggerRef = React.useRef<HTMLButtonElement>(null);
+  const [isActive, setIsActive] = React.useState(false);
+
+  React.useEffect(() => {
+    const trigger = triggerRef.current;
+    if (!trigger) return;
+
+    const updateActive = () => {
+      setIsActive(trigger.dataset.state === "active");
+    };
+
+    // Initial check
+    updateActive();
+
+    // Watch for data-state changes
+    const observer = new MutationObserver(updateActive);
+    observer.observe(trigger, {
+      attributes: true,
+      attributeFilter: ["data-state"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <TabsPrimitive.Trigger
+      ref={triggerRef}
       data-slot="tabs-trigger"
       className={cn(
-        "data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "relative inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:text-foreground",
         className
       )}
       {...props}
-    />
+    >
+      {props.children}
+      {isActive && (
+        <motion.div
+          layoutId="activeTabIndicator"
+          className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{
+            type: "spring",
+            stiffness: 400,
+            damping: 35,
+          }}
+        />
+      )}
+    </TabsPrimitive.Trigger>
+  );
+}
+
+function TabsContents({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<"div">) {
+  return (
+    <div
+      className={cn("relative", className)}
+      {...props}
+    >
+      {children}
+    </div>
   );
 }
 
 function TabsContent({
   className,
+  value,
   ...props
 }: React.ComponentProps<typeof TabsPrimitive.Content>) {
   return (
     <TabsPrimitive.Content
       data-slot="tabs-content"
+      value={value}
       className={cn("flex-1 outline-none", className)}
       {...props}
-    />
+    >
+      {props.children}
+    </TabsPrimitive.Content>
   );
 }
 
-export { Tabs, TabsList, TabsTrigger, TabsContent };
+export { Tabs, TabsList, TabsTrigger, TabsContent, TabsContents };
 
