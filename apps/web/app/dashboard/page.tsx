@@ -51,7 +51,7 @@ function DashboardContent() {
           variants={itemVariants}
           className="grid gap-6 md:grid-cols-2 lg:grid-cols-4"
         >
-          <Card className="border-0 shadow-sm">
+          <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Total Patients
@@ -65,10 +65,10 @@ function DashboardContent() {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-sm">
+          <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                Today's Appointments
+                Today&apos;s Appointments
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -79,7 +79,7 @@ function DashboardContent() {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-sm">
+          <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Pending Prescriptions
@@ -93,7 +93,7 @@ function DashboardContent() {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-sm">
+          <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Low Stock Items
@@ -109,7 +109,7 @@ function DashboardContent() {
         </motion.div>
 
         <motion.div variants={itemVariants} className="grid gap-6 md:grid-cols-2">
-          <Card className="border-0 shadow-sm">
+          <Card>
             <CardHeader>
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
@@ -135,7 +135,7 @@ function DashboardContent() {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-sm">
+          <Card>
             <CardHeader>
               <CardTitle>Recent Activity</CardTitle>
             </CardHeader>

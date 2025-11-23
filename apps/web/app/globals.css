@@ -167,3 +167,17 @@ body {
   color: var(--foreground);
   font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
+
+/* View Transition API support */
+@supports (view-transition-name: none) {
+  ::view-transition-group(root) {
+    animation-duration: 0.5s;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+/* Expo easing for smooth transitions */
+:root {
+  --expo-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --expo-in: cubic-bezier(0.7, 0, 0.84, 0);
+}
