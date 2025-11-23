@@ -79,12 +79,34 @@ const fallbackNavSections: NavSection[] = [
   },
 ];
 
+// Helper to find all parent IDs for active path
+function findActiveParentIds(items: NavItem[], activePath: string): string[] {
+  const parentIds: string[] = [];
+  
+  const traverse = (navItems: NavItem[]): boolean => {
+    for (const item of navItems) {
+      if (activePath === item.href || activePath.startsWith(item.href + "/")) {
+        return true;
+      }
+      if (item.children) {
+        if (traverse(item.children)) {
+          parentIds.push(item.id);
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+  
+  traverse(items);
+  return parentIds;
+}
+
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { logout, user } = useAuthStore();
   const { data: permissionsData } = useUserPermissions();
-  const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
   // Build navigation from permissions or use fallback
   const navSections = useMemo(() => {
@@ -106,8 +128,25 @@ export function Sidebar() {
     return fallbackNavSections;
   }, [permissionsData]);
 
+  // Calculate which items should be expanded based on active path
+  const activeParentIds = useMemo(() => {
+    if (navSections.length > 0 && navSections[0].items.length > 0) {
+      return findActiveParentIds(navSections[0].items, pathname);
+    }
+    return [];
+  }, [navSections, pathname]);
+
+  // User-controlled expanded items
+  const [userExpandedItems, setUserExpandedItems] = useState<string[]>([]);
+
+  // Computed expanded items = user expanded + active parents
+  const expandedItems = useMemo(() => {
+    const combined = new Set([...userExpandedItems, ...activeParentIds]);
+    return Array.from(combined);
+  }, [userExpandedItems, activeParentIds]);
+
   const toggleExpand = (id: string) => {
-    setExpandedItems((prev) =>
+    setUserExpandedItems((prev) =>
       prev.includes(id)
         ? prev.filter((item) => item !== id)
         : [...prev, id]
@@ -197,21 +236,69 @@ export function Sidebar() {
                     <AnimatePresence>
                       {isExpanded && (
                         <div className="pl-7 pt-1 space-y-1">
-                          {item.children.map((child) => (
-                            <Link key={child.id} href={child.href}>
-                              <div
-                                className={cn(
-                                  "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
-                                  isActive(child.href)
-                                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                                    : "hover:bg-sidebar-accent/50"
+                          {item.children.map((child) => {
+                            const hasGrandChildren = child.children && child.children.length > 0;
+                            const isChildExpanded = expandedItems.includes(child.id);
+                            const childActive = isParentActive(child);
+
+                            return (
+                              <div key={child.id}>
+                                <Link href={child.href}>
+                                  <div
+                                    className={cn(
+                                      "flex items-center justify-between px-3 py-2 rounded-md text-sm transition-colors",
+                                      childActive
+                                        ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                                        : "hover:bg-sidebar-accent/50"
+                                    )}
+                                    onClick={(e) => {
+                                      if (hasGrandChildren) {
+                                        e.preventDefault();
+                                        toggleExpand(child.id);
+                                      }
+                                    }}
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      {child.icon}
+                                      <span>{child.label}</span>
+                                    </div>
+                                    {hasGrandChildren && (
+                                      <ChevronDown
+                                        className={cn(
+                                          "h-4 w-4 transition-transform",
+                                          isChildExpanded && "rotate-180"
+                                        )}
+                                      />
+                                    )}
+                                  </div>
+                                </Link>
+
+                                {hasGrandChildren && (
+                                  <AnimatePresence>
+                                    {isChildExpanded && (
+                                      <div className="pl-7 pt-1 space-y-1">
+                                        {child.children?.map((grandChild) => (
+                                          <Link key={grandChild.id} href={grandChild.href}>
+                                            <div
+                                              className={cn(
+                                                "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
+                                                isActive(grandChild.href)
+                                                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                                                  : "hover:bg-sidebar-accent/50"
+                                              )}
+                                            >
+                                              {grandChild.icon}
+                                              <span>{grandChild.label}</span>
+                                            </div>
+                                          </Link>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </AnimatePresence>
                                 )}
-                              >
-                                {child.icon}
-                                <span>{child.label}</span>
                               </div>
-                            </Link>
-                          ))}
+                            );
+                          })}
                         </div>
                       )}
                     </AnimatePresence>
