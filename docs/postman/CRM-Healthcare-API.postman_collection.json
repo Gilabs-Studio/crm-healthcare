@@ -676,7 +676,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"code\": \"A00.0\",\n  \"name\": \"Kolera karena Vibrio cholerae 01, biovar cholerae\",\n  \"name_en\": \"Cholera due to Vibrio cholerae 01, biovar cholerae\",\n  \"category\": \"Penyakit Menular\",\n  \"description\": \"Kolera akut\",\n  \"status\": \"active\"\n}",
+                  "raw": "{\n  \"code\": \"A00.0\",\n  \"name\": \"Kolera karena Vibrio cholerae 01, biovar cholerae\",\n  \"category_id\": \"category_id_here\",\n  \"description\": \"Kolera akut\",\n  \"status\": \"active\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -708,7 +708,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"Updated Diagnosis Name\",\n  \"name_en\": \"Updated English Name\",\n  \"category\": \"Updated Category\",\n  \"description\": \"Updated description\",\n  \"status\": \"active\"\n}",
+                  "raw": "{\n  \"name\": \"Updated Diagnosis Name\",\n  \"category_id\": \"category_id_here\",\n  \"description\": \"Updated description\",\n  \"status\": \"active\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -841,7 +841,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"code\": \"PROC-001\",\n  \"name\": \"Suntik Intramuskular\",\n  \"name_en\": \"Intramuscular Injection\",\n  \"category\": \"Injection\",\n  \"description\": \"Prosedur suntik intramuskular\",\n  \"price\": 50000,\n  \"status\": \"active\"\n}",
+                  "raw": "{\n  \"code\": \"PROC-001\",\n  \"name\": \"Suntik Intramuskular\",\n  \"category_id\": \"category_id_here\",\n  \"description\": \"Prosedur suntik intramuskular\",\n  \"price\": 50000,\n  \"status\": \"active\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -873,7 +873,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"Updated Procedure Name\",\n  \"name_en\": \"Updated English Name\",\n  \"category\": \"Updated Category\",\n  \"description\": \"Updated description\",\n  \"price\": 75000,\n  \"status\": \"active\"\n}",
+                  "raw": "{\n  \"name\": \"Updated Procedure Name\",\n  \"category_id\": \"category_id_here\",\n  \"description\": \"Updated description\",\n  \"price\": 75000,\n  \"status\": \"active\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -914,9 +914,151 @@
               }
             }
           ]
+        },
+        {
+          "name": "Categories",
+          "item": [
+            {
+              "name": "List Categories",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/master-data/categories?page=1&per_page=20",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "master-data", "categories"],
+                  "query": [
+                    {"key": "page", "value": "1"},
+                    {"key": "per_page", "value": "20"},
+                    {"key": "type", "value": "", "disabled": true},
+                    {"key": "status", "value": "", "disabled": true},
+                    {"key": "search", "value": "", "disabled": true}
+                  ]
+                },
+                "description": "Get list of categories with pagination. Filter by type (diagnosis/procedure) and status."
+              }
+            },
+            {
+              "name": "Get Category by ID",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/master-data/categories/:id",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "master-data", "categories", ":id"],
+                  "variable": [
+                    {"key": "id", "value": "category_id"}
+                  ]
+                },
+                "description": "Get category details by ID"
+              }
+            },
+            {
+              "name": "Create Category",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"type\": \"diagnosis\",\n  \"name\": \"Penyakit Menular\",\n  \"description\": \"Kategori untuk penyakit menular\",\n  \"status\": \"active\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/master-data/categories",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "master-data", "categories"]
+                },
+                "description": "Create a new category. Type must be 'diagnosis' or 'procedure'."
+              }
+            },
+            {
+              "name": "Update Category",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Updated Category Name\",\n  \"description\": \"Updated description\",\n  \"status\": \"active\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/master-data/categories/:id",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "master-data", "categories", ":id"],
+                  "variable": [
+                    {"key": "id", "value": "category_id"}
+                  ]
+                },
+                "description": "Update category information"
+              }
+            },
+            {
+              "name": "Delete Category",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/master-data/categories/:id",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "master-data", "categories", ":id"],
+                  "variable": [
+                    {"key": "id", "value": "category_id"}
+                  ]
+                },
+                "description": "Delete a category"
+              }
+            }
+          ]
         }
       ],
-      "description": "Endpoints untuk master data (diagnosis dan procedures)"
+      "description": "Endpoints untuk master data (diagnosis, procedures, dan categories)"
     },
     {
       "name": "Health Check",

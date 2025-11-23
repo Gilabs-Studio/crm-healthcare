@@ -109,11 +109,6 @@ export function DiagnosisSelector({
                     <span className="font-medium">
                       {diagnosis.code} - {diagnosis.name}
                     </span>
-                    {diagnosis.name_en && (
-                      <span className="text-xs text-muted-foreground">
-                        {diagnosis.name_en}
-                      </span>
-                    )}
                   </div>
                 </CommandItem>
               ))}

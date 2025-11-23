@@ -47,6 +47,8 @@ func SeedPermissions() error {
 		{userPageMenu.ID, "CREATE_USERS", "Create Users", "CREATE", &userPageMenu}, // Includes roles & permissions
 		{userPageMenu.ID, "EDIT_USERS", "Edit Users", "EDIT", &userPageMenu},
 		{userPageMenu.ID, "DELETE_USERS", "Delete Users", "DELETE", &userPageMenu},
+		{userPageMenu.ID, "ROLES", "Manage Roles", "ROLES", &userPageMenu},
+		{userPageMenu.ID, "PERMISSIONS", "Manage Permissions", "PERMISSIONS", &userPageMenu},
 
 		// Company Management actions
 		{companyMgmtMenu.ID, "VIEW_COMPANY_MANAGEMENT", "View Company Management", "VIEW", &companyMgmtMenu},
@@ -104,6 +106,10 @@ func SeedPermissions() error {
 		{procedureMenu.ID, "EDIT_PROCEDURE", "Edit Procedure", "EDIT", &procedureMenu},
 		{procedureMenu.ID, "DELETE_PROCEDURE", "Delete Procedure", "DELETE", &procedureMenu},
 		{procedureMenu.ID, "SEARCH_PROCEDURE", "Search Procedure", "VIEW", &procedureMenu},
+		{procedureMenu.ID, "CATEGORY_PROCEDURE", "Manage Procedure Categories", "CATEGORY", &procedureMenu},
+
+		// Diagnosis actions - add CATEGORY permission
+		{diagnosisMenu.ID, "CATEGORY_DIAGNOSIS", "Manage Diagnosis Categories", "CATEGORY", &diagnosisMenu},
 	}
 
 	// Create permissions

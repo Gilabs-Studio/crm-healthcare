@@ -106,7 +106,7 @@ func (s *Service) Create(req *procedure.CreateProcedureRequest) (*procedure.Proc
 		Code:        req.Code,
 		Name:        req.Name,
 		NameEn:      req.NameEn,
-		Category:    req.Category,
+		CategoryID:  req.CategoryID,
 		Description: req.Description,
 		Price:       req.Price,
 		Status:      status,
@@ -153,8 +153,8 @@ func (s *Service) Update(id string, req *procedure.UpdateProcedureRequest) (*pro
 	if req.NameEn != nil {
 		p.NameEn = req.NameEn
 	}
-	if req.Category != nil {
-		p.Category = req.Category
+	if req.CategoryID != nil {
+		p.CategoryID = req.CategoryID
 	}
 	if req.Description != nil {
 		p.Description = req.Description

@@ -19,7 +19,7 @@ func NewRepository(db *gorm.DB) interfaces.ProcedureRepository {
 
 func (r *repository) FindByID(id string) (*procedure.Procedure, error) {
 	var p procedure.Procedure
-	err := r.db.Where("id = ?", id).First(&p).Error
+	err := r.db.Preload("Category").Where("id = ?", id).First(&p).Error
 	if err != nil {
 		return nil, err
 	}
@@ -44,10 +44,11 @@ func (r *repository) List(req *procedure.ListProceduresRequest) ([]procedure.Pro
 	// Apply filters
 	if req.Search != "" {
 		search := "%" + strings.ToLower(req.Search) + "%"
-		query = query.Where(
-			"LOWER(code) LIKE ? OR LOWER(name) LIKE ? OR LOWER(COALESCE(name_en, '')) LIKE ? OR LOWER(COALESCE(category, '')) LIKE ? OR LOWER(COALESCE(description, '')) LIKE ?",
-			search, search, search, search, search,
-		)
+		query = query.Joins("LEFT JOIN categories ON procedures.category_id = categories.id").
+			Where(
+				"LOWER(procedures.code) LIKE ? OR LOWER(procedures.name) LIKE ? OR LOWER(COALESCE(procedures.name_en, '')) LIKE ? OR LOWER(COALESCE(categories.name, '')) LIKE ? OR LOWER(COALESCE(procedures.description, '')) LIKE ?",
+				search, search, search, search, search,
+			)
 	}
 
 	if req.Status != "" {
@@ -74,8 +75,8 @@ func (r *repository) List(req *procedure.ListProceduresRequest) ([]procedure.Pro
 
 	offset := (page - 1) * perPage
 
-	// Fetch data
-	err := query.Order("code ASC").Offset(offset).Limit(perPage).Find(&procedures).Error
+	// Fetch data with preload category
+	err := query.Preload("Category").Order("procedures.code ASC").Offset(offset).Limit(perPage).Find(&procedures).Error
 	if err != nil {
 		return nil, 0, err
 	}
@@ -90,10 +91,11 @@ func (r *repository) Search(req *procedure.SearchProceduresRequest) ([]procedure
 
 	// Apply search
 	search := "%" + strings.ToLower(req.Query) + "%"
-	query = query.Where(
-		"LOWER(code) LIKE ? OR LOWER(name) LIKE ? OR LOWER(COALESCE(name_en, '')) LIKE ? OR LOWER(COALESCE(category, '')) LIKE ? OR LOWER(COALESCE(description, '')) LIKE ?",
-		search, search, search, search, search,
-	)
+	query = query.Joins("LEFT JOIN categories ON procedures.category_id = categories.id").
+		Where(
+			"LOWER(procedures.code) LIKE ? OR LOWER(procedures.name) LIKE ? OR LOWER(COALESCE(procedures.name_en, '')) LIKE ? OR LOWER(COALESCE(categories.name, '')) LIKE ? OR LOWER(COALESCE(procedures.description, '')) LIKE ?",
+			search, search, search, search, search,
+		)
 
 	if req.Status != "" {
 		query = query.Where("status = ?", req.Status)
@@ -108,8 +110,8 @@ func (r *repository) Search(req *procedure.SearchProceduresRequest) ([]procedure
 		limit = 50
 	}
 
-	// Fetch data
-	err := query.Order("code ASC").Limit(limit).Find(&procedures).Error
+	// Fetch data with preload category
+	err := query.Preload("Category").Order("procedures.code ASC").Limit(limit).Find(&procedures).Error
 	if err != nil {
 		return nil, err
 	}

@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/gilabs/crm-healthcare/api/internal/database"
+	"github.com/gilabs/crm-healthcare/api/internal/domain/category"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/diagnosis"
 )
 
@@ -17,13 +18,33 @@ func SeedDiagnoses() error {
 		return nil
 	}
 
+	// Get categories from database
+	var categories []category.Category
+	if err := database.DB.Where("type = ? AND status = ?", category.CategoryTypeDiagnosis, "active").Find(&categories).Error; err != nil {
+		return err
+	}
+
+	// Create category map for quick lookup by name -> ID
+	categoryMap := make(map[string]*string)
+	for _, c := range categories {
+		categoryMap[c.Name] = &c.ID
+	}
+
+	// Helper function to get category ID
+	getCategoryID := func(name string) *string {
+		if catID, ok := categoryMap[name]; ok {
+			return catID
+		}
+		return nil
+	}
+
 	// Sample ICD-10 diagnoses
 	diagnoses := []diagnosis.Diagnosis{
 		{
 			Code:        "A00.0",
 			Name:        "Kolera karena Vibrio cholerae 01, biovar cholerae",
 			NameEn:      stringPtr("Cholera due to Vibrio cholerae 01, biovar cholerae"),
-			Category:    stringPtr("Penyakit Menular"),
+			CategoryID:  getCategoryID("Penyakit Menular"),
 			Description: stringPtr("Kolera klasik"),
 			Status:      "active",
 		},
@@ -31,7 +52,7 @@ func SeedDiagnoses() error {
 			Code:        "A00.1",
 			Name:        "Kolera karena Vibrio cholerae 01, biovar eltor",
 			NameEn:      stringPtr("Cholera due to Vibrio cholerae 01, biovar eltor"),
-			Category:    stringPtr("Penyakit Menular"),
+			CategoryID:  getCategoryID("Penyakit Menular"),
 			Description: stringPtr("Kolera El Tor"),
 			Status:      "active",
 		},
@@ -39,7 +60,7 @@ func SeedDiagnoses() error {
 			Code:        "A01.0",
 			Name:        "Demam tifoid",
 			NameEn:      stringPtr("Typhoid fever"),
-			Category:    stringPtr("Penyakit Menular"),
+			CategoryID:  getCategoryID("Penyakit Menular"),
 			Description: stringPtr("Infeksi Salmonella typhi"),
 			Status:      "active",
 		},
@@ -47,7 +68,7 @@ func SeedDiagnoses() error {
 			Code:        "A02.0",
 			Name:        "Infeksi salmonella enteritis",
 			NameEn:      stringPtr("Salmonella enteritis"),
-			Category:    stringPtr("Penyakit Menular"),
+			CategoryID:  getCategoryID("Penyakit Menular"),
 			Description: stringPtr("Salmonellosis"),
 			Status:      "active",
 		},
@@ -55,7 +76,7 @@ func SeedDiagnoses() error {
 			Code:        "A09.0",
 			Name:        "Gastroenteritis dan kolitis yang berasal dari infeksi dan tidak diketahui",
 			NameEn:      stringPtr("Gastroenteritis and colitis of infectious origin, unspecified"),
-			Category:    stringPtr("Penyakit Menular"),
+			CategoryID:  getCategoryID("Penyakit Menular"),
 			Description: stringPtr("Diare infeksius"),
 			Status:      "active",
 		},
@@ -63,7 +84,7 @@ func SeedDiagnoses() error {
 			Code:        "E10.9",
 			Name:        "Diabetes melitus tipe 1 tanpa komplikasi",
 			NameEn:      stringPtr("Type 1 diabetes mellitus without complications"),
-			Category:    stringPtr("Penyakit Endokrin"),
+			CategoryID:  getCategoryID("Penyakit Endokrin"),
 			Description: stringPtr("DM Tipe 1"),
 			Status:      "active",
 		},
@@ -71,7 +92,7 @@ func SeedDiagnoses() error {
 			Code:        "E11.9",
 			Name:        "Diabetes melitus tipe 2 tanpa komplikasi",
 			NameEn:      stringPtr("Type 2 diabetes mellitus without complications"),
-			Category:    stringPtr("Penyakit Endokrin"),
+			CategoryID:  getCategoryID("Penyakit Endokrin"),
 			Description: stringPtr("DM Tipe 2"),
 			Status:      "active",
 		},
@@ -79,7 +100,7 @@ func SeedDiagnoses() error {
 			Code:        "I10",
 			Name:        "Hipertensi esensial (primer)",
 			NameEn:      stringPtr("Essential (primary) hypertension"),
-			Category:    stringPtr("Penyakit Kardiovaskular"),
+			CategoryID:  getCategoryID("Penyakit Kardiovaskular"),
 			Description: stringPtr("Hipertensi"),
 			Status:      "active",
 		},
@@ -87,7 +108,7 @@ func SeedDiagnoses() error {
 			Code:        "I20.9",
 			Name:        "Angina pektoris, tidak spesifik",
 			NameEn:      stringPtr("Angina pectoris, unspecified"),
-			Category:    stringPtr("Penyakit Kardiovaskular"),
+			CategoryID:  getCategoryID("Penyakit Kardiovaskular"),
 			Description: stringPtr("Angina"),
 			Status:      "active",
 		},
@@ -95,7 +116,7 @@ func SeedDiagnoses() error {
 			Code:        "J00",
 			Name:        "Rinitis akut (common cold)",
 			NameEn:      stringPtr("Acute nasopharyngitis (common cold)"),
-			Category:    stringPtr("Penyakit Pernapasan"),
+			CategoryID:  getCategoryID("Penyakit Pernapasan"),
 			Description: stringPtr("Pilek"),
 			Status:      "active",
 		},
@@ -103,7 +124,7 @@ func SeedDiagnoses() error {
 			Code:        "J06.9",
 			Name:        "Infeksi saluran pernapasan akut, tidak spesifik",
 			NameEn:      stringPtr("Acute upper respiratory infection, unspecified"),
-			Category:    stringPtr("Penyakit Pernapasan"),
+			CategoryID:  getCategoryID("Penyakit Pernapasan"),
 			Description: stringPtr("ISPA"),
 			Status:      "active",
 		},
@@ -111,7 +132,7 @@ func SeedDiagnoses() error {
 			Code:        "J18.9",
 			Name:        "Pneumonia, tidak diketahui penyebabnya",
 			NameEn:      stringPtr("Pneumonia, unspecified organism"),
-			Category:    stringPtr("Penyakit Pernapasan"),
+			CategoryID:  getCategoryID("Penyakit Pernapasan"),
 			Description: stringPtr("Pneumonia"),
 			Status:      "active",
 		},
@@ -119,7 +140,7 @@ func SeedDiagnoses() error {
 			Code:        "K25.9",
 			Name:        "Ulkus peptikum, tidak spesifik sebagai akut atau kronik, tanpa perdarahan atau perforasi",
 			NameEn:      stringPtr("Gastric ulcer, unspecified as acute or chronic, without hemorrhage or perforation"),
-			Category:    stringPtr("Penyakit Pencernaan"),
+			CategoryID:  getCategoryID("Penyakit Pencernaan"),
 			Description: stringPtr("Tukak lambung"),
 			Status:      "active",
 		},
@@ -127,7 +148,7 @@ func SeedDiagnoses() error {
 			Code:        "K29.9",
 			Name:        "Gastritis, tidak spesifik",
 			NameEn:      stringPtr("Gastritis, unspecified"),
-			Category:    stringPtr("Penyakit Pencernaan"),
+			CategoryID:  getCategoryID("Penyakit Pencernaan"),
 			Description: stringPtr("Gastritis"),
 			Status:      "active",
 		},
@@ -135,7 +156,7 @@ func SeedDiagnoses() error {
 			Code:        "M79.3",
 			Name:        "Panniculitis, tidak spesifik",
 			NameEn:      stringPtr("Panniculitis, unspecified"),
-			Category:    stringPtr("Penyakit Otot dan Jaringan Ikat"),
+			CategoryID:  getCategoryID("Penyakit Otot dan Jaringan Ikat"),
 			Description: stringPtr("Nyeri otot"),
 			Status:      "active",
 		},
@@ -143,7 +164,7 @@ func SeedDiagnoses() error {
 			Code:        "N39.0",
 			Name:        "Infeksi saluran kemih, lokasi tidak spesifik",
 			NameEn:      stringPtr("Urinary tract infection, site not specified"),
-			Category:    stringPtr("Penyakit Saluran Kemih"),
+			CategoryID:  getCategoryID("Penyakit Saluran Kemih"),
 			Description: stringPtr("ISK"),
 			Status:      "active",
 		},
@@ -151,7 +172,7 @@ func SeedDiagnoses() error {
 			Code:        "R50.9",
 			Name:        "Demam, tidak spesifik",
 			NameEn:      stringPtr("Fever, unspecified"),
-			Category:    stringPtr("Gejala dan Tanda"),
+			CategoryID:  getCategoryID("Gejala dan Tanda"),
 			Description: stringPtr("Demam"),
 			Status:      "active",
 		},
@@ -159,7 +180,7 @@ func SeedDiagnoses() error {
 			Code:        "R51",
 			Name:        "Sakit kepala",
 			NameEn:      stringPtr("Headache"),
-			Category:    stringPtr("Gejala dan Tanda"),
+			CategoryID:  getCategoryID("Gejala dan Tanda"),
 			Description: stringPtr("Sakit kepala"),
 			Status:      "active",
 		},
@@ -167,7 +188,7 @@ func SeedDiagnoses() error {
 			Code:        "Z00.0",
 			Name:        "Pemeriksaan kesehatan umum",
 			NameEn:      stringPtr("General health check-up"),
-			Category:    stringPtr("Kontak dengan Pelayanan Kesehatan"),
+			CategoryID:  getCategoryID("Kontak dengan Pelayanan Kesehatan"),
 			Description: stringPtr("Medical check-up"),
 			Status:      "active",
 		},

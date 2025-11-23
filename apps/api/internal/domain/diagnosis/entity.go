@@ -3,6 +3,7 @@ package diagnosis
 import (
 	"time"
 
+	"github.com/gilabs/crm-healthcare/api/internal/domain/category"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -13,7 +14,8 @@ type Diagnosis struct {
 	Code        string    `gorm:"type:varchar(20);uniqueIndex;not null" json:"code"`
 	Name        string    `gorm:"type:varchar(500);not null" json:"name"`
 	NameEn      *string   `gorm:"type:varchar(500)" json:"name_en,omitempty"`
-	Category    *string   `gorm:"type:varchar(100)" json:"category,omitempty"`
+	CategoryID  *string   `gorm:"type:uuid;index" json:"category_id,omitempty"`
+	Category    *category.Category `gorm:"foreignKey:CategoryID" json:"category,omitempty"`
 	Description *string   `gorm:"type:text" json:"description,omitempty"`
 	Status      string    `gorm:"type:varchar(20);not null;default:'active'" json:"status"`
 	CreatedAt   time.Time `json:"created_at"`
@@ -36,30 +38,35 @@ func (d *Diagnosis) BeforeCreate(tx *gorm.DB) error {
 
 // DiagnosisResponse represents diagnosis response DTO
 type DiagnosisResponse struct {
-	ID          string    `json:"id"`
-	Code        string    `json:"code"`
-	Name        string    `json:"name"`
-	NameEn      *string   `json:"name_en,omitempty"`
-	Category    *string   `json:"category,omitempty"`
-	Description *string   `json:"description,omitempty"`
-	Status      string    `json:"status"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	ID          string                 `json:"id"`
+	Code        string                 `json:"code"`
+	Name        string                 `json:"name"`
+	NameEn      *string                `json:"name_en,omitempty"`
+	CategoryID  *string                 `json:"category_id,omitempty"`
+	Category    *category.CategoryResponse `json:"category,omitempty"`
+	Description *string                 `json:"description,omitempty"`
+	Status      string                 `json:"status"`
+	CreatedAt   time.Time              `json:"created_at"`
+	UpdatedAt   time.Time              `json:"updated_at"`
 }
 
 // ToDiagnosisResponse converts Diagnosis to DiagnosisResponse
 func (d *Diagnosis) ToDiagnosisResponse() *DiagnosisResponse {
-	return &DiagnosisResponse{
+	resp := &DiagnosisResponse{
 		ID:          d.ID,
 		Code:        d.Code,
 		Name:        d.Name,
 		NameEn:      d.NameEn,
-		Category:    d.Category,
+		CategoryID:  d.CategoryID,
 		Description: d.Description,
 		Status:      d.Status,
 		CreatedAt:   d.CreatedAt,
 		UpdatedAt:   d.UpdatedAt,
 	}
+	if d.Category != nil {
+		resp.Category = d.Category.ToCategoryResponse()
+	}
+	return resp
 }
 
 // CreateDiagnosisRequest represents create diagnosis request DTO
@@ -67,7 +74,7 @@ type CreateDiagnosisRequest struct {
 	Code        string  `json:"code" binding:"required,min=1,max=20"`
 	Name        string  `json:"name" binding:"required,min=3,max=500"`
 	NameEn      *string `json:"name_en" binding:"omitempty,max=500"`
-	Category    *string `json:"category" binding:"omitempty,max=100"`
+	CategoryID  *string `json:"category_id" binding:"omitempty,uuid"`
 	Description *string `json:"description"`
 	Status      string  `json:"status" binding:"omitempty,oneof=active inactive"`
 }
@@ -77,7 +84,7 @@ type UpdateDiagnosisRequest struct {
 	Code        *string `json:"code" binding:"omitempty,min=1,max=20"`
 	Name        *string `json:"name" binding:"omitempty,min=3,max=500"`
 	NameEn      *string `json:"name_en" binding:"omitempty,max=500"`
-	Category    *string `json:"category" binding:"omitempty,max=100"`
+	CategoryID  *string `json:"category_id" binding:"omitempty,uuid"`
 	Description *string `json:"description"`
 	Status      *string `json:"status" binding:"omitempty,oneof=active inactive"`
 }

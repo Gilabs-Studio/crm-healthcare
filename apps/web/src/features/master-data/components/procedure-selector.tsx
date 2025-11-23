@@ -118,11 +118,6 @@ export function ProcedureSelector({
                     <span className="font-medium">
                       {procedure.code} - {procedure.name}
                     </span>
-                    {procedure.name_en && (
-                      <span className="text-xs text-muted-foreground">
-                        {procedure.name_en}
-                      </span>
-                    )}
                     {procedure.price && (
                       <span className="text-xs text-muted-foreground">
                         {formatPrice(procedure.price)}

@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useCategories } from "../hooks/useCategories";
 import type { Diagnosis } from "../types";
 
 interface DiagnosisFormProps {
@@ -30,6 +31,14 @@ interface DiagnosisFormProps {
 
 export function DiagnosisForm({ diagnosis, onSubmit, onCancel, isLoading }: DiagnosisFormProps) {
   const isEdit = !!diagnosis;
+
+  // Fetch categories for diagnosis
+  const { data: categoriesData } = useCategories({
+    type: "diagnosis",
+    status: "active",
+    per_page: 100,
+  });
+  const categories = categoriesData?.data || [];
 
   const {
     register,
@@ -43,9 +52,8 @@ export function DiagnosisForm({ diagnosis, onSubmit, onCancel, isLoading }: Diag
       ? {
           code: diagnosis.code,
           name: diagnosis.name,
-          name_en: diagnosis.name_en,
-          category: diagnosis.category,
-          description: diagnosis.description,
+          category_id: diagnosis.category_id || null,
+          description: diagnosis.description || null,
           status: diagnosis.status,
         }
       : {
@@ -70,30 +78,32 @@ export function DiagnosisForm({ diagnosis, onSubmit, onCancel, isLoading }: Diag
       </Field>
 
       <Field orientation="vertical">
-        <FieldLabel>Name (Indonesian)</FieldLabel>
+        <FieldLabel>Name</FieldLabel>
         <Input
           {...register("name")}
-          placeholder="Diagnosis name in Indonesian"
+          placeholder="Diagnosis name"
         />
         {errors.name && <FieldError>{errors.name.message}</FieldError>}
       </Field>
 
       <Field orientation="vertical">
-        <FieldLabel>Name (English) - Optional</FieldLabel>
-        <Input
-          {...register("name_en")}
-          placeholder="Diagnosis name in English"
-        />
-        {errors.name_en && <FieldError>{errors.name_en.message}</FieldError>}
-      </Field>
-
-      <Field orientation="vertical">
         <FieldLabel>Category - Optional</FieldLabel>
-        <Input
-          {...register("category")}
-          placeholder="Category"
-        />
-        {errors.category && <FieldError>{errors.category.message}</FieldError>}
+        <Select
+          value={watch("category_id") || undefined}
+          onValueChange={(value) => setValue("category_id", value || null)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select category" />
+          </SelectTrigger>
+          <SelectContent>
+            {categories.map((category) => (
+              <SelectItem key={category.id} value={category.id}>
+                {category.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {errors.category_id && <FieldError>{errors.category_id.message}</FieldError>}
       </Field>
 
       <Field orientation="vertical">
@@ -134,4 +144,3 @@ export function DiagnosisForm({ diagnosis, onSubmit, onCancel, isLoading }: Diag
     </form>
   );
 }
-

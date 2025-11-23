@@ -7,7 +7,7 @@ import (
 	"github.com/gilabs/crm-healthcare/api/pkg/jwt"
 )
 
-func SetupMasterDataRoutes(router *gin.RouterGroup, diagnosisHandler *handlers.DiagnosisHandler, procedureHandler *handlers.ProcedureHandler, jwtManager *jwt.JWTManager) {
+func SetupMasterDataRoutes(router *gin.RouterGroup, diagnosisHandler *handlers.DiagnosisHandler, procedureHandler *handlers.ProcedureHandler, categoryHandler *handlers.CategoryHandler, jwtManager *jwt.JWTManager) {
 	masterData := router.Group("/master-data")
 	masterData.Use(middleware.AuthMiddleware(jwtManager))
 	{
@@ -31,6 +31,16 @@ func SetupMasterDataRoutes(router *gin.RouterGroup, diagnosisHandler *handlers.D
 			procedures.POST("", procedureHandler.Create)
 			procedures.PUT("/:id", procedureHandler.Update)
 			procedures.DELETE("/:id", procedureHandler.Delete)
+		}
+
+		// Category routes
+		categories := masterData.Group("/categories")
+		{
+			categories.GET("", categoryHandler.List)
+			categories.GET("/:id", categoryHandler.GetByID)
+			categories.POST("", categoryHandler.Create)
+			categories.PUT("/:id", categoryHandler.Update)
+			categories.DELETE("/:id", categoryHandler.Delete)
 		}
 	}
 }

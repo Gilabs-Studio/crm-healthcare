@@ -106,7 +106,7 @@ func (s *Service) Create(req *diagnosis.CreateDiagnosisRequest) (*diagnosis.Diag
 		Code:        req.Code,
 		Name:        req.Name,
 		NameEn:      req.NameEn,
-		Category:    req.Category,
+		CategoryID:  req.CategoryID,
 		Description: req.Description,
 		Status:      status,
 	}
@@ -152,8 +152,8 @@ func (s *Service) Update(id string, req *diagnosis.UpdateDiagnosisRequest) (*dia
 	if req.NameEn != nil {
 		d.NameEn = req.NameEn
 	}
-	if req.Category != nil {
-		d.Category = req.Category
+	if req.CategoryID != nil {
+		d.CategoryID = req.CategoryID
 	}
 	if req.Description != nil {
 		d.Description = req.Description

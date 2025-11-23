@@ -3,8 +3,13 @@ export interface Diagnosis {
   id: string;
   code: string;
   name: string;
-  name_en?: string;
-  category?: string;
+  category_id?: string;
+  category?: {
+    id: string;
+    name: string;
+    description?: string;
+    status: "active" | "inactive";
+  } | null;
   description?: string;
   status: "active" | "inactive";
   created_at: string;
@@ -39,18 +44,16 @@ export interface DiagnosisResponse {
 export interface CreateDiagnosisFormData {
   code: string;
   name: string;
-  name_en?: string;
-  category?: string;
-  description?: string;
+  category_id?: string | null;
+  description?: string | null;
   status?: "active" | "inactive";
 }
 
 export interface UpdateDiagnosisFormData {
   code?: string;
   name?: string;
-  name_en?: string;
-  category?: string;
-  description?: string;
+  category_id?: string | null;
+  description?: string | null;
   status?: "active" | "inactive";
 }
 
@@ -59,8 +62,13 @@ export interface Procedure {
   id: string;
   code: string;
   name: string;
-  name_en?: string;
-  category?: string;
+  category_id?: string;
+  category?: {
+    id: string;
+    name: string;
+    description?: string;
+    status: "active" | "inactive";
+  } | null;
   description?: string;
   price?: number;
   status: "active" | "inactive";
@@ -96,20 +104,18 @@ export interface ProcedureResponse {
 export interface CreateProcedureFormData {
   code: string;
   name: string;
-  name_en?: string;
-  category?: string;
-  description?: string;
-  price?: number;
+  category_id?: string | null;
+  description?: string | null;
+  price?: number | null;
   status?: "active" | "inactive";
 }
 
 export interface UpdateProcedureFormData {
   code?: string;
   name?: string;
-  name_en?: string;
-  category?: string;
-  description?: string;
-  price?: number;
+  category_id?: string | null;
+  description?: string | null;
+  price?: number | null;
   status?: "active" | "inactive";
 }
 

@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useCategories } from "../hooks/useCategories";
 import type { Procedure } from "../types";
 
 interface ProcedureFormProps {
@@ -30,6 +31,14 @@ interface ProcedureFormProps {
 
 export function ProcedureForm({ procedure, onSubmit, onCancel, isLoading }: ProcedureFormProps) {
   const isEdit = !!procedure;
+
+  // Fetch categories for procedure
+  const { data: categoriesData } = useCategories({
+    type: "procedure",
+    status: "active",
+    per_page: 100,
+  });
+  const categories = categoriesData?.data || [];
 
   const {
     register,
@@ -43,10 +52,9 @@ export function ProcedureForm({ procedure, onSubmit, onCancel, isLoading }: Proc
       ? {
           code: procedure.code,
           name: procedure.name,
-          name_en: procedure.name_en,
-          category: procedure.category,
-          description: procedure.description,
-          price: procedure.price,
+          category_id: procedure.category_id || null,
+          description: procedure.description || null,
+          price: procedure.price || null,
           status: procedure.status,
         }
       : {
@@ -71,30 +79,32 @@ export function ProcedureForm({ procedure, onSubmit, onCancel, isLoading }: Proc
       </Field>
 
       <Field orientation="vertical">
-        <FieldLabel>Name (Indonesian)</FieldLabel>
+        <FieldLabel>Name</FieldLabel>
         <Input
           {...register("name")}
-          placeholder="Procedure name in Indonesian"
+          placeholder="Procedure name"
         />
         {errors.name && <FieldError>{errors.name.message}</FieldError>}
       </Field>
 
       <Field orientation="vertical">
-        <FieldLabel>Name (English) - Optional</FieldLabel>
-        <Input
-          {...register("name_en")}
-          placeholder="Procedure name in English"
-        />
-        {errors.name_en && <FieldError>{errors.name_en.message}</FieldError>}
-      </Field>
-
-      <Field orientation="vertical">
         <FieldLabel>Category - Optional</FieldLabel>
-        <Input
-          {...register("category")}
-          placeholder="Category"
-        />
-        {errors.category && <FieldError>{errors.category.message}</FieldError>}
+        <Select
+          value={watch("category_id") || undefined}
+          onValueChange={(value) => setValue("category_id", value || null)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select category" />
+          </SelectTrigger>
+          <SelectContent>
+            {categories.map((category) => (
+              <SelectItem key={category.id} value={category.id}>
+                {category.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {errors.category_id && <FieldError>{errors.category_id.message}</FieldError>}
       </Field>
 
       <Field orientation="vertical">
@@ -146,4 +156,3 @@ export function ProcedureForm({ procedure, onSubmit, onCancel, isLoading }: Proc
     </form>
   );
 }
-

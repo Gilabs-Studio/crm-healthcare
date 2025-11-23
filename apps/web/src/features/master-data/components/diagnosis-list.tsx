@@ -55,7 +55,7 @@ export function DiagnosisList() {
     {
       id: "category",
       header: "Category",
-      accessor: (row) => row.category || "-",
+      accessor: (row) => row.category?.name || "-",
     },
     {
       id: "status",
