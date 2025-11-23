@@ -1,12 +1,13 @@
 {
-  "name": "my-app",
+  "name": "@repo/web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint . --max-warnings 0",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "next": "16.0.3",
@@ -14,6 +15,8 @@
     "react-dom": "19.2.0"
   },
   "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

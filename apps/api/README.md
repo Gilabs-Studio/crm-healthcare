@@ -4,7 +4,7 @@ Backend API untuk CRM Healthcare/Pharmaceutical Platform menggunakan Go dan Gin 
 
 ## Tech Stack
 
-- **Go**: 1.23+
+- **Go**: 1.25+
 - **Gin**: Web framework
 - **PostgreSQL**: Database (akan ditambahkan)
 - **Docker**: Containerization
@@ -13,32 +13,57 @@ Backend API untuk CRM Healthcare/Pharmaceutical Platform menggunakan Go dan Gin 
 
 ### Prerequisites
 
-- Go 1.23 or higher
+- Go 1.25 or higher
+- pnpm (untuk monorepo)
 - Docker & Docker Compose (optional)
 
-### Local Development
+### Local Development dengan pnpm
 
-1. Install dependencies:
+1. Dari root monorepo:
 ```bash
-go mod download
+pnpm dev --filter=api
 ```
 
-2. Run the server:
+2. Atau dari folder api:
 ```bash
+cd apps/api
+pnpm dev
+```
+
+3. Atau langsung dengan Go:
+```bash
+cd apps/api
 go run cmd/server/main.go
 ```
 
 Server akan berjalan di `http://localhost:8080`
 
+### Build
+
+Dari root monorepo:
+```bash
+pnpm build --filter=api
+```
+
+Atau dari folder api:
+```bash
+cd apps/api
+pnpm build
+# atau
+go build -o bin/server ./cmd/server/main.go
+```
+
 ### Docker Development
 
 1. Build and run with Docker Compose:
 ```bash
+cd apps/api
 docker-compose up --build
 ```
 
 2. Atau build image manually:
 ```bash
+cd apps/api
 docker build -t crm-healthcare-api .
 docker run -p 8080:8080 crm-healthcare-api
 ```
