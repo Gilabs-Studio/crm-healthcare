@@ -46,10 +46,10 @@ apps/web/src/features/<moduleName>/
 ### Module Categories
 
 1. **Core Modules**: Authentication, User Management, Settings
-2. **Patient Management**: Patient registration, profiles, search
-3. **Healthcare Operations**: Appointments, Medical Records, Prescriptions
-4. **Pharmacy Operations**: Inventory, Stock Management, Purchase
-5. **Financial**: Billing, Invoicing, Payments
+2. **Master Data**: Diagnosis, Procedures, Insurance, Locations, Categories, Units
+3. **Patient Management**: Patient registration, profiles, search
+4. **Healthcare Operations**: Appointments, Medical Records, Prescriptions
+5. **Pharmacy Operations**: Inventory, Stock Management, Purchase
 6. **Analytics**: Dashboard, Reports
 
 ---
@@ -149,9 +149,310 @@ apps/web/src/features/<moduleName>/
 
 ---
 
+## Master Data Modules
+
+### 4. Master Data Module (`master-data`)
+
+**Purpose**: Manage all master data/reference data for the system
+
+**Sub-modules**:
+
+#### 4.1 Diagnosis Master (`diagnosis`)
+**Purpose**: Manage diagnosis codes (ICD-10)
+
+**Pages**:
+- `/master-data/diagnosis` - Diagnosis list
+- `/master-data/diagnosis/new` - Add diagnosis
+- `/master-data/diagnosis/[id]` - Diagnosis detail
+
+**Components**:
+- `DiagnosisList` - Diagnosis list with search
+- `DiagnosisForm` - Add/edit diagnosis form
+- `DiagnosisSelector` - Diagnosis selector (used in medical records)
+
+**Services**:
+- `diagnosisService.list()`
+- `diagnosisService.getById()`
+- `diagnosisService.create()`
+- `diagnosisService.update()`
+- `diagnosisService.search()`
+
+**Data Model**:
+```typescript
+interface Diagnosis {
+  id: string;
+  code: string; // ICD-10 code
+  name: string; // Diagnosis name in Indonesian
+  nameEn?: string; // Diagnosis name in English
+  category?: string;
+  description?: string;
+  status: 'active' | 'inactive';
+  createdAt: string;
+  updatedAt: string;
+}
+```
+
+**Relationships**:
+- → Medical Record Module (used in medical records)
+
+---
+
+#### 4.2 Procedure Master (`procedures`)
+**Purpose**: Manage medical procedures/tindakan
+
+**Pages**:
+- `/master-data/procedures` - Procedure list
+- `/master-data/procedures/new` - Add procedure
+- `/master-data/procedures/[id]` - Procedure detail
+
+**Components**:
+- `ProcedureList` - Procedure list
+- `ProcedureForm` - Add/edit procedure form
+- `ProcedureSelector` - Procedure selector
+
+**Services**:
+- `procedureService.list()`
+- `procedureService.getById()`
+- `procedureService.create()`
+- `procedureService.update()`
+- `procedureService.search()`
+
+**Data Model**:
+```typescript
+interface Procedure {
+  id: string;
+  code: string; // Procedure code
+  name: string;
+  nameEn?: string;
+  category?: string;
+  description?: string;
+  duration?: number; // minutes
+  price?: number; // Optional pricing
+  status: 'active' | 'inactive';
+  createdAt: string;
+  updatedAt: string;
+}
+```
+
+**Relationships**:
+- → Medical Record Module (used in treatment plans)
+- → Transaction Module (if transaction recording is needed)
+
+---
+
+#### 4.3 Insurance Provider Master (`insurance-providers`)
+**Purpose**: Manage insurance providers (BPJS, private insurance)
+
+**Pages**:
+- `/master-data/insurance-providers` - Insurance provider list
+- `/master-data/insurance-providers/new` - Add insurance provider
+- `/master-data/insurance-providers/[id]` - Insurance provider detail
+
+**Components**:
+- `InsuranceProviderList` - Insurance provider list
+- `InsuranceProviderForm` - Add/edit form
+- `InsuranceProviderSelector` - Insurance provider selector
+
+**Services**:
+- `insuranceProviderService.list()`
+- `insuranceProviderService.getById()`
+- `insuranceProviderService.create()`
+- `insuranceProviderService.update()`
+
+**Data Model**:
+```typescript
+interface InsuranceProvider {
+  id: string;
+  code: string; // e.g., "BPJS", "PRIVATE_001"
+  name: string;
+  type: 'bpjs' | 'private' | 'corporate';
+  apiEndpoint?: string; // For BPJS integration
+  apiKey?: string;
+  status: 'active' | 'inactive';
+  createdAt: string;
+  updatedAt: string;
+}
+```
+
+**Relationships**:
+- → Patient Module (patients can have insurance)
+
+---
+
+#### 4.4 Location Master (`locations`)
+**Purpose**: Manage physical locations (pharmacy, warehouse, clinic rooms)
+
+**Pages**:
+- `/master-data/locations` - Location list
+- `/master-data/locations/new` - Add location
+- `/master-data/locations/[id]` - Location detail
+
+**Components**:
+- `LocationList` - Location list
+- `LocationForm` - Add/edit location form
+- `LocationSelector` - Location selector
+
+**Services**:
+- `locationService.list()`
+- `locationService.getById()`
+- `locationService.create()`
+- `locationService.update()`
+
+**Data Model**:
+```typescript
+interface Location {
+  id: string;
+  code: string;
+  name: string;
+  type: 'pharmacy' | 'warehouse' | 'clinic' | 'room';
+  address?: Address;
+  phone?: string;
+  email?: string;
+  managerId?: string; // User ID of location manager
+  status: 'active' | 'inactive';
+  createdAt: string;
+  updatedAt: string;
+}
+```
+
+**Relationships**:
+- → Inventory Module (stock per location)
+- → Appointment Module (appointments at location)
+
+---
+
+#### 4.5 Category Master (`categories`)
+**Purpose**: Manage categories for medications
+
+**Pages**:
+- `/master-data/categories` - Category list
+- `/master-data/categories/new` - Add category
+- `/master-data/categories/[id]` - Category detail
+
+**Components**:
+- `CategoryList` - Category list (tree view if hierarchical)
+- `CategoryForm` - Add/edit category form
+- `CategorySelector` - Category selector
+
+**Services**:
+- `categoryService.list()`
+- `categoryService.getById()`
+- `categoryService.create()`
+- `categoryService.update()`
+
+**Data Model**:
+```typescript
+interface Category {
+  id: string;
+  code: string;
+  name: string;
+  nameEn?: string;
+  parentId?: string; // For hierarchical categories
+  description?: string;
+  status: 'active' | 'inactive';
+  createdAt: string;
+  updatedAt: string;
+}
+```
+
+**Relationships**:
+- → Medication Module (medications belong to category)
+
+---
+
+#### 4.6 Unit Master (`units`)
+**Purpose**: Manage measurement units (tablet, bottle, ml, mg, etc.)
+
+**Pages**:
+- `/master-data/units` - Unit list
+- `/master-data/units/new` - Add unit
+- `/master-data/units/[id]` - Unit detail
+
+**Components**:
+- `UnitList` - Unit list
+- `UnitForm` - Add/edit unit form
+- `UnitSelector` - Unit selector
+
+**Services**:
+- `unitService.list()`
+- `unitService.getById()`
+- `unitService.create()`
+- `unitService.update()`
+
+**Data Model**:
+```typescript
+interface Unit {
+  id: string;
+  code: string; // e.g., "TAB", "BTL", "ML", "MG"
+  name: string; // e.g., "Tablet", "Bottle", "Milliliter", "Milligram"
+  nameEn?: string;
+  type: 'count' | 'weight' | 'volume' | 'length';
+  baseUnit?: string; // For conversions
+  conversionFactor?: number;
+  status: 'active' | 'inactive';
+  createdAt: string;
+  updatedAt: string;
+}
+```
+
+**Relationships**:
+- → Medication Module (medications use units)
+
+---
+
+#### 4.7 Supplier Master (`suppliers`)
+**Purpose**: Manage suppliers/vendors for medications
+
+**Pages**:
+- `/master-data/suppliers` - Supplier list
+- `/master-data/suppliers/new` - Add supplier
+- `/master-data/suppliers/[id]` - Supplier detail
+
+**Components**:
+- `SupplierList` - Supplier list
+- `SupplierForm` - Add/edit supplier form
+- `SupplierSelector` - Supplier selector
+
+**Services**:
+- `supplierService.list()`
+- `supplierService.getById()`
+- `supplierService.create()`
+- `supplierService.update()`
+
+**Data Model**:
+```typescript
+interface Supplier {
+  id: string;
+  code: string;
+  name: string;
+  contactPerson?: string;
+  phone: string;
+  email?: string;
+  address: Address;
+  taxId?: string; // NPWP
+  paymentTerms?: string;
+  status: 'active' | 'inactive';
+  createdAt: string;
+  updatedAt: string;
+}
+```
+
+**Relationships**:
+- → Purchase Module (purchases from suppliers)
+
+---
+
+**Store**:
+- `useMasterDataStore` - All master data (diagnosis, procedures, etc.)
+
+**Relationships**:
+- → All modules (master data used throughout system)
+
+---
+
 ## Patient Management Modules
 
-### 4. Patient Module (`patients`)
+### 5. Patient Module (`patients`)
 
 **Purpose**: Manage patient registration, profiles, and data
 
@@ -162,7 +463,7 @@ apps/web/src/features/<moduleName>/
 - `/patients/[id]/medical-history` - Medical history
 - `/patients/[id]/appointments` - Patient appointments
 - `/patients/[id]/prescriptions` - Patient prescriptions
-- `/patients/[id]/billing` - Patient billing history
+- `/patients/[id]/transactions` - Patient transaction history
 
 **Components**:
 - `PatientList` - Patient list with search/filter
@@ -213,14 +514,14 @@ interface Patient {
 - → Appointment Module (has many appointments)
 - → Medical Record Module (has many medical records)
 - → Prescription Module (has many prescriptions)
-- → Billing Module (has many invoices)
+- → Transaction Module (has many transactions)
 - ← User Module (created by, updated by)
 
 ---
 
 ## Healthcare Operations Modules
 
-### 5. Doctor Module (`doctors`)
+### 6. Doctor Module (`doctors`)
 
 **Purpose**: Manage doctor/physician profiles and information
 
@@ -276,7 +577,7 @@ interface Doctor {
 
 ---
 
-### 6. Appointment Module (`appointments`)
+### 7. Appointment Module (`appointments`)
 
 **Purpose**: Manage appointment scheduling and booking
 
@@ -336,7 +637,7 @@ interface Appointment {
 
 ---
 
-### 7. Medical Record Module (`medical-records`)
+### 8. Medical Record Module (`medical-records`)
 
 **Purpose**: Manage patient medical records and history
 
@@ -423,7 +724,7 @@ interface TreatmentPlan {
 
 ---
 
-### 8. Prescription Module (`prescriptions`)
+### 9. Prescription Module (`prescriptions`)
 
 **Purpose**: Manage prescription creation and processing
 
@@ -502,7 +803,7 @@ interface PrescriptionMedication {
 
 ## Pharmacy Operations Modules
 
-### 9. Medication Module (`medications`)
+### 10. Medication Module (`medications`)
 
 **Purpose**: Manage medication/medicine master data
 
@@ -570,7 +871,7 @@ interface StockInfo {
 
 ---
 
-### 10. Inventory Module (`inventory`)
+### 11. Inventory Module (`inventory`)
 
 **Purpose**: Manage stock movements and inventory operations
 
@@ -631,7 +932,7 @@ interface StockMovement {
 
 ---
 
-### 11. Purchase Module (`purchases`)
+### 12. Purchase Module (`purchases`)
 
 **Purpose**: Manage purchase orders and supplier management
 
@@ -697,58 +998,48 @@ interface PurchaseOrderItem {
 
 ---
 
-## Financial Modules
+## Transaction Modules
 
-### 12. Billing Module (`billing`)
+### 13. Transaction Module (`transactions`)
 
-**Purpose**: Manage invoicing and payment processing
+**Purpose**: Simple transaction recording for internal use (simplified billing for single company)
+
+**Note**: Since this is an internal system for a single company, we use a simplified transaction model instead of complex invoicing/billing. This records transactions for services and medications.
 
 **Pages**:
-- `/billing` - Invoice list
-- `/billing/new` - Create new invoice
-- `/billing/[id]` - Invoice detail
-- `/billing/payments` - Payment processing
-- `/billing/receipts` - Receipt printing
+- `/transactions` - Transaction list
+- `/transactions/new` - Record new transaction
+- `/transactions/[id]` - Transaction detail
 
 **Components**:
-- `InvoiceList` - Invoice list
-- `InvoiceForm` - Create invoice form
-- `InvoiceDetail` - Invoice detail view
-- `PaymentProcessor` - Payment processing component
-- `PaymentMethodSelector` - Payment method selection
-- `ReceiptPrinter` - Receipt printing component
-- `BPJSVerifier` - BPJS verification component
+- `TransactionList` - Transaction list
+- `TransactionForm` - Record transaction form
+- `TransactionDetail` - Transaction detail view
+- `TransactionReceipt` - Simple receipt view/print
 
 **Services**:
-- `billingService.list()`
-- `billingService.getById()`
-- `billingService.create()`
-- `billingService.update()`
-- `billingService.processPayment()`
-- `billingService.refund()`
-- `billingService.verifyBPJS()`
-- `billingService.printReceipt()`
+- `transactionService.list()`
+- `transactionService.getById()`
+- `transactionService.create()`
+- `transactionService.update()`
+- `transactionService.printReceipt()`
 
 **Store**:
-- `useBillingStore` - Invoices, payments, receipts
+- `useTransactionStore` - Transactions list
 
 **Data Model**:
 ```typescript
-interface Invoice {
+interface Transaction {
   id: string;
-  invoiceNumber: string;
+  transactionNumber: string;
   patientId: string;
   appointmentId?: string;
   prescriptionId?: string;
-  items: InvoiceItem[];
-  subtotal: number;
-  discount: number;
-  tax: number;
+  items: TransactionItem[];
   total: number;
-  payment: Payment;
-  status: 'draft' | 'pending' | 'paid' | 'partial' | 'cancelled' | 'refunded';
-  dueDate?: string;
-  paidAt?: string;
+  paymentMethod: 'cash' | 'transfer' | 'bpjs' | 'insurance';
+  notes?: string;
+  createdBy: string;
   createdAt: string;
   updatedAt: string;
   patient: Patient;
@@ -756,37 +1047,28 @@ interface Invoice {
   prescription?: Prescription;
 }
 
-interface InvoiceItem {
+interface TransactionItem {
   type: 'service' | 'medication' | 'procedure';
   description: string;
   quantity: number;
   unitPrice: number;
-  discount: number;
   total: number;
   medicationId?: string;
-}
-
-interface Payment {
-  method: 'cash' | 'transfer' | 'credit_card' | 'debit_card' | 'bpjs' | 'insurance';
-  amount: number;
-  status: 'pending' | 'completed' | 'failed' | 'refunded';
-  paidAt?: string;
-  referenceNumber?: string;
-  bpjsData?: BPJSData;
+  procedureId?: string;
 }
 ```
 
 **Relationships**:
-- ← Patient Module (invoice for patient)
-- ← Appointment Module (invoice for appointment)
-- ← Prescription Module (invoice for prescription)
-- ← User Module (created by cashier)
+- ← Patient Module (transaction for patient)
+- ← Appointment Module (transaction for appointment)
+- ← Prescription Module (transaction for prescription)
+- ← User Module (created by staff)
 
 ---
 
 ## Analytics Modules
 
-### 13. Dashboard Module (`dashboard`)
+### 14. Dashboard Module (`dashboard`)
 
 **Purpose**: Provide overview and key metrics
 
@@ -821,7 +1103,7 @@ interface Payment {
 
 ---
 
-### 14. Reports Module (`reports`)
+### 15. Reports Module (`reports`)
 
 **Purpose**: Generate and export reports
 
@@ -882,7 +1164,7 @@ interface Payment {
        ├──────────────┬──────────────┬──────────────┐
        │              │              │              │
 ┌──────▼──────┐ ┌──────▼──────┐ ┌──────▼──────┐ ┌──────▼──────┐
-│ Appointment │ │   Medical   │ │Prescription │ │   Billing   │
+│ Appointment │ │   Medical   │ │Prescription │ │ Transaction │
 │   Module    │ │   Record    │ │   Module    │ │   Module    │
 └──────┬──────┘ │   Module    │ └──────┬──────┘ └─────────────┘
        │        └──────────────┘        │
@@ -906,6 +1188,15 @@ interface Payment {
 │   Doctor    │
 │  Module     │
 └─────────────┘
+
+┌─────────────────────────────────────────┐
+│         Master Data Module              │
+│  (Diagnosis, Procedures, Insurance,    │
+│   Locations, Categories, Units,        │
+│   Suppliers)                            │
+└──────┬──────────────────────────────────┘
+       │
+       └────────→ Used by all modules
 ```
 
 ---
@@ -931,7 +1222,7 @@ interface Payment {
 /patients/[id]/medical-history → Medical History
 /patients/[id]/appointments → Patient Appointments
 /patients/[id]/prescriptions → Patient Prescriptions
-/patients/[id]/billing     → Patient Billing
+/patients/[id]/transactions → Patient Transactions
 
 /doctors                   → Doctor List
 /doctors/new               → Register Doctor
@@ -973,11 +1264,26 @@ interface Payment {
 /suppliers                 → Supplier List
 /suppliers/new             → Add Supplier
 
-/billing                   → Invoice List
-/billing/new               → Create Invoice
-/billing/[id]              → Invoice Detail
-/billing/payments          → Payment Processing
-/billing/receipts          → Receipt Printing
+/transactions              → Transaction List
+/transactions/new          → Record Transaction
+/transactions/[id]         → Transaction Detail
+
+/master-data/diagnosis     → Diagnosis Master
+/master-data/diagnosis/new → Add Diagnosis
+/master-data/diagnosis/[id] → Diagnosis Detail
+/master-data/procedures    → Procedure Master
+/master-data/procedures/new → Add Procedure
+/master-data/procedures/[id] → Procedure Detail
+/master-data/insurance-providers → Insurance Provider Master
+/master-data/insurance-providers/new → Add Insurance Provider
+/master-data/locations     → Location Master
+/master-data/locations/new → Add Location
+/master-data/categories    → Category Master
+/master-data/categories/new → Add Category
+/master-data/units         → Unit Master
+/master-data/units/new     → Add Unit
+/master-data/suppliers     → Supplier Master
+/master-data/suppliers/new → Add Supplier
 
 /dashboard                 → Main Dashboard
 /dashboard/appointments     → Appointment Analytics
@@ -1013,17 +1319,22 @@ interface Payment {
 7. **Medication** - Medicine master data
 8. **StockMovement** - Inventory movements
 9. **PurchaseOrder** - Purchase orders
-10. **Invoice** - Billing invoices
-11. **Payment** - Payment transactions
-12. **Supplier** - Suppliers/vendors
-13. **Location** - Physical locations (pharmacy, warehouse)
+10. **Transaction** - Simple transaction records (internal)
+11. **Master Data Entities**:
+    - **Diagnosis** - Diagnosis codes (ICD-10)
+    - **Procedure** - Medical procedures/tindakan
+    - **InsuranceProvider** - Insurance providers (BPJS, private)
+    - **Location** - Physical locations (pharmacy, warehouse, clinic)
+    - **Category** - Medication categories
+    - **Unit** - Measurement units
+    - **Supplier** - Suppliers/vendors
 
 ### Key Relationships
 
 - **Patient** has many **Appointments**
 - **Patient** has many **MedicalRecords**
 - **Patient** has many **Prescriptions**
-- **Patient** has many **Invoices**
+- **Patient** has many **Transactions**
 - **Doctor** has many **Appointments**
 - **Doctor** creates **MedicalRecords**
 - **Doctor** creates **Prescriptions**
@@ -1032,8 +1343,9 @@ interface Payment {
 - **Prescription** uses **Medications**
 - **Prescription** reduces **Stock**
 - **PurchaseOrder** increases **Stock**
-- **Invoice** is for **Patient**
-- **Invoice** may be for **Appointment** or **Prescription**
+- **Transaction** is for **Patient**
+- **Transaction** may be for **Appointment** or **Prescription**
+- **Master Data** is referenced by multiple modules
 
 ---
 
@@ -1118,13 +1430,42 @@ interface Payment {
 - `PUT /api/v1/purchases/:id`
 - `POST /api/v1/purchases/:id/receive`
 
-### Billing
-- `GET /api/v1/invoices`
-- `GET /api/v1/invoices/:id`
-- `POST /api/v1/invoices`
-- `PUT /api/v1/invoices/:id`
-- `POST /api/v1/invoices/:id/payment`
-- `POST /api/v1/invoices/:id/refund`
+### Transactions
+- `GET /api/v1/transactions`
+- `GET /api/v1/transactions/:id`
+- `POST /api/v1/transactions`
+- `PUT /api/v1/transactions/:id`
+- `GET /api/v1/transactions/:id/receipt`
+
+### Master Data
+- `GET /api/v1/master-data/diagnosis`
+- `GET /api/v1/master-data/diagnosis/:id`
+- `POST /api/v1/master-data/diagnosis`
+- `PUT /api/v1/master-data/diagnosis/:id`
+- `GET /api/v1/master-data/procedures`
+- `GET /api/v1/master-data/procedures/:id`
+- `POST /api/v1/master-data/procedures`
+- `PUT /api/v1/master-data/procedures/:id`
+- `GET /api/v1/master-data/insurance-providers`
+- `GET /api/v1/master-data/insurance-providers/:id`
+- `POST /api/v1/master-data/insurance-providers`
+- `PUT /api/v1/master-data/insurance-providers/:id`
+- `GET /api/v1/master-data/locations`
+- `GET /api/v1/master-data/locations/:id`
+- `POST /api/v1/master-data/locations`
+- `PUT /api/v1/master-data/locations/:id`
+- `GET /api/v1/master-data/categories`
+- `GET /api/v1/master-data/categories/:id`
+- `POST /api/v1/master-data/categories`
+- `PUT /api/v1/master-data/categories/:id`
+- `GET /api/v1/master-data/units`
+- `GET /api/v1/master-data/units/:id`
+- `POST /api/v1/master-data/units`
+- `PUT /api/v1/master-data/units/:id`
+- `GET /api/v1/master-data/suppliers`
+- `GET /api/v1/master-data/suppliers/:id`
+- `POST /api/v1/master-data/suppliers`
+- `PUT /api/v1/master-data/suppliers/:id`
 
 ### Dashboard
 - `GET /api/v1/dashboard/overview`
@@ -1147,26 +1488,27 @@ interface Payment {
 ### Phase 1: MVP Core (Months 1-2)
 1. Authentication Module
 2. User Management Module
-3. Patient Module
-4. Doctor Module
-5. Appointment Module
-6. Settings Module
+3. Settings Module
+4. Master Data Module (Diagnosis, Procedures, Insurance, Locations, Categories, Units, Suppliers)
+5. Patient Module
+6. Doctor Module
+7. Appointment Module
 
 ### Phase 2: Healthcare Operations (Month 2-3)
-7. Medical Record Module
-8. Prescription Module
-9. Dashboard Module
+8. Medical Record Module
+9. Prescription Module
+10. Dashboard Module
 
-### Phase 3: Pharmacy & Financial (Month 3)
-10. Medication Module
-11. Inventory Module
-12. Billing Module
-13. Reports Module
+### Phase 3: Pharmacy & Transactions (Month 3)
+11. Medication Module
+12. Inventory Module
+13. Transaction Module (simplified)
+14. Reports Module
 
 ### Phase 4: Enhancement (Month 4+)
-14. Purchase Module
-15. Advanced Reports
-16. Integrations (BPJS, Payment Gateway)
+15. Purchase Module
+16. Advanced Reports
+17. Integrations (BPJS, if needed)
 
 ---
 
