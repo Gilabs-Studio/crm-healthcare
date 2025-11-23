@@ -44,15 +44,19 @@ func (r *repository) List(req *user.ListUsersRequest) ([]user.User, int64, error
 	// Apply filters
 	if req.Search != "" {
 		search := "%" + strings.ToLower(req.Search) + "%"
-		query = query.Where("LOWER(name) LIKE ? OR LOWER(email) LIKE ?", search, search)
+		// Search across all columns: name, email, role name, and status
+		query = query.Where(
+			"LOWER(users.name) LIKE ? OR LOWER(users.email) LIKE ? OR LOWER(users.status) LIKE ? OR EXISTS (SELECT 1 FROM roles WHERE roles.id = users.role_id AND LOWER(roles.name) LIKE ?)",
+			search, search, search, search,
+		)
 	}
 
 	if req.Status != "" {
-		query = query.Where("status = ?", req.Status)
+		query = query.Where("users.status = ?", req.Status)
 	}
 
 	if req.RoleID != "" {
-		query = query.Where("role_id = ?", req.RoleID)
+		query = query.Where("users.role_id = ?", req.RoleID)
 	}
 
 	// Count total
@@ -76,7 +80,7 @@ func (r *repository) List(req *user.ListUsersRequest) ([]user.User, int64, error
 	offset := (page - 1) * perPage
 
 	// Fetch data
-	err := query.Order("created_at DESC").Offset(offset).Limit(perPage).Find(&users).Error
+	err := query.Order("users.created_at DESC").Offset(offset).Limit(perPage).Find(&users).Error
 	if err != nil {
 		return nil, 0, err
 	}
