@@ -3,6 +3,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { User, AuthState } from "../types";
+import type { AuthError } from "../types/errors";
 import { authService } from "../services/authService";
 
 interface AuthStore extends AuthState {
@@ -43,10 +44,11 @@ export const useAuthStore = create<AuthStore>()(
               error: null,
             });
           }
-        } catch (error: any) {
+        } catch (error) {
+          const authError = error as AuthError;
           const errorMessage =
-            error.response?.data?.error?.message ||
-            error.message ||
+            authError.response?.data?.error?.message ||
+            authError.message ||
             "Login failed";
           set({
             isLoading: false,

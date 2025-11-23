@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -21,10 +20,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { useAuthStore } from "../stores/useAuthStore";
 import { loginSchema, type LoginFormData } from "../schemas/login.schema";
+import { useLogin } from "../hooks/useLogin";
+import type { AuthError } from "../types/errors";
 
 export function LoginForm() {
-  const router = useRouter();
-  const { login, isLoading, error, clearError, isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
+  const { handleLogin, isLoading, error, clearError } = useLogin();
 
   const {
     register,
@@ -41,9 +42,9 @@ export function LoginForm() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.push("/dashboard");
+      // Redirect handled by useLogin hook
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (error) {
@@ -56,12 +57,12 @@ export function LoginForm() {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      await login(data.email, data.password);
-      router.push("/dashboard");
-    } catch (err: any) {
+      await handleLogin(data);
+    } catch (err) {
+      const error = err as AuthError;
       const errorMessage =
-        err.response?.data?.error?.message ||
-        err.message ||
+        error.response?.data?.error?.message ||
+        error.message ||
         "Login failed. Please try again.";
       setError("root", {
         message: errorMessage,
