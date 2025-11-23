@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuthGuard } from "../hooks/useAuthGuard";
 
 interface AuthGuardProps {
@@ -7,7 +9,15 @@ interface AuthGuardProps {
 }
 
 export function AuthGuard({ children }: AuthGuardProps) {
+  const router = useRouter();
+  const pathname = usePathname();
   const { isAuthenticated, isLoading } = useAuthGuard();
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push("/");
+    }
+  }, [isAuthenticated, isLoading, router, pathname]);
 
   if (isLoading) {
     return (

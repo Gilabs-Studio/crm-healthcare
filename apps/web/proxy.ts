@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// Public routes that don't require authentication
-const publicRoutes = ["/"];
-
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get("token")?.value;
@@ -12,6 +9,10 @@ export function proxy(request: NextRequest) {
   if (pathname === "/" && token) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
+
+  // If accessing protected routes without token, let client-side handle redirect
+  // Don't redirect here to avoid redirect loops and let client handle auth state
+  // Client-side will check localStorage and redirect if needed
 
   // For protected routes, let client-side handle auth
   // This prevents flash of login page during hard refresh
@@ -26,8 +27,10 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - public files
+     * - mockServiceWorker.js (MSW service worker)
+     * - static files (images, js, css, etc.)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    String.raw`/((?!api|_next/static|_next/image|favicon.ico|mockServiceWorker\.js|.*\.(?:svg|png|jpg|jpeg|gif|webp|js|css|json)$).*)`,
   ],
 };
+

@@ -91,7 +91,7 @@ export const useAuthStore = create<AuthStore>()(
         try {
           const response = await authService.refreshToken(currentRefreshToken);
           if (response.success && response.data) {
-            const { token, refresh_token } = response.data;
+            const { user, token, refresh_token } = response.data;
             if (typeof window !== "undefined") {
               localStorage.setItem("token", token);
               localStorage.setItem("refreshToken", refresh_token);
@@ -99,8 +99,10 @@ export const useAuthStore = create<AuthStore>()(
               document.cookie = `token=${token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
             }
             set({
+              user,
               token,
               refreshToken: refresh_token,
+              isAuthenticated: true,
             });
           }
         } catch (error) {
@@ -135,17 +137,20 @@ export const useAuthStore = create<AuthStore>()(
         isAuthenticated: state.isAuthenticated,
       }),
       onRehydrateStorage: () => (state) => {
-        // After rehydration, check if we have token in localStorage
+        // After rehydration, sync state with localStorage
         if (typeof window !== "undefined" && state) {
           const token = localStorage.getItem("token");
-          if (token) {
-            // Token exists, restore state
-            if (!state.token) {
-              state.token = token;
+          const refreshToken = localStorage.getItem("refreshToken");
+
+          // Priority: Zustand persisted state > localStorage
+          // If Zustand has token, use it and sync to localStorage
+          if (state.token) {
+            // Sync Zustand state to localStorage
+            if (!token || token !== state.token) {
+              localStorage.setItem("token", state.token);
             }
-            const refreshToken = localStorage.getItem("refreshToken");
-            if (refreshToken && !state.refreshToken) {
-              state.refreshToken = refreshToken;
+            if (state.refreshToken && (!refreshToken || refreshToken !== state.refreshToken)) {
+              localStorage.setItem("refreshToken", state.refreshToken);
             }
             // Set authenticated if we have token
             if (!state.isAuthenticated) {
@@ -153,10 +158,21 @@ export const useAuthStore = create<AuthStore>()(
             }
             // Set cookie if not exists
             if (!document.cookie.includes("token=")) {
+              document.cookie = `token=${state.token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
+            }
+          } else if (token) {
+            // No Zustand token but localStorage has it, restore from localStorage
+            state.token = token;
+            if (refreshToken) {
+              state.refreshToken = refreshToken;
+            }
+            state.isAuthenticated = true;
+            // Set cookie if not exists
+            if (!document.cookie.includes("token=")) {
               document.cookie = `token=${token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
             }
           } else if (!token && state.isAuthenticated) {
-            // No token but store says authenticated, clear it
+            // No token anywhere but store says authenticated, clear it
             state.isAuthenticated = false;
             state.user = null;
             state.token = null;

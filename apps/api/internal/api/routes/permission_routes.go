@@ -14,12 +14,5 @@ func SetupPermissionRoutes(router *gin.RouterGroup, permissionHandler *handlers.
 		permissions.GET("", permissionHandler.List)
 		permissions.GET("/:id", permissionHandler.GetByID)
 	}
-
-	// User permissions route
-	users := router.Group("/users")
-	users.Use(middleware.AuthMiddleware(jwtManager))
-	{
-		users.GET("/:id/permissions", permissionHandler.GetUserPermissions)
-	}
 }
 

@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupUserRoutes(router *gin.RouterGroup, userHandler *handlers.UserHandler, jwtManager *jwt.JWTManager) {
+func SetupUserRoutes(router *gin.RouterGroup, userHandler *handlers.UserHandler, permissionHandler *handlers.PermissionHandler, jwtManager *jwt.JWTManager) {
 	users := router.Group("/users")
 	users.Use(middleware.AuthMiddleware(jwtManager))
 	{
@@ -16,6 +16,7 @@ func SetupUserRoutes(router *gin.RouterGroup, userHandler *handlers.UserHandler,
 		users.POST("", userHandler.Create)
 		users.PUT("/:id", userHandler.Update)
 		users.DELETE("/:id", userHandler.Delete)
+		users.GET("/:id/permissions", permissionHandler.GetUserPermissions)
 	}
 }
 
