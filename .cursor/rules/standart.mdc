@@ -14,7 +14,6 @@ Folder structure (per feature)
   - `hooks/` — feature-scoped React hooks, named `use<Thing>.ts`.
   - `services/` — API/side-effects. One module per remote domain.
   - `components/` — UI components. Keep small, focused, and reusable.
-  - `messages/` — Translation component en and id
 
 Types
 - Use `.d.ts` for ambient/shared declarations inside `types/`.

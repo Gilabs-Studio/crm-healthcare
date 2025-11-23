@@ -59,27 +59,30 @@ Setiap sprint mencakup:
 
 **Backend Tasks**:
 - [x] Setup Go project structure
-- [ ] Setup database connection (PostgreSQL)
+- [x] Setup database connection (PostgreSQL)
 - [x] Setup Gin router and middleware
-- [ ] Implement authentication middleware (JWT)
-- [ ] Create base API response helpers
-- [ ] Setup error handling
-- [ ] Create user model and migration
-- [ ] Implement login API (`POST /api/v1/auth/login`)
-- [ ] Implement refresh token API (`POST /api/v1/auth/refresh`)
-- [ ] Setup CORS
+- [x] Implement authentication middleware (JWT)
+- [x] Create base API response helpers
+- [x] Setup error handling
+- [x] Create user model and migration
+- [x] Implement login API (`POST /api/v1/auth/login`)
+- [x] Implement refresh token API (`POST /api/v1/auth/refresh`)
+- [x] Setup CORS
 
 **Frontend Tasks**:
-- [ ] Setup Next.js 16 project
-- [ ] Setup Tailwind CSS v4
-- [ ] Setup shadcn/ui components
-- [ ] Setup Zustand stores structure
-- [ ] Create auth store (`useAuthStore`)
-- [ ] Create auth service (`authService`)
-- [ ] Create login page (`/login`)
-- [ ] Create auth guard component
-- [ ] Setup API client with interceptors
-- [ ] Setup i18n (Bahasa Indonesia & English)
+- [x] Setup Next.js 16 project
+- [x] Setup Tailwind CSS v4
+- [x] Setup shadcn/ui components
+- [x] Setup Zustand stores structure
+- [x] Create auth store (`useAuthStore`)
+- [x] Create auth service (`authService`)
+- [x] Create login page (`/`)
+- [x] Create auth guard component
+- [x] Setup API client with interceptors
+- [x] Setup Zod + React Hook Form
+- [x] Setup TanStack Query
+- [x] Create Error Boundary
+- [x] Add loading states & skeletons
 
 **Acceptance Criteria**:
 - ✅ User dapat login dengan email/password
