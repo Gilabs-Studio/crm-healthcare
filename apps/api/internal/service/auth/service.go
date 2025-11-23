@@ -49,8 +49,14 @@ func (s *Service) Login(req *auth.LoginRequest) (*auth.LoginResponse, error) {
 		return nil, ErrInvalidCredentials
 	}
 
+	// Get role code
+	roleCode := "user"
+	if user.Role != nil {
+		roleCode = user.Role.Code
+	}
+
 	// Generate tokens
-	accessToken, err := s.jwtManager.GenerateAccessToken(user.ID, user.Email, user.Role)
+	accessToken, err := s.jwtManager.GenerateAccessToken(user.ID, user.Email, roleCode)
 	if err != nil {
 		return nil, err
 	}
@@ -63,8 +69,20 @@ func (s *Service) Login(req *auth.LoginRequest) (*auth.LoginResponse, error) {
 	// Calculate expires in (seconds)
 	expiresIn := int(s.jwtManager.AccessTokenTTL().Seconds())
 
+	// Convert to auth response format
+	userResp := user.ToUserResponse()
+	authUserResp := &auth.UserResponse{
+		ID:        userResp.ID,
+		Email:     userResp.Email,
+		Name:      userResp.Name,
+		Role:      roleCode,
+		Status:    userResp.Status,
+		CreatedAt: userResp.CreatedAt,
+		UpdatedAt: userResp.UpdatedAt,
+	}
+
 	return &auth.LoginResponse{
-		User:         user.ToUserResponse(),
+		User:         authUserResp,
 		Token:        accessToken,
 		RefreshToken: refreshToken,
 		ExpiresIn:    expiresIn,
@@ -90,8 +108,14 @@ func (s *Service) RefreshToken(refreshToken string) (*auth.LoginResponse, error)
 		return nil, ErrUserInactive
 	}
 
+	// Get role code
+	roleCode := "user"
+	if user.Role != nil {
+		roleCode = user.Role.Code
+	}
+
 	// Generate new tokens
-	accessToken, err := s.jwtManager.GenerateAccessToken(user.ID, user.Email, user.Role)
+	accessToken, err := s.jwtManager.GenerateAccessToken(user.ID, user.Email, roleCode)
 	if err != nil {
 		return nil, err
 	}
@@ -103,8 +127,20 @@ func (s *Service) RefreshToken(refreshToken string) (*auth.LoginResponse, error)
 
 	expiresIn := int(s.jwtManager.AccessTokenTTL().Seconds())
 
+	// Convert to auth response format
+	userResp := user.ToUserResponse()
+	authUserResp := &auth.UserResponse{
+		ID:        userResp.ID,
+		Email:     userResp.Email,
+		Name:      userResp.Name,
+		Role:      roleCode,
+		Status:    userResp.Status,
+		CreatedAt: userResp.CreatedAt,
+		UpdatedAt: userResp.UpdatedAt,
+	}
+
 	return &auth.LoginResponse{
-		User:         user.ToUserResponse(),
+		User:         authUserResp,
 		Token:        accessToken,
 		RefreshToken: newRefreshToken,
 		ExpiresIn:    expiresIn,

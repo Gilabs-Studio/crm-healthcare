@@ -1,42 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
 import { 
-  LayoutDashboard,
-  Users,
-  UserCircle,
-  Calendar,
-  FileText,
-  Pill,
-  Package,
-  ShoppingCart,
-  Receipt,
-  Database,
-  BarChart3,
-  Settings,
   Search,
   LogOut,
   ChevronDown,
-  Activity,
-  Stethoscope,
-  ClipboardList,
-  Warehouse,
-  Truck,
-  FolderTree,
-  MapPin,
-  Building2,
-  Ruler,
-  Store,
+  LayoutDashboard,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ThemeToggleButton } from "@/components/ui/theme-toggle";
 import { useAuthStore } from "@/features/auth/stores/useAuthStore";
+import { useUserPermissions } from "@/features/user/hooks/useUserPermissions";
+import { getMenuIcon } from "@/lib/menu-icons";
 import { cn } from "@/lib/utils";
+import type { MenuWithActions } from "@/features/user/types";
 
 interface NavItem {
   id: string;
@@ -52,7 +34,25 @@ interface NavSection {
   items: NavItem[];
 }
 
-const navSections: NavSection[] = [
+// Helper function to convert API menu structure to NavItem
+function buildNavItemsFromMenus(menus: MenuWithActions[]): NavItem[] {
+  return menus.map((menu) => {
+    const children = menu.children && menu.children.length > 0 
+      ? buildNavItemsFromMenus(menu.children) 
+      : undefined;
+    
+    return {
+      id: menu.id,
+      label: menu.name,
+      href: menu.url,
+      icon: getMenuIcon(menu.icon),
+      children,
+    };
+  });
+}
+
+// Fallback navigation for when permissions are not loaded
+const fallbackNavSections: NavSection[] = [
   {
     id: "main",
     label: "Main",
@@ -66,106 +66,6 @@ const navSections: NavSection[] = [
     ],
   },
   {
-    id: "healthcare",
-    label: "Healthcare",
-    items: [
-      { 
-        id: "patients", 
-        label: "Patients", 
-        href: "/patients", 
-        icon: <UserCircle className="h-4 w-4" /> 
-      },
-      { 
-        id: "doctors", 
-        label: "Doctors", 
-        href: "/doctors", 
-        icon: <Stethoscope className="h-4 w-4" /> 
-      },
-      { 
-        id: "appointments", 
-        label: "Appointments", 
-        href: "/appointments", 
-        icon: <Calendar className="h-4 w-4" /> 
-      },
-      { 
-        id: "medical-records", 
-        label: "Medical Records", 
-        href: "/medical-records", 
-        icon: <FileText className="h-4 w-4" /> 
-      },
-      { 
-        id: "prescriptions", 
-        label: "Prescriptions", 
-        href: "/prescriptions", 
-        icon: <Pill className="h-4 w-4" /> 
-      },
-    ],
-  },
-  {
-    id: "pharmacy",
-    label: "Pharmacy",
-    items: [
-      { 
-        id: "medications", 
-        label: "Medications", 
-        href: "/medications", 
-        icon: <Package className="h-4 w-4" /> 
-      },
-      {
-        id: "inventory",
-        label: "Inventory",
-        href: "/inventory",
-        icon: <Warehouse className="h-4 w-4" />,
-        children: [
-          { id: "inventory-stock", label: "Stock", href: "/inventory/stock", icon: <Package className="h-4 w-4" /> },
-          { id: "inventory-movements", label: "Movements", href: "/inventory/movements", icon: <Activity className="h-4 w-4" /> },
-          { id: "inventory-adjustments", label: "Adjustments", href: "/inventory/adjustments", icon: <ClipboardList className="h-4 w-4" /> },
-          { id: "inventory-transfers", label: "Transfers", href: "/inventory/transfers", icon: <Truck className="h-4 w-4" /> },
-          { id: "inventory-alerts", label: "Alerts", href: "/inventory/alerts", icon: <Activity className="h-4 w-4" /> },
-        ],
-      },
-      { 
-        id: "purchases", 
-        label: "Purchases", 
-        href: "/purchases", 
-        icon: <ShoppingCart className="h-4 w-4" /> 
-      },
-    ],
-  },
-  {
-    id: "transactions",
-    label: "Transactions",
-    items: [
-      { 
-        id: "transactions", 
-        label: "Transactions", 
-        href: "/transactions", 
-        icon: <Receipt className="h-4 w-4" /> 
-      },
-    ],
-  },
-  {
-    id: "master-data",
-    label: "Master Data",
-    items: [
-      {
-        id: "master-data",
-        label: "Master Data",
-        href: "/master-data",
-        icon: <Database className="h-4 w-4" />,
-        children: [
-          { id: "master-diagnosis", label: "Diagnosis", href: "/master-data/diagnosis", icon: <FileText className="h-4 w-4" /> },
-          { id: "master-procedures", label: "Procedures", href: "/master-data/procedures", icon: <Activity className="h-4 w-4" /> },
-          { id: "master-insurance", label: "Insurance Providers", href: "/master-data/insurance-providers", icon: <Building2 className="h-4 w-4" /> },
-          { id: "master-locations", label: "Locations", href: "/master-data/locations", icon: <MapPin className="h-4 w-4" /> },
-          { id: "master-categories", label: "Categories", href: "/master-data/categories", icon: <FolderTree className="h-4 w-4" /> },
-          { id: "master-units", label: "Units", href: "/master-data/units", icon: <Ruler className="h-4 w-4" /> },
-          { id: "master-suppliers", label: "Suppliers", href: "/master-data/suppliers", icon: <Store className="h-4 w-4" /> },
-        ],
-      },
-    ],
-  },
-  {
     id: "system",
     label: "System",
     items: [
@@ -173,19 +73,7 @@ const navSections: NavSection[] = [
         id: "users", 
         label: "Users", 
         href: "/users", 
-        icon: <Users className="h-4 w-4" /> 
-      },
-      { 
-        id: "reports", 
-        label: "Reports", 
-        href: "/reports", 
-        icon: <BarChart3 className="h-4 w-4" /> 
-      },
-      { 
-        id: "settings", 
-        label: "Settings", 
-        href: "/settings", 
-        icon: <Settings className="h-4 w-4" /> 
+        icon: getMenuIcon("users")
       },
     ],
   },
@@ -195,7 +83,28 @@ export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { logout, user } = useAuthStore();
-  const [expandedItems, setExpandedItems] = useState<string[]>(["inventory", "master-data"]);
+  const { data: permissionsData } = useUserPermissions();
+  const [expandedItems, setExpandedItems] = useState<string[]>([]);
+
+  // Build navigation from permissions or use fallback
+  const navSections = useMemo(() => {
+    if (permissionsData?.data?.menus && permissionsData.data.menus.length > 0) {
+      // Build from API permissions
+      const menuItems = buildNavItemsFromMenus(permissionsData.data.menus);
+      
+      // Group into sections (for now, put all in one section or group by parent)
+      return [
+        {
+          id: "main",
+          label: "Main",
+          items: menuItems,
+        },
+      ];
+    }
+    
+    // Fallback to default navigation
+    return fallbackNavSections;
+  }, [permissionsData]);
 
   const toggleExpand = (id: string) => {
     setExpandedItems((prev) =>

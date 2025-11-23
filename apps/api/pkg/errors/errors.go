@@ -117,6 +117,10 @@ var ErrorCodeMap = map[string]ErrorInfo{
 		HTTPStatus: http.StatusBadRequest,
 		Message:    "Invalid request body",
 	},
+	"INVALID_QUERY_PARAM": {
+		HTTPStatus: http.StatusBadRequest,
+		Message:    "Invalid query parameter",
+	},
 }
 
 // ErrorResponse creates an error response
@@ -242,5 +246,10 @@ func getRequestID(c *gin.Context) string {
 // InvalidRequestBodyResponse creates an invalid request body error response
 func InvalidRequestBodyResponse(c *gin.Context) {
 	ErrorResponse(c, "INVALID_REQUEST_BODY", nil, nil)
+}
+
+// InvalidQueryParamResponse creates an invalid query parameter error response
+func InvalidQueryParamResponse(c *gin.Context) {
+	ErrorResponse(c, "INVALID_QUERY_PARAM", nil, nil)
 }
 

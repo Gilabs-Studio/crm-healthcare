@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"github.com/gilabs/crm-healthcare/api/internal/domain/auth"
+	"github.com/gilabs/crm-healthcare/api/internal/domain/user"
 	"github.com/gilabs/crm-healthcare/api/internal/repository/interfaces"
 	"gorm.io/gorm"
 )
@@ -15,29 +15,29 @@ func NewRepository(db *gorm.DB) interfaces.AuthRepository {
 	return &repository{db: db}
 }
 
-func (r *repository) FindByEmail(email string) (*auth.User, error) {
-	var user auth.User
-	err := r.db.Where("email = ?", email).First(&user).Error
+func (r *repository) FindByEmail(email string) (*user.User, error) {
+	var u user.User
+	err := r.db.Preload("Role").Where("email = ?", email).First(&u).Error
 	if err != nil {
 		return nil, err
 	}
-	return &user, nil
+	return &u, nil
 }
 
-func (r *repository) FindByID(id string) (*auth.User, error) {
-	var user auth.User
-	err := r.db.Where("id = ?", id).First(&user).Error
+func (r *repository) FindByID(id string) (*user.User, error) {
+	var u user.User
+	err := r.db.Preload("Role").Where("id = ?", id).First(&u).Error
 	if err != nil {
 		return nil, err
 	}
-	return &user, nil
+	return &u, nil
 }
 
-func (r *repository) Create(user *auth.User) error {
-	return r.db.Create(user).Error
+func (r *repository) Create(u *user.User) error {
+	return r.db.Create(u).Error
 }
 
-func (r *repository) Update(user *auth.User) error {
-	return r.db.Save(user).Error
+func (r *repository) Update(u *user.User) error {
+	return r.db.Save(u).Error
 }
 

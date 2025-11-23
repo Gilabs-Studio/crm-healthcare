@@ -105,36 +105,36 @@ Setiap sprint mencakup:
 **Goal**: Complete user management (CRUD + permissions)
 
 **Backend Tasks**:
-- [ ] Create user model and migration
-- [ ] Create role and permission models
-- [ ] Implement user list API (`GET /api/v1/users`)
-- [ ] Implement user detail API (`GET /api/v1/users/:id`)
-- [ ] Implement create user API (`POST /api/v1/users`)
-- [ ] Implement update user API (`PUT /api/v1/users/:id`)
-- [ ] Implement delete user API (`DELETE /api/v1/users/:id`)
-- [ ] Implement permission management API (`PUT /api/v1/users/:id/permissions`)
-- [ ] Add user validation
-- [ ] Add pagination support
+- [x] Create user model and migration
+- [x] Create role and permission models
+- [x] Implement user list API (`GET /api/v1/users`)
+- [x] Implement user detail API (`GET /api/v1/users/:id`)
+- [x] Implement create user API (`POST /api/v1/users`)
+- [x] Implement update user API (`PUT /api/v1/users/:id`)
+- [x] Implement delete user API (`DELETE /api/v1/users/:id`)
+- [x] Implement permission management API (`GET /api/v1/users/:id/permissions`)
+- [x] Add user validation
+- [x] Add pagination support
 
 **Frontend Tasks**:
-- [ ] Create user store (`useUserStore`)
-- [ ] Create user service (`userService`)
-- [ ] Create user types (`types/user.d.ts`)
-- [ ] Create user list page (`/users`)
-- [ ] Create user form component (`UserForm`)
-- [ ] Create user list table component (`UserList`)
-- [ ] Create user detail page (`/users/[id]`)
-- [ ] Create user permissions page (`/users/[id]/permissions`)
-- [ ] Create permission matrix component
-- [ ] Add user search and filter
+- [x] Create user service (`userService`)
+- [x] Create user types (`types/user.d.ts`)
+- [x] Create user list page (`/users`)
+- [x] Create user form component (`UserForm`)
+- [x] Create user list table component (`UserList`)
+- [x] Add user search and filter
+- [x] Update sidebar to use permissions from API
 
 **Acceptance Criteria**:
 - ✅ Admin dapat melihat list users dengan pagination
 - ✅ Admin dapat create user baru
 - ✅ Admin dapat edit user
 - ✅ Admin dapat delete user
-- ✅ Admin dapat manage user permissions
+- ✅ User terhubung ke role (select dropdown, bukan input field)
+- ✅ Seeder hanya ada 3 user (admin, doctor, pharmacist)
+- ✅ Admin memiliki permission untuk seluruh halaman dan action
 - ✅ Form validation bekerja dengan baik
+- ✅ Sidebar menggunakan permissions dari API
 
 **Testing**:
 - Test CRUD operations

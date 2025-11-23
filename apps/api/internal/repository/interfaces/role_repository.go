@@ -1,0 +1,33 @@
+package interfaces
+
+import (
+	"github.com/gilabs/crm-healthcare/api/internal/domain/role"
+)
+
+// RoleRepository defines the interface for role repository
+type RoleRepository interface {
+	// FindByID finds a role by ID
+	FindByID(id string) (*role.Role, error)
+	
+	// FindByCode finds a role by code
+	FindByCode(code string) (*role.Role, error)
+	
+	// List returns a list of roles
+	List() ([]role.Role, error)
+	
+	// Create creates a new role
+	Create(role *role.Role) error
+	
+	// Update updates a role
+	Update(role *role.Role) error
+	
+	// Delete soft deletes a role
+	Delete(id string) error
+	
+	// AssignPermissions assigns permissions to a role
+	AssignPermissions(roleID string, permissionIDs []string) error
+	
+	// GetPermissions gets all permissions for a role
+	GetPermissions(roleID string) ([]string, error)
+}
+
