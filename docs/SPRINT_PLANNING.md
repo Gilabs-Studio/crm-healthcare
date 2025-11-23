@@ -105,28 +105,28 @@ Setiap sprint mencakup:
 **Goal**: Complete user management (CRUD + permissions)
 
 **Backend Tasks**:
-- [x] Create user model and migration
-- [x] Create role and permission models
-- [x] Implement user list API (`GET /api/v1/users`)
-- [x] Implement user detail API (`GET /api/v1/users/:id`)
-- [x] Implement create user API (`POST /api/v1/users`)
-- [x] Implement update user API (`PUT /api/v1/users/:id`)
-- [x] Implement delete user API (`DELETE /api/v1/users/:id`)
-- [x] Implement permission management API (`PUT /api/v1/users/:id/permissions`)
-- [x] Add user validation
-- [x] Add pagination support
+- [ ] Create user model and migration
+- [ ] Create role and permission models
+- [ ] Implement user list API (`GET /api/v1/users`)
+- [ ] Implement user detail API (`GET /api/v1/users/:id`)
+- [ ] Implement create user API (`POST /api/v1/users`)
+- [ ] Implement update user API (`PUT /api/v1/users/:id`)
+- [ ] Implement delete user API (`DELETE /api/v1/users/:id`)
+- [ ] Implement permission management API (`PUT /api/v1/users/:id/permissions`)
+- [ ] Add user validation
+- [ ] Add pagination support
 
 **Frontend Tasks**:
-- [x] Create user store (`useUserStore`)
-- [x] Create user service (`userService`)
-- [x] Create user types (`types/user.d.ts`)
-- [x] Create user list page (`/users`)
-- [x] Create user form component (`UserForm`)
-- [x] Create user list table component (`UserList`)
-- [x] Create user detail page (`/users/[id]`)
-- [x] Create user permissions page (`/users/[id]/permissions`)
-- [x] Create permission matrix component
-- [x] Add user search and filter
+- [ ] Create user store (`useUserStore`)
+- [ ] Create user service (`userService`)
+- [ ] Create user types (`types/user.d.ts`)
+- [ ] Create user list page (`/users`)
+- [ ] Create user form component (`UserForm`)
+- [ ] Create user list table component (`UserList`)
+- [ ] Create user detail page (`/users/[id]`)
+- [ ] Create user permissions page (`/users/[id]/permissions`)
+- [ ] Create permission matrix component
+- [ ] Add user search and filter
 
 **Acceptance Criteria**:
 - ✅ Admin dapat melihat list users dengan pagination

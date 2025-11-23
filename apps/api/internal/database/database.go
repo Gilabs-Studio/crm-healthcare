@@ -6,7 +6,6 @@ import (
 
 	"github.com/gilabs/crm-healthcare/api/internal/config"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/auth"
-	"github.com/gilabs/crm-healthcare/api/internal/domain/user"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -34,11 +33,7 @@ func Connect() error {
 // AutoMigrate runs database migrations
 func AutoMigrate() error {
 	err := DB.AutoMigrate(
-		&auth.User{},           // Users table (already exists from auth)
-		&user.Role{},           // Roles table
-		&user.Permission{},     // Permissions table
-		&user.UserRole{},       // User-Role many-to-many
-		&user.RolePermission{}, // Role-Permission many-to-many
+		&auth.User{},
 	)
 	if err != nil {
 		return fmt.Errorf("failed to run migrations: %w", err)
