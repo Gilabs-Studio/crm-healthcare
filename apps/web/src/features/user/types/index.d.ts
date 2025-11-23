@@ -127,3 +127,17 @@ export interface UserPermissionsApiResponse {
   request_id: string;
 }
 
+export interface CreateRoleFormData {
+  name: string;
+  code: string;
+  description?: string;
+  status?: "active" | "inactive";
+}
+
+export interface UpdateRoleFormData {
+  name?: string;
+  code?: string;
+  description?: string;
+  status?: "active" | "inactive";
+}
+

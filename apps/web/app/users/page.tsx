@@ -2,13 +2,13 @@
 
 import { DashboardLayout } from "@/components/layouts/dashboard-layout";
 import { AuthGuard } from "@/features/auth/components/auth-guard";
-import { UserList } from "@/features/user/components/user-list";
+import { UserManagement } from "@/features/user/components/user-management";
 
 function UsersPageContent() {
   return (
     <DashboardLayout>
       <div className="container mx-auto py-6 px-4">
-        <UserList />
+        <UserManagement />
       </div>
     </DashboardLayout>
   );
