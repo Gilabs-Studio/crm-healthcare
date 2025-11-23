@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, memo } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
@@ -102,7 +102,7 @@ function findActiveParentIds(items: NavItem[], activePath: string): string[] {
   return parentIds;
 }
 
-export function Sidebar() {
+function SidebarComponent() {
   const pathname = usePathname();
   const router = useRouter();
   const { logout, user } = useAuthStore();
@@ -354,3 +354,6 @@ export function Sidebar() {
     </aside>
   );
 }
+
+// Memoize Sidebar to prevent unnecessary rerenders on route changes
+export const Sidebar = memo(SidebarComponent);
