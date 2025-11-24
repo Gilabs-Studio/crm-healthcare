@@ -17,7 +17,7 @@ func NewRepository(db *gorm.DB) interfaces.AuthRepository {
 
 func (r *repository) FindByEmail(email string) (*user.User, error) {
 	var u user.User
-	err := r.db.Preload("Role").Where("email = ?", email).First(&u).Error
+	err := r.db.Preload("Role").Preload("Role.Permissions").Where("email = ?", email).First(&u).Error
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +26,7 @@ func (r *repository) FindByEmail(email string) (*user.User, error) {
 
 func (r *repository) FindByID(id string) (*user.User, error) {
 	var u user.User
-	err := r.db.Preload("Role").Where("id = ?", id).First(&u).Error
+	err := r.db.Preload("Role").Preload("Role.Permissions").Where("id = ?", id).First(&u).Error
 	if err != nil {
 		return nil, err
 	}

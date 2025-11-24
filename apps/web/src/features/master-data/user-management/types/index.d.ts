@@ -2,6 +2,7 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  avatar_url?: string;
   role_id: string;
   role?: Role;
   status: "active" | "inactive";

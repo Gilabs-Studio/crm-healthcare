@@ -14,6 +14,7 @@ type User struct {
 	Email     string    `gorm:"type:varchar(255);uniqueIndex;not null" json:"email"`
 	Password  string    `gorm:"type:varchar(255);not null" json:"-"` // Hidden from JSON
 	Name      string    `gorm:"type:varchar(255);not null" json:"name"`
+	AvatarURL string    `gorm:"type:text" json:"avatar_url"`
 	RoleID    string    `gorm:"type:uuid;not null;index" json:"role_id"`
 	Role      *role.Role     `gorm:"foreignKey:RoleID" json:"role,omitempty"`
 	Status    string    `gorm:"type:varchar(20);not null;default:'active'" json:"status"`
@@ -40,6 +41,7 @@ type UserResponse struct {
 	ID        string         `json:"id"`
 	Email     string         `json:"email"`
 	Name      string         `json:"name"`
+	AvatarURL string         `json:"avatar_url"`
 	RoleID    string         `json:"role_id"`
 	Role      *role.RoleResponse  `json:"role,omitempty"`
 	Status    string         `json:"status"`
@@ -53,6 +55,7 @@ func (u *User) ToUserResponse() *UserResponse {
 		ID:        u.ID,
 		Email:     u.Email,
 		Name:      u.Name,
+		AvatarURL: u.AvatarURL,
 		RoleID:    u.RoleID,
 		Status:    u.Status,
 		CreatedAt: u.CreatedAt,

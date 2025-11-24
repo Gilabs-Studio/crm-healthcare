@@ -19,6 +19,7 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  avatar_url?: string;
   role: string;
   permissions: string[];
   created_at: string;

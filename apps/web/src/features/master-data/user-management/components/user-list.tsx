@@ -1,13 +1,15 @@
 "use client";
 
-import Link from "next/link";
+import { useState } from "react";
 import { Edit, Trash2, Plus, Search, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { DataTable, type Column } from "@/components/ui/data-table";
 import { useUserList } from "../hooks/useUserList";
 import { UserForm } from "./user-form";
+import { UserDetailModal } from "./user-detail-modal";
 import {
   Dialog,
   DialogContent,
@@ -43,17 +45,36 @@ export function UserList() {
     updateUser,
   } = useUserList();
 
+  const [viewingUserId, setViewingUserId] = useState<string | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
+  const getAvatarUrl = (user: User) => {
+    if (user.avatar_url) {
+      return user.avatar_url;
+    }
+    // Always use dicebear with email as seed
+    return `https://api.dicebear.com/7.x/lorelei/svg?seed=${encodeURIComponent(user.email)}`;
+  };
+
+  const handleViewUser = (userId: string) => {
+    setViewingUserId(userId);
+    setIsDetailModalOpen(true);
+  };
+
   const columns: Column<User>[] = [
     {
       id: "name",
       header: "Name",
       accessor: (row) => (
-        <Link
-          href={`/master-data/users/${row.id}`}
-          className="font-medium text-primary hover:underline"
+        <button
+          onClick={() => handleViewUser(row.id)}
+          className="flex items-center gap-3 font-medium text-primary hover:underline"
         >
-          {row.name}
-        </Link>
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={getAvatarUrl(row)} alt={row.name} />
+          </Avatar>
+          <span>{row.name}</span>
+        </button>
       ),
       className: "w-[200px]",
     },
@@ -88,16 +109,15 @@ export function UserList() {
       header: "Actions",
       accessor: (row) => (
         <div className="flex items-center justify-end gap-1">
-          <Link href={`/master-data/users/${row.id}`}>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="h-8 w-8"
-              title="View Details"
-            >
-              <Eye className="h-3.5 w-3.5" />
-            </Button>
-          </Link>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className="h-8 w-8"
+            title="View Details"
+            onClick={() => handleViewUser(row.id)}
+          >
+            <Eye className="h-3.5 w-3.5" />
+          </Button>
           <Button
             variant="ghost"
             size="icon-sm"
@@ -218,6 +238,21 @@ export function UserList() {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* User Detail Modal */}
+      <UserDetailModal
+        userId={viewingUserId}
+        open={isDetailModalOpen}
+        onOpenChange={(open) => {
+          setIsDetailModalOpen(open);
+          if (!open) {
+            setViewingUserId(null);
+          }
+        }}
+        onUserUpdated={() => {
+          // Refresh will be handled by query invalidation in hooks
+        }}
+      />
     </div>
   );
 }

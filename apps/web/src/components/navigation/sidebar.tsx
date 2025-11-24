@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { ThemeToggleButton } from "@/components/ui/theme-toggle";
 import { useAuthStore } from "@/features/auth/stores/useAuthStore";
 import { useUserPermissions } from "@/features/master-data/user-management/hooks/useUserPermissions";
@@ -164,14 +164,12 @@ function SidebarComponent() {
     router.push("/");
   };
 
-  const getInitials = (name?: string) => {
-    if (!name) return "U";
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
+  const getAvatarUrl = (userData: typeof user) => {
+    if (userData?.avatar_url) {
+      return userData.avatar_url;
+    }
+    // Always use dicebear with email as seed
+    return `https://api.dicebear.com/7.x/lorelei/svg?seed=${encodeURIComponent(userData?.email || "user")}`;
   };
 
   return (
@@ -310,19 +308,17 @@ function SidebarComponent() {
         ))}
       </nav>
 
-      {/* Account Section */}
-      <div className="border-t border border-sidebar-border">
-        {/* User Account */}
-        {user && (
-          <div className="p-4 border-b border border-sidebar-border">
-            <div className="flex items-center gap-3">
-              <Avatar className="h-10 w-10">
-                <AvatarFallback className="bg-primary text-primary-foreground text-sm font-medium">
-                  {getInitials(user.name)}
-                </AvatarFallback>
+      {/* Account Section - Modern Footer Design */}
+      {user && (
+        <div className="border-t border-sidebar-border bg-sidebar-accent/30 backdrop-blur-sm">
+          {/* User Profile Card */}
+          <div className="p-4">
+            <div className="flex items-center gap-3 mb-4">
+              <Avatar className="h-12 w-12 ring-2 ring-sidebar-accent ring-offset-2 ring-offset-sidebar">
+                <AvatarImage src={getAvatarUrl(user)} alt={user.name} />
               </Avatar>
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium text-sidebar-foreground truncate">
+                <div className="text-sm font-semibold text-sidebar-foreground truncate">
                   {user.name}
                 </div>
                 <div className="text-xs text-muted-foreground capitalize truncate">
@@ -330,27 +326,27 @@ function SidebarComponent() {
                 </div>
               </div>
             </div>
-          </div>
-        )}
 
-        {/* Actions */}
-        <div className="p-4 flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleLogout}
-            className="flex-1 justify-start gap-2 h-9 text-sm text-destructive hover:text-destructive hover:bg-destructive/10"
-          >
-            <LogOut className="h-4 w-4" />
-            <span>Logout</span>
-          </Button>
-          <ThemeToggleButton
-            variant="circle"
-            start="bottom-left"
-            className="size-9 bg-sidebar-accent hover:bg-sidebar-accent/80"
-          />
+            {/* Actions Row */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogout}
+                className="flex-1 justify-center gap-2 h-9 text-sm text-destructive hover:text-destructive hover:bg-destructive/10 transition-all"
+              >
+                <LogOut className="h-4 w-4" />
+                <span>Logout</span>
+              </Button>
+              <ThemeToggleButton
+                variant="circle"
+                start="bottom-left"
+                className="size-9 bg-sidebar-accent hover:bg-sidebar-accent/80 transition-all shadow-sm"
+              />
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </aside>
   );
 }

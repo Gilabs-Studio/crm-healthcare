@@ -2,6 +2,7 @@ package user
 
 import (
 	"errors"
+	"net/url"
 
 	"github.com/gilabs/crm-healthcare/api/internal/domain/user"
 	"github.com/gilabs/crm-healthcare/api/internal/repository/interfaces"
@@ -105,13 +106,17 @@ func (s *Service) Create(req *user.CreateUserRequest) (*user.UserResponse, error
 		status = "active"
 	}
 
+	// Generate avatar URL using dicebear lorelei
+	avatarURL := "https://api.dicebear.com/7.x/lorelei/svg?seed=" + url.QueryEscape(req.Email)
+
 	// Create user
 	u := &user.User{
-		Email:    req.Email,
-		Password: string(hashedPassword),
-		Name:     req.Name,
-		RoleID:   req.RoleID,
-		Status:   status,
+		Email:     req.Email,
+		Password:  string(hashedPassword),
+		Name:      req.Name,
+		AvatarURL: avatarURL,
+		RoleID:    req.RoleID,
+		Status:    status,
 	}
 
 	if err := s.userRepo.Create(u); err != nil {

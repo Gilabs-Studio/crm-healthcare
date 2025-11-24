@@ -19,7 +19,7 @@ func NewRepository(db *gorm.DB) interfaces.UserRepository {
 
 func (r *repository) FindByID(id string) (*user.User, error) {
 	var u user.User
-	err := r.db.Preload("Role").Where("id = ?", id).First(&u).Error
+	err := r.db.Preload("Role").Preload("Role.Permissions").Where("id = ?", id).First(&u).Error
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +28,7 @@ func (r *repository) FindByID(id string) (*user.User, error) {
 
 func (r *repository) FindByEmail(email string) (*user.User, error) {
 	var u user.User
-	err := r.db.Preload("Role").Where("email = ?", email).First(&u).Error
+	err := r.db.Preload("Role").Preload("Role.Permissions").Where("email = ?", email).First(&u).Error
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func (r *repository) List(req *user.ListUsersRequest) ([]user.User, int64, error
 	var users []user.User
 	var total int64
 
-	query := r.db.Model(&user.User{}).Preload("Role")
+	query := r.db.Model(&user.User{}).Preload("Role").Preload("Role.Permissions")
 
 	// Apply filters
 	if req.Search != "" {
