@@ -30,16 +30,16 @@ export function UserManagement() {
             Users
           </TabsTrigger>
           {hasRolesPermission && (
-            <TabsTrigger value="roles" className="gap-2">
-              <Shield className="h-4 w-4" />
-              Roles
-            </TabsTrigger>
+          <TabsTrigger value="roles" className="gap-2">
+            <Shield className="h-4 w-4" />
+            Roles
+          </TabsTrigger>
           )}
           {hasPermissionsPermission && (
-            <TabsTrigger value="permissions" className="gap-2">
-              <Key className="h-4 w-4" />
-              Permissions
-            </TabsTrigger>
+          <TabsTrigger value="permissions" className="gap-2">
+            <Key className="h-4 w-4" />
+            Permissions
+          </TabsTrigger>
           )}
         </TabsList>
 
@@ -48,15 +48,15 @@ export function UserManagement() {
         </TabsContent>
 
         {hasRolesPermission && (
-          <TabsContent value="roles" className="mt-6">
-            <RoleList />
-          </TabsContent>
+        <TabsContent value="roles" className="mt-6">
+          <RoleList />
+        </TabsContent>
         )}
 
         {hasPermissionsPermission && (
-          <TabsContent value="permissions" className="mt-6">
-            <PermissionList />
-          </TabsContent>
+        <TabsContent value="permissions" className="mt-6">
+          <PermissionList />
+        </TabsContent>
         )}
       </Tabs>
     </div>

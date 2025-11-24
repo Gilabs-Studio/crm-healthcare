@@ -13,12 +13,13 @@ import type { CreateDiagnosisFormData, UpdateDiagnosisFormData } from "../schema
 
 export function useDiagnosisList() {
   const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(20);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<string>("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingDiagnosis, setEditingDiagnosis] = useState<string | null>(null);
 
-  const { data, isLoading } = useDiagnoses({ page, per_page: 20, search, status });
+  const { data, isLoading } = useDiagnoses({ page, per_page: perPage, search, status });
   const { data: editingDiagnosisData } = useDiagnosis(editingDiagnosis || "");
   const deleteDiagnosis = useDeleteDiagnosis();
   const createDiagnosis = useCreateDiagnosis();
@@ -60,10 +61,17 @@ export function useDiagnosisList() {
     }
   };
 
+  const handlePerPageChange = (newPerPage: number) => {
+    setPerPage(newPerPage);
+    setPage(1); // Reset to first page when changing per page
+  };
+
   return {
     // State
     page,
     setPage,
+    perPage,
+    setPerPage: handlePerPageChange,
     search,
     setSearch,
     status,

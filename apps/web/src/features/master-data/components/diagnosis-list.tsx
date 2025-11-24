@@ -19,6 +19,7 @@ export function DiagnosisList() {
   const {
     page,
     setPage,
+    setPerPage,
     search,
     setSearch,
     status,
@@ -128,9 +129,22 @@ export function DiagnosisList() {
         data={diagnoses}
         isLoading={isLoading}
         emptyMessage="No diagnoses found"
-        pagination={pagination}
+        pagination={
+          pagination
+            ? {
+                page: pagination.page,
+                per_page: pagination.per_page,
+                total: pagination.total,
+                total_pages: pagination.total_pages,
+                has_next: pagination.has_next,
+                has_prev: pagination.has_prev,
+              }
+            : undefined
+        }
         onPageChange={setPage}
+        onPerPageChange={setPerPage}
         itemName="diagnosis"
+        perPageOptions={[10, 20, 50, 100]}
       />
 
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>

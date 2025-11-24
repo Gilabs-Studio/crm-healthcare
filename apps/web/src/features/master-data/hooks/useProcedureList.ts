@@ -13,12 +13,13 @@ import type { CreateProcedureFormData, UpdateProcedureFormData } from "../schema
 
 export function useProcedureList() {
   const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(20);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<string>("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingProcedure, setEditingProcedure] = useState<string | null>(null);
 
-  const { data, isLoading } = useProcedures({ page, per_page: 20, search, status });
+  const { data, isLoading } = useProcedures({ page, per_page: perPage, search, status });
   const { data: editingProcedureData } = useProcedure(editingProcedure || "");
   const deleteProcedure = useDeleteProcedure();
   const createProcedure = useCreateProcedure();
@@ -60,10 +61,17 @@ export function useProcedureList() {
     }
   };
 
+  const handlePerPageChange = (newPerPage: number) => {
+    setPerPage(newPerPage);
+    setPage(1); // Reset to first page when changing per page
+  };
+
   return {
     // State
     page,
     setPage,
+    perPage,
+    setPerPage: handlePerPageChange,
     search,
     setSearch,
     status,

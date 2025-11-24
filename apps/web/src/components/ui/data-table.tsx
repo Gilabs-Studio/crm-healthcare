@@ -1,7 +1,5 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -11,6 +9,25 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationFirst,
+  PaginationLast,
+} from "@/components/ui/pagination";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
 export interface Column<T> {
@@ -21,20 +38,22 @@ export interface Column<T> {
 }
 
 interface DataTableProps<T> {
-  columns: Column<T>[];
-  data: T[];
-  isLoading?: boolean;
-  emptyMessage?: string;
-  pagination?: {
-    page: number;
-    per_page: number;
-    total: number;
-    total_pages: number;
-    has_next: boolean;
-    has_prev: boolean;
+  readonly columns: readonly Column<T>[];
+  readonly data: readonly T[];
+  readonly isLoading?: boolean;
+  readonly emptyMessage?: string;
+  readonly pagination?: {
+    readonly page: number;
+    readonly per_page: number;
+    readonly total: number;
+    readonly total_pages: number;
+    readonly has_next: boolean;
+    readonly has_prev: boolean;
   };
-  onPageChange?: (page: number) => void;
-  itemName?: string; // e.g., "diagnosis", "procedure"
+  readonly onPageChange?: (page: number) => void;
+  readonly onPerPageChange?: (perPage: number) => void;
+  readonly itemName?: string; // e.g., "diagnosis", "procedure"
+  readonly perPageOptions?: readonly number[]; // e.g., [10, 20, 50, 100]
 }
 
 export function DataTable<T extends { id: string }>({
@@ -44,7 +63,9 @@ export function DataTable<T extends { id: string }>({
   emptyMessage = "No data found",
   pagination,
   onPageChange,
+  onPerPageChange,
   itemName = "item",
+  perPageOptions = [10, 20, 50, 100],
 }: DataTableProps<T>) {
   const getPageNumbers = () => {
     if (!pagination) return [];
@@ -79,8 +100,8 @@ export function DataTable<T extends { id: string }>({
     <div className="border rounded-lg">
       {isLoading ? (
         <div className="p-4 space-y-3">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={`skeleton-${i}`} className="h-10 w-full" />
+          {Array.from({ length: 5 }, (_, i) => (
+            <Skeleton key={`skeleton-row-${i}`} className="h-10 w-full" />
           ))}
         </div>
       ) : (
@@ -125,90 +146,149 @@ export function DataTable<T extends { id: string }>({
             </TableBody>
           </Table>
 
-          {pagination && pagination.total_pages > 1 && (
-            <div className="border-t p-4">
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-muted-foreground">
-                  Showing{" "}
-                  <span className="font-medium text-foreground">
-                    {(pagination.page - 1) * pagination.per_page + 1}
-                  </span>{" "}
-                  to{" "}
-                  <span className="font-medium text-foreground">
-                    {Math.min(
-                      pagination.page * pagination.per_page,
-                      pagination.total
-                    )}
-                  </span>{" "}
-                  of{" "}
-                  <span className="font-medium text-foreground">
-                    {pagination.total}
-                  </span>{" "}
-                  {pagination.total === 1 ? itemName : `${itemName}s`}
-                </div>
-
-                <div className="flex items-center gap-1">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      onPageChange?.(Math.max(1, pagination.page - 1))
-                    }
-                    disabled={!pagination.has_prev || isLoading}
-                    className="h-9 px-3"
-                  >
-                    <ChevronLeft className="h-4 w-4 mr-1" />
-                    Previous
-                  </Button>
-
-                  <div className="flex items-center gap-1 mx-2">
-                    {getPageNumbers().map((pageNum, idx) => {
-                      if (
-                        pageNum === "ellipsis-start" ||
-                        pageNum === "ellipsis-end"
-                      ) {
-                        return (
-                          <span
-                            key={`ellipsis-${idx}`}
-                            className="px-2 text-muted-foreground"
-                          >
-                            ...
-                          </span>
-                        );
-                      }
-
-                      const pageNumber = pageNum as number;
-                      const isActive = pageNumber === pagination.page;
-
-                      return (
-                        <Button
-                          key={pageNumber}
-                          variant={isActive ? "default" : "ghost"}
-                          size="sm"
-                          onClick={() => onPageChange?.(pageNumber)}
-                          disabled={isLoading}
-                          className={cn(
-                            "h-9 min-w-9 px-3",
-                            isActive && "font-semibold"
-                          )}
-                        >
-                          {pageNumber}
-                        </Button>
-                      );
-                    })}
+          {pagination && (
+            <div className="border-t bg-muted/30 px-6 py-4">
+              <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
+                {/* Rows per page selector */}
+                {onPerPageChange && (
+                  <div className="flex items-center gap-3 order-3 lg:order-1">
+                    <Label htmlFor="rows-per-page" className="text-sm whitespace-nowrap">
+                      Rows per page
+                    </Label>
+                    <Select
+                      value={String(pagination.per_page)}
+                      onValueChange={(value) => {
+                        onPerPageChange?.(Number(value));
+                        // Reset to page 1 when changing per page
+                        onPageChange?.(1);
+                      }}
+                    >
+                      <SelectTrigger
+                        id="rows-per-page"
+                        className="w-fit whitespace-nowrap h-9"
+                      >
+                        <SelectValue placeholder="Select rows" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {perPageOptions.map((option) => (
+                          <SelectItem key={option} value={String(option)}>
+                            {option}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
+                )}
 
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onPageChange?.(pagination.page + 1)}
-                    disabled={!pagination.has_next || isLoading}
-                    className="h-9 px-3"
-                  >
-                    Next
-                    <ChevronRight className="h-4 w-4 ml-1" />
-                  </Button>
+                {/* Page number information */}
+                <div className="flex grow justify-center lg:justify-end text-sm whitespace-nowrap text-muted-foreground order-2 lg:order-2">
+                  <p className="text-sm whitespace-nowrap text-muted-foreground" aria-live="polite">
+                    <span className="text-foreground font-semibold">
+                      {(pagination.page - 1) * pagination.per_page + 1}-
+                      {Math.min(
+                        pagination.page * pagination.per_page,
+                        pagination.total
+                      )}
+                    </span>{" "}
+                    of{" "}
+                    <span className="text-foreground font-semibold">
+                      {pagination.total}
+                    </span>
+                  </p>
                 </div>
+
+                {/* Pagination controls */}
+                {pagination.total_pages > 1 && (
+                  <div className="order-1 lg:order-3">
+                    <Pagination>
+                      <PaginationContent>
+                        <PaginationItem>
+                          <PaginationFirst
+                            onClick={() => onPageChange?.(1)}
+                            disabled={!pagination.has_prev || isLoading}
+                            className={cn(
+                              (!pagination.has_prev || isLoading) &&
+                                "pointer-events-none opacity-50 cursor-not-allowed"
+                            )}
+                            aria-disabled={!pagination.has_prev || isLoading}
+                          />
+                        </PaginationItem>
+
+                        <PaginationItem>
+                          <PaginationPrevious
+                            onClick={() =>
+                              onPageChange?.(Math.max(1, pagination.page - 1))
+                            }
+                            disabled={!pagination.has_prev || isLoading}
+                            className={cn(
+                              (!pagination.has_prev || isLoading) &&
+                                "pointer-events-none opacity-50 cursor-not-allowed"
+                            )}
+                            aria-disabled={!pagination.has_prev || isLoading}
+                          />
+                        </PaginationItem>
+
+                        {getPageNumbers().map((pageNum) => {
+                          if (
+                            pageNum === "ellipsis-start" ||
+                            pageNum === "ellipsis-end"
+                          ) {
+                            return (
+                              <PaginationItem key={`ellipsis-${pageNum}`}>
+                                <PaginationEllipsis />
+                              </PaginationItem>
+                            );
+                          }
+
+                          const pageNumber = pageNum as number;
+                          const isActive = pageNumber === pagination.page;
+
+                          return (
+                            <PaginationItem key={pageNumber}>
+                              <PaginationLink
+                                onClick={() => onPageChange?.(pageNumber)}
+                                disabled={isLoading}
+                                isActive={isActive}
+                                className={cn(
+                                  isLoading &&
+                                    "pointer-events-none opacity-50 cursor-not-allowed"
+                                )}
+                              >
+                                {pageNumber}
+                              </PaginationLink>
+                            </PaginationItem>
+                          );
+                        })}
+
+                        <PaginationItem>
+                          <PaginationNext
+                            onClick={() => onPageChange?.(pagination.page + 1)}
+                            disabled={!pagination.has_next || isLoading}
+                            className={cn(
+                              (!pagination.has_next || isLoading) &&
+                                "pointer-events-none opacity-50 cursor-not-allowed"
+                            )}
+                            aria-disabled={!pagination.has_next || isLoading}
+                          />
+                        </PaginationItem>
+
+                        <PaginationItem>
+                          <PaginationLast
+                            onClick={() =>
+                              onPageChange?.(pagination.total_pages)
+                            }
+                            disabled={!pagination.has_next || isLoading}
+                            className={cn(
+                              (!pagination.has_next || isLoading) &&
+                                "pointer-events-none opacity-50 cursor-not-allowed"
+                            )}
+                            aria-disabled={!pagination.has_next || isLoading}
+                          />
+                        </PaginationItem>
+                      </PaginationContent>
+                    </Pagination>
+                  </div>
+                )}
               </div>
             </div>
           )}

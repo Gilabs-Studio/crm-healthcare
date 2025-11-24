@@ -19,6 +19,7 @@ export function UserList() {
   const {
     page,
     setPage,
+    setPerPage,
     search,
     setSearch,
     status,
@@ -162,7 +163,9 @@ export function UserList() {
             : undefined
         }
         onPageChange={setPage}
+        onPerPageChange={setPerPage}
         itemName="user"
+        perPageOptions={[10, 20, 50, 100]}
       />
 
       {/* Create Dialog */}
