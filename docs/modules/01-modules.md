@@ -1,9 +1,10 @@
 # Modules Documentation
-## CRM Healthcare/Pharmaceutical Platform - MVP Modules
+## CRM Healthcare/Pharmaceutical Platform - Sales CRM Modules
 
-**Versi**: 1.0  
-**Status**: Draft  
-**Last Updated**: 2025-01-15
+**Versi**: 2.0  
+**Status**: Active  
+**Last Updated**: 2025-01-15  
+**Product Type**: Sales CRM untuk Perusahaan Farmasi
 
 ---
 
@@ -21,7 +22,9 @@
 
 ## Overview
 
-Dokumen ini menjelaskan semua modules yang akan diimplementasikan dalam MVP CRM Healthcare/Pharmaceutical Platform. Setiap module memiliki pages, components, services, dan relasi dengan modules lainnya.
+Dokumen ini menjelaskan semua modules yang akan diimplementasikan dalam **Sales CRM untuk Perusahaan Farmasi**. Setiap module memiliki pages, components, services, dan relasi dengan modules lainnya.
+
+**Platform**: Web Application (Next.js 16) + Mobile App (Flutter)
 
 ### Module Structure
 
@@ -46,11 +49,13 @@ apps/web/src/features/<moduleName>/
 ### Module Categories
 
 1. **Core Modules**: Authentication, User Management, Settings
-2. **Master Data**: Diagnosis, Procedures, Insurance, Locations, Categories, Units
-3. **Patient Management**: Patient registration, profiles, search
-4. **Healthcare Operations**: Appointments, Medical Records, Prescriptions
-5. **Pharmacy Operations**: Inventory, Stock Management, Purchase
-6. **Analytics**: Dashboard, Reports
+2. **Sales CRM Modules**: Account & Contact, Visit Report, Sales Pipeline, Task & Reminder, Product
+3. **Analytics**: Dashboard, Reports
+
+### Platform Support
+
+- **Web Application**: Semua modules
+- **Mobile App**: Account & Contact, Visit Report, Task & Reminder, Dashboard (basic)
 
 ---
 
@@ -126,16 +131,15 @@ apps/web/src/features/<moduleName>/
 
 **Pages**:
 - `/settings` - Settings dashboard
-- `/settings/general` - General settings (clinic info, business hours)
+- `/settings/general` - General settings (company info, logo, branding)
 - `/settings/notifications` - Notification preferences
-- `/settings/payments` - Payment method configuration
-- `/settings/taxes` - Tax configuration
+- `/settings/pipeline` - Pipeline stages configuration
 
 **Components**:
 - `SettingsNav` - Settings navigation
 - `GeneralSettingsForm` - General settings form
 - `NotificationSettingsForm` - Notification settings
-- `PaymentMethodConfig` - Payment method configuration
+- `PipelineSettingsForm` - Pipeline stages configuration
 
 **Services**:
 - `settingsService.getSettings()`
@@ -149,43 +153,376 @@ apps/web/src/features/<moduleName>/
 
 ---
 
-## Master Data Modules
+## Sales CRM Modules
 
-### 4. Master Data Module (`master-data`)
+### 4. Account & Contact Management Module (`accounts`)
 
-**Purpose**: Manage all master data/reference data for the system
+**Purpose**: Manage accounts (Rumah Sakit, Klinik, Apotek) dan contacts (Dokter, PIC, Manager)
 
-**Sub-modules**:
+**Pages (Web)**:
+- `/accounts` - Account list
+- `/accounts/new` - Create new account
+- `/accounts/[id]` - Account detail/edit
+- `/accounts/[id]/contacts` - Account contacts
+- `/contacts` - Contact list
+- `/contacts/new` - Create new contact
+- `/contacts/[id]` - Contact detail/edit
 
-#### 4.1 Diagnosis Master (`diagnosis`)
-**Purpose**: Manage diagnosis codes (ICD-10)
+**Pages (Mobile)**:
+- `/accounts` - Account list
+- `/accounts/[id]` - Account detail
+- `/contacts` - Contact list
+- `/contacts/[id]` - Contact detail
 
-**Pages**:
-- `/master-data/diagnosis` - Diagnosis list
-- `/master-data/diagnosis/new` - Add diagnosis
-- `/master-data/diagnosis/[id]` - Diagnosis detail
+**Components (Web)**:
+- `AccountList` - Account list table dengan search & filter
+- `AccountForm` - Create/edit account form
+- `AccountDetail` - Account detail view
+- `ContactList` - Contact list table
+- `ContactForm` - Create/edit contact form
+- `ContactDetail` - Contact detail view
+- `AccountSelector` - Account selector (untuk form lain)
+- `ContactSelector` - Contact selector (untuk form lain)
 
-**Components**:
-- `DiagnosisList` - Diagnosis list with search
-- `DiagnosisForm` - Add/edit diagnosis form
-- `DiagnosisSelector` - Diagnosis selector (used in medical records)
+**Components (Mobile)**:
+- `AccountListScreen` - Account list dengan search
+- `AccountDetailScreen` - Account detail
+- `ContactListScreen` - Contact list
+- `ContactDetailScreen` - Contact detail
 
 **Services**:
-- `diagnosisService.list()`
-- `diagnosisService.getById()`
-- `diagnosisService.create()`
-- `diagnosisService.update()`
-- `diagnosisService.search()`
+- `accountService.list()`
+- `accountService.getById()`
+- `accountService.create()`
+- `accountService.update()`
+- `accountService.delete()`
+- `accountService.search()`
+- `contactService.list()`
+- `contactService.getById()`
+- `contactService.create()`
+- `contactService.update()`
+- `contactService.delete()`
+- `contactService.search()`
 
-**Data Model**:
+**Store**:
+- `useAccountStore` - Account list, current account
+- `useContactStore` - Contact list, current contact
+
+**Data Models**:
 ```typescript
-interface Diagnosis {
+interface Account {
   id: string;
-  code: string; // ICD-10 code
-  name: string; // Diagnosis name in Indonesian
-  nameEn?: string; // Diagnosis name in English
+  name: string;
+  category: 'hospital' | 'clinic' | 'pharmacy';
+  address?: string;
+  city?: string;
+  province?: string;
+  phone?: string;
+  email?: string;
+  status: 'active' | 'inactive';
+  assignedTo?: string; // Sales rep ID
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Contact {
+  id: string;
+  accountId: string;
+  name: string;
+  role: 'doctor' | 'pic' | 'manager' | 'other';
+  phone?: string;
+  email?: string;
+  position?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+```
+
+**Relationships**:
+- → Visit Report Module (visit reports linked ke account)
+- → Sales Pipeline Module (deals linked ke account)
+- → Task Module (tasks linked ke account/contact)
+
+---
+
+### 5. Visit Report & Activity Tracking Module (`visit-reports`)
+
+**Purpose**: Track sales visits dengan check-in/out, GPS, dan dokumentasi foto
+
+**Pages (Web)**:
+- `/visit-reports` - Visit report list
+- `/visit-reports/new` - Create new visit report
+- `/visit-reports/[id]` - Visit report detail
+- `/visit-reports/[id]/review` - Supervisor review page
+- `/accounts/[id]/activities` - Account activity timeline
+
+**Pages (Mobile)**:
+- `/visit-reports` - Visit report list
+- `/visit-reports/new` - Create visit report dengan GPS & foto
+- `/visit-reports/[id]` - Visit report detail
+
+**Components (Web)**:
+- `VisitReportList` - Visit report list dengan filter
+- `VisitReportForm` - Create/edit visit report form
+- `VisitReportDetail` - Visit report detail view
+- `ActivityTimeline` - Activity timeline component
+- `PhotoUpload` - Photo upload component
+- `SupervisorReview` - Supervisor review component (approve/reject)
+
+**Components (Mobile)**:
+- `VisitReportListScreen` - Visit report list
+- `VisitReportFormScreen` - Create visit report dengan GPS & camera
+- `VisitReportDetailScreen` - Visit report detail
+- `CheckInOutButton` - Check-in/out button dengan GPS
+
+**Services**:
+- `visitReportService.list()`
+- `visitReportService.getById()`
+- `visitReportService.create()`
+- `visitReportService.update()`
+- `visitReportService.checkIn()`
+- `visitReportService.checkOut()`
+- `visitReportService.approve()`
+- `visitReportService.reject()`
+- `visitReportService.uploadPhoto()`
+- `activityService.getTimeline()`
+
+**Store**:
+- `useVisitReportStore` - Visit report list, current visit report
+- `useActivityStore` - Activity timeline
+
+**Data Models**:
+```typescript
+interface VisitReport {
+  id: string;
+  accountId: string;
+  contactId?: string;
+  salesRepId: string;
+  visitDate: string;
+  checkInTime?: string;
+  checkOutTime?: string;
+  checkInLocation?: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+  };
+  checkOutLocation?: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+  };
+  purpose: string;
+  notes?: string;
+  photos?: string[]; // Photo URLs
+  status: 'draft' | 'submitted' | 'approved' | 'rejected';
+  approvedBy?: string;
+  approvedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Activity {
+  id: string;
+  type: 'visit' | 'call' | 'email' | 'task' | 'deal';
+  accountId?: string;
+  contactId?: string;
+  userId: string;
+  description: string;
+  timestamp: string;
+  metadata?: Record<string, any>;
+}
+```
+
+**Relationships**:
+- ← Account Module (visit report linked ke account)
+- ← Contact Module (visit report linked ke contact)
+- → Activity Module (visit report creates activity)
+
+---
+
+### 6. Sales Pipeline Module (`pipeline`)
+
+**Purpose**: Manage sales pipeline dari lead hingga deal
+
+**Pages (Web)**:
+- `/pipeline` - Pipeline kanban view
+- `/deals` - Deal list
+- `/deals/new` - Create new deal
+- `/deals/[id]` - Deal detail/edit
+
+**Pages (Mobile)**:
+- (Optional untuk MVP) - Basic deal list
+
+**Components (Web)**:
+- `PipelineKanban` - Kanban board untuk pipeline
+- `DealCard` - Deal card component
+- `DealForm` - Create/edit deal form
+- `DealDetail` - Deal detail view
+- `PipelineSummary` - Pipeline summary widget
+- `ForecastWidget` - Forecast widget
+
+**Services**:
+- `pipelineService.getPipeline()`
+- `pipelineService.getSummary()`
+- `pipelineService.getForecast()`
+- `dealService.list()`
+- `dealService.getById()`
+- `dealService.create()`
+- `dealService.update()`
+- `dealService.delete()`
+- `dealService.move()`
+
+**Store**:
+- `usePipelineStore` - Pipeline data, deals
+- `useDealStore` - Deal list, current deal
+
+**Data Models**:
+```typescript
+interface PipelineStage {
+  id: string;
+  name: string;
+  order: number;
+  color?: string;
+}
+
+interface Deal {
+  id: string;
+  accountId: string;
+  contactId?: string;
+  salesRepId: string;
+  stageId: string;
+  title: string;
+  value: number;
+  currency: string;
+  expectedCloseDate?: string;
+  probability: number; // 0-100
+  products?: DealProduct[];
+  notes?: string;
+  status: 'open' | 'won' | 'lost';
+  closedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface DealProduct {
+  productId: string;
+  quantity: number;
+  price: number;
+}
+```
+
+**Relationships**:
+- ← Account Module (deal linked ke account)
+- ← Contact Module (deal linked ke contact)
+- ← Product Module (deal linked ke products)
+
+---
+
+### 7. Task & Reminder Module (`tasks`)
+
+**Purpose**: Manage tasks dan reminders untuk follow-up
+
+**Pages (Web)**:
+- `/tasks` - Task list
+- `/tasks/new` - Create new task
+- `/tasks/[id]` - Task detail/edit
+
+**Pages (Mobile)**:
+- `/tasks` - Task list
+- `/tasks/new` - Create new task
+- `/tasks/[id]` - Task detail
+
+**Components (Web)**:
+- `TaskList` - Task list dengan filter
+- `TaskForm` - Create/edit task form
+- `TaskCard` - Task card component
+- `TaskDetail` - Task detail view
+
+**Components (Mobile)**:
+- `TaskListScreen` - Task list
+- `TaskFormScreen` - Create task form
+- `TaskDetailScreen` - Task detail
+- `TaskReminderNotification` - Push notification untuk reminder
+
+**Services**:
+- `taskService.list()`
+- `taskService.getById()`
+- `taskService.create()`
+- `taskService.update()`
+- `taskService.delete()`
+- `taskService.assign()`
+- `taskService.complete()`
+- `taskService.getReminders()`
+
+**Store**:
+- `useTaskStore` - Task list, current task
+
+**Data Models**:
+```typescript
+interface Task {
+  id: string;
+  title: string;
+  description?: string;
+  accountId?: string;
+  contactId?: string;
+  assignedTo: string;
+  assignedBy: string;
+  dueDate?: string;
+  priority: 'low' | 'medium' | 'high';
+  status: 'open' | 'in-progress' | 'done' | 'cancelled';
+  reminderAt?: string;
+  completedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+```
+
+**Relationships**:
+- ← Account Module (task linked ke account)
+- ← Contact Module (task linked ke contact)
+
+---
+
+### 8. Product Management Module (`products`)
+
+**Purpose**: Manage product catalog
+
+**Pages (Web)**:
+- `/products` - Product list
+- `/products/new` - Create new product
+- `/products/[id]` - Product detail/edit
+
+**Pages (Mobile)**:
+- (Optional untuk MVP) - Basic product list
+
+**Components (Web)**:
+- `ProductList` - Product list dengan search
+- `ProductForm` - Create/edit product form
+- `ProductDetail` - Product detail view
+- `ProductSelector` - Product selector (untuk deal form)
+
+**Services**:
+- `productService.list()`
+- `productService.getById()`
+- `productService.create()`
+- `productService.update()`
+- `productService.delete()`
+- `productService.search()`
+
+**Store**:
+- `useProductStore` - Product list, current product
+
+**Data Models**:
+```typescript
+interface Product {
+  id: string;
+  sku: string;
+  name: string;
   category?: string;
   description?: string;
+  price: number;
+  currency: string;
   status: 'active' | 'inactive';
   createdAt: string;
   updatedAt: string;
@@ -193,11 +530,151 @@ interface Diagnosis {
 ```
 
 **Relationships**:
-- → Medical Record Module (used in medical records)
+- → Sales Pipeline Module (products linked ke deals)
 
 ---
 
-#### 4.2 Procedure Master (`procedures`)
+### 9. Dashboard Module (`dashboard`)
+
+**Purpose**: Dashboard dengan key metrics dan analytics
+
+**Pages (Web)**:
+- `/dashboard` - Main dashboard
+
+**Pages (Mobile)**:
+- `/dashboard` - Basic dashboard
+
+**Components (Web)**:
+- `DashboardOverview` - Overview widget
+- `VisitStatistics` - Visit statistics widget
+- `PipelineSummary` - Pipeline summary widget
+- `TopAccounts` - Top accounts widget
+- `TopSalesRep` - Top sales rep widget
+- `RecentActivities` - Recent activities widget
+- `Charts` - Various charts (recharts atau similar)
+
+**Components (Mobile)**:
+- `DashboardScreen` - Basic dashboard dengan key metrics
+- `VisitStatsWidget` - Visit statistics
+- `RecentActivitiesWidget` - Recent activities
+
+**Services**:
+- `dashboardService.getOverview()`
+- `dashboardService.getVisitStats()`
+- `dashboardService.getPipelineSummary()`
+- `dashboardService.getTopAccounts()`
+- `dashboardService.getTopSalesRep()`
+- `dashboardService.getRecentActivities()`
+
+**Store**:
+- `useDashboardStore` - Dashboard data
+
+**Relationships**:
+- ← All modules (dashboard aggregates data dari semua modules)
+
+---
+
+### 10. Reports Module (`reports`)
+
+**Purpose**: Generate reports untuk sales activities
+
+**Pages (Web)**:
+- `/reports` - Reports list
+- `/reports/visit-reports` - Visit report report
+- `/reports/pipeline` - Pipeline report
+- `/reports/sales-performance` - Sales performance report
+- `/reports/account-activity` - Account activity report
+
+**Pages (Mobile)**:
+- (Optional untuk MVP)
+
+**Components (Web)**:
+- `ReportGenerator` - Report generator component
+- `ReportViewer` - Report viewer component
+- `DateRangePicker` - Date range picker
+- `ReportFilters` - Report filters component
+- `ExportButton` - Export to PDF/Excel
+
+**Services**:
+- `reportService.generateVisitReport()`
+- `reportService.generatePipelineReport()`
+- `reportService.generateSalesPerformanceReport()`
+- `reportService.generateAccountActivityReport()`
+- `reportService.export()`
+
+**Store**:
+- `useReportStore` - Report data
+
+**Relationships**:
+- ← All modules (reports aggregate data dari semua modules)
+
+---
+
+## Legacy Modules (ARCHIVED)
+
+> **Note**: Modules berikut di-archive karena tidak relevan untuk Sales CRM:
+> - Diagnosis & Procedures (dapat digunakan sebagai optional module di future)
+> - Patient Management
+> - Doctor Management
+> - Appointment Scheduling
+> - Medical Records
+> - Prescription Management
+> - Medication Management
+> - Inventory Management
+> - Purchase Management
+> - Transaction Management
+
+---
+
+## Module Relationships
+
+```
+Authentication
+    ↓
+User Management
+    ↓
+Account & Contact ←→ Visit Report ←→ Sales Pipeline
+    ↓                    ↓                ↓
+    └────────────────────┴────────────────┘
+                         ↓
+                    Task & Reminder
+                         ↓
+                    Product Management
+                         ↓
+                    Dashboard & Reports
+                         ↓
+                    Settings
+```
+
+---
+
+## API Endpoints Summary
+
+### Web APIs
+- `/api/v1/auth/*` - Authentication
+- `/api/v1/users/*` - User management
+- `/api/v1/accounts/*` - Account management
+- `/api/v1/contacts/*` - Contact management
+- `/api/v1/visit-reports/*` - Visit report management
+- `/api/v1/activities/*` - Activity tracking
+- `/api/v1/pipelines/*` - Pipeline management
+- `/api/v1/deals/*` - Deal management
+- `/api/v1/tasks/*` - Task management
+- `/api/v1/products/*` - Product management
+- `/api/v1/dashboard/*` - Dashboard data
+- `/api/v1/reports/*` - Reports
+- `/api/v1/settings/*` - Settings
+
+### Mobile APIs
+- Same as Web APIs, dengan beberapa endpoints yang dioptimize untuk mobile
+- `/api/v1/mobile/visit-reports/check-in` - Check-in dengan GPS
+- `/api/v1/mobile/visit-reports/check-out` - Check-out dengan GPS
+- `/api/v1/mobile/visit-reports/upload-photo` - Photo upload
+- `/api/v1/mobile/tasks/reminders` - Task reminders
+
+---
+
+**Dokumen ini akan diupdate sesuai dengan progress development.**
 **Purpose**: Manage medical procedures/tindakan
 
 **Pages**:

@@ -1,10 +1,11 @@
 # Product Requirements Document (PRD)
-## CRM Healthcare/Pharmaceutical Platform
+## CRM Healthcare/Pharmaceutical Platform - Sales CRM
 
-**Versi**: 1.0  
-**Status**: Draft  
+**Versi**: 2.0  
+**Status**: Active  
 **Last Updated**: 2025-01-15  
-**Target Release**: MVP Q1 2025
+**Target Release**: MVP Q1 2025  
+**Product Type**: Sales CRM untuk Perusahaan Farmasi
 
 ---
 
@@ -26,15 +27,16 @@
 
 ## Executive Summary
 
-CRM Healthcare/Pharmaceutical Platform adalah sistem manajemen hubungan pelanggan (CRM) yang dirancang khusus untuk industri kesehatan dan farmasi. Platform ini membantu klinik, rumah sakit, apotek, dan perusahaan farmasi mengelola pasien, dokter, janji temu, resep, rekam medis, inventori obat, dan operasi bisnis mereka secara terintegrasi.
+CRM Healthcare/Pharmaceutical Platform adalah sistem manajemen hubungan pelanggan (CRM) yang dirancang khusus untuk **perusahaan farmasi** yang melakukan sales ke rumah sakit, klinik, dan apotek. Platform ini membantu sales team mengelola accounts, contacts, visit reports, sales pipeline, dan aktivitas sales secara terintegrasi melalui **Web Application** dan **Mobile App (Flutter)**.
 
 ### Key Value Propositions
 
-- **Integrated Patient Management**: Manajemen data pasien yang terpusat dan aman
-- **Streamlined Workflow**: Otomatisasi proses dari appointment hingga billing
-- **Regulatory Compliance**: Memenuhi standar kesehatan dan farmasi Indonesia
-- **Real-time Inventory**: Manajemen stok obat yang akurat dan real-time
-- **Comprehensive Reporting**: Laporan dan analitik untuk pengambilan keputusan
+- **Account & Contact Management**: Manajemen data rumah sakit, klinik, apotek, dan kontak (dokter, PIC) yang terpusat
+- **Visit Report & Activity Tracking**: Tracking kunjungan sales dengan check-in/out, GPS, dan dokumentasi foto
+- **Sales Pipeline Management**: Manage sales pipeline dari lead hingga deal dengan forecast yang akurat
+- **Task & Reminder**: Task management dan reminder otomatis untuk follow-up
+- **Mobile-First**: Mobile app (Flutter) untuk sales rep bekerja di lapangan
+- **On-Premise Ready**: Dapat di-install on-premise di server perusahaan
 
 ---
 
@@ -42,19 +44,19 @@ CRM Healthcare/Pharmaceutical Platform adalah sistem manajemen hubungan pelangga
 
 ### Vision
 
-Menjadi platform CRM terdepan untuk industri kesehatan dan farmasi di Indonesia yang memungkinkan penyedia layanan kesehatan memberikan perawatan yang lebih baik sambil mengoptimalkan operasi bisnis mereka.
+Menjadi platform CRM Sales terdepan untuk perusahaan farmasi di Indonesia yang memungkinkan sales team bekerja lebih efisien dan efektif dalam mengelola hubungan dengan rumah sakit, klinik, dan apotek.
 
 ### Mission
 
-Menyediakan solusi teknologi yang komprehensif, mudah digunakan, dan mematuhi regulasi untuk membantu transformasi digital industri kesehatan dan farmasi Indonesia.
+Menyediakan solusi CRM Sales yang komprehensif, mudah digunakan, dan mobile-first untuk membantu perusahaan farmasi mengoptimalkan aktivitas sales dan meningkatkan revenue.
 
 ### Product Goals
 
-1. **Improve Patient Experience**: Mempermudah pasien dalam mengakses layanan kesehatan
-2. **Operational Efficiency**: Mengurangi beban administratif dan meningkatkan efisiensi operasional
-3. **Data-Driven Decisions**: Memberikan insights yang actionable melalui data dan analitik
-4. **Regulatory Compliance**: Memastikan kepatuhan terhadap regulasi kesehatan dan farmasi
-5. **Scalability**: Mendukung pertumbuhan bisnis dari klinik kecil hingga jaringan besar
+1. **Improve Sales Efficiency**: Mempermudah sales rep dalam mengelola kunjungan dan aktivitas sales
+2. **Better Visibility**: Memberikan visibility yang jelas kepada supervisor dan management tentang aktivitas sales
+3. **Data-Driven Decisions**: Memberikan insights yang actionable melalui data dan analitik sales
+4. **Mobile-First**: Mobile app yang memungkinkan sales rep bekerja di lapangan dengan mudah
+5. **Scalability**: Mendukung pertumbuhan dari tim sales kecil hingga enterprise
 
 ---
 
@@ -62,67 +64,66 @@ Menyediakan solusi teknologi yang komprehensif, mudah digunakan, dan mematuhi re
 
 ### Primary Users
 
-1. **Administrator Klinik/Rumah Sakit**
-   - Mengelola seluruh operasi klinik
-   - Mengatur user dan permissions
+1. **Sales Rep / Sales Representative**
+   - Melakukan kunjungan ke rumah sakit, klinik, apotek
+   - Membuat visit report dengan check-in/out
+   - Mengelola tasks dan follow-up
+   - Melihat accounts dan contacts
+   - Menggunakan mobile app di lapangan
+
+2. **Supervisor / Sales Manager**
+   - Review dan approve visit reports
+   - Monitor aktivitas sales team
+   - Manage sales pipeline
+   - Melihat dashboard dan laporan
+   - Assign tasks ke sales rep
+
+3. **Administrator**
+   - Mengelola users dan permissions
+   - Mengelola accounts dan contacts
+   - Konfigurasi sistem
    - Melihat laporan dan analitik
-
-2. **Dokter/Physician**
-   - Mengelola jadwal appointment
-   - Membuat rekam medis
-   - Menulis resep
-
-3. **Apoteker/Pharmacist**
-   - Mengelola inventori obat
-   - Memproses resep
-   - Melakukan dispensing
-
-4. **Front Desk/Receptionist**
-   - Mencatat appointment
-   - Mengelola data pasien
-   - Memproses pembayaran
-
-5. **Kasir/Billing Staff**
-   - Memproses tagihan
-   - Mengelola pembayaran
-   - Mencetak invoice
+   - Manage products dan pricing
 
 ### Secondary Users
 
-1. **Pasien/Patient** (Future: Patient Portal)
-   - Melihat riwayat medis
-   - Booking appointment online
-   - Melihat resep dan tagihan
-
-2. **Manager/Owner**
+1. **Manager / Owner**
    - Melihat dashboard dan laporan
-   - Analisis bisnis
+   - Analisis sales performance
    - Pengambilan keputusan strategis
+   - Forecast dan planning
+
+2. **Viewer / Read-Only User**
+   - Melihat data dan laporan (tanpa edit)
+   - Export data untuk analisis
 
 ---
 
 ## Business Objectives
 
-### Short-term (MVP - 3 bulan)
+### Short-term (MVP - 100 hari)
 
-1. **Core Functionality**: Implementasi fitur-fitur inti untuk operasi harian
-2. **User Adoption**: Onboarding minimal 10 klinik/apotek
+1. **Core Functionality**: Implementasi fitur-fitur inti untuk sales operations
+2. **User Adoption**: Onboarding minimal 1 perusahaan farmasi dengan 10+ sales rep
 3. **Data Accuracy**: Akurasi data > 95%
 4. **System Uptime**: Uptime > 99%
+5. **Mobile App**: Functional Flutter app untuk sales rep
+6. **On-Premise**: Ready untuk install on-premise
 
 ### Medium-term (6-12 bulan)
 
-1. **Market Expansion**: Ekspansi ke 50+ klinik/apotek
+1. **Market Expansion**: Ekspansi ke 10+ perusahaan farmasi
 2. **Feature Enhancement**: Penambahan fitur advanced berdasarkan feedback
-3. **Integration**: Integrasi dengan sistem eksternal (BPJS, payment gateway)
-4. **Mobile App**: Aplikasi mobile untuk dokter dan pasien
+3. **Integration**: Integrasi dengan sistem eksternal (ERP, accounting)
+4. **Advanced Analytics**: Advanced analytics dan reporting
+5. **Mobile Enhancement**: Offline support, advanced features di mobile app
 
 ### Long-term (12+ bulan)
 
-1. **Market Leadership**: Menjadi market leader di Indonesia
-2. **AI/ML Integration**: Implementasi AI untuk diagnosis support dan prediksi
-3. **Telemedicine**: Fitur telemedicine terintegrasi
-4. **Analytics Platform**: Platform analitik advanced untuk healthcare insights
+1. **Market Leadership**: Menjadi market leader CRM Sales untuk pharma di Indonesia
+2. **AI/ML Integration**: Implementasi AI untuk sales prediction dan recommendation
+3. **Advanced Features**: Territory management, route optimization, digital signature
+4. **Analytics Platform**: Platform analitik advanced untuk sales insights
 
 ---
 
@@ -132,176 +133,163 @@ Menyediakan solusi teknologi yang komprehensif, mudah digunakan, dan mematuhi re
 
 #### 1.1 User Authentication
 - **FR-1.1.1**: Sistem harus mendukung login dengan email dan password
-- **FR-1.1.2**: Sistem harus mendukung multi-factor authentication (MFA)
+- **FR-1.1.2**: Sistem harus mendukung multi-factor authentication (MFA) - optional untuk MVP
 - **FR-1.1.3**: Sistem harus mendukung password reset via email
-- **FR-1.1.4**: Sistem harus mendukung session management dengan token-based authentication
+- **FR-1.1.4**: Sistem harus mendukung session management dengan token-based authentication (JWT)
 - **FR-1.1.5**: Sistem harus mendukung remember me functionality
+- **FR-1.1.6**: Mobile app harus mendukung login dan token refresh
 
 #### 1.2 Role-Based Access Control (RBAC)
-- **FR-1.2.1**: Sistem harus mendukung multiple roles (Admin, Doctor, Pharmacist, Receptionist, Cashier)
+- **FR-1.2.1**: Sistem harus mendukung multiple roles (Admin, Supervisor, Sales, Viewer)
 - **FR-1.2.2**: Sistem harus mendukung permission-based access control
 - **FR-1.2.3**: Sistem harus mendukung role assignment per user
 - **FR-1.2.4**: Sistem harus mendukung audit log untuk semua akses
 
-### 2. Patient Management
+### 2. Account & Contact Management
 
-#### 2.1 Patient Registration
-- **FR-2.1.1**: Sistem harus memungkinkan registrasi pasien baru dengan data lengkap
-- **FR-2.1.2**: Sistem harus memvalidasi NIK (Nomor Induk Kependudukan) untuk pasien Indonesia
-- **FR-2.1.3**: Sistem harus memvalidasi nomor BPJS jika tersedia
-- **FR-2.1.4**: Sistem harus mendukung upload foto pasien
-- **FR-2.1.5**: Sistem harus mendukung multiple contact methods (phone, email, address)
+#### 2.1 Account Management
+- **FR-2.1.1**: Sistem harus memungkinkan registrasi account baru (Rumah Sakit, Klinik, Apotek)
+- **FR-2.1.2**: Sistem harus menyimpan informasi account lengkap (nama, alamat, kategori, status)
+- **FR-2.1.3**: Sistem harus mendukung multiple accounts per sales rep
+- **FR-2.1.4**: Sistem harus mendukung import account dari Excel (optional untuk MVP)
+- **FR-2.1.5**: Sistem harus mendukung kategori account (Hospital, Clinic, Pharmacy)
 
-#### 2.2 Patient Profile
-- **FR-2.2.1**: Sistem harus menyimpan informasi demografis pasien (nama, tanggal lahir, gender, alamat)
-- **FR-2.2.2**: Sistem harus menyimpan informasi medis dasar (golongan darah, alergi, kondisi kronis)
-- **FR-2.2.3**: Sistem harus menyimpan informasi kontak darurat
-- **FR-2.2.4**: Sistem harus mendukung riwayat keluarga medis
-- **FR-2.2.5**: Sistem harus mendukung multiple insurance providers
+#### 2.2 Contact Management
+- **FR-2.2.1**: Sistem harus menyimpan informasi kontak (Dokter, PIC, Manager) yang terhubung ke account
+- **FR-2.2.2**: Sistem harus menyimpan informasi kontak lengkap (nama, phone, email, jabatan)
+- **FR-2.2.3**: Sistem harus mendukung multiple contacts per account
+- **FR-2.2.4**: Sistem harus mendukung riwayat interaksi dengan contact
+- **FR-2.2.5**: Sistem harus mendukung kategori contact (Doctor, PIC, Manager, Other)
 
-#### 2.3 Patient Search & Filter
-- **FR-2.3.1**: Sistem harus memungkinkan pencarian pasien berdasarkan nama, NIK, nomor telepon
-- **FR-2.3.2**: Sistem harus memungkinkan filter berdasarkan status, tanggal registrasi, dll
-- **FR-2.3.3**: Sistem harus mendukung pagination untuk daftar pasien
+#### 2.3 Account & Contact Search & Filter
+- **FR-2.3.1**: Sistem harus memungkinkan pencarian account berdasarkan nama, kategori, lokasi
+- **FR-2.3.2**: Sistem harus memungkinkan pencarian contact berdasarkan nama, phone, email
+- **FR-2.3.3**: Sistem harus memungkinkan filter berdasarkan status, kategori, sales rep assignment
+- **FR-2.3.4**: Sistem harus mendukung pagination untuk daftar account dan contact
 
-### 3. Doctor/Physician Management
+### 3. Visit Report & Activity Tracking
 
-#### 3.1 Doctor Registration
-- **FR-3.1.1**: Sistem harus memungkinkan registrasi dokter dengan informasi lengkap
-- **FR-3.1.2**: Sistem harus memvalidasi STR (Surat Tanda Registrasi) dokter
-- **FR-3.1.3**: Sistem harus menyimpan spesialisasi dokter
-- **FR-3.1.4**: Sistem harus menyimpan jadwal praktik dokter
+#### 3.1 Visit Report Creation
+- **FR-3.1.1**: Sistem harus memungkinkan sales rep membuat visit report
+- **FR-3.1.2**: Sistem harus mendukung check-in/check-out dengan GPS location
+- **FR-3.1.3**: Sistem harus menyimpan informasi kunjungan (account, contact, purpose, notes)
+- **FR-3.1.4**: Sistem harus mendukung upload foto dokumentasi kunjungan
+- **FR-3.1.5**: Sistem harus mendukung multiple visit types (regular, follow-up, emergency)
+- **FR-3.1.6**: Mobile app harus mendukung create visit report dengan GPS dan foto
 
-#### 3.2 Doctor Profile
-- **FR-3.2.1**: Sistem harus menyimpan informasi personal dokter
-- **FR-3.2.2**: Sistem harus menyimpan informasi profesional (pendidikan, sertifikasi, pengalaman)
-- **FR-3.2.3**: Sistem harus menyimpan informasi kontak dan jadwal
-- **FR-3.2.4**: Sistem harus mendukung multiple specializations
+#### 3.2 Visit Report Management
+- **FR-3.2.1**: Sistem harus menampilkan list visit reports dengan filter
+- **FR-3.2.2**: Sistem harus mendukung status tracking (draft, submitted, approved, rejected)
+- **FR-3.2.3**: Supervisor harus dapat review dan approve/reject visit reports
+- **FR-3.2.4**: Sistem harus menampilkan activity timeline untuk setiap account
+- **FR-3.2.5**: Sistem harus mendukung search visit reports
 
-### 4. Appointment Scheduling
+#### 3.3 Activity Tracking
+- **FR-3.3.1**: Sistem harus melacak semua aktivitas sales (visit, call, email, task)
+- **FR-3.3.2**: Sistem harus menampilkan activity timeline per account
+- **FR-3.3.3**: Sistem harus mendukung filter activity berdasarkan type, date, sales rep
+- **FR-3.3.4**: Mobile app harus menampilkan activity timeline
 
-#### 4.1 Appointment Booking
-- **FR-4.1.1**: Sistem harus memungkinkan booking appointment untuk pasien
-- **FR-4.1.2**: Sistem harus memvalidasi ketersediaan slot waktu dokter
-- **FR-4.1.3**: Sistem harus mendukung multiple appointment types (konsultasi, follow-up, emergency)
-- **FR-4.1.4**: Sistem harus mendukung reminder via SMS/Email
-- **FR-4.1.5**: Sistem harus mendukung reschedule dan cancel appointment
+### 4. Sales Pipeline Management
 
-#### 4.2 Appointment Management
-- **FR-4.2.1**: Sistem harus menampilkan calendar view untuk appointments
-- **FR-4.2.2**: Sistem harus menampilkan list view untuk appointments
-- **FR-4.2.3**: Sistem harus mendukung filter berdasarkan dokter, tanggal, status
-- **FR-4.2.4**: Sistem harus mendukung status tracking (scheduled, confirmed, in-progress, completed, cancelled)
-- **FR-4.2.5**: Sistem harus mendukung walk-in appointments
+#### 4.1 Pipeline Stages
+- **FR-4.1.1**: Sistem harus mendukung multiple pipeline stages (Lead, Prospect, Proposal, Negotiation, Deal, Closed)
+- **FR-4.1.2**: Sistem harus memungkinkan custom pipeline stages
+- **FR-4.1.3**: Sistem harus menampilkan kanban view untuk pipeline
+- **FR-4.1.4**: Sistem harus mendukung drag-and-drop untuk move deal antar stages
 
-### 5. Medical Records
+#### 4.2 Deal/Opportunity Management
+- **FR-4.2.1**: Sistem harus memungkinkan create deal/opportunity
+- **FR-4.2.2**: Sistem harus menyimpan informasi deal (account, contact, product, value, expected close date)
+- **FR-4.2.3**: Sistem harus mendukung notes dan attachments untuk deal
+- **FR-4.2.4**: Sistem harus mendukung forecast berdasarkan deals
+- **FR-4.2.5**: Sistem harus mendukung win/loss tracking
 
-#### 5.1 Medical Record Creation
-- **FR-5.1.1**: Sistem harus memungkinkan dokter membuat rekam medis setelah appointment
-- **FR-5.1.2**: Sistem harus menyimpan chief complaint (keluhan utama)
-- **FR-5.1.3**: Sistem harus menyimpan physical examination results
-- **FR-5.1.4**: Sistem harus menyimpan diagnosis
-- **FR-5.1.5**: Sistem harus menyimpan treatment plan
-- **FR-5.1.6**: Sistem harus mendukung upload file (lab results, X-ray, dll)
+#### 4.3 Pipeline Analytics
+- **FR-4.3.1**: Sistem harus menampilkan pipeline summary (total value, stage distribution)
+- **FR-4.3.2**: Sistem harus menampilkan forecast berdasarkan deals
+- **FR-4.3.3**: Sistem harus menampilkan conversion rate per stage
+- **FR-4.3.4**: Sistem harus mendukung date range filtering
 
-#### 5.2 Medical Record History
-- **FR-5.2.1**: Sistem harus menampilkan riwayat rekam medis pasien
-- **FR-5.2.2**: Sistem harus mendukung filter berdasarkan tanggal, dokter, diagnosis
-- **FR-5.2.3**: Sistem harus mendukung search dalam rekam medis
-- **FR-5.2.4**: Sistem harus memastikan privacy dan security rekam medis
+### 5. Task & Reminder Management
 
-### 6. Prescription Management
+#### 5.1 Task Creation
+- **FR-5.1.1**: Sistem harus memungkinkan create task untuk follow-up
+- **FR-5.1.2**: Sistem harus menyimpan informasi task (title, description, due date, assignee, priority)
+- **FR-5.1.3**: Sistem harus mendukung task assignment ke sales rep
+- **FR-5.1.4**: Sistem harus mendukung task linked ke account atau contact
+- **FR-5.1.5**: Mobile app harus mendukung create dan view tasks
 
-#### 6.1 Prescription Creation
-- **FR-6.1.1**: Sistem harus memungkinkan dokter membuat resep
-- **FR-6.1.2**: Sistem harus memvalidasi ketersediaan obat di apotek
-- **FR-6.1.3**: Sistem harus mendukung multiple medications dalam satu resep
-- **FR-6.1.4**: Sistem harus menyimpan dosage, frequency, dan duration
-- **FR-6.1.5**: Sistem harus mendukung prescription notes
-- **FR-6.1.6**: Sistem harus memvalidasi drug interactions
+#### 5.2 Task Management
+- **FR-5.2.1**: Sistem harus menampilkan task list dengan filter (status, assignee, due date)
+- **FR-5.2.2**: Sistem harus mendukung task status (open, in-progress, done, cancelled)
+- **FR-5.2.3**: Sistem harus mendukung task reminder (email, in-app notification)
+- **FR-5.2.4**: Mobile app harus mengirim push notification untuk task reminder
 
-#### 6.2 Prescription Processing
-- **FR-6.2.1**: Sistem harus memungkinkan apoteker memproses resep
-- **FR-6.2.2**: Sistem harus memvalidasi stok obat
-- **FR-6.2.3**: Sistem harus mendukung partial fulfillment
-- **FR-6.2.4**: Sistem harus mendukung prescription status (pending, processing, fulfilled, cancelled)
-- **FR-6.2.5**: Sistem harus mencetak label obat
+### 6. Product Management
 
-### 7. Pharmacy/Inventory Management
+#### 6.1 Product Catalog
+- **FR-6.1.1**: Sistem harus memungkinkan manage product catalog
+- **FR-6.1.2**: Sistem harus menyimpan informasi product (nama, SKU, kategori, harga)
+- **FR-6.1.3**: Sistem harus mendukung product categories
+- **FR-6.1.4**: Sistem harus mendukung search products
+- **FR-6.1.5**: Sistem harus mendukung product linked ke deals
 
-#### 7.1 Medicine Management
-- **FR-7.1.1**: Sistem harus memungkinkan registrasi obat baru
-- **FR-7.1.2**: Sistem harus menyimpan informasi obat (nama, generic name, manufacturer, batch number, expiry date)
-- **FR-7.1.3**: Sistem harus memvalidasi nomor registrasi BPOM
-- **FR-7.1.4**: Sistem harus menyimpan harga beli dan harga jual
-- **FR-7.1.5**: Sistem harus mendukung barcode scanning
+### 7. Dashboard & Reports
 
-#### 7.2 Stock Management
-- **FR-7.2.1**: Sistem harus melacak stok obat real-time
-- **FR-7.2.2**: Sistem harus mendukung stock adjustment (masuk, keluar, adjustment)
-- **FR-7.2.3**: Sistem harus memberikan alert untuk stok rendah
-- **FR-7.2.4**: Sistem harus memberikan alert untuk obat mendekati expiry date
-- **FR-7.2.5**: Sistem harus mendukung multiple warehouses/locations
-- **FR-7.2.6**: Sistem harus mendukung stock transfer antar lokasi
+#### 7.1 Dashboard
+- **FR-7.1.1**: Sistem harus menampilkan dashboard dengan key metrics
+- **FR-7.1.2**: Sistem harus menampilkan visit statistics (today, this week, this month)
+- **FR-7.1.3**: Sistem harus menampilkan pipeline summary
+- **FR-7.1.4**: Sistem harus menampilkan top accounts, top sales rep
+- **FR-7.1.5**: Sistem harus menampilkan recent activities
+- **FR-7.1.6**: Mobile app harus menampilkan dashboard (basic)
 
-#### 7.3 Purchase Management
-- **FR-7.3.1**: Sistem harus memungkinkan pembuatan purchase order
-- **FR-7.3.2**: Sistem harus memungkinkan penerimaan barang (goods receipt)
-- **FR-7.3.3**: Sistem harus memvalidasi invoice supplier
-- **FR-7.3.4**: Sistem harus mendukung multiple suppliers
+#### 7.2 Reports
+- **FR-7.2.1**: Sistem harus menghasilkan laporan visit reports (daily, weekly, monthly)
+- **FR-7.2.2**: Sistem harus menghasilkan laporan sales pipeline
+- **FR-7.2.3**: Sistem harus menghasilkan laporan sales performance per sales rep
+- **FR-7.2.4**: Sistem harus menghasilkan laporan account activity
+- **FR-7.2.5**: Sistem harus mendukung export ke PDF, Excel
 
-### 8. Billing & Invoicing
+### 8. Mobile App (Flutter)
 
-#### 8.1 Invoice Creation
-- **FR-8.1.1**: Sistem harus memungkinkan pembuatan invoice untuk layanan medis
-- **FR-8.1.2**: Sistem harus memungkinkan pembuatan invoice untuk obat
-- **FR-8.1.3**: Sistem harus mendukung multiple payment methods (cash, transfer, credit card, BPJS)
-- **FR-8.1.4**: Sistem harus mendukung discount dan promo
-- **FR-8.1.5**: Sistem harus menghitung tax secara otomatis
+#### 8.1 Core Mobile Features
+- **FR-8.1.1**: Mobile app harus mendukung login dan authentication
+- **FR-8.1.2**: Mobile app harus menampilkan dashboard (basic metrics)
+- **FR-8.1.3**: Mobile app harus menampilkan visit reports list dan create visit report
+- **FR-8.1.4**: Mobile app harus mendukung check-in/out dengan GPS
+- **FR-8.1.5**: Mobile app harus menampilkan tasks list dan create task
+- **FR-8.1.6**: Mobile app harus menampilkan accounts dan contacts list
+- **FR-8.1.7**: Mobile app harus mendukung upload foto untuk visit report
+- **FR-8.1.8**: Mobile app harus mengirim push notification untuk task reminder
 
-#### 8.2 Payment Processing
-- **FR-8.2.1**: Sistem harus memproses pembayaran
-- **FR-8.2.2**: Sistem harus mencetak receipt
-- **FR-8.2.3**: Sistem harus mendukung partial payment
-- **FR-8.2.4**: Sistem harus mendukung refund
-- **FR-8.2.5**: Sistem harus memvalidasi pembayaran BPJS
+#### 8.2 Mobile Offline Support (Optional untuk MVP)
+- **FR-8.2.1**: Mobile app harus mendukung offline mode (sync later)
+- **FR-8.2.2**: Mobile app harus sync data saat online
 
-#### 8.3 Insurance Integration
-- **FR-8.3.1**: Sistem harus mendukung verifikasi BPJS
-- **FR-8.3.2**: Sistem harus menghitung co-payment
-- **FR-8.3.3**: Sistem harus memproses klaim BPJS
-- **FR-8.3.4**: Sistem harus menyimpan informasi asuransi swasta
+### 9. System Administration
 
-### 9. Reports & Analytics
+#### 9.1 User Management
+- **FR-9.1.1**: Sistem harus memungkinkan admin mengelola users
+- **FR-9.1.2**: Sistem harus memungkinkan assign roles dan permissions
+- **FR-9.1.3**: Sistem harus memungkinkan enable/disable users
+- **FR-9.1.4**: Sistem harus menyimpan audit log untuk semua user actions
 
-#### 9.1 Dashboard
-- **FR-9.1.1**: Sistem harus menampilkan dashboard dengan key metrics
-- **FR-9.1.2**: Sistem harus menampilkan appointment statistics
-- **FR-9.1.3**: Sistem harus menampilkan revenue statistics
-- **FR-9.1.4**: Sistem harus menampilkan inventory alerts
-- **FR-9.1.5**: Sistem harus menampilkan top doctors, top medications
+#### 9.2 Settings
+- **FR-9.2.1**: Sistem harus memungkinkan konfigurasi sistem (company info, logo, branding)
+- **FR-9.2.2**: Sistem harus memungkinkan konfigurasi notification settings
+- **FR-9.2.3**: Sistem harus memungkinkan konfigurasi pipeline stages
+- **FR-9.2.4**: Sistem harus memungkinkan konfigurasi account categories
 
-#### 9.2 Reports
-- **FR-9.2.1**: Sistem harus menghasilkan laporan harian, mingguan, bulanan
-- **FR-9.2.2**: Sistem harus menghasilkan laporan pasien
-- **FR-9.2.3**: Sistem harus menghasilkan laporan penjualan obat
-- **FR-9.2.4**: Sistem harus menghasilkan laporan inventory
-- **FR-9.2.5**: Sistem harus menghasilkan laporan keuangan
-- **FR-9.2.6**: Sistem harus mendukung export ke PDF, Excel
+### 10. On-Premise Installation
 
-### 10. System Administration
-
-#### 10.1 User Management
-- **FR-10.1.1**: Sistem harus memungkinkan admin mengelola users
-- **FR-10.1.2**: Sistem harus memungkinkan assign roles dan permissions
-- **FR-10.1.3**: Sistem harus memungkinkan enable/disable users
-- **FR-10.1.4**: Sistem harus menyimpan audit log untuk semua user actions
-
-#### 10.2 Settings
-- **FR-10.2.1**: Sistem harus memungkinkan konfigurasi sistem (clinic info, business hours, dll)
-- **FR-10.2.2**: Sistem harus memungkinkan konfigurasi notification settings
-- **FR-10.2.3**: Sistem harus memungkinkan konfigurasi payment methods
-- **FR-10.2.4**: Sistem harus memungkinkan konfigurasi tax rates
+#### 10.1 Installation Requirements
+- **FR-10.1.1**: Sistem harus dapat di-install on-premise di server perusahaan
+- **FR-10.1.2**: Sistem harus menyediakan Docker Compose untuk easy installation
+- **FR-10.1.3**: Sistem harus menyediakan installation guide (PDF)
+- **FR-10.1.4**: Sistem harus menyediakan database migration scripts
+- **FR-10.1.5**: Sistem harus menyediakan environment configuration template
 
 ---
 
@@ -345,53 +333,63 @@ Menyediakan solusi teknologi yang komprehensif, mudah digunakan, dan mematuhi re
 
 ## User Stories
 
-### Epic 1: Patient Management
+### Epic 1: Account & Contact Management
 
-**US-1.1**: Sebagai receptionist, saya ingin dapat mendaftarkan pasien baru dengan data lengkap agar dapat melayani pasien dengan baik.
+**US-1.1**: Sebagai admin, saya ingin dapat mendaftarkan account baru (RS/Klinik/Apotek) dengan data lengkap agar dapat mengelola customer dengan baik.
 
-**US-1.2**: Sebagai dokter, saya ingin dapat melihat riwayat medis pasien lengkap agar dapat memberikan diagnosis yang akurat.
+**US-1.2**: Sebagai sales rep, saya ingin dapat melihat list accounts yang ditugaskan kepada saya agar dapat merencanakan kunjungan.
 
-**US-1.3**: Sebagai admin, saya ingin dapat mencari pasien berdasarkan berbagai kriteria agar dapat menemukan data pasien dengan cepat.
+**US-1.3**: Sebagai admin, saya ingin dapat mencari account berdasarkan berbagai kriteria agar dapat menemukan data account dengan cepat.
 
-### Epic 2: Appointment Scheduling
+**US-1.4**: Sebagai sales rep, saya ingin dapat melihat kontak (dokter, PIC) dari setiap account agar dapat menghubungi orang yang tepat.
 
-**US-2.1**: Sebagai receptionist, saya ingin dapat membuat appointment untuk pasien dengan dokter tertentu agar pasien dapat dijadwalkan dengan tepat.
+### Epic 2: Visit Report & Activity Tracking
 
-**US-2.2**: Sebagai dokter, saya ingin dapat melihat jadwal appointment saya hari ini agar dapat mempersiapkan konsultasi.
+**US-2.1**: Sebagai sales rep, saya ingin dapat membuat visit report setelah kunjungan agar dapat mendokumentasikan aktivitas sales.
 
-**US-2.3**: Sebagai sistem, saya ingin mengirim reminder appointment ke pasien 24 jam sebelum jadwal agar mengurangi no-show rate.
+**US-2.2**: Sebagai sales rep, saya ingin dapat check-in/check-out dengan GPS di mobile app agar supervisor dapat memverifikasi lokasi kunjungan.
 
-### Epic 3: Medical Records
+**US-2.3**: Sebagai supervisor, saya ingin dapat review dan approve visit reports agar dapat memastikan kualitas laporan kunjungan.
 
-**US-3.1**: Sebagai dokter, saya ingin dapat membuat rekam medis setelah konsultasi agar data medis pasien tersimpan dengan baik.
+**US-2.4**: Sebagai sales rep, saya ingin dapat upload foto dokumentasi kunjungan agar dapat memberikan bukti visual.
 
-**US-3.2**: Sebagai dokter, saya ingin dapat melihat riwayat rekam medis pasien sebelumnya agar dapat memberikan continuity of care.
+**US-2.5**: Sebagai supervisor, saya ingin dapat melihat activity timeline untuk setiap account agar dapat memahami history interaksi.
 
-**US-3.3**: Sebagai admin, saya ingin memastikan rekam medis hanya dapat diakses oleh authorized personnel agar privasi pasien terjaga.
+### Epic 3: Sales Pipeline
 
-### Epic 4: Prescription Management
+**US-3.1**: Sebagai sales rep, saya ingin dapat membuat deal/opportunity baru agar dapat melacak potential sales.
 
-**US-4.1**: Sebagai dokter, saya ingin dapat membuat resep dengan multiple medications agar dapat memberikan treatment yang komprehensif.
+**US-3.2**: Sebagai supervisor, saya ingin dapat melihat pipeline dalam kanban view agar dapat memantau progress deals.
 
-**US-4.2**: Sebagai apoteker, saya ingin dapat melihat resep yang perlu diproses agar dapat mempersiapkan obat dengan tepat.
+**US-3.3**: Sebagai manager, saya ingin dapat melihat forecast berdasarkan pipeline agar dapat melakukan planning.
 
-**US-4.3**: Sebagai sistem, saya ingin memvalidasi drug interactions sebelum resep dibuat agar dapat mencegah medication errors.
+**US-3.4**: Sebagai sales rep, saya ingin dapat move deal antar stages agar dapat update progress sales.
 
-### Epic 5: Inventory Management
+### Epic 4: Task & Reminder
 
-**US-5.1**: Sebagai apoteker, saya ingin dapat melihat stok obat real-time agar dapat mengetahui ketersediaan obat.
+**US-4.1**: Sebagai sales rep, saya ingin dapat membuat task untuk follow-up agar tidak lupa melakukan tindak lanjut.
 
-**US-5.2**: Sebagai admin, saya ingin menerima alert ketika stok obat rendah agar dapat melakukan restocking tepat waktu.
+**US-4.2**: Sebagai supervisor, saya ingin dapat assign task ke sales rep agar dapat mengatur workload.
 
-**US-5.3**: Sebagai admin, saya ingin menerima alert untuk obat yang mendekati expiry date agar dapat mengelola stok dengan baik.
+**US-4.3**: Sebagai sales rep, saya ingin menerima reminder untuk task yang due date-nya mendekati agar dapat menyelesaikan tepat waktu.
 
-### Epic 6: Billing
+**US-4.4**: Sebagai sales rep, saya ingin dapat melihat task list di mobile app agar dapat mengelola tasks saat di lapangan.
 
-**US-6.1**: Sebagai kasir, saya ingin dapat membuat invoice untuk layanan medis dan obat agar dapat memproses pembayaran.
+### Epic 5: Dashboard & Reports
 
-**US-6.2**: Sebagai kasir, saya ingin dapat memproses pembayaran dengan multiple payment methods agar dapat memberikan fleksibilitas kepada pasien.
+**US-5.1**: Sebagai supervisor, saya ingin dapat melihat dashboard dengan key metrics agar dapat memantau performance sales team.
 
-**US-6.3**: Sebagai admin, saya ingin dapat melihat laporan keuangan harian agar dapat memantau cash flow.
+**US-5.2**: Sebagai manager, saya ingin dapat melihat laporan visit reports harian/mingguan/bulanan agar dapat menganalisis aktivitas sales.
+
+**US-5.3**: Sebagai admin, saya ingin dapat export laporan ke Excel/PDF agar dapat melakukan analisis lebih lanjut.
+
+### Epic 6: Mobile App
+
+**US-6.1**: Sebagai sales rep, saya ingin dapat login ke mobile app agar dapat mengakses CRM saat di lapangan.
+
+**US-6.2**: Sebagai sales rep, saya ingin dapat membuat visit report di mobile app dengan GPS dan foto agar dapat mendokumentasikan kunjungan secara real-time.
+
+**US-6.3**: Sebagai sales rep, saya ingin dapat melihat tasks dan accounts di mobile app agar dapat bekerja tanpa perlu membuka laptop.
 
 ---
 
@@ -399,20 +397,27 @@ Menyediakan solusi teknologi yang komprehensif, mudah digunakan, dan mematuhi re
 
 ### Technology Stack
 
-#### Frontend
+#### Web Frontend
 - **Framework**: Next.js 16 (App Router, Server Components)
 - **Styling**: Tailwind CSS v4
 - **State Management**: Zustand
 - **UI Components**: shadcn/ui v4
 - **Internationalization**: next-intl (Bahasa Indonesia & English)
 
+#### Mobile App
+- **Framework**: Flutter
+- **State Management**: Provider / Riverpod
+- **HTTP Client**: Dio
+- **Local Storage**: Hive / SharedPreferences
+- **Maps**: Google Maps / OpenStreetMap
+
 #### Backend
 - **Language**: Go
 - **Framework**: Gin
 - **Database**: PostgreSQL
 - **ORM**: GORM
-- **Cache**: Redis
-- **Message Queue**: RabbitMQ (optional)
+- **Cache**: Redis (optional untuk MVP)
+- **File Storage**: Local / S3 compatible storage
 
 #### Infrastructure
 - **Hosting**: Cloud (AWS/GCP/Azure)
@@ -446,8 +451,8 @@ Menyediakan solusi teknologi yang komprehensif, mudah digunakan, dan mematuhi re
 ## Success Metrics
 
 ### User Adoption
-- **Target**: 10+ clinics/pharmacies onboarded dalam 3 bulan pertama
-- **Metric**: Number of active users, number of daily logins
+- **Target**: 1 perusahaan farmasi dengan 10+ sales rep onboarded dalam 100 hari
+- **Metric**: Number of active users, number of daily logins, number of visit reports created
 
 ### System Performance
 - **Target**: 99.5% uptime
@@ -462,42 +467,54 @@ Menyediakan solusi teknologi yang komprehensif, mudah digunakan, dan mematuhi re
 - **Metric**: User surveys, feedback, support tickets
 
 ### Business Impact
-- **Target**: 30% reduction in administrative time
-- **Metric**: Time saved per transaction, efficiency metrics
+- **Target**: 30% reduction in administrative time untuk sales rep
+- **Metric**: Time saved per visit report, number of visit reports per sales rep, pipeline conversion rate
 
 ---
 
 ## Timeline & Milestones
 
-### Phase 1: MVP (Months 1-3)
+### Phase 1: MVP (100 Hari / ~14 Minggu)
 
-#### Month 1: Foundation
-- Authentication & Authorization
+#### Week 1-2: Foundation & Account Management
+- Authentication & Authorization (Web + Mobile)
 - User Management
-- Patient Management (Basic)
-- Doctor Management (Basic)
+- Account & Contact Management (Web)
 
-#### Month 2: Core Features
-- Appointment Scheduling
-- Medical Records (Basic)
-- Prescription Management (Basic)
+#### Week 3-4: Visit Report & Sales Pipeline
+- Visit Report & Activity Tracking (Web + Mobile)
+- Sales Pipeline Management (Web)
 
-#### Month 3: Business Features
-- Inventory Management (Basic)
-- Billing & Invoicing (Basic)
-- Dashboard & Basic Reports
+#### Week 5-6: Task, Product, Dashboard
+- Task & Reminder (Web + Mobile)
+- Product Management (Web)
+- Dashboard & Reports (Web)
+
+#### Week 7-8: Mobile App & Integration
+- Mobile App (Flutter) - Core Features
+- Integration & Testing
+
+#### Week 9-11: Polish & Demo
+- Testing & Bug Fixes
+- Demo Preparation
+- On-Premise Setup
+
+#### Week 12-14: Buffer & Delivery
+- Client Feedback
+- Customization
+- Final Delivery
 
 ### Phase 2: Enhancement (Months 4-6)
 - Advanced Reports
-- BPJS Integration
-- Mobile Responsive Optimization
+- Offline Support (Mobile)
+- Advanced Analytics
 - Performance Optimization
 
 ### Phase 3: Scale (Months 7-12)
-- Multi-tenant Support
-- Advanced Analytics
+- Multi-company Support
+- Advanced Features (Territory Management, Route Optimization)
 - API for Third-party Integration
-- Mobile App (Future)
+- Advanced Mobile Features
 
 ---
 
@@ -539,11 +556,12 @@ Menyediakan solusi teknologi yang komprehensif, mudah digunakan, dan mematuhi re
 
 ### Glossary
 
-- **BPJS**: Badan Penyelenggara Jaminan Sosial (Social Security Agency)
-- **BPOM**: Badan Pengawas Obat dan Makanan (Food and Drug Authority)
-- **STR**: Surat Tanda Registrasi (Registration Certificate for Doctors)
-- **HIPAA**: Health Insurance Portability and Accountability Act
-- **NIK**: Nomor Induk Kependudukan (National ID Number)
+- **Account**: Rumah Sakit, Klinik, atau Apotek yang menjadi customer perusahaan farmasi
+- **Contact**: Dokter, PIC, atau Manager yang merupakan kontak di account
+- **Visit Report**: Laporan kunjungan sales rep ke account
+- **Pipeline**: Sales pipeline dari lead hingga deal
+- **Deal/Opportunity**: Potential sales yang sedang dalam proses
+- **Check-in/Check-out**: Proses menandai mulai dan selesai kunjungan dengan GPS
 
 ### References
 
