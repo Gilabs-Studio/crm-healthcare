@@ -1,9 +1,9 @@
-# Sprint Planning - Developer 2 (Backend Developer)
+# Sprint Planning - Developer 2 (Fullstack Developer)
 ## CRM Healthcare/Pharmaceutical Platform - Sales CRM
 
-**Developer**: Backend Developer (Fokus BE, sedikit FE)  
-**Role**: Develop backend APIs dan sedikit frontend yang efisien  
-**Versi**: 1.0  
+**Developer**: Fullstack Developer (Go Backend + Next.js Frontend)  
+**Role**: Develop modul-modul Sales CRM secara fullstack (backend + frontend)  
+**Versi**: 2.0  
 **Status**: Active  
 **Last Updated**: 2025-01-15
 
@@ -14,11 +14,22 @@
 ## 📋 Overview
 
 Developer 2 bertanggung jawab untuk:
-- **Backend Development**: Develop semua backend APIs (Go + Gin)
-- **Database Design**: Design dan implement database schema
-- **API Design**: Design RESTful APIs sesuai API standards
-- **Minimal Frontend**: Develop minimal frontend yang efisien (hanya untuk testing/validation)
-- **API Documentation**: Update Postman collection
+- **Fullstack Development**: Develop modul-modul yang ditugaskan secara lengkap (backend API + frontend)
+- **Backend**: Go (Gin) APIs untuk modul yang ditugaskan
+- **Frontend**: Next.js 16 frontend untuk modul yang ditugaskan
+- **Database**: Design dan implement database schema untuk modul yang ditugaskan
+- **Postman Collection**: Update Postman collection untuk modul yang ditugaskan
+
+**Modul yang ditugaskan ke Dev2**:
+1. ✅ Sales Pipeline Management (Fullstack)
+2. ✅ Task & Reminder Management (Fullstack)
+3. ✅ Product Management (Fullstack)
+
+**Parallel Development Strategy**:
+- ✅ **TIDAK bergantung ke Dev1** - bisa dikerjakan paralel
+- ✅ Setiap modul dikerjakan fullstack sampai selesai
+- ✅ **Hackathon mode** - tidak ada unit test
+- ✅ Manual testing saja
 
 ---
 
@@ -67,122 +78,9 @@ Developer 2 bertanggung jawab untuk:
 
 ---
 
-### Sprint 2: Account & Contact Management APIs (Week 3-4)
+### Sprint 2: Sales Pipeline Management (Fullstack) (Week 7-8)
 
-**Goal**: Implement Account & Contact Management APIs
-
-**Backend Tasks**:
-- [ ] Create account model dan migration
-- [ ] Create contact model dan migration
-- [ ] Create account repository interface dan implementation
-- [ ] Create contact repository interface dan implementation
-- [ ] Create account service
-- [ ] Create contact service
-- [ ] Implement account list API (`GET /api/v1/accounts`)
-- [ ] Implement account detail API (`GET /api/v1/accounts/:id`)
-- [ ] Implement create account API (`POST /api/v1/accounts`)
-- [ ] Implement update account API (`PUT /api/v1/accounts/:id`)
-- [ ] Implement delete account API (`DELETE /api/v1/accounts/:id`)
-- [ ] Implement contact list API (`GET /api/v1/contacts`)
-- [ ] Implement contact detail API (`GET /api/v1/contacts/:id`)
-- [ ] Implement create contact API (`POST /api/v1/contacts`)
-- [ ] Implement update contact API (`PUT /api/v1/contacts/:id`)
-- [ ] Implement delete contact API (`DELETE /api/v1/contacts/:id`)
-- [ ] Implement account-contact relationship APIs
-- [ ] Add account search API (`GET /api/v1/accounts/search`)
-- [ ] Add contact search API (`GET /api/v1/contacts/search`)
-- [ ] Add pagination support
-- [ ] Add validation
-- [ ] Add account categories seeder
-
-**Minimal Frontend Tasks** (Efisien):
-- [ ] Create simple account list page untuk testing (`/test/accounts`)
-- [ ] Create simple account form untuk testing
-- [ ] Create simple contact list page untuk testing (`/test/contacts`)
-- [ ] Create simple contact form untuk testing
-
-**Postman Collection**:
-- [ ] Add account APIs ke Postman collection (Web section)
-- [ ] Add contact APIs ke Postman collection (Web section)
-
-**Acceptance Criteria**:
-- ✅ Account CRUD APIs bekerja dengan baik
-- ✅ Contact CRUD APIs bekerja dengan baik
-- ✅ Account-contact relationship bekerja
-- ✅ Search dan pagination bekerja
-- ✅ Validation comprehensive
-- ✅ Postman collection updated
-
-**Testing**:
-- Test account CRUD
-- Test contact CRUD
-- Test account-contact relationship
-- Test search dan pagination
-
-**Estimated Time**: 6-7 days
-
----
-
-### Sprint 3: Visit Report & Activity Tracking APIs (Week 5-6)
-
-**Goal**: Implement Visit Report & Activity Tracking APIs
-
-**Backend Tasks**:
-- [ ] Create visit report model dan migration
-- [ ] Create activity model dan migration
-- [ ] Create visit report repository interface dan implementation
-- [ ] Create activity repository interface dan implementation
-- [ ] Create visit report service
-- [ ] Create activity service
-- [ ] Implement visit report list API (`GET /api/v1/visit-reports`)
-- [ ] Implement visit report detail API (`GET /api/v1/visit-reports/:id`)
-- [ ] Implement create visit report API (`POST /api/v1/visit-reports`)
-- [ ] Implement update visit report API (`PUT /api/v1/visit-reports/:id`)
-- [ ] Implement delete visit report API (`DELETE /api/v1/visit-reports/:id`)
-- [ ] Implement check-in API (`POST /api/v1/visit-reports/:id/check-in`)
-- [ ] Implement check-out API (`POST /api/v1/visit-reports/:id/check-out`)
-- [ ] Implement approve visit report API (`POST /api/v1/visit-reports/:id/approve`)
-- [ ] Implement reject visit report API (`POST /api/v1/visit-reports/:id/reject`)
-- [ ] Implement photo upload API (`POST /api/v1/visit-reports/:id/photos`)
-- [ ] Implement activity list API (`GET /api/v1/activities`)
-- [ ] Implement activity timeline API (`GET /api/v1/accounts/:id/activities`)
-- [ ] Add GPS location tracking
-- [ ] Add pagination support
-- [ ] Add validation
-- [ ] Add file storage setup
-
-**Minimal Frontend Tasks** (Efisien):
-- [ ] Create simple visit report list page untuk testing (`/test/visit-reports`)
-- [ ] Create simple visit report form untuk testing
-- [ ] Create simple photo upload component untuk testing
-
-**Postman Collection**:
-- [ ] Add visit report APIs ke Postman collection (Web section)
-- [ ] Add visit report APIs ke Postman collection (Mobile section)
-- [ ] Add activity APIs ke Postman collection (Web section)
-
-**Acceptance Criteria**:
-- ✅ Visit report CRUD APIs bekerja dengan baik
-- ✅ Check-in/out APIs bekerja dengan GPS
-- ✅ Photo upload bekerja
-- ✅ Activity tracking bekerja
-- ✅ Supervisor approve/reject bekerja
-- ✅ Postman collection updated (Web + Mobile)
-
-**Testing**:
-- Test visit report CRUD
-- Test check-in/out dengan GPS
-- Test photo upload
-- Test activity tracking
-- Test supervisor workflow
-
-**Estimated Time**: 7-8 days
-
----
-
-### Sprint 4: Sales Pipeline APIs (Week 7-8)
-
-**Goal**: Implement Sales Pipeline APIs
+**Goal**: Implement Sales Pipeline Management secara fullstack (backend + frontend)
 
 **Backend Tasks**:
 - [ ] Create pipeline stage model dan migration
@@ -205,9 +103,19 @@ Developer 2 bertanggung jawab untuk:
 - [ ] Add validation
 - [ ] Add pipeline stages seeder
 
-**Minimal Frontend Tasks** (Efisien):
-- [ ] Create simple deal list page untuk testing (`/test/deals`)
-- [ ] Create simple deal form untuk testing
+**Frontend Tasks**:
+- [ ] Create pipeline types (`types/pipeline.d.ts`)
+- [ ] Create deal types (`types/deal.d.ts`)
+- [ ] Create pipeline service (`pipelineService`)
+- [ ] Create deal service (`dealService`)
+- [ ] Create pipeline kanban page (`/pipeline`)
+- [ ] Create kanban board component (`KanbanBoard`)
+- [ ] Create deal card component (`DealCard`)
+- [ ] Create deal form component (`DealForm`)
+- [ ] Create deal detail page (`/deals/[id]`)
+- [ ] Add drag-and-drop untuk move deal
+- [ ] Create pipeline summary component
+- [ ] Create forecast component
 
 **Postman Collection**:
 - [ ] Add pipeline APIs ke Postman collection (Web section)
@@ -217,21 +125,29 @@ Developer 2 bertanggung jawab untuk:
 - ✅ Deal CRUD APIs bekerja dengan baik
 - ✅ Move deal API bekerja
 - ✅ Pipeline summary dan forecast bekerja
+- ✅ Frontend terintegrasi dengan backend APIs
+- ✅ User dapat melihat pipeline dalam kanban view
+- ✅ User dapat create dan edit deal
+- ✅ User dapat move deal antar stages (drag-and-drop)
+- ✅ Pipeline summary dan forecast ditampilkan
+- ✅ UI/UX modern dan intuitive
 - ✅ Postman collection updated
 
-**Testing**:
-- Test pipeline APIs
-- Test deal CRUD
-- Test move deal
+**Testing** (Manual testing):
+- Test pipeline APIs (backend)
+- Test deal CRUD (backend + frontend)
+- Test move deal (backend + frontend)
 - Test forecast calculation
+- Test kanban view
+- Test drag-and-drop
 
 **Estimated Time**: 6-7 days
 
 ---
 
-### Sprint 5: Task & Reminder APIs (Week 9)
+### Sprint 3: Task & Reminder Management (Fullstack) (Week 9)
 
-**Goal**: Implement Task & Reminder APIs
+**Goal**: Implement Task & Reminder Management secara fullstack (backend + frontend)
 
 **Backend Tasks**:
 - [ ] Create task model dan migration
@@ -250,9 +166,16 @@ Developer 2 bertanggung jawab untuk:
 - [ ] Add pagination support
 - [ ] Add validation
 
-**Minimal Frontend Tasks** (Efisien):
-- [ ] Create simple task list page untuk testing (`/test/tasks`)
-- [ ] Create simple task form untuk testing
+**Frontend Tasks**:
+- [ ] Create task types (`types/task.d.ts`)
+- [ ] Create task service (`taskService`)
+- [ ] Create task list page (`/tasks`)
+- [ ] Create task form component (`TaskForm`)
+- [ ] Create task card component (`TaskCard`)
+- [ ] Create task detail page (`/tasks/[id]`)
+- [ ] Add task filter (status, assignee, due date)
+- [ ] Create reminder settings component
+- [ ] Add task linked ke account/contact
 
 **Postman Collection**:
 - [ ] Add task APIs ke Postman collection (Web section)
@@ -263,21 +186,27 @@ Developer 2 bertanggung jawab untuk:
 - ✅ Task assignment bekerja
 - ✅ Reminder APIs bekerja
 - ✅ Notification service bekerja
+- ✅ Frontend terintegrasi dengan backend APIs
+- ✅ User dapat create dan manage tasks
+- ✅ Task dapat di-assign ke sales rep
+- ✅ Task dapat di-link ke account/contact
+- ✅ Filter dan search bekerja optimal
 - ✅ Postman collection updated (Web + Mobile)
 
-**Testing**:
-- Test task CRUD
+**Testing** (Manual testing):
+- Test task CRUD (backend + frontend)
 - Test task assignment
 - Test reminder
 - Test notification
+- Test task filtering
 
 **Estimated Time**: 4-5 days
 
 ---
 
-### Sprint 6: Product Management APIs (Week 10)
+### Sprint 4: Product Management (Fullstack) (Week 10)
 
-**Goal**: Implement Product Management APIs
+**Goal**: Implement Product Management secara fullstack (backend + frontend)
 
 **Backend Tasks**:
 - [ ] Create product model dan migration
@@ -294,9 +223,14 @@ Developer 2 bertanggung jawab untuk:
 - [ ] Add validation
 - [ ] Add product categories seeder
 
-**Minimal Frontend Tasks** (Efisien):
-- [ ] Create simple product list page untuk testing (`/test/products`)
-- [ ] Create simple product form untuk testing
+**Frontend Tasks**:
+- [ ] Create product types (`types/product.d.ts`)
+- [ ] Create product service (`productService`)
+- [ ] Create product list page (`/products`)
+- [ ] Create product form component (`ProductForm`)
+- [ ] Create product detail page (`/products/[id]`)
+- [ ] Create product selector component (untuk deal form)
+- [ ] Add product search and filter
 
 **Postman Collection**:
 - [ ] Add product APIs ke Postman collection (Web section)
@@ -304,123 +238,47 @@ Developer 2 bertanggung jawab untuk:
 **Acceptance Criteria**:
 - ✅ Product CRUD APIs bekerja dengan baik
 - ✅ Product search bekerja
+- ✅ Frontend terintegrasi dengan backend APIs
+- ✅ Admin dapat manage products (CRUD)
+- ✅ Product selector dapat digunakan di deal form
+- ✅ Search dan filter bekerja optimal
 - ✅ Postman collection updated
 
-**Testing**:
-- Test product CRUD
+**Testing** (Manual testing):
+- Test product CRUD (backend + frontend)
 - Test product search
+- Test product selector
 
 **Estimated Time**: 3-4 days
 
 ---
 
-### Sprint 7: Dashboard & Reports APIs (Week 11-12)
+### Sprint 5: Integration & Final Testing (Week 14)
 
-**Goal**: Implement Dashboard & Reports APIs
-
-**Backend Tasks**:
-- [ ] Create dashboard service
-- [ ] Create report service
-- [ ] Implement dashboard overview API (`GET /api/v1/dashboard/overview`)
-- [ ] Implement visit statistics API (`GET /api/v1/dashboard/visits`)
-- [ ] Implement pipeline summary API (`GET /api/v1/dashboard/pipeline`)
-- [ ] Implement top accounts API (`GET /api/v1/dashboard/top-accounts`)
-- [ ] Implement top sales rep API (`GET /api/v1/dashboard/top-sales-rep`)
-- [ ] Implement recent activities API (`GET /api/v1/dashboard/recent-activities`)
-- [ ] Implement visit report API (`GET /api/v1/reports/visit-reports`)
-- [ ] Implement sales pipeline report API (`GET /api/v1/reports/pipeline`)
-- [ ] Implement sales performance report API (`GET /api/v1/reports/sales-performance`)
-- [ ] Implement account activity report API (`GET /api/v1/reports/account-activity`)
-- [ ] Add date range filtering
-- [ ] Add export functionality (PDF/Excel) - basic
-
-**Minimal Frontend Tasks** (Efisien):
-- [ ] Create simple dashboard page untuk testing (`/test/dashboard`)
-- [ ] Create simple report page untuk testing (`/test/reports`)
-
-**Postman Collection**:
-- [ ] Add dashboard APIs ke Postman collection (Web section)
-- [ ] Add report APIs ke Postman collection (Web section)
-
-**Acceptance Criteria**:
-- ✅ Dashboard APIs bekerja dengan baik
-- ✅ Report APIs bekerja dengan baik
-- ✅ Date range filtering bekerja
-- ✅ Export functionality bekerja (basic)
-- ✅ Postman collection updated
-
-**Testing**:
-- Test dashboard APIs
-- Test report APIs
-- Test date range filtering
-- Test export functionality
-
-**Estimated Time**: 6-7 days
-
----
-
-### Sprint 8: Settings APIs (Week 13)
-
-**Goal**: Implement Settings APIs
-
-**Backend Tasks**:
-- [ ] Create settings model dan migration
-- [ ] Create settings repository interface dan implementation
-- [ ] Create settings service
-- [ ] Implement get settings API (`GET /api/v1/settings`)
-- [ ] Implement update settings API (`PUT /api/v1/settings`)
-- [ ] Implement general settings API
-- [ ] Implement notification settings API
-- [ ] Implement pipeline settings API
-- [ ] Add validation
-
-**Minimal Frontend Tasks** (Efisien):
-- [ ] Create simple settings page untuk testing (`/test/settings`)
-
-**Postman Collection**:
-- [ ] Add settings APIs ke Postman collection (Web section)
-
-**Acceptance Criteria**:
-- ✅ Settings APIs bekerja dengan baik
-- ✅ Settings tersimpan dengan benar
-- ✅ Postman collection updated
-
-**Testing**:
-- Test settings update
-- Test settings persistence
-
-**Estimated Time**: 2-3 days
-
----
-
-### Sprint 9: API Optimization & Documentation (Week 14)
-
-**Goal**: Optimize APIs dan complete documentation
+**Goal**: Integration dengan modul Dev1 dan final testing
 
 **Tasks**:
-- [ ] Optimize database queries
-- [ ] Add missing indexes
-- [ ] Add caching jika diperlukan
+- [ ] Coordinate dengan Developer 1 untuk integration
+- [ ] Test integration antara modul Dev2 dan Dev1
+- [ ] Fix integration issues
+- [ ] End-to-end testing
 - [ ] Performance testing
-- [ ] Security audit
-- [ ] Complete Postman collection (Web + Mobile separation)
-- [ ] Update API documentation
-- [ ] Add API examples
+- [ ] Security testing
 - [ ] Final bug fixes
+- [ ] Documentation update
 
 **Acceptance Criteria**:
-- ✅ APIs optimized
+- ✅ Semua modules terintegrasi dengan baik
+- ✅ Tidak ada critical bugs
 - ✅ Performance acceptable
 - ✅ Security audit passed
-- ✅ Postman collection complete (Web + Mobile)
-- ✅ Documentation complete
 
 **Testing**:
+- End-to-end testing
 - Performance testing
 - Security testing
-- API integration testing
 
-**Estimated Time**: 4-5 days
+**Estimated Time**: 3-4 days
 
 ---
 
@@ -430,40 +288,46 @@ Developer 2 bertanggung jawab untuk:
 |--------|------|----------|--------|
 | Sprint 0 | Foundation Review | 2-3 days | ⏳ Pending |
 | Sprint 1 | User Management Review | 2-3 days | ⏳ Pending |
-| Sprint 2 | Account & Contact APIs | 6-7 days | ⏳ Pending |
-| Sprint 3 | Visit Report APIs | 7-8 days | ⏳ Pending |
-| Sprint 4 | Pipeline APIs | 6-7 days | ⏳ Pending |
-| Sprint 5 | Task APIs | 4-5 days | ⏳ Pending |
-| Sprint 6 | Product APIs | 3-4 days | ⏳ Pending |
-| Sprint 7 | Dashboard & Reports APIs | 6-7 days | ⏳ Pending |
-| Sprint 8 | Settings APIs | 2-3 days | ⏳ Pending |
-| Sprint 9 | Optimization & Docs | 4-5 days | ⏳ Pending |
+| Sprint 2 | Sales Pipeline (Fullstack) | 6-7 days | ⏳ Pending |
+| Sprint 3 | Task & Reminder (Fullstack) | 4-5 days | ⏳ Pending |
+| Sprint 4 | Product Management (Fullstack) | 3-4 days | ⏳ Pending |
+| Sprint 5 | Integration & Testing | 3-4 days | ⏳ Pending |
 
-**Total Estimated Time**: 38-50 days (5.5-7 weeks)
+**Total Estimated Time**: 20-26 days (2.9-3.7 weeks)
 
 ---
 
-## 🔗 Dependencies
+## 🔗 Coordination dengan Dev1
 
-### Dependencies untuk Developer 1 (Web)
-- Semua APIs harus ready sebelum Developer 1 mulai develop frontend
-- Coordinate API design dengan Developer 1
+### Modul yang dikerjakan Dev1 (untuk referensi):
+- Account & Contact Management (Fullstack)
+- Visit Report & Activity Tracking (Fullstack)
+- Dashboard & Reports (Fullstack)
+- Settings (Fullstack)
 
-### Dependencies untuk Developer 3 (Mobile)
-- Mobile APIs harus ready (same APIs, different endpoints jika diperlukan)
-- Coordinate API design dengan Developer 3
+### Integration Points:
+- Dashboard & Reports (Dev1) perlu data dari Pipeline (Dev2)
+- Visit Report (Dev1) bisa link ke Task (Dev2)
+- Deal (Dev2) bisa link ke Product (Dev2)
+- Deal (Dev2) perlu link ke Account (Dev1)
+
+### Coordination:
+- [ ] Week 3: Coordinate API contract untuk integration points
+- [ ] Week 7: Mid-sprint review - check integration points
+- [ ] Week 11: Pre-integration review
+- [ ] Week 14: Final integration testing
 
 ---
 
 ## 📝 Notes
 
-1. **API Standards**: Pastikan semua APIs mengikuti API response standards
-2. **Postman Collection**: Update Postman collection untuk setiap sprint, pisahkan Web dan Mobile
-3. **Minimal Frontend**: Frontend hanya untuk testing/validation, bukan production-ready
-4. **Coordinate**: Coordinate dengan Developer 1 dan Developer 3 untuk API design
-5. **Testing**: Test semua APIs sebelum move ke sprint berikutnya
+1. **Fullstack Development**: Setiap modul dikerjakan fullstack sampai selesai
+2. **No Dependencies**: Tidak bergantung ke Dev1, bisa dikerjakan paralel
+3. **Hackathon Mode**: Tidak ada unit test, manual testing saja
+4. **Code Review**: Lakukan code review sebelum merge
+5. **Documentation**: Update documentation setelah setiap sprint
+6. **Postman Collection**: Update Postman collection untuk setiap modul
 
 ---
 
 **Dokumen ini akan diupdate sesuai dengan progress development.**
-

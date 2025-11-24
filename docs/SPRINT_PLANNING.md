@@ -63,21 +63,30 @@ Setiap developer memiliki sprint planning terpisah yang detail.
 
 ## Team Structure
 
-### Developer 1: Web Developer
-- **Focus**: Web application (Next.js 16)
+### Developer 1: Fullstack Developer
+- **Focus**: Fullstack development (Go Backend + Next.js Frontend)
 - **Responsibilities**:
   - Perbaiki sprint 0-2 yang sudah ada
-  - Develop web frontend untuk Sales CRM
-  - Integrate dengan backend APIs
+  - Develop modul-modul yang ditugaskan secara fullstack
+  - Backend APIs + Frontend untuk modul yang ditugaskan
+- **Modul yang ditugaskan**:
+  - Account & Contact Management (Fullstack)
+  - Visit Report & Activity Tracking (Fullstack)
+  - Dashboard & Reports (Fullstack)
+  - Settings (Fullstack)
 - **Sprint Planning**: [`SPRINT_PLANNING_DEV1.md`](./SPRINT_PLANNING_DEV1.md)
 
-### Developer 2: Backend Developer
-- **Focus**: Backend APIs (Go + Gin)
+### Developer 2: Fullstack Developer
+- **Focus**: Fullstack development (Go Backend + Next.js Frontend)
 - **Responsibilities**:
-  - Develop semua backend APIs
+  - Develop modul-modul yang ditugaskan secara fullstack
+  - Backend APIs + Frontend untuk modul yang ditugaskan
   - Database design dan migration
-  - Minimal frontend untuk testing
   - Update Postman collection
+- **Modul yang ditugaskan**:
+  - Sales Pipeline Management (Fullstack)
+  - Task & Reminder Management (Fullstack)
+  - Product Management (Fullstack)
 - **Sprint Planning**: [`SPRINT_PLANNING_DEV2.md`](./SPRINT_PLANNING_DEV2.md)
 
 ### Developer 3: Mobile Developer
@@ -94,56 +103,60 @@ Setiap developer memiliki sprint planning terpisah yang detail.
 
 ### Master Timeline (100 Hari / ~14 Minggu)
 
-| Week | Developer 1 (Web) | Developer 2 (Backend) | Developer 3 (Mobile) |
-|------|-------------------|----------------------|---------------------|
+| Week | Developer 1 (Fullstack) | Developer 2 (Fullstack) | Developer 3 (Mobile) |
+|------|-------------------------|------------------------|---------------------|
 | 1-2 | Foundation Review, User Management Review, Master Data Cleanup | Foundation Review, User Management Review | Flutter Setup |
-| 3-4 | Account & Contact Management | Account & Contact APIs | Account & Contact Mobile |
-| 5-6 | Visit Report & Activity Tracking | Visit Report APIs | Visit Report Mobile |
-| 7-8 | Sales Pipeline | Pipeline APIs | Task & Reminder Mobile |
-| 9 | Task & Reminder | Task APIs | Dashboard Mobile |
-| 10 | Product Management | Product APIs | Mobile Polish |
-| 11-12 | Dashboard & Reports | Dashboard & Reports APIs | Mobile Integration |
-| 13 | Settings & Polish | Settings APIs | Final Testing |
-| 14 | Integration & Testing | API Optimization & Docs | Final Testing |
+| 3-4 | Account & Contact (Fullstack) | - | Account & Contact Mobile |
+| 5-6 | Visit Report (Fullstack) | - | Visit Report Mobile |
+| 7-8 | - | Sales Pipeline (Fullstack) | Task & Reminder Mobile |
+| 9 | - | Task & Reminder (Fullstack) | Dashboard Mobile |
+| 10 | - | Product Management (Fullstack) | Mobile Polish |
+| 11-12 | Dashboard & Reports (Fullstack) | - | Mobile Integration |
+| 13 | Settings (Fullstack) | - | Final Testing |
+| 14 | Integration & Testing | Integration & Testing | Final Testing |
 
 ---
 
 ## Developer Sprint Plans
 
-### Developer 1: Web Developer
+### Developer 1: Fullstack Developer
 📄 **Detail Sprint Planning**: [`SPRINT_PLANNING_DEV1.md`](./SPRINT_PLANNING_DEV1.md)
 
 **Sprint Summary**:
 - Sprint 0: Foundation Review (3-4 days)
 - Sprint 1: User Management Review (3-4 days)
 - Sprint 2: Master Data Cleanup (1-2 days)
-- Sprint 3: Account & Contact Management (5-6 days)
-- Sprint 4: Visit Report & Activity Tracking (5-6 days)
-- Sprint 5: Sales Pipeline (5-6 days)
-- Sprint 6: Task & Reminder (3-4 days)
-- Sprint 7: Product Management (2-3 days)
-- Sprint 8: Dashboard & Reports (6-7 days)
-- Sprint 9: Settings & Polish (4-5 days)
-- Sprint 10: Integration & Testing (5-7 days)
+- Sprint 3: Account & Contact (Fullstack) (6-7 days)
+- Sprint 4: Visit Report (Fullstack) (7-8 days)
+- Sprint 5: Dashboard & Reports (Fullstack) (6-7 days)
+- Sprint 6: Settings (Fullstack) (3-4 days)
+- Sprint 7: Integration & Testing (3-4 days)
 
-**Total**: 42-52 days (6-7.5 weeks)
+**Total**: 33-40 days (4.7-5.7 weeks)
 
-### Developer 2: Backend Developer
+**Modul yang dikerjakan**:
+- ✅ Account & Contact Management (Backend + Frontend)
+- ✅ Visit Report & Activity Tracking (Backend + Frontend)
+- ✅ Dashboard & Reports (Backend + Frontend)
+- ✅ Settings (Backend + Frontend)
+
+### Developer 2: Fullstack Developer
 📄 **Detail Sprint Planning**: [`SPRINT_PLANNING_DEV2.md`](./SPRINT_PLANNING_DEV2.md)
 
 **Sprint Summary**:
 - Sprint 0: Foundation Review (2-3 days)
 - Sprint 1: User Management Review (2-3 days)
-- Sprint 2: Account & Contact APIs (6-7 days)
-- Sprint 3: Visit Report APIs (7-8 days)
-- Sprint 4: Pipeline APIs (6-7 days)
-- Sprint 5: Task APIs (4-5 days)
-- Sprint 6: Product APIs (3-4 days)
-- Sprint 7: Dashboard & Reports APIs (6-7 days)
-- Sprint 8: Settings APIs (2-3 days)
-- Sprint 9: Optimization & Docs (4-5 days)
+- Sprint 2: Sales Pipeline (Fullstack) (6-7 days)
+- Sprint 3: Task & Reminder (Fullstack) (4-5 days)
+- Sprint 4: Product Management (Fullstack) (3-4 days)
+- Sprint 5: Integration & Testing (3-4 days)
 
-**Total**: 38-50 days (5.5-7 weeks)
+**Total**: 20-26 days (2.9-3.7 weeks)
+
+**Modul yang dikerjakan**:
+- ✅ Sales Pipeline Management (Backend + Frontend)
+- ✅ Task & Reminder Management (Backend + Frontend)
+- ✅ Product Management (Backend + Frontend)
 
 ### Developer 3: Mobile Developer
 📄 **Detail Sprint Planning**: [`SPRINT_PLANNING_DEV3.md`](./SPRINT_PLANNING_DEV3.md)
@@ -163,11 +176,21 @@ Setiap developer memiliki sprint planning terpisah yang detail.
 
 ## Coordination & Dependencies
 
-### Critical Dependencies
+### Parallel Development Strategy
 
-1. **Developer 2 → Developer 1**: Backend APIs harus ready sebelum frontend development
-2. **Developer 2 → Developer 3**: Backend APIs harus ready sebelum mobile development
+1. **Developer 1 & Developer 2**: Bekerja paralel, tidak ada dependencies
+   - Setiap developer mengerjakan modul secara fullstack (backend + frontend)
+   - Tidak perlu menunggu satu sama lain
+   - Integration dilakukan di akhir (Week 14)
+
+2. **Integration Points** (Week 14):
+   - Dashboard & Reports (Dev1) perlu data dari Pipeline (Dev2)
+   - Visit Report (Dev1) bisa link ke Task (Dev2)
+   - Deal (Dev2) perlu link ke Account (Dev1)
+   - Deal (Dev2) link ke Product (Dev2)
+
 3. **Developer 1 ↔ Developer 3**: Coordinate untuk UI/UX consistency
+4. **Developer 2 ↔ Developer 3**: Coordinate untuk API consistency
 
 ### Coordination Points
 
@@ -180,9 +203,9 @@ Setiap developer memiliki sprint planning terpisah yang detail.
 
 ### API Design Coordination
 
-- **Developer 2** harus design APIs dengan mempertimbangkan kebutuhan Web dan Mobile
-- **Developer 1** dan **Developer 3** harus review API design sebelum development
+- **Developer 1 & Developer 2** design APIs untuk modul masing-masing
 - Semua APIs harus mengikuti API response standards
+- Coordinate integration points di Week 3 dan Week 11
 - Postman collection harus terpisah untuk Web dan Mobile
 
 ---
@@ -197,33 +220,33 @@ Setiap developer memiliki sprint planning terpisah yang detail.
 - Developer 3: Flutter project setup
 
 **Week 3-4**: Account & Contact
-- Developer 1: Account & Contact Management (Web)
-- Developer 2: Account & Contact APIs
+- Developer 1: Account & Contact (Fullstack - Backend + Frontend)
+- Developer 2: Foundation Review, User Management Review
 - Developer 3: Account & Contact Mobile
 
 **Week 5-6**: Visit Report
-- Developer 1: Visit Report & Activity Tracking (Web)
-- Developer 2: Visit Report APIs
+- Developer 1: Visit Report (Fullstack - Backend + Frontend)
+- Developer 2: Foundation Review, User Management Review
 - Developer 3: Visit Report Mobile
 
-**Week 7-8**: Pipeline & Task
-- Developer 1: Sales Pipeline (Web)
-- Developer 2: Pipeline APIs
+**Week 7-8**: Pipeline
+- Developer 1: (Buffer/Polish)
+- Developer 2: Sales Pipeline (Fullstack - Backend + Frontend)
 - Developer 3: Task & Reminder Mobile
 
-**Week 9-10**: Task, Product, Dashboard
-- Developer 1: Task & Reminder, Product Management (Web)
-- Developer 2: Task APIs, Product APIs
+**Week 9-10**: Task & Product
+- Developer 1: (Buffer/Polish)
+- Developer 2: Task & Reminder (Fullstack), Product Management (Fullstack)
 - Developer 3: Dashboard Mobile, Mobile Polish
 
 **Week 11-12**: Dashboard & Reports
-- Developer 1: Dashboard & Reports (Web)
-- Developer 2: Dashboard & Reports APIs
+- Developer 1: Dashboard & Reports (Fullstack - Backend + Frontend)
+- Developer 2: (Buffer/Polish)
 - Developer 3: Mobile Integration
 
-**Week 13**: Settings & Polish
-- Developer 1: Settings & Polish (Web)
-- Developer 2: Settings APIs, API Optimization
+**Week 13**: Settings
+- Developer 1: Settings (Fullstack - Backend + Frontend)
+- Developer 2: (Buffer/Polish)
 - Developer 3: Final Testing
 
 **Week 14**: Integration & Delivery
@@ -283,23 +306,21 @@ Sprint 0 (Foundation) ✅
     ↓
 Sprint 1 (User Management) ✅
     ↓
-Sprint 2 (Master Data Cleanup) → Archive Diagnosis/Procedures
+Sprint 2 (Master Data Cleanup) ✅
     ↓
-Sprint 3 (Account & Contact) → Parallel dengan Mobile Setup
-    ↓
-Sprint 4 (Visit Report) → Requires: Account & Contact
-    ↓
-Sprint 5 (Sales Pipeline) → Requires: Account & Contact
-    ↓
-Sprint 6 (Task & Reminder) → Can be parallel dengan Pipeline
-    ↓
-Sprint 7 (Product Management) → Can be parallel
-    ↓
-Sprint 8 (Dashboard & Reports) → Requires: All modules
-    ↓
-Sprint 9 (Settings) → Can be parallel
-    ↓
-Sprint 10 (Integration & Testing) → Requires: All sprints
+┌─────────────────────────────────────────┐
+│  PARALLEL DEVELOPMENT (No Dependencies) │
+└─────────────────────────────────────────┘
+    ↓                    ↓
+Dev1:                 Dev2:
+- Account & Contact   - Sales Pipeline
+- Visit Report        - Task & Reminder
+- Dashboard & Reports - Product Management
+- Settings
+    ↓                    ↓
+┌─────────────────────────────────────────┐
+│  Integration & Testing (Week 14)        │
+└─────────────────────────────────────────┘
 ```
 
 ---
@@ -308,8 +329,8 @@ Sprint 10 (Integration & Testing) → Requires: All sprints
 
 - **Total Duration**: 100 hari (~14 minggu)
 - **Team Size**: 3 developers
-  - Developer 1 (Web): 42-52 days (6-7.5 weeks)
-  - Developer 2 (Backend): 38-50 days (5.5-7 weeks)
+  - Developer 1 (Fullstack): 33-40 days (4.7-5.7 weeks)
+  - Developer 2 (Fullstack): 20-26 days (2.9-3.7 weeks)
   - Developer 3 (Mobile): 33-42 days (4.5-6 weeks)
 
 ---
