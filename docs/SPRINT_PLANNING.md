@@ -18,6 +18,14 @@
 6. [Timeline](#timeline)
 7. [Sprint Checklist](#sprint-checklist)
 8. [Dependencies](#dependencies)
+9. [📊 Project Diagrams](#-project-diagrams)
+
+> **📊 Visualisasi Project**: Untuk memahami scope, fitur, dan user flow secara visual, lihat [**PROJECT_DIAGRAMS.md**](./PROJECT_DIAGRAMS.md) yang berisi:
+> - Project Scope Overview
+> - Feature Modules Diagram
+> - User Flow Diagrams (Sales Rep, Supervisor, Admin)
+> - Input/Output Diagrams per Feature
+> - System Architecture Diagram
 
 ---
 

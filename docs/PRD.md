@@ -406,10 +406,9 @@ Menyediakan solusi CRM Sales yang komprehensif, mudah digunakan, dan mobile-firs
 
 #### Mobile App
 - **Framework**: Flutter
-- **State Management**: Provider / Riverpod
-- **HTTP Client**: Dio
-- **Local Storage**: Hive / SharedPreferences
-- **Maps**: Google Maps / OpenStreetMap
+- **State Management**: 
+- **HTTP Client**: 
+- **Local Storage**: 
 
 #### Backend
 - **Language**: Go

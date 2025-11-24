@@ -7,6 +7,8 @@
 **Status**: Active  
 **Last Updated**: 2025-01-15
 
+> **📊 Visualisasi Project**: Lihat [**PROJECT_DIAGRAMS.md**](../PROJECT_DIAGRAMS.md) untuk memahami scope, fitur, dan user flow secara visual.
+
 ---
 
 ## 📋 Overview
