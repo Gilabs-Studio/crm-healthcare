@@ -145,26 +145,78 @@ mindmap
       Export Excel
 ```
 
-### Feature Matrix by Platform
+### Feature Matrix by Platform & Role
 
-| Feature | Web (Admin/Supervisor) | Mobile (Sales) | Backend API |
-|---------|------------------------|----------------|-------------|
-| **Authentication** | ✅ Full | ✅ Full | ✅ Full |
-| **User Management** | ✅ Full | ❌ | ✅ Full |
-| **Account Management** | ✅ Full (CRUD) | ✅ View Only | ✅ Full |
-| **Contact Management** | ✅ Full (CRUD) | ✅ View Only | ✅ Full |
-| **Visit Reports** | ✅ Review/Approve | ✅ Create/View | ✅ Full |
-| **Sales Pipeline** | ✅ Full | ❌ | ✅ Full |
-| **Tasks** | ✅ Full | ✅ Full | ✅ Full |
-| **Products** | ✅ Full | ✅ View Only | ✅ Full |
-| **Dashboard** | ✅ Full | ✅ Basic | ✅ Full |
-| **Reports** | ✅ Full | ❌ | ✅ Full |
+| Feature | Web (Admin) | Web (Supervisor) | Web (Sales Rep) | Mobile (Sales Rep) | Backend API |
+|---------|------------|------------------|-----------------|-------------------|-------------|
+| **Authentication** | ✅ Full | ✅ Full | ✅ Full | ✅ Full | ✅ Full |
+| **User Management** | ✅ Full | ❌ | ❌ | ❌ | ✅ Full |
+| **Account Management** | ✅ Full (CRUD) | ✅ Full (CRUD) | ✅ Full (CRUD) | ✅ View Only | ✅ Full |
+| **Contact Management** | ✅ Full (CRUD) | ✅ Full (CRUD) | ✅ Full (CRUD) | ✅ View Only | ✅ Full |
+| **Visit Reports** | ✅ Full (View All) | ✅ Review/Approve | ✅ Create/View Own | ✅ Create/View Own | ✅ Full |
+| **Sales Pipeline** | ✅ Full | ✅ Full | ✅ Full (Own Deals) | ❌ | ✅ Full |
+| **Tasks** | ✅ Full | ✅ Full (Assign) | ✅ Full (Own Tasks) | ✅ Full (Own Tasks) | ✅ Full |
+| **Products** | ✅ Full | ✅ View Only | ✅ View Only | ✅ View Only | ✅ Full |
+| **Dashboard** | ✅ Full (All Data) | ✅ Full (Team Data) | ✅ Full (Own Data) | ✅ Basic (Own Data) | ✅ Full |
+| **Reports** | ✅ Full | ✅ Full (Team Reports) | ✅ View Own Reports | ❌ | ✅ Full |
+
+**Note**: 
+- Sales Rep dapat menggunakan **Web App** untuk semua fitur yang tersedia di Mobile, plus fitur tambahan seperti Sales Pipeline
+- Mobile App fokus pada fitur yang dibutuhkan di lapangan (Visit Reports dengan GPS/Camera, Tasks, Dashboard basic)
+- Web App memberikan akses lebih lengkap untuk Sales Rep, terutama untuk data entry dan review yang lebih nyaman
 
 ---
 
 ## User Flow Diagrams
 
-### 1. Sales Rep User Flow (Mobile)
+### 1. Sales Rep User Flow (Web)
+
+```mermaid
+flowchart TD
+    START([Sales Rep Login - Web]) --> AUTH{Authenticated?}
+    AUTH -->|No| LOGIN[Login Screen]
+    LOGIN --> AUTH
+    AUTH -->|Yes| DASHBOARD[Dashboard<br/>- Today's Visits<br/>- Tasks<br/>- Pipeline<br/>- Stats]
+    
+    DASHBOARD --> MANAGE_ACCOUNTS[Manage Accounts]
+    DASHBOARD --> MANAGE_CONTACTS[Manage Contacts]
+    DASHBOARD --> CREATE_VISIT[Create Visit Report]
+    DASHBOARD --> VIEW_PIPELINE[View Sales Pipeline]
+    DASHBOARD --> MANAGE_TASKS[Manage Tasks]
+    
+    MANAGE_ACCOUNTS --> ACCOUNT_LIST[Account List<br/>- Search & Filter<br/>- View/Edit/Create]
+    ACCOUNT_LIST --> ACCOUNT_DETAIL[Account Detail<br/>- Info<br/>- Contacts<br/>- History]
+    ACCOUNT_DETAIL --> CREATE_VISIT
+    
+    MANAGE_CONTACTS --> CONTACT_LIST[Contact List<br/>- Search & Filter<br/>- View/Edit/Create]
+    CONTACT_LIST --> CONTACT_DETAIL[Contact Detail<br/>- Info<br/>- Account<br/>- History]
+    
+    CREATE_VISIT --> SELECT_ACCOUNT[Select Account & Contact]
+    SELECT_ACCOUNT --> FILL_FORM[Fill Visit Form<br/>- Purpose<br/>- Notes<br/>- Date/Time]
+    FILL_FORM --> UPLOAD_PHOTO[Upload Photo<br/>Optional]
+    UPLOAD_PHOTO --> SUBMIT[Submit Visit Report]
+    SUBMIT --> DASHBOARD
+    
+    VIEW_PIPELINE --> PIPELINE_KANBAN[Pipeline Kanban View<br/>- Own Deals<br/>- Move Between Stages]
+    PIPELINE_KANBAN --> CREATE_DEAL[Create New Deal]
+    PIPELINE_KANBAN --> DEAL_DETAIL[Deal Detail<br/>- Info<br/>- History<br/>- Update]
+    CREATE_DEAL --> DEAL_DETAIL
+    DEAL_DETAIL --> PIPELINE_KANBAN
+    
+    MANAGE_TASKS --> TASK_LIST[Task List<br/>- Own Tasks<br/>- Filter by Status]
+    TASK_LIST --> CREATE_TASK[Create Task<br/>- Title<br/>- Description<br/>- Due Date]
+    TASK_LIST --> TASK_DETAIL[Task Detail<br/>- Info<br/>- Complete/Update]
+    CREATE_TASK --> TASK_LIST
+    TASK_DETAIL --> TASK_LIST
+    
+    style START fill:#10b981
+    style DASHBOARD fill:#3b82f6
+    style CREATE_VISIT fill:#f59e0b
+    style VIEW_PIPELINE fill:#8b5cf6
+    style MANAGE_TASKS fill:#ef4444
+```
+
+### 2. Sales Rep User Flow (Mobile)
 
 ```mermaid
 flowchart TD
@@ -198,7 +250,7 @@ flowchart TD
     style CHECK_OUT fill:#ef4444
 ```
 
-### 2. Supervisor User Flow (Web)
+### 3. Supervisor User Flow (Web)
 
 ```mermaid
 flowchart TD
@@ -236,7 +288,7 @@ flowchart TD
     style APPROVE fill:#ef4444
 ```
 
-### 3. Admin User Flow (Web)
+### 4. Admin User Flow (Web)
 
 ```mermaid
 flowchart TD
@@ -660,12 +712,23 @@ sequenceDiagram
 - ✅ Responsive Design (Tailwind CSS v4)
 
 **Key Features:**
-- Account & Contact Management UI
-- Visit Report Review & Approval UI
-- Sales Pipeline Kanban View
-- Task Management UI
-- Dashboard & Reports UI
-- Settings UI
+- **For All Roles:**
+  - Account & Contact Management UI (CRUD)
+  - Visit Report Creation & Management UI
+  - Task Management UI
+  - Dashboard UI
+- **For Admin:**
+  - User Management UI
+  - System Settings UI
+  - Full Reports UI
+- **For Supervisor:**
+  - Visit Report Review & Approval UI
+  - Sales Pipeline Management UI
+  - Team Reports UI
+- **For Sales Rep:**
+  - Visit Report Creation UI
+  - Sales Pipeline View (Own Deals)
+  - Own Reports View
 
 ### Developer 2: Backend Developer
 
@@ -735,9 +798,18 @@ sequenceDiagram
 - **Core Features**: 8 modules (Auth, Users, Accounts, Visits, Pipeline, Tasks, Products, Dashboard)
 
 ### Key User Flows
-1. **Sales Rep**: Login → Dashboard → Create Visit Report → Check-in → Fill Form → Upload Photo → Check-out
-2. **Supervisor**: Login → Dashboard → Review Visit Reports → Approve/Reject → View Pipeline → Manage Tasks
-3. **Admin**: Login → Dashboard → Manage Users → Manage Accounts → Manage Products → System Settings
+
+1. **Sales Rep (Web)**: 
+   - Login → Dashboard → Manage Accounts/Contacts → Create Visit Report → View Pipeline → Manage Tasks
+   
+2. **Sales Rep (Mobile)**: 
+   - Login → Dashboard → Create Visit Report → Check-in (GPS) → Fill Form → Upload Photo → Check-out (GPS) → View Tasks
+   
+3. **Supervisor (Web)**: 
+   - Login → Dashboard → Review Visit Reports → Approve/Reject → View Pipeline → Manage Tasks → View Reports
+   
+4. **Admin (Web)**: 
+   - Login → Dashboard → Manage Users → Manage Accounts → Manage Products → System Settings → View All Reports
 
 ### Developer Focus
 - **Developer 1**: Web UI/UX, Frontend Logic, Component Development
