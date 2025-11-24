@@ -617,7 +617,7 @@
                         {"key": "per_page", "value": "20"},
                         {"key": "search", "value": "", "disabled": true},
                         {"key": "status", "value": "", "disabled": true},
-                        {"key": "category", "value": "", "disabled": true},
+                        {"key": "category_id", "value": "", "disabled": true},
                         {"key": "assigned_to", "value": "", "disabled": true}
                       ]
                     },
@@ -663,7 +663,7 @@
                     ],
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n  \"name\": \"Rumah Sakit Umum\",\n  \"category\": \"hospital\",\n  \"address\": \"Jl. Contoh No. 123\",\n  \"city\": \"Jakarta\",\n  \"province\": \"DKI Jakarta\",\n  \"phone\": \"02112345678\",\n  \"email\": \"rsu@example.com\",\n  \"status\": \"active\"\n}",
+                      "raw": "{\n  \"name\": \"Rumah Sakit Umum\",\n  \"category_id\": \"category_id_here\",\n  \"address\": \"Jl. Contoh No. 123\",\n  \"city\": \"Jakarta\",\n  \"province\": \"DKI Jakarta\",\n  \"phone\": \"02112345678\",\n  \"email\": \"rsu@example.com\",\n  \"status\": \"active\"\n}",
                       "options": {
                         "raw": {
                           "language": "json"
@@ -695,7 +695,7 @@
                     ],
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n  \"name\": \"Updated Account Name\",\n  \"category\": \"clinic\",\n  \"status\": \"active\"\n}",
+                      "raw": "{\n  \"name\": \"Updated Account Name\",\n  \"category_id\": \"category_id_here\",\n  \"status\": \"active\"\n}",
                       "options": {
                         "raw": {
                           "language": "json"
@@ -739,6 +739,278 @@
               "description": "Account Management endpoints untuk mengelola accounts (Hospitals, Clinics, Pharmacies)"
             },
             {
+              "name": "Categories",
+              "item": [
+                {
+                  "name": "List Categories",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/categories",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "categories"]
+                    },
+                    "description": "Get list of all categories"
+                  }
+                },
+                {
+                  "name": "Get Category by ID",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/categories/:id",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "categories", ":id"],
+                      "variable": [
+                        {"key": "id", "value": "category_id"}
+                      ]
+                    },
+                    "description": "Get category details by ID"
+                  }
+                },
+                {
+                  "name": "Create Category",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"name\": \"Hospital\",\n  \"code\": \"HOSPITAL\",\n  \"description\": \"Hospital account category\",\n  \"badge_color\": \"default\",\n  \"status\": \"active\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/categories",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "categories"]
+                    },
+                    "description": "Create a new category"
+                  }
+                },
+                {
+                  "name": "Update Category",
+                  "request": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"name\": \"Updated Category Name\",\n  \"badge_color\": \"secondary\",\n  \"status\": \"active\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/categories/:id",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "categories", ":id"],
+                      "variable": [
+                        {"key": "id", "value": "category_id"}
+                      ]
+                    },
+                    "description": "Update category information"
+                  }
+                },
+                {
+                  "name": "Delete Category",
+                  "request": {
+                    "method": "DELETE",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/categories/:id",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "categories", ":id"],
+                      "variable": [
+                        {"key": "id", "value": "category_id"}
+                      ]
+                    },
+                    "description": "Delete a category"
+                  }
+                }
+              ],
+              "description": "Category Management endpoints untuk mengelola account categories (Hospital, Clinic, Pharmacy)"
+            },
+            {
+              "name": "Contact Roles",
+              "item": [
+                {
+                  "name": "List Contact Roles",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/contact-roles",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "contact-roles"]
+                    },
+                    "description": "Get list of all contact roles"
+                  }
+                },
+                {
+                  "name": "Get Contact Role by ID",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/contact-roles/:id",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "contact-roles", ":id"],
+                      "variable": [
+                        {"key": "id", "value": "contact_role_id"}
+                      ]
+                    },
+                    "description": "Get contact role details by ID"
+                  }
+                },
+                {
+                  "name": "Create Contact Role",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"name\": \"Doctor\",\n  \"code\": \"DOCTOR\",\n  \"description\": \"Medical doctor role\",\n  \"badge_color\": \"default\",\n  \"status\": \"active\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/contact-roles",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "contact-roles"]
+                    },
+                    "description": "Create a new contact role"
+                  }
+                },
+                {
+                  "name": "Update Contact Role",
+                  "request": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"name\": \"Updated Contact Role Name\",\n  \"badge_color\": \"secondary\",\n  \"status\": \"active\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/contact-roles/:id",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "contact-roles", ":id"],
+                      "variable": [
+                        {"key": "id", "value": "contact_role_id"}
+                      ]
+                    },
+                    "description": "Update contact role information"
+                  }
+                },
+                {
+                  "name": "Delete Contact Role",
+                  "request": {
+                    "method": "DELETE",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/contact-roles/:id",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "contact-roles", ":id"],
+                      "variable": [
+                        {"key": "id", "value": "contact_role_id"}
+                      ]
+                    },
+                    "description": "Delete a contact role"
+                  }
+                }
+              ],
+              "description": "Contact Role Management endpoints untuk mengelola contact roles (Doctor, PIC, Manager, Other)"
+            },
+            {
               "name": "Contact Management",
               "item": [
                 {
@@ -761,7 +1033,7 @@
                         {"key": "per_page", "value": "20"},
                         {"key": "search", "value": "", "disabled": true},
                         {"key": "account_id", "value": "", "disabled": true},
-                        {"key": "role", "value": "", "disabled": true}
+                        {"key": "role_id", "value": "", "disabled": true}
                       ]
                     },
                     "description": "Get list of contacts with pagination"
@@ -806,7 +1078,7 @@
                     ],
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n  \"account_id\": \"account_id_here\",\n  \"name\": \"Dr. John Doe\",\n  \"role\": \"doctor\",\n  \"phone\": \"081234567890\",\n  \"email\": \"doctor@example.com\",\n  \"position\": \"Chief Medical Officer\",\n  \"notes\": \"Primary contact for medical supplies\"\n}",
+                      "raw": "{\n  \"account_id\": \"account_id_here\",\n  \"name\": \"Dr. John Doe\",\n  \"role_id\": \"contact_role_id_here\",\n  \"phone\": \"081234567890\",\n  \"email\": \"doctor@example.com\",\n  \"position\": \"Chief Medical Officer\",\n  \"notes\": \"Primary contact for medical supplies\"\n}",
                       "options": {
                         "raw": {
                           "language": "json"
@@ -838,7 +1110,7 @@
                     ],
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n  \"name\": \"Updated Contact Name\",\n  \"role\": \"pic\",\n  \"phone\": \"081234567890\"\n}",
+                      "raw": "{\n  \"name\": \"Updated Contact Name\",\n  \"role_id\": \"contact_role_id_here\",\n  \"phone\": \"081234567890\"\n}",
                       "options": {
                         "raw": {
                           "language": "json"

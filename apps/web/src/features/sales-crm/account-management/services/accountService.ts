@@ -13,7 +13,7 @@ export const accountService = {
     per_page?: number;
     search?: string;
     status?: string;
-    category?: string;
+    category_id?: string;
     assigned_to?: string;
   }): Promise<ListAccountsResponse> {
     const response = await apiClient.get<ListAccountsResponse>("/accounts", { params });

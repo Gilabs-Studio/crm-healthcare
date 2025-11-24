@@ -21,19 +21,10 @@ func SeedPermissions() error {
 	// Get menus
 	var dashboardMenu permission.Menu
 	var userPageMenu permission.Menu
-	var dataMasterMenu, companyMgmtMenu, companyMenu, divisionMenu, jobPositionMenu, employeeMenu permission.Menu
-	var healthcareMenu permission.Menu
 	var salesCRMMenu, accountsMenu permission.Menu
 
 	database.DB.Where("url = ?", "/dashboard").First(&dashboardMenu)
 	database.DB.Where("url = ?", "/master-data/users").First(&userPageMenu)
-	database.DB.Where("url = ?", "/data-master").First(&dataMasterMenu)
-	database.DB.Where("url = ?", "/data-master/company").First(&companyMgmtMenu)
-	database.DB.Where("url = ?", "/data-master/company/company").First(&companyMenu)
-	database.DB.Where("url = ?", "/data-master/company/division").First(&divisionMenu)
-	database.DB.Where("url = ?", "/data-master/company/job-position").First(&jobPositionMenu)
-	database.DB.Where("url = ?", "/data-master/company/employee").First(&employeeMenu)
-	database.DB.Where("url = ?", "/master-data").First(&healthcareMenu)
 	database.DB.Where("url = ?", "/sales-crm").First(&salesCRMMenu)
 	database.DB.Where("url = ?", "/accounts").First(&accountsMenu)
 
@@ -56,49 +47,6 @@ func SeedPermissions() error {
 		{userPageMenu.ID, "ROLES", "Manage Roles", "ROLES", &userPageMenu},
 		{userPageMenu.ID, "PERMISSIONS", "Manage Permissions", "PERMISSIONS", &userPageMenu},
 
-		// Company Management actions
-		{companyMgmtMenu.ID, "VIEW_COMPANY_MANAGEMENT", "View Company Management", "VIEW", &companyMgmtMenu},
-
-		// Company actions
-		{companyMenu.ID, "VIEW_COMPANY", "View Company", "VIEW", &companyMenu},
-		{companyMenu.ID, "CREATE_COMPANY", "Create Company", "CREATE", &companyMenu},
-		{companyMenu.ID, "EDIT_COMPANY", "Edit Company", "EDIT", &companyMenu},
-		{companyMenu.ID, "DELETE_COMPANY", "Delete Company", "DELETE", &companyMenu},
-		{companyMenu.ID, "DETAIL_COMPANY", "Detail Company", "DETAIL", &companyMenu},
-		{companyMenu.ID, "IMPORT_COMPANY", "Import Company", "IMPORT", &companyMenu},
-		{companyMenu.ID, "EXPORT_COMPANY", "Export Company", "EXPORT", &companyMenu},
-		{companyMenu.ID, "APPROVE_COMPANY", "Approve Company", "APPROVE", &companyMenu},
-
-		// Division actions
-		{divisionMenu.ID, "VIEW_DIVISION", "View Division", "VIEW", &divisionMenu},
-		{divisionMenu.ID, "CREATE_DIVISION", "Create Division", "CREATE", &divisionMenu},
-		{divisionMenu.ID, "EDIT_DIVISION", "Edit Division", "EDIT", &divisionMenu},
-		{divisionMenu.ID, "DELETE_DIVISION", "Delete Division", "DELETE", &divisionMenu},
-		{divisionMenu.ID, "DETAIL_DIVISION", "Detail Division", "DETAIL", &divisionMenu},
-		{divisionMenu.ID, "IMPORT_DIVISION", "Import Division", "IMPORT", &divisionMenu},
-		{divisionMenu.ID, "EXPORT_DIVISION", "Export Division", "EXPORT", &divisionMenu},
-
-		// Job Position actions
-		{jobPositionMenu.ID, "VIEW_JOB_POSITION", "View Job Position", "VIEW", &jobPositionMenu},
-		{jobPositionMenu.ID, "CREATE_JOB_POSITION", "Create Job Position", "CREATE", &jobPositionMenu},
-		{jobPositionMenu.ID, "EDIT_JOB_POSITION", "Edit Job Position", "EDIT", &jobPositionMenu},
-		{jobPositionMenu.ID, "DELETE_JOB_POSITION", "Delete Job Position", "DELETE", &jobPositionMenu},
-		{jobPositionMenu.ID, "DETAIL_JOB_POSITION", "Detail Job Position", "DETAIL", &jobPositionMenu},
-		{jobPositionMenu.ID, "IMPORT_JOB_POSITION", "Import Job Position", "IMPORT", &jobPositionMenu},
-		{jobPositionMenu.ID, "EXPORT_JOB_POSITION", "Export Job Position", "EXPORT", &jobPositionMenu},
-
-		// Employee actions
-		{employeeMenu.ID, "VIEW_EMPLOYEE", "View Employee", "VIEW", &employeeMenu},
-		{employeeMenu.ID, "CREATE_EMPLOYEE", "Create Employee", "CREATE", &employeeMenu},
-		{employeeMenu.ID, "EDIT_EMPLOYEE", "Edit Employee", "EDIT", &employeeMenu},
-		{employeeMenu.ID, "DELETE_EMPLOYEE", "Delete Employee", "DELETE", &employeeMenu},
-		{employeeMenu.ID, "DETAIL_EMPLOYEE", "Detail Employee", "DETAIL", &employeeMenu},
-		{employeeMenu.ID, "IMPORT_EMPLOYEE", "Import Employee", "IMPORT", &employeeMenu},
-		{employeeMenu.ID, "EXPORT_EMPLOYEE", "Export Employee", "EXPORT", &employeeMenu},
-
-		// Healthcare Master Data actions
-		{healthcareMenu.ID, "VIEW_HEALTHCARE_MASTER", "View Healthcare Master Data", "VIEW", &healthcareMenu},
-
 		// Sales CRM actions
 		{salesCRMMenu.ID, "VIEW_SALES_CRM", "View Sales CRM", "VIEW", &salesCRMMenu},
 
@@ -108,6 +56,8 @@ func SeedPermissions() error {
 		{accountsMenu.ID, "EDIT_ACCOUNTS", "Edit Accounts", "EDIT", &accountsMenu},
 		{accountsMenu.ID, "DELETE_ACCOUNTS", "Delete Accounts", "DELETE", &accountsMenu},
 		{accountsMenu.ID, "DETAIL_ACCOUNTS", "Detail Accounts", "DETAIL", &accountsMenu},
+		{accountsMenu.ID, "CATEGORY", "Manage Categories", "CATEGORY", &accountsMenu},
+		{accountsMenu.ID, "ROLE", "Manage Contact Roles", "ROLE", &accountsMenu},
 	}
 
 	// Create permissions

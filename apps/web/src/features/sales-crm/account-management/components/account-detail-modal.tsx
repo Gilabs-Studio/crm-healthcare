@@ -46,18 +46,6 @@ export function AccountDetailModal({ accountId, open, onOpenChange, onAccountUpd
     }
   };
 
-  const getCategoryBadgeVariant = (category: string) => {
-    switch (category) {
-      case "hospital":
-        return "default";
-      case "clinic":
-        return "secondary";
-      case "pharmacy":
-        return "outline";
-      default:
-        return "outline";
-    }
-  };
 
   return (
     <>
@@ -108,9 +96,13 @@ export function AccountDetailModal({ accountId, open, onOpenChange, onAccountUpd
                 <div className="flex-1">
                   <h2 className="text-2xl font-semibold tracking-tight">{account.name}</h2>
                   <div className="flex items-center gap-2 mt-1">
-                    <Badge variant={getCategoryBadgeVariant(account.category)} className="capitalize">
-                      {account.category}
-                    </Badge>
+                    {account.category ? (
+                      <Badge variant={account.category.badge_color as any} className="font-normal">
+                        {account.category.name}
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline">-</Badge>
+                    )}
                     <Badge variant={account.status === "active" ? "active" : "inactive"}>
                       {account.status}
                     </Badge>
@@ -158,9 +150,13 @@ export function AccountDetailModal({ accountId, open, onOpenChange, onAccountUpd
                         <span>Category</span>
                       </div>
                       <div>
-                        <Badge variant={getCategoryBadgeVariant(account.category)} className="capitalize">
-                          {account.category}
-                        </Badge>
+                        {account.category ? (
+                          <Badge variant={account.category.badge_color as any} className="font-normal">
+                            {account.category.name}
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
                       </div>
                     </div>
 

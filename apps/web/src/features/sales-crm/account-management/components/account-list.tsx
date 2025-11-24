@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Edit, Trash2, Plus, Search, Eye, ChevronDown, ChevronRight, UserPlus, Contact, Phone, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { Badge, badgeVariants } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -25,22 +25,23 @@ import { AccountForm } from "./account-form";
 import { ContactForm } from "./contact-form";
 import { AccountDetailModal } from "./account-detail-modal";
 import { useAccountList } from "../hooks/useAccountList";
+import { useCategories } from "../hooks/useCategories";
 import { useContacts, useContact, useDeleteContact, useCreateContact, useUpdateContact } from "../hooks/useContacts";
 import { toast } from "sonner";
 import type { Account, Contact } from "../types";
-import { cn } from "@/lib/utils";
+import type { CreateContactFormData, UpdateContactFormData } from "../schemas/contact.schema";
+import type { VariantProps } from "class-variance-authority";
 
 export function AccountList() {
   const {
-    page,
     setPage,
     setPerPage,
     search,
     setSearch,
     status,
     setStatus,
-    category,
-    setCategory,
+    categoryId,
+    setCategoryId,
     isCreateDialogOpen,
     setIsCreateDialogOpen,
     editingAccount,
@@ -51,10 +52,17 @@ export function AccountList() {
     isLoading,
     handleCreate,
     handleUpdate,
-    handleDelete,
+    handleDeleteClick,
+    handleDeleteConfirm,
+    deletingAccountId,
+    setDeletingAccountId,
+    deleteAccount,
     createAccount,
     updateAccount,
   } = useAccountList();
+
+  const { data: categoriesData } = useCategories();
+  const categories = categoriesData?.data || [];
 
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [viewingAccountId, setViewingAccountId] = useState<string | null>(null);
@@ -96,25 +104,25 @@ export function AccountList() {
   const createContact = useCreateContact();
   const updateContact = useUpdateContact();
 
-  const handleCreateContactSubmit = async (data: any) => {
+  const handleCreateContactSubmit = async (data: CreateContactFormData) => {
     if (!createContactAccountId) return;
     try {
       await createContact.mutateAsync({ ...data, account_id: createContactAccountId });
       setIsCreateContactDialogOpen(false);
       setCreateContactAccountId(null);
       toast.success("Contact created successfully");
-    } catch (error) {
+    } catch {
       // Error already handled
     }
   };
 
-  const handleUpdateContactSubmit = async (data: any) => {
+  const handleUpdateContactSubmit = async (data: UpdateContactFormData) => {
     if (!editingContact?.contactId) return;
     try {
       await updateContact.mutateAsync({ id: editingContact.contactId, data });
       setEditingContact(null);
       toast.success("Contact updated successfully");
-    } catch (error) {
+    } catch {
       // Error already handled
     }
   };
@@ -125,23 +133,11 @@ export function AccountList() {
       await deleteContact.mutateAsync(deletingContactId);
       setDeletingContactId(null);
       toast.success("Contact deleted successfully");
-    } catch (error) {
+    } catch {
       // Error already handled
     }
   };
 
-  const getCategoryBadgeVariant = (category: string) => {
-    switch (category) {
-      case "hospital":
-        return "default";
-      case "clinic":
-        return "secondary";
-      case "pharmacy":
-        return "outline";
-      default:
-        return "outline";
-    }
-  };
 
   return (
     <div className="space-y-4">
@@ -167,14 +163,18 @@ export function AccountList() {
             <option value="inactive">Inactive</option>
           </select>
           <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
+            value={categoryId}
+            onChange={(e) => setCategoryId(e.target.value)}
             className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground"
           >
             <option value="">All Categories</option>
-            <option value="hospital">Hospital</option>
-            <option value="clinic">Clinic</option>
-            <option value="pharmacy">Pharmacy</option>
+            {categories
+              .filter((cat) => cat.status === "active")
+              .map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
           </select>
         </div>
         <Button onClick={() => setIsCreateDialogOpen(true)} size="sm">
@@ -221,11 +221,10 @@ export function AccountList() {
                       onToggle={() => toggleRow(account.id)}
                       onView={() => handleViewAccount(account.id)}
                       onEdit={() => setEditingAccount(account.id)}
-                      onDelete={() => handleDelete(account.id)}
+                      onDelete={() => handleDeleteClick(account.id)}
                       onCreateContact={() => handleCreateContact(account.id)}
                       onEditContact={handleEditContact}
                       onDeleteContact={handleDeleteContactClick}
-                      getCategoryBadgeVariant={getCategoryBadgeVariant}
                     />
                   ))
                 )}
@@ -378,9 +377,8 @@ export function AccountList() {
       )}
 
       {/* Edit Contact Dialog */}
-      {editingContact && editingContact.contactId && (
+      {editingContact?.contactId && (
         <ContactEditDialog
-          accountId={editingContact.accountId}
           contactId={editingContact.contactId}
           open={!!editingContact}
           onOpenChange={(open) => !open && setEditingContact(null)}
@@ -388,6 +386,25 @@ export function AccountList() {
           isLoading={updateContact.isPending}
         />
       )}
+
+      {/* Delete Account Dialog */}
+      <DeleteDialog
+        open={!!deletingAccountId}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDeletingAccountId(null);
+          }
+        }}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Account?"
+        description={
+          deletingAccountId
+            ? `Are you sure you want to delete account "${accounts.find((a) => a.id === deletingAccountId)?.name || "this account"}"? This action cannot be undone. All associated contacts will also be deleted.`
+            : "Are you sure you want to delete this account? This action cannot be undone. All associated contacts will also be deleted."
+        }
+        itemName="account"
+        isLoading={deleteAccount.isPending}
+      />
 
       {/* Delete Contact Dialog */}
       <DeleteDialog
@@ -409,16 +426,15 @@ export function AccountList() {
 
 
 interface AccountRowProps {
-  account: Account;
-  isExpanded: boolean;
-  onToggle: () => void;
-  onView: () => void;
-  onEdit: () => void;
-  onDelete: () => void;
-  onCreateContact: () => void;
-  onEditContact: (accountId: string, contactId: string) => void;
-  onDeleteContact: (contactId: string) => void;
-  getCategoryBadgeVariant: (category: string) => "default" | "secondary" | "outline";
+  readonly account: Account;
+  readonly isExpanded: boolean;
+  readonly onToggle: () => void;
+  readonly onView: () => void;
+  readonly onEdit: () => void;
+  readonly onDelete: () => void;
+  readonly onCreateContact: () => void;
+  readonly onEditContact: (accountId: string, contactId: string) => void;
+  readonly onDeleteContact: (contactId: string) => void;
 }
 
 function AccountRow({
@@ -431,7 +447,6 @@ function AccountRow({
   onCreateContact,
   onEditContact,
   onDeleteContact,
-  getCategoryBadgeVariant,
 }: AccountRowProps) {
   const { data: contactsData, isLoading: isLoadingContacts } = useContacts({
     account_id: account.id,
@@ -465,9 +480,16 @@ function AccountRow({
           </button>
         </TableCell>
         <TableCell>
-          <Badge variant={getCategoryBadgeVariant(account.category)} className="font-normal capitalize">
-            {account.category}
-          </Badge>
+          {account.category ? (
+            <Badge 
+              variant={account.category.badge_color as VariantProps<typeof badgeVariants>["variant"]} 
+              className="font-normal"
+            >
+              {account.category.name}
+            </Badge>
+          ) : (
+            <span className="text-muted-foreground">-</span>
+          )}
         </TableCell>
         <TableCell>
           <span className="text-muted-foreground">{account.city || "-"}</span>
@@ -536,40 +558,47 @@ function AccountRow({
               </div>
 
               {/* Content */}
-              {isLoadingContacts ? (
-                <div className="space-y-3">
-                  {Array.from({ length: 3 }, (_, i) => (
-                    <Skeleton key={i} className="h-16 w-full rounded-lg" />
-                  ))}
-                </div>
-              ) : contacts.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <div className="rounded-full bg-muted p-3 mb-3">
-                    <UserPlus className="h-5 w-5 text-muted-foreground" />
-                  </div>
-                  <p className="text-sm font-medium text-foreground mb-1">No contacts yet</p>
-                  <p className="text-xs text-muted-foreground mb-4">
-                    Get started by adding your first contact
-                  </p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={onCreateContact}
-                    className="h-8 gap-1.5"
-                  >
-                    <UserPlus className="h-3.5 w-3.5" />
-                    <span>Add Contact</span>
-                  </Button>
-                </div>
-              ) : (
-                <div className="grid gap-3">
-                  {contacts.map((contact) => (
+              {(() => {
+                if (isLoadingContacts) {
+                  return (
+                    <div className="space-y-3">
+                      {Array.from({ length: 3 }, (_, i) => (
+                        <Skeleton key={i} className="h-16 w-full rounded-lg" />
+                      ))}
+                    </div>
+                  );
+                }
+                if (contacts.length === 0) {
+                  return (
+                    <div className="flex flex-col items-center justify-center py-8 text-center">
+                      <div className="rounded-full bg-muted p-3 mb-3">
+                        <UserPlus className="h-5 w-5 text-muted-foreground" />
+                      </div>
+                      <p className="text-sm font-medium text-foreground mb-1">No contacts yet</p>
+                      <p className="text-xs text-muted-foreground mb-4">
+                        Get started by adding your first contact
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={onCreateContact}
+                        className="h-8 gap-1.5"
+                      >
+                        <UserPlus className="h-3.5 w-3.5" />
+                        <span>Add Contact</span>
+                      </Button>
+                    </div>
+                  );
+                }
+                return (
+                  <div className="grid gap-3">
+                    {contacts.map((contact) => (
                     <div
                       key={contact.id}
                       className="group relative flex items-start gap-4 p-4 rounded-lg border bg-card hover:border-border/80 hover:shadow-sm transition-all"
                     >
                       {/* Avatar/Icon */}
-                      <div className="flex-shrink-0">
+                      <div className="shrink-0">
                         <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
                           <Contact className="h-5 w-5 text-primary" />
                         </div>
@@ -588,9 +617,18 @@ function AccountRow({
                               </p>
                             )}
                           </div>
-                          <Badge variant="outline" className="text-xs font-normal capitalize shrink-0">
-                            {contact.role}
-                          </Badge>
+                          {contact.role ? (
+                            <Badge 
+                              variant={contact.role.badge_color as VariantProps<typeof badgeVariants>["variant"]} 
+                              className="text-xs font-normal shrink-0"
+                            >
+                              {contact.role.name}
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-xs font-normal shrink-0">
+                              -
+                            </Badge>
+                          )}
                         </div>
 
                         {/* Contact Info */}
@@ -632,9 +670,10 @@ function AccountRow({
                         </Button>
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
+                    ))}
+                  </div>
+                );
+              })()}
             </div>
           </TableCell>
         </TableRow>
@@ -644,16 +683,14 @@ function AccountRow({
 }
 
 interface ContactEditDialogProps {
-  accountId: string;
-  contactId: string;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSubmit: (data: any) => Promise<void>;
-  isLoading: boolean;
+  readonly contactId: string;
+  readonly open: boolean;
+  readonly onOpenChange: (open: boolean) => void;
+  readonly onSubmit: (data: UpdateContactFormData) => Promise<void>;
+  readonly isLoading: boolean;
 }
 
 function ContactEditDialog({
-  accountId,
   contactId,
   open,
   onOpenChange,
@@ -668,20 +705,28 @@ function ContactEditDialog({
         <DialogHeader>
           <DialogTitle>Edit Contact</DialogTitle>
         </DialogHeader>
-        {isLoadingContact ? (
-          <div className="space-y-4">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-20 w-full" />
-          </div>
-        ) : contactData?.data ? (
-          <ContactForm
-            contact={contactData.data}
-            onSubmit={onSubmit}
-            onCancel={() => onOpenChange(false)}
-            isLoading={isLoading}
-          />
-        ) : null}
+        {(() => {
+          if (isLoadingContact) {
+            return (
+              <div className="space-y-4">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-20 w-full" />
+              </div>
+            );
+          }
+          if (contactData?.data) {
+            return (
+              <ContactForm
+                contact={contactData.data}
+                onSubmit={onSubmit}
+                onCancel={() => onOpenChange(false)}
+                isLoading={isLoading}
+              />
+            );
+          }
+          return null;
+        })()}
       </DialogContent>
     </Dialog>
   );

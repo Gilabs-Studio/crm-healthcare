@@ -9,7 +9,7 @@ export function useAccounts(params?: {
   per_page?: number;
   search?: string;
   status?: string;
-  category?: string;
+  category_id?: string;
   assigned_to?: string;
 }) {
   return useQuery({

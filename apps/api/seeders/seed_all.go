@@ -24,12 +24,22 @@ func SeedAll() error {
 		return err
 	}
 
-	// Seed accounts (requires users for assigned_to)
+	// Seed categories (required for accounts)
+	if err := SeedCategories(); err != nil {
+		return err
+	}
+
+	// Seed contact roles (required for contacts)
+	if err := SeedContactRoles(); err != nil {
+		return err
+	}
+
+	// Seed accounts (requires users for assigned_to and categories for category_id)
 	if err := SeedAccounts(); err != nil {
 		return err
 	}
 
-	// Seed contacts (requires accounts for account_id)
+	// Seed contacts (requires accounts for account_id and contact_roles for role_id)
 	if err := SeedContacts(); err != nil {
 		return err
 	}

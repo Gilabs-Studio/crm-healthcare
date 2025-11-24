@@ -1,7 +1,30 @@
+export interface Category {
+  id: string;
+  name: string;
+  code: string;
+  description?: string;
+  badge_color: "default" | "secondary" | "outline" | "success" | "warning" | "active";
+  status: "active" | "inactive";
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ContactRole {
+  id: string;
+  name: string;
+  code: string;
+  description?: string;
+  badge_color: "default" | "secondary" | "outline" | "success" | "warning" | "active";
+  status: "active" | "inactive";
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Account {
   id: string;
   name: string;
-  category: "hospital" | "clinic" | "pharmacy";
+  category_id: string;
+  category?: Category;
   address?: string;
   city?: string;
   province?: string;
@@ -17,13 +40,42 @@ export interface Contact {
   id: string;
   account_id: string;
   name: string;
-  role: "doctor" | "pic" | "manager" | "other";
+  role_id: string;
+  role?: ContactRole;
   phone?: string;
   email?: string;
   position?: string;
   notes?: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface ListCategoriesResponse {
+  success: boolean;
+  data: Category[];
+  timestamp: string;
+  request_id: string;
+}
+
+export interface CategoryResponse {
+  success: boolean;
+  data: Category;
+  timestamp: string;
+  request_id: string;
+}
+
+export interface ListContactRolesResponse {
+  success: boolean;
+  data: ContactRole[];
+  timestamp: string;
+  request_id: string;
+}
+
+export interface ContactRoleResponse {
+  success: boolean;
+  data: ContactRole;
+  timestamp: string;
+  request_id: string;
 }
 
 export interface ListAccountsResponse {
@@ -75,4 +127,3 @@ export interface ContactResponse {
   timestamp: string;
   request_id: string;
 }
-

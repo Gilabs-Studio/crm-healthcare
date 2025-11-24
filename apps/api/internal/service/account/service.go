@@ -9,16 +9,19 @@ import (
 )
 
 var (
-	ErrAccountNotFound = errors.New("account not found")
+	ErrAccountNotFound   = errors.New("account not found")
+	ErrCategoryNotFound  = errors.New("category not found")
 )
 
 type Service struct {
-	accountRepo interfaces.AccountRepository
+	accountRepo  interfaces.AccountRepository
+	categoryRepo interfaces.CategoryRepository
 }
 
-func NewService(accountRepo interfaces.AccountRepository) *Service {
+func NewService(accountRepo interfaces.AccountRepository, categoryRepo interfaces.CategoryRepository) *Service {
 	return &Service{
-		accountRepo: accountRepo,
+		accountRepo:  accountRepo,
+		categoryRepo: categoryRepo,
 	}
 }
 
@@ -78,9 +81,18 @@ func (s *Service) GetByID(id string) (*account.AccountResponse, error) {
 
 // Create creates a new account
 func (s *Service) Create(req *account.CreateAccountRequest) (*account.AccountResponse, error) {
+	// Validate category exists
+	_, err := s.categoryRepo.FindByID(req.CategoryID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrCategoryNotFound
+		}
+		return nil, err
+	}
+
 	a := &account.Account{
 		Name:       req.Name,
-		Category:   req.Category,
+		CategoryID: req.CategoryID,
 		Address:    req.Address,
 		City:       req.City,
 		Province:   req.Province,
@@ -99,7 +111,13 @@ func (s *Service) Create(req *account.CreateAccountRequest) (*account.AccountRes
 		return nil, err
 	}
 
-	return a.ToAccountResponse(), nil
+	// Reload with category
+	createdAccount, err := s.accountRepo.FindByID(a.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return createdAccount.ToAccountResponse(), nil
 }
 
 // Update updates an account
@@ -116,8 +134,16 @@ func (s *Service) Update(id string, req *account.UpdateAccountRequest) (*account
 	if req.Name != "" {
 		a.Name = req.Name
 	}
-	if req.Category != "" {
-		a.Category = req.Category
+	if req.CategoryID != "" {
+		// Validate category exists
+		_, err := s.categoryRepo.FindByID(req.CategoryID)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, ErrCategoryNotFound
+			}
+			return nil, err
+		}
+		a.CategoryID = req.CategoryID
 	}
 	if req.Address != "" {
 		a.Address = req.Address
@@ -145,7 +171,13 @@ func (s *Service) Update(id string, req *account.UpdateAccountRequest) (*account
 		return nil, err
 	}
 
-	return a.ToAccountResponse(), nil
+	// Reload with category
+	updatedAccount, err := s.accountRepo.FindByID(a.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return updatedAccount.ToAccountResponse(), nil
 }
 
 // Delete deletes an account

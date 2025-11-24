@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useCategories } from "../hooks/useCategories";
 import type { Account } from "../types";
 
 interface AccountFormProps {
@@ -30,6 +31,8 @@ interface AccountFormProps {
 
 export function AccountForm({ account, onSubmit, onCancel, isLoading }: AccountFormProps) {
   const isEdit = !!account;
+  const { data: categoriesData } = useCategories();
+  const categories = categoriesData?.data || [];
 
   const {
     register,
@@ -42,7 +45,7 @@ export function AccountForm({ account, onSubmit, onCancel, isLoading }: AccountF
     defaultValues: account
       ? {
           name: account.name,
-          category: account.category,
+          category_id: account.category_id,
           address: account.address || "",
           city: account.city || "",
           province: account.province || "",
@@ -71,19 +74,23 @@ export function AccountForm({ account, onSubmit, onCancel, isLoading }: AccountF
       <Field orientation="vertical">
         <FieldLabel>Category *</FieldLabel>
         <Select
-          value={watch("category") || ""}
-          onValueChange={(value) => setValue("category", value as "hospital" | "clinic" | "pharmacy")}
+          value={watch("category_id") || ""}
+          onValueChange={(value) => setValue("category_id", value)}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select category" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="hospital">Hospital</SelectItem>
-            <SelectItem value="clinic">Clinic</SelectItem>
-            <SelectItem value="pharmacy">Pharmacy</SelectItem>
+            {categories
+              .filter((cat) => cat.status === "active")
+              .map((category) => (
+                <SelectItem key={category.id} value={category.id}>
+                  {category.name}
+                </SelectItem>
+              ))}
           </SelectContent>
         </Select>
-        {errors.category && <FieldError>{errors.category.message}</FieldError>}
+        {errors.category_id && <FieldError>{errors.category_id.message}</FieldError>}
       </Field>
 
       <Field orientation="vertical">

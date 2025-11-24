@@ -19,7 +19,7 @@ func NewRepository(db *gorm.DB) interfaces.AccountRepository {
 
 func (r *repository) FindByID(id string) (*account.Account, error) {
 	var a account.Account
-	err := r.db.Where("id = ?", id).First(&a).Error
+	err := r.db.Preload("Category").Where("id = ?", id).First(&a).Error
 	if err != nil {
 		return nil, err
 	}
@@ -45,8 +45,8 @@ func (r *repository) List(req *account.ListAccountsRequest) ([]account.Account, 
 		query = query.Where("status = ?", req.Status)
 	}
 
-	if req.Category != "" {
-		query = query.Where("category = ?", req.Category)
+	if req.CategoryID != "" {
+		query = query.Where("category_id = ?", req.CategoryID)
 	}
 
 	if req.AssignedTo != "" {
@@ -73,8 +73,8 @@ func (r *repository) List(req *account.ListAccountsRequest) ([]account.Account, 
 
 	offset := (page - 1) * perPage
 
-	// Fetch data
-	err := query.Order("created_at DESC").Offset(offset).Limit(perPage).Find(&accounts).Error
+	// Fetch data with preload
+	err := query.Preload("Category").Order("created_at DESC").Offset(offset).Limit(perPage).Find(&accounts).Error
 	if err != nil {
 		return nil, 0, err
 	}

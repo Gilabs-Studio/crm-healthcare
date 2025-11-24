@@ -8,7 +8,9 @@ import (
 
 	"github.com/gilabs/crm-healthcare/api/internal/config"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/account"
+	"github.com/gilabs/crm-healthcare/api/internal/domain/category"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/contact"
+	"github.com/gilabs/crm-healthcare/api/internal/domain/contact_role"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/permission"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/role"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/user"
@@ -67,6 +69,8 @@ func AutoMigrate() error {
 		&role.Role{},
 		&permission.Permission{},
 		&permission.Menu{},
+		&category.Category{},
+		&contact_role.ContactRole{},
 		&account.Account{},
 		&contact.Contact{},
 	)

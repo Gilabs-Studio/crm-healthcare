@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const createAccountSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters"),
-  category: z.enum(["hospital", "clinic", "pharmacy"], {
+  category_id: z.string().uuid("Invalid category ID", {
     required_error: "Category is required",
   }),
   address: z.string().optional(),
@@ -16,7 +16,7 @@ export const createAccountSchema = z.object({
 
 export const updateAccountSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters").optional(),
-  category: z.enum(["hospital", "clinic", "pharmacy"]).optional(),
+  category_id: z.string().uuid("Invalid category ID").optional(),
   address: z.string().optional(),
   city: z.string().optional(),
   province: z.string().optional(),

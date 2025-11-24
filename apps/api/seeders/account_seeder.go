@@ -5,6 +5,7 @@ import (
 
 	"github.com/gilabs/crm-healthcare/api/internal/database"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/account"
+	"github.com/gilabs/crm-healthcare/api/internal/domain/category"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/user"
 )
 
@@ -27,10 +28,22 @@ func SeedAccounts() error {
 		adminUserID = adminUser.ID
 	}
 
+	// Get categories by code
+	var hospitalCategory, clinicCategory, pharmacyCategory category.Category
+	if err := database.DB.Where("code = ?", "HOSPITAL").First(&hospitalCategory).Error; err != nil {
+		return err
+	}
+	if err := database.DB.Where("code = ?", "CLINIC").First(&clinicCategory).Error; err != nil {
+		return err
+	}
+	if err := database.DB.Where("code = ?", "PHARMACY").First(&pharmacyCategory).Error; err != nil {
+		return err
+	}
+
 	accounts := []account.Account{
 		{
 			Name:       "Rumah Sakit Umum Daerah Jakarta",
-			Category:   "hospital",
+			CategoryID: hospitalCategory.ID,
 			Address:    "Jl. Salemba Raya No. 6, Jakarta Pusat",
 			City:       "Jakarta Pusat",
 			Province:   "DKI Jakarta",
@@ -41,7 +54,7 @@ func SeedAccounts() error {
 		},
 		{
 			Name:       "Rumah Sakit Cipto Mangunkusumo",
-			Category:   "hospital",
+			CategoryID: hospitalCategory.ID,
 			Address:    "Jl. Diponegoro No. 71, Jakarta Pusat",
 			City:       "Jakarta Pusat",
 			Province:   "DKI Jakarta",
@@ -52,7 +65,7 @@ func SeedAccounts() error {
 		},
 		{
 			Name:       "Klinik Sehat Sentosa",
-			Category:   "clinic",
+			CategoryID: clinicCategory.ID,
 			Address:    "Jl. Sudirman No. 123, Jakarta Selatan",
 			City:       "Jakarta Selatan",
 			Province:   "DKI Jakarta",
@@ -63,7 +76,7 @@ func SeedAccounts() error {
 		},
 		{
 			Name:       "Klinik Medika Pratama",
-			Category:   "clinic",
+			CategoryID: clinicCategory.ID,
 			Address:    "Jl. Gatot Subroto No. 45, Jakarta Selatan",
 			City:       "Jakarta Selatan",
 			Province:   "DKI Jakarta",
@@ -74,7 +87,7 @@ func SeedAccounts() error {
 		},
 		{
 			Name:       "Apotek Kimia Farma Cabang Thamrin",
-			Category:   "pharmacy",
+			CategoryID: pharmacyCategory.ID,
 			Address:    "Jl. MH Thamrin No. 1, Jakarta Pusat",
 			City:       "Jakarta Pusat",
 			Province:   "DKI Jakarta",
@@ -85,7 +98,7 @@ func SeedAccounts() error {
 		},
 		{
 			Name:       "Apotek Guardian Plaza Indonesia",
-			Category:   "pharmacy",
+			CategoryID: pharmacyCategory.ID,
 			Address:    "Jl. MH Thamrin Kav. 28-30, Jakarta Pusat",
 			City:       "Jakarta Pusat",
 			Province:   "DKI Jakarta",
@@ -96,7 +109,7 @@ func SeedAccounts() error {
 		},
 		{
 			Name:       "Rumah Sakit Pondok Indah",
-			Category:   "hospital",
+			CategoryID: hospitalCategory.ID,
 			Address:    "Jl. Metro Duta Kav. UE, Jakarta Selatan",
 			City:       "Jakarta Selatan",
 			Province:   "DKI Jakarta",
@@ -107,7 +120,7 @@ func SeedAccounts() error {
 		},
 		{
 			Name:       "Klinik Bunda Sejahtera",
-			Category:   "clinic",
+			CategoryID: clinicCategory.ID,
 			Address:    "Jl. Kebayoran Baru No. 78, Jakarta Selatan",
 			City:       "Jakarta Selatan",
 			Province:   "DKI Jakarta",
@@ -122,7 +135,7 @@ func SeedAccounts() error {
 		if err := database.DB.Create(&acc).Error; err != nil {
 			return err
 		}
-		log.Printf("Created account: %s (id: %s, category: %s)", acc.Name, acc.ID, acc.Category)
+		log.Printf("Created account: %s (id: %s, category_id: %s)", acc.Name, acc.ID, acc.CategoryID)
 	}
 
 	log.Println("Accounts seeded successfully")

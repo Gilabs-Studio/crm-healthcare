@@ -19,7 +19,7 @@ func NewRepository(db *gorm.DB) interfaces.ContactRepository {
 
 func (r *repository) FindByID(id string) (*contact.Contact, error) {
 	var c contact.Contact
-	err := r.db.Where("id = ?", id).First(&c).Error
+	err := r.db.Preload("Role").Where("id = ?", id).First(&c).Error
 	if err != nil {
 		return nil, err
 	}
@@ -45,8 +45,8 @@ func (r *repository) List(req *contact.ListContactsRequest) ([]contact.Contact, 
 		query = query.Where("account_id = ?", req.AccountID)
 	}
 
-	if req.Role != "" {
-		query = query.Where("role = ?", req.Role)
+	if req.RoleID != "" {
+		query = query.Where("role_id = ?", req.RoleID)
 	}
 
 	// Count total
@@ -69,8 +69,8 @@ func (r *repository) List(req *contact.ListContactsRequest) ([]contact.Contact, 
 
 	offset := (page - 1) * perPage
 
-	// Fetch data
-	err := query.Order("created_at DESC").Offset(offset).Limit(perPage).Find(&contacts).Error
+	// Fetch data with preload
+	err := query.Preload("Role").Order("created_at DESC").Offset(offset).Limit(perPage).Find(&contacts).Error
 	if err != nil {
 		return nil, 0, err
 	}
@@ -92,7 +92,7 @@ func (r *repository) Delete(id string) error {
 
 func (r *repository) FindByAccountID(accountID string) ([]contact.Contact, error) {
 	var contacts []contact.Contact
-	err := r.db.Where("account_id = ?", accountID).Order("created_at DESC").Find(&contacts).Error
+	err := r.db.Preload("Role").Where("account_id = ?", accountID).Order("created_at DESC").Find(&contacts).Error
 	if err != nil {
 		return nil, err
 	}

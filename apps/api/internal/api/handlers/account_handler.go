@@ -56,8 +56,8 @@ func (h *AccountHandler) List(c *gin.Context) {
 	if req.Status != "" {
 		meta.Filters["status"] = req.Status
 	}
-	if req.Category != "" {
-		meta.Filters["category"] = req.Category
+	if req.CategoryID != "" {
+		meta.Filters["category_id"] = req.CategoryID
 	}
 	if req.AssignedTo != "" {
 		meta.Filters["assigned_to"] = req.AssignedTo

@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAccounts } from "../hooks/useAccounts";
+import { useContactRoles } from "../hooks/useContactRoles";
 import type { Contact } from "../types";
 
 interface ContactFormProps {
@@ -40,6 +41,8 @@ export function ContactForm({
   const isEdit = !!contact;
   const { data: accountsData } = useAccounts({ per_page: 100 });
   const accounts = accountsData?.data || [];
+  const { data: contactRolesData } = useContactRoles();
+  const contactRoles = contactRolesData?.data || [];
 
   const {
     register,
@@ -53,7 +56,7 @@ export function ContactForm({
       ? {
           account_id: contact.account_id,
           name: contact.name,
-          role: contact.role,
+          role_id: contact.role_id,
           phone: contact.phone || "",
           email: contact.email || "",
           position: contact.position || "",
@@ -85,7 +88,7 @@ export function ContactForm({
           <SelectContent>
             {accounts.map((account) => (
               <SelectItem key={account.id} value={account.id}>
-                {account.name} ({account.category})
+                {account.name} {account.category && `(${account.category.name})`}
               </SelectItem>
             ))}
           </SelectContent>
@@ -102,22 +105,23 @@ export function ContactForm({
       <Field orientation="vertical">
         <FieldLabel>Role *</FieldLabel>
         <Select
-          value={watch("role") || ""}
-          onValueChange={(value) =>
-            setValue("role", value as "doctor" | "pic" | "manager" | "other")
-          }
+          value={watch("role_id") || ""}
+          onValueChange={(value) => setValue("role_id", value)}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select role" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="doctor">Doctor</SelectItem>
-            <SelectItem value="pic">PIC</SelectItem>
-            <SelectItem value="manager">Manager</SelectItem>
-            <SelectItem value="other">Other</SelectItem>
+            {contactRoles
+              .filter((role) => role.status === "active")
+              .map((role) => (
+                <SelectItem key={role.id} value={role.id}>
+                  {role.name}
+                </SelectItem>
+              ))}
           </SelectContent>
         </Select>
-        {errors.role && <FieldError>{errors.role.message}</FieldError>}
+        {errors.role_id && <FieldError>{errors.role_id.message}</FieldError>}
       </Field>
 
       <div className="grid grid-cols-2 gap-4">

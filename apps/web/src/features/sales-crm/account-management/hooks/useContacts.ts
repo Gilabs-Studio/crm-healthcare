@@ -9,7 +9,7 @@ export function useContacts(params?: {
   per_page?: number;
   search?: string;
   account_id?: string;
-  role?: string;
+  role_id?: string;
 }) {
   return useQuery({
     queryKey: ["contacts", params],

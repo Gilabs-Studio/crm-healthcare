@@ -56,8 +56,8 @@ func (h *ContactHandler) List(c *gin.Context) {
 	if req.AccountID != "" {
 		meta.Filters["account_id"] = req.AccountID
 	}
-	if req.Role != "" {
-		meta.Filters["role"] = req.Role
+	if req.RoleID != "" {
+		meta.Filters["role_id"] = req.RoleID
 	}
 
 	response.SuccessResponse(c, contacts, meta)

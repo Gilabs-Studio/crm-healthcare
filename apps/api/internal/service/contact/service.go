@@ -9,19 +9,22 @@ import (
 )
 
 var (
-	ErrContactNotFound = errors.New("contact not found")
-	ErrAccountNotFound = errors.New("account not found")
+	ErrContactNotFound    = errors.New("contact not found")
+	ErrAccountNotFound    = errors.New("account not found")
+	ErrContactRoleNotFound = errors.New("contact role not found")
 )
 
 type Service struct {
-	contactRepo interfaces.ContactRepository
-	accountRepo interfaces.AccountRepository
+	contactRepo     interfaces.ContactRepository
+	accountRepo     interfaces.AccountRepository
+	contactRoleRepo interfaces.ContactRoleRepository
 }
 
-func NewService(contactRepo interfaces.ContactRepository, accountRepo interfaces.AccountRepository) *Service {
+func NewService(contactRepo interfaces.ContactRepository, accountRepo interfaces.AccountRepository, contactRoleRepo interfaces.ContactRoleRepository) *Service {
 	return &Service{
-		contactRepo: contactRepo,
-		accountRepo: accountRepo,
+		contactRepo:     contactRepo,
+		accountRepo:     accountRepo,
+		contactRoleRepo: contactRoleRepo,
 	}
 }
 
@@ -90,10 +93,19 @@ func (s *Service) Create(req *contact.CreateContactRequest) (*contact.ContactRes
 		return nil, err
 	}
 
+	// Validate contact role exists
+	_, err = s.contactRoleRepo.FindByID(req.RoleID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrContactRoleNotFound
+		}
+		return nil, err
+	}
+
 	c := &contact.Contact{
 		AccountID: req.AccountID,
 		Name:      req.Name,
-		Role:      req.Role,
+		RoleID:    req.RoleID,
 		Phone:     req.Phone,
 		Email:     req.Email,
 		Position:  req.Position,
@@ -104,7 +116,13 @@ func (s *Service) Create(req *contact.CreateContactRequest) (*contact.ContactRes
 		return nil, err
 	}
 
-	return c.ToContactResponse(), nil
+	// Reload with role
+	createdContact, err := s.contactRepo.FindByID(c.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return createdContact.ToContactResponse(), nil
 }
 
 // Update updates a contact
@@ -133,8 +151,16 @@ func (s *Service) Update(id string, req *contact.UpdateContactRequest) (*contact
 	if req.Name != "" {
 		c.Name = req.Name
 	}
-	if req.Role != "" {
-		c.Role = req.Role
+	if req.RoleID != "" {
+		// Validate contact role exists
+		_, err := s.contactRoleRepo.FindByID(req.RoleID)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, ErrContactRoleNotFound
+			}
+			return nil, err
+		}
+		c.RoleID = req.RoleID
 	}
 	if req.Phone != "" {
 		c.Phone = req.Phone
@@ -153,7 +179,13 @@ func (s *Service) Update(id string, req *contact.UpdateContactRequest) (*contact
 		return nil, err
 	}
 
-	return c.ToContactResponse(), nil
+	// Reload with role
+	updatedContact, err := s.contactRepo.FindByID(c.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return updatedContact.ToContactResponse(), nil
 }
 
 // Delete deletes a contact

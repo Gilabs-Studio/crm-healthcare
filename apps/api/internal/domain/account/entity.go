@@ -11,7 +11,8 @@ import (
 type Account struct {
 	ID         string    `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	Name       string    `gorm:"type:varchar(255);not null" json:"name"`
-	Category   string    `gorm:"type:varchar(50);not null" json:"category"` // hospital, clinic, pharmacy
+	CategoryID string    `gorm:"type:uuid;not null;index" json:"category_id"`
+	Category   *Category `gorm:"foreignKey:CategoryID" json:"category,omitempty"`
 	Address    string    `gorm:"type:text" json:"address"`
 	City       string    `gorm:"type:varchar(100)" json:"city"`
 	Province   string    `gorm:"type:varchar(100)" json:"province"`
@@ -22,6 +23,16 @@ type Account struct {
 	CreatedAt  time.Time `json:"created_at"`
 	UpdatedAt  time.Time `json:"updated_at"`
 	DeletedAt  gorm.DeletedAt `gorm:"index" json:"-"`
+}
+
+// Category represents account category (imported from category package)
+type Category struct {
+	ID          string    `gorm:"type:uuid;primary_key" json:"id"`
+	Name        string    `json:"name"`
+	Code        string    `json:"code"`
+	Description string    `json:"description"`
+	BadgeColor  string    `json:"badge_color"`
+	Status      string    `json:"status"`
 }
 
 // TableName specifies the table name for Account
@@ -41,7 +52,8 @@ func (a *Account) BeforeCreate(tx *gorm.DB) error {
 type AccountResponse struct {
 	ID         string    `json:"id"`
 	Name       string    `json:"name"`
-	Category   string    `json:"category"`
+	CategoryID string    `json:"category_id"`
+	Category   *CategoryResponse `json:"category,omitempty"`
 	Address    string    `json:"address"`
 	City       string    `json:"city"`
 	Province   string    `json:"province"`
@@ -53,12 +65,22 @@ type AccountResponse struct {
 	UpdatedAt  time.Time `json:"updated_at"`
 }
 
+// CategoryResponse represents category in account response
+type CategoryResponse struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Code        string `json:"code"`
+	Description string `json:"description"`
+	BadgeColor  string `json:"badge_color"`
+	Status      string `json:"status"`
+}
+
 // ToAccountResponse converts Account to AccountResponse
 func (a *Account) ToAccountResponse() *AccountResponse {
-	return &AccountResponse{
+	resp := &AccountResponse{
 		ID:         a.ID,
 		Name:       a.Name,
-		Category:   a.Category,
+		CategoryID: a.CategoryID,
 		Address:    a.Address,
 		City:       a.City,
 		Province:   a.Province,
@@ -69,12 +91,23 @@ func (a *Account) ToAccountResponse() *AccountResponse {
 		CreatedAt:  a.CreatedAt,
 		UpdatedAt:  a.UpdatedAt,
 	}
+	if a.Category != nil {
+		resp.Category = &CategoryResponse{
+			ID:          a.Category.ID,
+			Name:        a.Category.Name,
+			Code:        a.Category.Code,
+			Description: a.Category.Description,
+			BadgeColor:  a.Category.BadgeColor,
+			Status:      a.Category.Status,
+		}
+	}
+	return resp
 }
 
 // CreateAccountRequest represents create account request DTO
 type CreateAccountRequest struct {
 	Name       string `json:"name" binding:"required,min=3"`
-	Category   string `json:"category" binding:"required,oneof=hospital clinic pharmacy"`
+	CategoryID string `json:"category_id" binding:"required,uuid"`
 	Address    string `json:"address" binding:"omitempty"`
 	City       string `json:"city" binding:"omitempty"`
 	Province   string `json:"province" binding:"omitempty"`
@@ -87,7 +120,7 @@ type CreateAccountRequest struct {
 // UpdateAccountRequest represents update account request DTO
 type UpdateAccountRequest struct {
 	Name       string `json:"name" binding:"omitempty,min=3"`
-	Category   string `json:"category" binding:"omitempty,oneof=hospital clinic pharmacy"`
+	CategoryID string `json:"category_id" binding:"omitempty,uuid"`
 	Address    string `json:"address" binding:"omitempty"`
 	City       string `json:"city" binding:"omitempty"`
 	Province   string `json:"province" binding:"omitempty"`
@@ -103,7 +136,7 @@ type ListAccountsRequest struct {
 	PerPage   int    `form:"per_page" binding:"omitempty,min=1,max=100"`
 	Search    string `form:"search" binding:"omitempty"`
 	Status    string `form:"status" binding:"omitempty,oneof=active inactive"`
-	Category  string `form:"category" binding:"omitempty,oneof=hospital clinic pharmacy"`
+	CategoryID string `form:"category_id" binding:"omitempty,uuid"`
 	AssignedTo string `form:"assigned_to" binding:"omitempty,uuid"`
 }
 

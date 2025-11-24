@@ -16,7 +16,7 @@ export function useAccountList() {
   const [perPage, setPerPage] = useState(20);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<string>("");
-  const [category, setCategory] = useState<string>("");
+  const [categoryId, setCategoryId] = useState<string>("");
   const [assignedTo, setAssignedTo] = useState<string>("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState<string | null>(null);
@@ -27,7 +27,7 @@ export function useAccountList() {
     per_page: perPage,
     search,
     status,
-    category,
+    category_id: categoryId,
     assigned_to: assignedTo,
   });
   const { data: editingAccountData } = useAccount(editingAccount || "");
@@ -60,12 +60,19 @@ export function useAccountList() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    try {
-      await deleteAccount.mutateAsync(id);
-      toast.success("Account deleted successfully");
-    } catch (error) {
-      // Error already handled in api-client interceptor
+  const handleDeleteClick = (id: string) => {
+    setDeletingAccountId(id);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (deletingAccountId) {
+      try {
+        await deleteAccount.mutateAsync(deletingAccountId);
+        toast.success("Account deleted successfully");
+        setDeletingAccountId(null);
+      } catch (error) {
+        // Error already handled in api-client interceptor
+      }
     }
   };
 
@@ -84,8 +91,8 @@ export function useAccountList() {
     setSearch,
     status,
     setStatus,
-    category,
-    setCategory,
+    categoryId,
+    setCategoryId,
     assignedTo,
     setAssignedTo,
     isCreateDialogOpen,
@@ -102,7 +109,8 @@ export function useAccountList() {
     // Actions
     handleCreate,
     handleUpdate,
-    handleDelete,
+    handleDeleteClick,
+    handleDeleteConfirm,
     // Mutations
     deleteAccount,
     createAccount,

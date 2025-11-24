@@ -5,7 +5,9 @@ import (
 
 	"github.com/gilabs/crm-healthcare/api/internal/database"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/account"
+	"github.com/gilabs/crm-healthcare/api/internal/domain/category"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/contact"
+	"github.com/gilabs/crm-healthcare/api/internal/domain/contact_role"
 )
 
 // SeedContacts seeds initial contacts
@@ -18,9 +20,9 @@ func SeedContacts() error {
 		return nil
 	}
 
-	// Get accounts for relationships
+	// Get accounts for relationships (with category preload)
 	var accounts []account.Account
-	if err := database.DB.Find(&accounts).Error; err != nil {
+	if err := database.DB.Preload("Category").Find(&accounts).Error; err != nil {
 		return err
 	}
 
@@ -29,19 +31,48 @@ func SeedContacts() error {
 		return nil
 	}
 
+	// Get contact roles by code
+	var doctorRole, picRole, managerRole, otherRole contact_role.ContactRole
+	if err := database.DB.Where("code = ?", "DOCTOR").First(&doctorRole).Error; err != nil {
+		return err
+	}
+	if err := database.DB.Where("code = ?", "PIC").First(&picRole).Error; err != nil {
+		return err
+	}
+	if err := database.DB.Where("code = ?", "MANAGER").First(&managerRole).Error; err != nil {
+		return err
+	}
+	if err := database.DB.Where("code = ?", "OTHER").First(&otherRole).Error; err != nil {
+		return err
+	}
+
+	// Get categories by code for mapping
+	var hospitalCategory, clinicCategory, pharmacyCategory category.Category
+	if err := database.DB.Where("code = ?", "HOSPITAL").First(&hospitalCategory).Error; err != nil {
+		return err
+	}
+	if err := database.DB.Where("code = ?", "CLINIC").First(&clinicCategory).Error; err != nil {
+		return err
+	}
+	if err := database.DB.Where("code = ?", "PHARMACY").First(&pharmacyCategory).Error; err != nil {
+		return err
+	}
+
 	// Map accounts by category for easier assignment
 	hospitalAccounts := []account.Account{}
 	clinicAccounts := []account.Account{}
 	pharmacyAccounts := []account.Account{}
 
 	for _, acc := range accounts {
-		switch acc.Category {
-		case "hospital":
-			hospitalAccounts = append(hospitalAccounts, acc)
-		case "clinic":
-			clinicAccounts = append(clinicAccounts, acc)
-		case "pharmacy":
-			pharmacyAccounts = append(pharmacyAccounts, acc)
+		if acc.Category != nil {
+			switch acc.Category.Code {
+			case "HOSPITAL":
+				hospitalAccounts = append(hospitalAccounts, acc)
+			case "CLINIC":
+				clinicAccounts = append(clinicAccounts, acc)
+			case "PHARMACY":
+				pharmacyAccounts = append(pharmacyAccounts, acc)
+			}
 		}
 	}
 
@@ -53,7 +84,7 @@ func SeedContacts() error {
 		contacts = append(contacts, contact.Contact{
 			AccountID: hospitalAccounts[0].ID,
 			Name:      "Dr. Ahmad Wijaya, Sp.PD",
-			Role:      "doctor",
+			RoleID:    doctorRole.ID,
 			Phone:     "+6281234568001",
 			Email:     "ahmad.wijaya@rsud-jakarta.go.id",
 			Position:  "Kepala Bagian Internal Medicine",
@@ -62,7 +93,7 @@ func SeedContacts() error {
 		contacts = append(contacts, contact.Contact{
 			AccountID: hospitalAccounts[0].ID,
 			Name:      "Budi Santoso",
-			Role:      "pic",
+			RoleID:    picRole.ID,
 			Phone:     "+6281234568002",
 			Email:     "budi.santoso@rsud-jakarta.go.id",
 			Position:  "Manager Procurement",
@@ -74,7 +105,7 @@ func SeedContacts() error {
 			contacts = append(contacts, contact.Contact{
 				AccountID: hospitalAccounts[1].ID,
 				Name:      "Dr. Siti Nurhaliza, Sp.JP",
-				Role:      "doctor",
+				RoleID:    doctorRole.ID,
 				Phone:     "+6281234568003",
 				Email:     "siti.nurhaliza@rscm.go.id",
 				Position:  "Kepala Bagian Kardiologi",
@@ -83,7 +114,7 @@ func SeedContacts() error {
 			contacts = append(contacts, contact.Contact{
 				AccountID: hospitalAccounts[1].ID,
 				Name:      "Rina Kartika",
-				Role:      "manager",
+				RoleID:    managerRole.ID,
 				Phone:     "+6281234568004",
 				Email:     "rina.kartika@rscm.go.id",
 				Position:  "Direktur Operasional",
@@ -96,7 +127,7 @@ func SeedContacts() error {
 			contacts = append(contacts, contact.Contact{
 				AccountID: hospitalAccounts[2].ID,
 				Name:      "Dr. Michael Chen, Sp.OG",
-				Role:      "doctor",
+				RoleID:    doctorRole.ID,
 				Phone:     "+6281234568005",
 				Email:     "michael.chen@rspondokindah.co.id",
 				Position:  "Kepala Bagian Obstetri & Ginekologi",
@@ -111,7 +142,7 @@ func SeedContacts() error {
 		contacts = append(contacts, contact.Contact{
 			AccountID: clinicAccounts[0].ID,
 			Name:      "Dr. Indra Gunawan",
-			Role:      "doctor",
+			RoleID:    doctorRole.ID,
 			Phone:     "+6281234568006",
 			Email:     "indra.gunawan@kliniksehatsentosa.com",
 			Position:  "Dokter Umum",
@@ -120,7 +151,7 @@ func SeedContacts() error {
 		contacts = append(contacts, contact.Contact{
 			AccountID: clinicAccounts[0].ID,
 			Name:      "Sari Dewi",
-			Role:      "pic",
+			RoleID:    picRole.ID,
 			Phone:     "+6281234568007",
 			Email:     "sari.dewi@kliniksehatsentosa.com",
 			Position:  "Administrator",
@@ -132,7 +163,7 @@ func SeedContacts() error {
 			contacts = append(contacts, contact.Contact{
 				AccountID: clinicAccounts[1].ID,
 				Name:      "Dr. Lisa Permata",
-				Role:      "doctor",
+				RoleID:    doctorRole.ID,
 				Phone:     "+6281234568008",
 				Email:     "lisa.permata@medikapratama.com",
 				Position:  "Dokter Spesialis Anak",
@@ -145,7 +176,7 @@ func SeedContacts() error {
 			contacts = append(contacts, contact.Contact{
 				AccountID: clinicAccounts[2].ID,
 				Name:      "Dr. Maria Sari",
-				Role:      "doctor",
+				RoleID:    doctorRole.ID,
 				Phone:     "+6281234568009",
 				Email:     "maria.sari@bundasejahtera.com",
 				Position:  "Dokter Spesialis Kandungan",
@@ -160,7 +191,7 @@ func SeedContacts() error {
 		contacts = append(contacts, contact.Contact{
 			AccountID: pharmacyAccounts[0].ID,
 			Name:      "Apt. Dedi Kurniawan, S.Farm",
-			Role:      "manager",
+			RoleID:    managerRole.ID,
 			Phone:     "+6281234568010",
 			Email:     "dedi.kurniawan@kimiafarma.co.id",
 			Position:  "Apoteker Kepala",
@@ -169,7 +200,7 @@ func SeedContacts() error {
 		contacts = append(contacts, contact.Contact{
 			AccountID: pharmacyAccounts[0].ID,
 			Name:      "Rizki Pratama",
-			Role:      "pic",
+			RoleID:    picRole.ID,
 			Phone:     "+6281234568011",
 			Email:     "rizki.pratama@kimiafarma.co.id",
 			Position:  "Supervisor",
@@ -181,7 +212,7 @@ func SeedContacts() error {
 			contacts = append(contacts, contact.Contact{
 				AccountID: pharmacyAccounts[1].ID,
 				Name:      "Apt. Sarah Putri, S.Farm",
-				Role:      "manager",
+				RoleID:    managerRole.ID,
 				Phone:     "+6281234568012",
 				Email:     "sarah.putri@guardian.co.id",
 				Position:  "Branch Manager",
@@ -195,7 +226,7 @@ func SeedContacts() error {
 		if err := database.DB.Create(&cont).Error; err != nil {
 			return err
 		}
-		log.Printf("Created contact: %s (id: %s, account_id: %s, role: %s)", cont.Name, cont.ID, cont.AccountID, cont.Role)
+		log.Printf("Created contact: %s (id: %s, account_id: %s, role_id: %s)", cont.Name, cont.ID, cont.AccountID, cont.RoleID)
 	}
 
 	log.Printf("Contacts seeded successfully (%d contacts created)", len(contacts))

@@ -13,7 +13,7 @@ export const contactService = {
     per_page?: number;
     search?: string;
     account_id?: string;
-    role?: string;
+    role_id?: string;
   }): Promise<ListContactsResponse> {
     const response = await apiClient.get<ListContactsResponse>("/contacts", { params });
     return response.data;
