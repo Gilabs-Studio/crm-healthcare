@@ -23,6 +23,7 @@ func SeedPermissions() error {
 	var userPageMenu permission.Menu
 	var dataMasterMenu, companyMgmtMenu, companyMenu, divisionMenu, jobPositionMenu, employeeMenu permission.Menu
 	var healthcareMenu permission.Menu
+	var salesCRMMenu, accountsMenu permission.Menu
 
 	database.DB.Where("url = ?", "/dashboard").First(&dashboardMenu)
 	database.DB.Where("url = ?", "/master-data/users").First(&userPageMenu)
@@ -33,6 +34,8 @@ func SeedPermissions() error {
 	database.DB.Where("url = ?", "/data-master/company/job-position").First(&jobPositionMenu)
 	database.DB.Where("url = ?", "/data-master/company/employee").First(&employeeMenu)
 	database.DB.Where("url = ?", "/master-data").First(&healthcareMenu)
+	database.DB.Where("url = ?", "/sales-crm").First(&salesCRMMenu)
+	database.DB.Where("url = ?", "/accounts").First(&accountsMenu)
 
 	// Define actions for each menu
 	actions := []struct {
@@ -95,6 +98,16 @@ func SeedPermissions() error {
 
 		// Healthcare Master Data actions
 		{healthcareMenu.ID, "VIEW_HEALTHCARE_MASTER", "View Healthcare Master Data", "VIEW", &healthcareMenu},
+
+		// Sales CRM actions
+		{salesCRMMenu.ID, "VIEW_SALES_CRM", "View Sales CRM", "VIEW", &salesCRMMenu},
+
+		// Accounts actions
+		{accountsMenu.ID, "VIEW_ACCOUNTS", "View Accounts", "VIEW", &accountsMenu},
+		{accountsMenu.ID, "CREATE_ACCOUNTS", "Create Accounts", "CREATE", &accountsMenu},
+		{accountsMenu.ID, "EDIT_ACCOUNTS", "Edit Accounts", "EDIT", &accountsMenu},
+		{accountsMenu.ID, "DELETE_ACCOUNTS", "Delete Accounts", "DELETE", &accountsMenu},
+		{accountsMenu.ID, "DETAIL_ACCOUNTS", "Detail Accounts", "DETAIL", &accountsMenu},
 	}
 
 	// Create permissions

@@ -24,6 +24,8 @@ import {
   Grid,
   Briefcase,
   Heart,
+  TrendingUp,
+  Contact,
 } from "lucide-react";
 
 const iconMap: Record<string, React.ReactNode> = {
@@ -34,11 +36,16 @@ const iconMap: Record<string, React.ReactNode> = {
   // Data Master icons
   database: <Database className="h-4 w-4" />,
   building: <Building2 className="h-4 w-4" />,
+  "building-2": <Building2 className="h-4 w-4" />,
   grid: <Grid className="h-4 w-4" />,
   briefcase: <Briefcase className="h-4 w-4" />,
   user: <UserCircle className="h-4 w-4" />,
   users: <Users className="h-4 w-4" />,
   heart: <Heart className="h-4 w-4" />,
+  
+  // Sales CRM icons
+  "trending-up": <TrendingUp className="h-4 w-4" />,
+  contact: <Contact className="h-4 w-4" />,
   
   // Other icons
   calendar: <Calendar className="h-4 w-4" />,

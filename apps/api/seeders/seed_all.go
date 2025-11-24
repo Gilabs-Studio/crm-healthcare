@@ -2,7 +2,7 @@ package seeders
 
 // SeedAll runs all seeders
 func SeedAll() error {
-	// Seed in order: roles -> menus -> permissions -> users -> master data
+	// Seed in order: roles -> menus -> permissions -> users -> accounts -> contacts
 	if err := SeedRoles(); err != nil {
 		return err
 	}
@@ -21,6 +21,16 @@ func SeedAll() error {
 	}
 
 	if err := SeedUsers(); err != nil {
+		return err
+	}
+
+	// Seed accounts (requires users for assigned_to)
+	if err := SeedAccounts(); err != nil {
+		return err
+	}
+
+	// Seed contacts (requires accounts for account_id)
+	if err := SeedContacts(); err != nil {
 		return err
 	}
 

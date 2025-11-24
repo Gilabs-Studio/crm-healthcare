@@ -593,6 +593,293 @@
                 }
               ],
               "description": "User Management endpoints untuk mengelola users, roles, dan permissions"
+            },
+            {
+              "name": "Account Management",
+              "item": [
+                {
+                  "name": "List Accounts",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/accounts?page=1&per_page=20",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "accounts"],
+                      "query": [
+                        {"key": "page", "value": "1"},
+                        {"key": "per_page", "value": "20"},
+                        {"key": "search", "value": "", "disabled": true},
+                        {"key": "status", "value": "", "disabled": true},
+                        {"key": "category", "value": "", "disabled": true},
+                        {"key": "assigned_to", "value": "", "disabled": true}
+                      ]
+                    },
+                    "description": "Get list of accounts with pagination"
+                  }
+                },
+                {
+                  "name": "Get Account by ID",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/accounts/:id",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "accounts", ":id"],
+                      "variable": [
+                        {"key": "id", "value": "account_id"}
+                      ]
+                    },
+                    "description": "Get account details by ID"
+                  }
+                },
+                {
+                  "name": "Create Account",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"name\": \"Rumah Sakit Umum\",\n  \"category\": \"hospital\",\n  \"address\": \"Jl. Contoh No. 123\",\n  \"city\": \"Jakarta\",\n  \"province\": \"DKI Jakarta\",\n  \"phone\": \"02112345678\",\n  \"email\": \"rsu@example.com\",\n  \"status\": \"active\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/accounts",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "accounts"]
+                    },
+                    "description": "Create a new account"
+                  }
+                },
+                {
+                  "name": "Update Account",
+                  "request": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"name\": \"Updated Account Name\",\n  \"category\": \"clinic\",\n  \"status\": \"active\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/accounts/:id",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "accounts", ":id"],
+                      "variable": [
+                        {"key": "id", "value": "account_id"}
+                      ]
+                    },
+                    "description": "Update account information"
+                  }
+                },
+                {
+                  "name": "Delete Account",
+                  "request": {
+                    "method": "DELETE",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/accounts/:id",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "accounts", ":id"],
+                      "variable": [
+                        {"key": "id", "value": "account_id"}
+                      ]
+                    },
+                    "description": "Delete an account"
+                  }
+                }
+              ],
+              "description": "Account Management endpoints untuk mengelola accounts (Hospitals, Clinics, Pharmacies)"
+            },
+            {
+              "name": "Contact Management",
+              "item": [
+                {
+                  "name": "List Contacts",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/contacts?page=1&per_page=20",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "contacts"],
+                      "query": [
+                        {"key": "page", "value": "1"},
+                        {"key": "per_page", "value": "20"},
+                        {"key": "search", "value": "", "disabled": true},
+                        {"key": "account_id", "value": "", "disabled": true},
+                        {"key": "role", "value": "", "disabled": true}
+                      ]
+                    },
+                    "description": "Get list of contacts with pagination"
+                  }
+                },
+                {
+                  "name": "Get Contact by ID",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/contacts/:id",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "contacts", ":id"],
+                      "variable": [
+                        {"key": "id", "value": "contact_id"}
+                      ]
+                    },
+                    "description": "Get contact details by ID"
+                  }
+                },
+                {
+                  "name": "Create Contact",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"account_id\": \"account_id_here\",\n  \"name\": \"Dr. John Doe\",\n  \"role\": \"doctor\",\n  \"phone\": \"081234567890\",\n  \"email\": \"doctor@example.com\",\n  \"position\": \"Chief Medical Officer\",\n  \"notes\": \"Primary contact for medical supplies\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/contacts",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "contacts"]
+                    },
+                    "description": "Create a new contact"
+                  }
+                },
+                {
+                  "name": "Update Contact",
+                  "request": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"name\": \"Updated Contact Name\",\n  \"role\": \"pic\",\n  \"phone\": \"081234567890\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/contacts/:id",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "contacts", ":id"],
+                      "variable": [
+                        {"key": "id", "value": "contact_id"}
+                      ]
+                    },
+                    "description": "Update contact information"
+                  }
+                },
+                {
+                  "name": "Delete Contact",
+                  "request": {
+                    "method": "DELETE",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/contacts/:id",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "contacts", ":id"],
+                      "variable": [
+                        {"key": "id", "value": "contact_id"}
+                      ]
+                    },
+                    "description": "Delete a contact"
+                  }
+                }
+              ],
+              "description": "Contact Management endpoints untuk mengelola contacts (Doctors, PICs, Managers)"
             }
           ],
           "description": "Endpoints untuk master data Sales CRM"

@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	"github.com/gilabs/crm-healthcare/api/internal/config"
+	"github.com/gilabs/crm-healthcare/api/internal/domain/account"
+	"github.com/gilabs/crm-healthcare/api/internal/domain/contact"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/permission"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/role"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/user"
@@ -65,6 +67,8 @@ func AutoMigrate() error {
 		&role.Role{},
 		&permission.Permission{},
 		&permission.Menu{},
+		&account.Account{},
+		&contact.Contact{},
 	)
 	if err != nil {
 		return fmt.Errorf("failed to run migrations: %w", err)

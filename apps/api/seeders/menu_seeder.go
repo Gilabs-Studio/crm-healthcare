@@ -141,6 +141,33 @@ func SeedMenus() error {
 	}
 	log.Printf("Created menu: %s", employeeMenu.Name)
 
+	// Create Sales CRM root menu
+	salesCRMMenu := permission.Menu{
+		Name:   "Sales CRM",
+		Icon:   "briefcase",
+		URL:    "/sales-crm",
+		Order:  3,
+		Status: "active",
+	}
+	if err := database.DB.Create(&salesCRMMenu).Error; err != nil {
+		return err
+	}
+	log.Printf("Created menu: %s", salesCRMMenu.Name)
+
+	// Create Accounts menu under Sales CRM
+	accountsMenu := permission.Menu{
+		Name:     "Accounts",
+		Icon:     "building-2",
+		URL:      "/accounts",
+		ParentID: &salesCRMMenu.ID,
+		Order:    1,
+		Status:   "active",
+	}
+	if err := database.DB.Create(&accountsMenu).Error; err != nil {
+		return err
+	}
+	log.Printf("Created menu: %s", accountsMenu.Name)
+
 	log.Println("Menus seeded successfully")
 	return nil
 }
