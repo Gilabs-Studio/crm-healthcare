@@ -15,21 +15,12 @@ package api
 import (
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 )
 
 // Timezone WIB (UTC+7)
 var timezoneWIB = time.FixedZone("WIB", 7*60*60)
 
-// Supported locales
-const (
-	LocaleID = "id" // Bahasa Indonesia
-	LocaleEN = "en" // English
-)
-
-// DefaultLocale is the default locale if not specified
-const DefaultLocale = LocaleID
 
 // APIResponse represents the standard API response structure
 type APIResponse struct {
@@ -41,22 +32,20 @@ type APIResponse struct {
 	RequestID string      `json:"request_id"`
 }
 
-// APIError represents error information with bilingual support
+// APIError represents error information
 type APIError struct {
 	Code        string                 `json:"code"`
-	Message     string                 `json:"message"`     // Primary message (based on locale)
-	MessageEn   string                 `json:"message_en"`  // English message (always included)
+	Message     string                 `json:"message"`
 	Details     map[string]interface{} `json:"details,omitempty"`
 	FieldErrors []FieldError           `json:"field_errors,omitempty"`
 	StackTrace  string                 `json:"stack_trace,omitempty"` // Only in dev/staging
 }
 
-// FieldError represents validation error for a specific field with bilingual support
+// FieldError represents validation error for a specific field
 type FieldError struct {
 	Field      string                 `json:"field"`
 	Code       string                 `json:"code"`
-	Message    string                 `json:"message"`     // Primary message (based on locale)
-	MessageEn  string                 `json:"message_en"` // English message (always included)
+	Message    string                 `json:"message"`
 	Constraint map[string]interface{} `json:"constraint,omitempty"`
 }
 
@@ -102,7 +91,6 @@ type SortMeta struct {
 type ErrorInfo struct {
 	HTTPStatus int
 	Message    string
-	MessageEn  string
 }
 
 // ErrorCodeMap maps error codes to their HTTP status and messages
@@ -110,91 +98,75 @@ var ErrorCodeMap = map[string]ErrorInfo{
 	// Validation Errors
 	"VALIDATION_ERROR": {
 		HTTPStatus: http.StatusBadRequest,
-		Message:    "Data yang dikirim tidak valid",
-		MessageEn:  "Invalid request data",
+		Message:    "Invalid request data",
 	},
 	"REQUIRED": {
 		HTTPStatus: http.StatusBadRequest,
-		Message:    "Field wajib diisi",
-		MessageEn:  "Field is required",
+		Message:    "Field is required",
 	},
 	"INVALID_TYPE": {
 		HTTPStatus: http.StatusBadRequest,
-		Message:    "Tipe data tidak valid",
-		MessageEn:  "Invalid data type",
+		Message:    "Invalid data type",
 	},
 	"INVALID_FORMAT": {
 		HTTPStatus: http.StatusBadRequest,
-		Message:    "Format tidak valid",
-		MessageEn:  "Invalid format",
+		Message:    "Invalid format",
 	},
 	"MIN_VALUE": {
 		HTTPStatus: http.StatusBadRequest,
-		Message:    "Nilai kurang dari minimum",
-		MessageEn:  "Value is less than minimum",
+		Message:    "Value is less than minimum",
 	},
 	"MAX_VALUE": {
 		HTTPStatus: http.StatusBadRequest,
-		Message:    "Nilai lebih dari maksimum",
-		MessageEn:  "Value exceeds maximum",
+		Message:    "Value exceeds maximum",
 	},
 
 	// Authentication & Authorization
 	"UNAUTHORIZED": {
 		HTTPStatus: http.StatusUnauthorized,
-		Message:    "Token autentikasi tidak valid atau telah kedaluwarsa",
-		MessageEn:  "Authentication token is invalid or expired",
+		Message:    "Authentication token is invalid or expired",
 	},
 	"FORBIDDEN": {
 		HTTPStatus: http.StatusForbidden,
-		Message:    "Tidak memiliki izin untuk mengakses resource ini",
-		MessageEn:  "You do not have permission to access this resource",
+		Message:    "You do not have permission to access this resource",
 	},
 
 	// Resource Errors
 	"NOT_FOUND": {
 		HTTPStatus: http.StatusNotFound,
-		Message:    "Resource tidak ditemukan",
-		MessageEn:  "Resource not found",
+		Message:    "Resource not found",
 	},
 	"CONFLICT": {
 		HTTPStatus: http.StatusConflict,
-		Message:    "Konflik dengan state saat ini",
-		MessageEn:  "Conflict with current state",
+		Message:    "Conflict with current state",
 	},
 
 	// Business Logic Errors
 	"INSUFFICIENT_STOCK": {
 		HTTPStatus: http.StatusUnprocessableEntity,
-		Message:    "Stok produk tidak mencukupi",
-		MessageEn:  "Insufficient product stock",
+		Message:    "Insufficient product stock",
 	},
 	"SHIFT_NOT_OPEN": {
 		HTTPStatus: http.StatusUnprocessableEntity,
-		Message:    "Shift belum dibuka. Silakan buka shift terlebih dahulu",
-		MessageEn:  "Shift is not open. Please open shift first",
+		Message:    "Shift is not open. Please open shift first",
 	},
 	"PAYMENT_FAILED": {
 		HTTPStatus: http.StatusUnprocessableEntity,
-		Message:    "Pembayaran gagal",
-		MessageEn:  "Payment failed",
+		Message:    "Payment failed",
 	},
 
 	// System Errors
 	"INTERNAL_SERVER_ERROR": {
 		HTTPStatus: http.StatusInternalServerError,
-		Message:    "Terjadi kesalahan pada server. Tim kami telah diberitahu",
-		MessageEn:  "An internal server error occurred. Our team has been notified",
+		Message:    "An internal server error occurred. Our team has been notified",
 	},
 	"RATE_LIMIT_EXCEEDED": {
 		HTTPStatus: http.StatusTooManyRequests,
-		Message:    "Terlalu banyak request. Silakan coba lagi nanti",
-		MessageEn:  "Too many requests. Please try again later",
+		Message:    "Too many requests. Please try again later",
 	},
 	"SERVICE_UNAVAILABLE": {
 		HTTPStatus: http.StatusServiceUnavailable,
-		Message:    "Layanan sedang dalam maintenance. Silakan coba lagi nanti",
-		MessageEn:  "Service is under maintenance. Please try again later",
+		Message:    "Service is under maintenance. Please try again later",
 	},
 }
 
@@ -213,40 +185,6 @@ type Context interface {
 	Header(key, value string)
 }
 
-// getLocale extracts locale from context or header, defaults to Indonesian
-func getLocale(c Context) string {
-	// Try to get from context first (set by middleware)
-	if locale, exists := c.Get("locale"); exists {
-		if loc, ok := locale.(string); ok && (loc == LocaleID || loc == LocaleEN) {
-			return loc
-		}
-	}
-
-	// Try to get from Accept-Language header
-	acceptLang := c.GetHeader("Accept-Language")
-	if acceptLang != "" {
-		// Parse Accept-Language header (e.g., "en-US,en;q=0.9,id;q=0.8")
-		langs := strings.Split(acceptLang, ",")
-		for _, lang := range langs {
-			lang = strings.TrimSpace(strings.Split(lang, ";")[0])
-			if lang == "en" || strings.HasPrefix(lang, "en-") {
-				return LocaleEN
-			}
-			if lang == "id" || strings.HasPrefix(lang, "id-") {
-				return LocaleID
-			}
-		}
-	}
-
-	// Try to get from X-Locale header
-	if locale := c.GetHeader("X-Locale"); locale != "" {
-		if locale == LocaleEN || locale == LocaleID {
-			return locale
-		}
-	}
-
-	return DefaultLocale
-}
 
 // getRequestID extracts request ID from context or generates new one
 func getRequestID(c Context) string {
@@ -303,7 +241,7 @@ func SuccessResponseNoContent(c Context) {
 	c.Status(http.StatusNoContent)
 }
 
-// ErrorResponse creates an error response with bilingual support
+// ErrorResponse creates an error response
 func ErrorResponse(c Context, code string, details map[string]interface{}, fieldErrors []FieldError) {
 	errorInfo, exists := ErrorCodeMap[code]
 	if !exists {
@@ -311,21 +249,9 @@ func ErrorResponse(c Context, code string, details map[string]interface{}, field
 		code = "INTERNAL_SERVER_ERROR"
 	}
 
-	// Get locale for primary message
-	locale := getLocale(c)
-	
-	// Select primary message based on locale
-	var primaryMessage string
-	if locale == LocaleEN {
-		primaryMessage = errorInfo.MessageEn
-	} else {
-		primaryMessage = errorInfo.Message
-	}
-
 	apiError := &APIError{
 		Code:        code,
-		Message:     primaryMessage,
-		MessageEn:   errorInfo.MessageEn, // Always include English
+		Message:     errorInfo.Message,
 		Details:     details,
 		FieldErrors: fieldErrors,
 	}
@@ -350,7 +276,7 @@ func ErrorResponse(c Context, code string, details map[string]interface{}, field
 	c.JSON(errorInfo.HTTPStatus, response)
 }
 
-// ValidationErrorResponse creates a validation error response with bilingual support
+// ValidationErrorResponse creates a validation error response
 func ValidationErrorResponse(c Context, fieldErrors []FieldError) {
 	ErrorResponse(c, "VALIDATION_ERROR", nil, fieldErrors)
 }
@@ -551,15 +477,6 @@ func formatNumber(n float64) string {
 // Note: These are example middleware functions. In actual implementation with Gin,
 // you would use gin.HandlerFunc return type.
 
-// LocaleMiddleware extracts locale from request and sets it in context
-// Example usage with Gin:
-// func LocaleMiddleware() gin.HandlerFunc {
-//     return func(c *gin.Context) {
-//         locale := getLocale(c)
-//         c.Set("locale", locale)
-//         c.Next()
-//     }
-// }
 
 // RequestIDMiddleware adds request ID to context
 // Example usage with Gin:
@@ -660,10 +577,9 @@ func formatNumber(n float64) string {
 //     SuccessResponse(c, products, meta)
 // }
 
-// parseValidationErrors converts validation errors to FieldError slice with bilingual support
+// parseValidationErrors converts validation errors to FieldError slice
 // Example implementation:
 // func parseValidationErrors(c Context, err error) []FieldError {
-//     locale := getLocale(c)
 //     var fieldErrors []FieldError
 //
 //     // Parse gin validation errors
@@ -673,8 +589,7 @@ func formatNumber(n float64) string {
 //             fieldErr := FieldError{
 //                 Field:     fieldError.Field(),
 //                 Code:      fieldError.Tag(),
-//                 Message:   getLocalizedMessage(errorInfo, locale),
-//                 MessageEn: errorInfo.MessageEn,
+//                 Message:   errorInfo.Message,
 //             }
 //             fieldErrors = append(fieldErrors, fieldErr)
 //         }

@@ -28,26 +28,7 @@ Semua API response mengikuti format standar yang konsisten untuk memastikan:
 - **Konsistensi**: Format sama di semua endpoint
 - **Predictability**: Developer tahu apa yang diharapkan
 - **Error Handling**: Error handling yang jelas dan actionable
-- **Bilingual Support**: Dukungan Bahasa Indonesia dan English untuk semua pesan error
-- **Internationalization**: Format yang sesuai dengan locale English (default)
 - **Type Safety**: Struktur yang jelas untuk frontend typing
-
-### Bilingual Support
-
-API mendukung **dua bahasa** untuk semua pesan error:
-- **English (en)**: Default locale
-- **Bahasa Indonesia (id)**: Secondary locale
-
-
-Setiap error response selalu menyertakan:
-- `message`: Pesan dalam bahasa sesuai locale request (primary)
-- `message_en`: Pesan dalam bahasa Inggris (always included)
-
-Locale ditentukan melalui:
-1. Context (set oleh middleware)
-2. `Accept-Language` header (standard HTTP header)
-3. `X-Locale` header (custom header, e.g., `X-Locale: en`)
-4. Default: Bahasa Indonesia (id)
 
 ---
 
@@ -303,14 +284,12 @@ Locale ditentukan melalui:
 
 ### Standard Error Structure
 
-**Request dengan locale Indonesia (default):**
 ```json
 {
   "success": false,
   "error": {
     "code": "ERROR_CODE",
-    "message": "Human readable error message in Bahasa Indonesia",
-    "message_en": "Human readable error message in English",
+    "message": "Human readable error message",
     "details": {
       "additional_info": "value"
     },
@@ -318,40 +297,10 @@ Locale ditentukan melalui:
       {
         "field": "email",
         "code": "INVALID_FORMAT",
-        "message": "Format email tidak valid",
-        "message_en": "Invalid email format"
+        "message": "Invalid email format"
       }
     ],
     "stack_trace": "..." // Only in development/staging
-  },
-  "meta": {
-    "tenant_id": "tenant_123",
-    "outlet_id": "outlet_456"
-  },
-  "timestamp": "2024-01-15T10:30:45+07:00",
-  "request_id": "req_abc123xyz"
-}
-```
-
-**Request dengan locale English (Accept-Language: en atau X-Locale: en):**
-```json
-{
-  "success": false,
-  "error": {
-    "code": "ERROR_CODE",
-    "message": "Human readable error message in English",
-    "message_en": "Human readable error message in English",
-    "details": {
-      "additional_info": "value"
-    },
-    "field_errors": [
-      {
-        "field": "email",
-        "code": "INVALID_FORMAT",
-        "message": "Invalid email format",
-        "message_en": "Invalid email format"
-      }
-    ]
   },
   "meta": {
     "tenant_id": "tenant_123",
@@ -366,38 +315,32 @@ Locale ditentukan melalui:
 
 #### Validation Errors (400 Bad Request)
 
-**Request dengan locale Indonesia:**
 ```json
 {
   "success": false,
   "error": {
     "code": "VALIDATION_ERROR",
-    "message": "Data yang dikirim tidak valid",
-    "message_en": "Invalid request data",
+    "message": "Invalid request data",
     "field_errors": [
       {
         "field": "name",
         "code": "REQUIRED",
-        "message": "Nama produk wajib diisi",
-        "message_en": "Product name is required"
+        "message": "Product name is required"
       },
       {
         "field": "price",
         "code": "INVALID_TYPE",
-        "message": "Harga harus berupa angka",
-        "message_en": "Price must be a number"
+        "message": "Price must be a number"
       },
       {
         "field": "email",
         "code": "INVALID_FORMAT",
-        "message": "Format email tidak valid",
-        "message_en": "Invalid email format"
+        "message": "Invalid email format"
       },
       {
         "field": "stock",
         "code": "MIN_VALUE",
-        "message": "Stok tidak boleh kurang dari 0",
-        "message_en": "Stock cannot be less than 0",
+        "message": "Stock cannot be less than 0",
         "constraint": {
           "min": 0
         }
@@ -405,8 +348,7 @@ Locale ditentukan melalui:
       {
         "field": "category_id",
         "code": "NOT_FOUND",
-        "message": "Kategori tidak ditemukan",
-        "message_en": "Category not found"
+        "message": "Category not found"
       }
     ]
   },
@@ -1206,13 +1148,6 @@ Semua resource memiliki minimal:
 - Include di response untuk correlation
 - Log request ID di semua logs untuk tracing
 
-### 11. Bilingual Support
-
-- **Always include both messages**: Setiap error response harus menyertakan `message` (primary) dan `message_en` (English)
-- **Locale detection**: Deteksi locale dari `Accept-Language` header atau `X-Locale` header
-- **Default to English**: Jika locale tidak ditentukan, default ke Bahasa Inggris
-- **Field errors**: Semua field errors juga harus bilingual
-- **Consistent format**: Gunakan format yang sama untuk semua error messages
 
 ---
 

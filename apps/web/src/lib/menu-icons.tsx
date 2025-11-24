@@ -27,13 +27,20 @@ import {
 } from "lucide-react";
 
 const iconMap: Record<string, React.ReactNode> = {
+  // Dashboard icons
+  dashboard: <LayoutDashboard className="h-4 w-4" />,
+  "layout-dashboard": <LayoutDashboard className="h-4 w-4" />,
+  
+  // Data Master icons
   database: <Database className="h-4 w-4" />,
   building: <Building2 className="h-4 w-4" />,
   grid: <Grid className="h-4 w-4" />,
   briefcase: <Briefcase className="h-4 w-4" />,
   user: <UserCircle className="h-4 w-4" />,
-  dashboard: <LayoutDashboard className="h-4 w-4" />,
   users: <Users className="h-4 w-4" />,
+  heart: <Heart className="h-4 w-4" />,
+  
+  // Other icons
   calendar: <Calendar className="h-4 w-4" />,
   filetext: <FileText className="h-4 w-4" />,
   pill: <Pill className="h-4 w-4" />,
@@ -51,7 +58,6 @@ const iconMap: Record<string, React.ReactNode> = {
   mappin: <MapPin className="h-4 w-4" />,
   ruler: <Ruler className="h-4 w-4" />,
   store: <Store className="h-4 w-4" />,
-  heart: <Heart className="h-4 w-4" />,
 };
 
 export function getMenuIcon(iconName: string): React.ReactNode {

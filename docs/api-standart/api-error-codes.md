@@ -8,25 +8,6 @@
 
 ---
 
-## 🌐 Bilingual Support
-
-Semua error codes mendukung **dua bahasa**:
-
-- **Bahasa Indonesia (id)**: Default locale
-- **English (en)**: Secondary locale
-
-Setiap error response selalu menyertakan:
-
-- `message`: Pesan dalam bahasa sesuai locale request (primary)
-- `message_en`: Pesan dalam bahasa Inggris (always included)
-
-**Cara menentukan locale:**
-
-1. Header `Accept-Language: en` atau `Accept-Language: id`
-2. Header `X-Locale: en` atau `X-Locale: id`
-3. Context (set oleh middleware)
-4. Default: Bahasa Indonesia (id)
-
 ---
 
 ## 📋 Kategori Error Codes
@@ -271,45 +252,7 @@ Setiap error response selalu menyertakan:
 }
 ```
 
-### Multiple Field Errors (Bilingual)
-
-**Request dengan locale Indonesia:**
-
-```json
-{
-  "success": false,
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Data yang dikirim tidak valid",
-    "message_en": "Invalid request data",
-    "field_errors": [
-      {
-        "field": "name",
-        "code": "REQUIRED",
-        "message": "Nama produk wajib diisi",
-        "message_en": "Product name is required"
-      },
-      {
-        "field": "price",
-        "code": "INVALID_TYPE",
-        "message": "Harga harus berupa angka",
-        "message_en": "Price must be a number"
-      },
-      {
-        "field": "stock",
-        "code": "MIN_VALUE",
-        "message": "Stok tidak boleh kurang dari 0",
-        "message_en": "Stock cannot be less than 0",
-        "constraint": {
-          "min": 0
-        }
-      }
-    ]
-  }
-}
-```
-
-**Request dengan locale English:**
+### Multiple Field Errors
 
 ```json
 {
@@ -317,25 +260,21 @@ Setiap error response selalu menyertakan:
   "error": {
     "code": "VALIDATION_ERROR",
     "message": "Invalid request data",
-    "message_en": "Invalid request data",
     "field_errors": [
       {
         "field": "name",
         "code": "REQUIRED",
-        "message": "Product name is required",
-        "message_en": "Product name is required"
+        "message": "Product name is required"
       },
       {
         "field": "price",
         "code": "INVALID_TYPE",
-        "message": "Price must be a number",
-        "message_en": "Price must be a number"
+        "message": "Price must be a number"
       },
       {
         "field": "stock",
         "code": "MIN_VALUE",
         "message": "Stock cannot be less than 0",
-        "message_en": "Stock cannot be less than 0",
         "constraint": {
           "min": 0
         }

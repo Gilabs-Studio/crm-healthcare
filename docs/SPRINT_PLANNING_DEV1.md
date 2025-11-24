@@ -28,12 +28,12 @@ Developer 1 bertanggung jawab untuk:
 **Goal**: Review dan perbaiki foundation yang sudah ada
 
 **Tasks**:
-- [ ] Review authentication flow (login, token refresh)
-- [ ] Fix bugs di sprint 0 jika ada
-- [ ] Improve error handling di frontend
-- [ ] Optimize API client interceptors
-- [ ] Improve loading states dan skeletons
-- [ ] Review dan fix auth guard component
+- [x] Review authentication flow (login, token refresh)
+- [x] Fix bugs di sprint 0 jika ada
+- [x] Improve error handling di frontend
+- [x] Optimize API client interceptors
+- [x] Improve loading states dan skeletons
+- [x] Review dan fix auth guard component
 
 **Acceptance Criteria**:
 - ✅ Login flow bekerja dengan baik
@@ -50,12 +50,12 @@ Developer 1 bertanggung jawab untuk:
 **Goal**: Review dan perbaiki user management module
 
 **Tasks**:
-- [ ] Review user list page dan fix bugs
-- [ ] Improve user form validation
-- [ ] Optimize user list table (pagination, search, filter)
-- [ ] Fix sidebar permission integration
-- [ ] Improve user form UI/UX
-- [ ] Add user detail page jika belum ada
+- [x] Review user list page dan fix bugs
+- [x] Improve user form validation
+- [x] Optimize user list table (pagination, search, filter)
+- [x] Fix sidebar permission integration
+- [x] Improve user form UI/UX
+- [x] Add user detail page jika belum ada
 
 **Acceptance Criteria**:
 - ✅ User CRUD bekerja dengan baik
@@ -397,8 +397,8 @@ Developer 1 bertanggung jawab untuk:
 
 | Sprint | Goal | Duration | Status |
 |--------|------|----------|--------|
-| Sprint 0 | Foundation Review | 3-4 days | ⏳ Pending |
-| Sprint 1 | User Management Review | 3-4 days | ⏳ Pending |
+| Sprint 0 | Foundation Review | 3-4 days | ✅ Completed |
+| Sprint 1 | User Management Review | 3-4 days | ✅ Completed |
 | Sprint 2 | Master Data Cleanup | 1-2 days | ⏳ Pending |
 | Sprint 3 | Account & Contact | 5-6 days | ⏳ Pending |
 | Sprint 4 | Visit Report | 5-6 days | ⏳ Pending |

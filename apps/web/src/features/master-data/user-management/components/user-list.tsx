@@ -1,6 +1,7 @@
 "use client";
 
-import { Edit, Trash2, Plus, Search } from "lucide-react";
+import Link from "next/link";
+import { Edit, Trash2, Plus, Search, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -46,7 +47,14 @@ export function UserList() {
     {
       id: "name",
       header: "Name",
-      accessor: (row) => <span className="font-medium">{row.name}</span>,
+      accessor: (row) => (
+        <Link
+          href={`/master-data/users/${row.id}`}
+          className="font-medium text-primary hover:underline"
+        >
+          {row.name}
+        </Link>
+      ),
       className: "w-[200px]",
     },
     {
@@ -80,11 +88,22 @@ export function UserList() {
       header: "Actions",
       accessor: (row) => (
         <div className="flex items-center justify-end gap-1">
+          <Link href={`/master-data/users/${row.id}`}>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="h-8 w-8"
+              title="View Details"
+            >
+              <Eye className="h-3.5 w-3.5" />
+            </Button>
+          </Link>
           <Button
             variant="ghost"
             size="icon-sm"
             onClick={() => setEditingUser(row.id)}
             className="h-8 w-8"
+            title="Edit"
           >
             <Edit className="h-3.5 w-3.5" />
           </Button>
@@ -93,12 +112,13 @@ export function UserList() {
             size="icon-sm"
             onClick={() => handleDelete(row.id)}
             className="h-8 w-8 text-destructive hover:text-destructive"
+            title="Delete"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </Button>
         </div>
       ),
-      className: "w-[100px] text-right",
+      className: "w-[140px] text-right",
     },
   ];
 
