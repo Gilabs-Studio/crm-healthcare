@@ -10,6 +10,7 @@ import { DataTable, type Column } from "@/components/ui/data-table";
 import { useUserList } from "../hooks/useUserList";
 import { UserForm } from "./user-form";
 import { UserDetailModal } from "./user-detail-modal";
+import { DeleteDialog } from "@/components/ui/delete-dialog";
 import {
   Dialog,
   DialogContent,
@@ -40,7 +41,11 @@ export function UserList() {
     isLoading,
     handleCreate,
     handleUpdate,
-    handleDelete,
+    handleDeleteClick,
+    handleDeleteConfirm,
+    deletingUserId,
+    setDeletingUserId,
+    deleteUser,
     createUser,
     updateUser,
   } = useUserList();
@@ -130,7 +135,7 @@ export function UserList() {
           <Button
             variant="ghost"
             size="icon-sm"
-            onClick={() => handleDelete(row.id)}
+            onClick={() => handleDeleteClick(row.id)}
             className="h-8 w-8 text-destructive hover:text-destructive"
             title="Delete"
           >
@@ -252,6 +257,25 @@ export function UserList() {
         onUserUpdated={() => {
           // Refresh will be handled by query invalidation in hooks
         }}
+      />
+
+      {/* Delete Dialog */}
+      <DeleteDialog
+        open={!!deletingUserId}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDeletingUserId(null);
+          }
+        }}
+        onConfirm={handleDeleteConfirm}
+        title="Delete User?"
+        description={
+          deletingUserId
+            ? `Are you sure you want to delete user "${users.find((u) => u.id === deletingUserId)?.name || "this user"}"? This action cannot be undone.`
+            : "Are you sure you want to delete this user? This action cannot be undone."
+        }
+        itemName="user"
+        isLoading={deleteUser.isPending}
       />
     </div>
   );

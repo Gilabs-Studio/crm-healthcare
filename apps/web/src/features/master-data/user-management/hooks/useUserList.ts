@@ -14,6 +14,7 @@ export function useUserList() {
   const [roleId, setRoleId] = useState<string>("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<string | null>(null);
+  const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
 
   const { data, isLoading } = useUsers({ page, per_page: perPage, search, status, role_id: roleId });
   const { data: rolesData } = useRoles();
@@ -48,11 +49,16 @@ export function useUserList() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this user?")) {
+  const handleDeleteClick = (id: string) => {
+    setDeletingUserId(id);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (deletingUserId) {
       try {
-        await deleteUser.mutateAsync(id);
+        await deleteUser.mutateAsync(deletingUserId);
         toast.success("User deleted successfully");
+        setDeletingUserId(null);
       } catch (error) {
         // Error already handled in api-client interceptor
       }
@@ -80,6 +86,8 @@ export function useUserList() {
     setIsCreateDialogOpen,
     editingUser,
     setEditingUser,
+    deletingUserId,
+    setDeletingUserId,
     // Data
     users,
     pagination,
@@ -89,7 +97,8 @@ export function useUserList() {
     // Actions
     handleCreate,
     handleUpdate,
-    handleDelete,
+    handleDeleteClick,
+    handleDeleteConfirm,
     // Mutations
     deleteUser,
     createUser,

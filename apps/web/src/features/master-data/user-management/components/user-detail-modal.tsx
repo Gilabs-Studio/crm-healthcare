@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { useUser, useDeleteUser, useUpdateUser } from "../hooks/useUsers";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -30,20 +31,19 @@ export function UserDetailModal({ userId, open, onOpenChange, onUserUpdated }: U
   const deleteUser = useDeleteUser();
   const updateUser = useUpdateUser();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const user = data?.data;
 
-  const handleDelete = async () => {
-    if (!user) return;
-    if (confirm(`Are you sure you want to delete user "${user.name}"?`)) {
-      try {
-        await deleteUser.mutateAsync(userId!);
-        toast.success("User deleted successfully");
-        onOpenChange(false);
-        onUserUpdated?.();
-      } catch (error) {
-        // Error already handled in api-client interceptor
-      }
+  const handleDeleteConfirm = async () => {
+    if (!user || !userId) return;
+    try {
+      await deleteUser.mutateAsync(userId);
+      toast.success("User deleted successfully");
+      onOpenChange(false);
+      onUserUpdated?.();
+    } catch (error) {
+      // Error already handled in api-client interceptor
     }
   };
 
@@ -117,7 +117,7 @@ export function UserDetailModal({ userId, open, onOpenChange, onUserUpdated }: U
                   <Button
                     variant="destructive"
                     size="sm"
-                    onClick={handleDelete}
+                    onClick={() => setIsDeleteDialogOpen(true)}
                     disabled={deleteUser.isPending}
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
@@ -277,6 +277,21 @@ export function UserDetailModal({ userId, open, onOpenChange, onUserUpdated }: U
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Delete Dialog */}
+      <DeleteDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onConfirm={handleDeleteConfirm}
+        title="Delete User?"
+        description={
+          user
+            ? `Are you sure you want to delete user "${user.name}"? This action cannot be undone.`
+            : "Are you sure you want to delete this user? This action cannot be undone."
+        }
+        itemName="user"
+        isLoading={deleteUser.isPending}
+      />
     </>
   );
 }
