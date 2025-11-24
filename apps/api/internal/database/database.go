@@ -7,10 +7,7 @@ import (
 	"strings"
 
 	"github.com/gilabs/crm-healthcare/api/internal/config"
-	"github.com/gilabs/crm-healthcare/api/internal/domain/category"
-	"github.com/gilabs/crm-healthcare/api/internal/domain/diagnosis"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/permission"
-	"github.com/gilabs/crm-healthcare/api/internal/domain/procedure"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/role"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/user"
 	"gorm.io/driver/postgres"
@@ -68,9 +65,6 @@ func AutoMigrate() error {
 		&role.Role{},
 		&permission.Permission{},
 		&permission.Menu{},
-		&diagnosis.Diagnosis{},
-		&procedure.Procedure{},
-		&category.Category{},
 	)
 	if err != nil {
 		return fmt.Errorf("failed to run migrations: %w", err)

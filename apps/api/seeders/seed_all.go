@@ -24,19 +24,6 @@ func SeedAll() error {
 		return err
 	}
 
-	// Seed master data - categories must be seeded first
-	if err := SeedCategories(); err != nil {
-		return err
-	}
-
-	if err := SeedDiagnoses(); err != nil {
-		return err
-	}
-
-	if err := SeedProcedures(); err != nil {
-		return err
-	}
-
 	return nil
 }
 

@@ -15,10 +15,10 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ThemeToggleButton } from "@/components/ui/theme-toggle";
 import { useAuthStore } from "@/features/auth/stores/useAuthStore";
-import { useUserPermissions } from "@/features/user/hooks/useUserPermissions";
+import { useUserPermissions } from "@/features/master-data/user-management/hooks/useUserPermissions";
 import { getMenuIcon } from "@/lib/menu-icons";
 import { cn } from "@/lib/utils";
-import type { MenuWithActions } from "@/features/user/types";
+import type { MenuWithActions } from "@/features/master-data/user-management/types";
 
 interface NavItem {
   id: string;

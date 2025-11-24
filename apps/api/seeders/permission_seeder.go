@@ -19,11 +19,13 @@ func SeedPermissions() error {
 	}
 
 	// Get menus
+	var dashboardMenu permission.Menu
 	var userPageMenu permission.Menu
 	var dataMasterMenu, companyMgmtMenu, companyMenu, divisionMenu, jobPositionMenu, employeeMenu permission.Menu
-	var healthcareMenu, diagnosisMenu, procedureMenu permission.Menu
+	var healthcareMenu permission.Menu
 
-	database.DB.Where("url = ?", "/users").First(&userPageMenu)
+	database.DB.Where("url = ?", "/dashboard").First(&dashboardMenu)
+	database.DB.Where("url = ?", "/master-data/users").First(&userPageMenu)
 	database.DB.Where("url = ?", "/data-master").First(&dataMasterMenu)
 	database.DB.Where("url = ?", "/data-master/company").First(&companyMgmtMenu)
 	database.DB.Where("url = ?", "/data-master/company/company").First(&companyMenu)
@@ -31,8 +33,6 @@ func SeedPermissions() error {
 	database.DB.Where("url = ?", "/data-master/company/job-position").First(&jobPositionMenu)
 	database.DB.Where("url = ?", "/data-master/company/employee").First(&employeeMenu)
 	database.DB.Where("url = ?", "/master-data").First(&healthcareMenu)
-	database.DB.Where("url = ?", "/master-data/diagnosis").First(&diagnosisMenu)
-	database.DB.Where("url = ?", "/master-data/procedures").First(&procedureMenu)
 
 	// Define actions for each menu
 	actions := []struct {
@@ -42,6 +42,9 @@ func SeedPermissions() error {
 		action   string
 		menu     *permission.Menu
 	}{
+		// Dashboard actions
+		{dashboardMenu.ID, "VIEW_DASHBOARD", "View Dashboard", "VIEW", &dashboardMenu},
+
 		// Users page actions (CREATE includes roles & permissions setup)
 		{userPageMenu.ID, "VIEW_USERS", "View Users", "VIEW", &userPageMenu},
 		{userPageMenu.ID, "CREATE_USERS", "Create Users", "CREATE", &userPageMenu}, // Includes roles & permissions
@@ -92,24 +95,6 @@ func SeedPermissions() error {
 
 		// Healthcare Master Data actions
 		{healthcareMenu.ID, "VIEW_HEALTHCARE_MASTER", "View Healthcare Master Data", "VIEW", &healthcareMenu},
-
-		// Diagnosis actions
-		{diagnosisMenu.ID, "VIEW_DIAGNOSIS", "View Diagnosis", "VIEW", &diagnosisMenu},
-		{diagnosisMenu.ID, "CREATE_DIAGNOSIS", "Create Diagnosis", "CREATE", &diagnosisMenu},
-		{diagnosisMenu.ID, "EDIT_DIAGNOSIS", "Edit Diagnosis", "EDIT", &diagnosisMenu},
-		{diagnosisMenu.ID, "DELETE_DIAGNOSIS", "Delete Diagnosis", "DELETE", &diagnosisMenu},
-		{diagnosisMenu.ID, "SEARCH_DIAGNOSIS", "Search Diagnosis", "VIEW", &diagnosisMenu},
-
-		// Procedure actions
-		{procedureMenu.ID, "VIEW_PROCEDURE", "View Procedure", "VIEW", &procedureMenu},
-		{procedureMenu.ID, "CREATE_PROCEDURE", "Create Procedure", "CREATE", &procedureMenu},
-		{procedureMenu.ID, "EDIT_PROCEDURE", "Edit Procedure", "EDIT", &procedureMenu},
-		{procedureMenu.ID, "DELETE_PROCEDURE", "Delete Procedure", "DELETE", &procedureMenu},
-		{procedureMenu.ID, "SEARCH_PROCEDURE", "Search Procedure", "VIEW", &procedureMenu},
-		{procedureMenu.ID, "CATEGORY_PROCEDURE", "Manage Procedure Categories", "CATEGORY", &procedureMenu},
-
-		// Diagnosis actions - add CATEGORY permission
-		{diagnosisMenu.ID, "CATEGORY_DIAGNOSIS", "Manage Diagnosis Categories", "CATEGORY", &diagnosisMenu},
 	}
 
 	// Create permissions
@@ -145,7 +130,44 @@ func SeedPermissions() error {
 	}
 
 	log.Printf("Assigned %d permissions to admin role", len(permissionIDs))
+	
+	// Always sync all permissions to admin role (even if permissions already exist)
+	if err := SyncAdminPermissions(); err != nil {
+		log.Printf("Warning: Failed to sync admin permissions: %v", err)
+	}
+	
 	log.Println("Permissions seeded successfully")
+	return nil
+}
+
+// SyncAdminPermissions syncs all existing permissions to admin role
+// This ensures admin always has access to all permissions, including newly added ones
+func SyncAdminPermissions() error {
+	var adminRole role.Role
+	if err := database.DB.Where("code = ?", "admin").First(&adminRole).Error; err != nil {
+		return err
+	}
+
+	// Get all permissions from database
+	var allPermissions []permission.Permission
+	if err := database.DB.Find(&allPermissions).Error; err != nil {
+		return err
+	}
+
+	// Assign all permissions to admin (skip if already exists)
+	assignedCount := 0
+	for _, perm := range allPermissions {
+		if err := database.DB.Exec(
+			"INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?) ON CONFLICT DO NOTHING",
+			adminRole.ID, perm.ID,
+		).Error; err != nil {
+			log.Printf("Warning: Failed to assign permission %s to admin: %v", perm.Code, err)
+		} else {
+			assignedCount++
+		}
+	}
+
+	log.Printf("Synced %d permissions to admin role (total: %d)", assignedCount, len(allPermissions))
 	return nil
 }
 

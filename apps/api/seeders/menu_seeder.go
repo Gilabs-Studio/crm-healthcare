@@ -17,12 +17,25 @@ func SeedMenus() error {
 		return nil
 	}
 
+	// Create Dashboard menu (root level)
+	dashboardMenu := permission.Menu{
+		Name:   "Dashboard",
+		Icon:   "layout-dashboard",
+		URL:    "/dashboard",
+		Order:  1,
+		Status: "active",
+	}
+	if err := database.DB.Create(&dashboardMenu).Error; err != nil {
+		return err
+	}
+	log.Printf("Created menu: %s", dashboardMenu.Name)
+
 	// Create root menu: Data Master
 	dataMasterMenu := permission.Menu{
 		Name:   "Data Master",
 		Icon:   "database",
 		URL:    "/data-master",
-		Order:  1,
+		Order:  2,
 		Status: "active",
 	}
 	if err := database.DB.Create(&dataMasterMenu).Error; err != nil {
@@ -30,12 +43,26 @@ func SeedMenus() error {
 	}
 	log.Printf("Created menu: %s", dataMasterMenu.Name)
 
-	// Create Users menu directly under Data Master
+	// Create Master Data - Healthcare submenu (under Data Master)
+	healthcareMenu := permission.Menu{
+		Name:     "Healthcare",
+		Icon:     "heart",
+		URL:      "/master-data",
+		ParentID: &dataMasterMenu.ID,
+		Order:    3,
+		Status:   "active",
+	}
+	if err := database.DB.Create(&healthcareMenu).Error; err != nil {
+		return err
+	}
+	log.Printf("Created menu: %s", healthcareMenu.Name)
+
+	// Create Users menu under Master Data
 	userPageMenu := permission.Menu{
 		Name:     "Users",
 		Icon:     "users",
-		URL:      "/users",
-		ParentID: &dataMasterMenu.ID,
+		URL:      "/master-data/users",
+		ParentID: &healthcareMenu.ID,
 		Order:    1,
 		Status:   "active",
 	}
@@ -114,48 +141,6 @@ func SeedMenus() error {
 	}
 	log.Printf("Created menu: %s", employeeMenu.Name)
 
-	// Create Master Data - Healthcare submenu (under Data Master)
-	healthcareMenu := permission.Menu{
-		Name:     "Healthcare",
-		Icon:     "heart",
-		URL:      "/master-data",
-		ParentID: &dataMasterMenu.ID,
-		Order:    3,
-		Status:   "active",
-	}
-	if err := database.DB.Create(&healthcareMenu).Error; err != nil {
-		return err
-	}
-	log.Printf("Created menu: %s", healthcareMenu.Name)
-
-	// Create Diagnosis submenu
-	diagnosisMenu := permission.Menu{
-		Name:     "Diagnosis",
-		Icon:     "stethoscope",
-		URL:      "/master-data/diagnosis",
-		ParentID: &healthcareMenu.ID,
-		Order:    1,
-		Status:   "active",
-	}
-	if err := database.DB.Create(&diagnosisMenu).Error; err != nil {
-		return err
-	}
-	log.Printf("Created menu: %s", diagnosisMenu.Name)
-
-	// Create Procedures submenu
-	procedureMenu := permission.Menu{
-		Name:     "Procedures",
-		Icon:     "activity",
-		URL:      "/master-data/procedures",
-		ParentID: &healthcareMenu.ID,
-		Order:    2,
-		Status:   "active",
-	}
-	if err := database.DB.Create(&procedureMenu).Error; err != nil {
-		return err
-	}
-	log.Printf("Created menu: %s", procedureMenu.Name)
-
 	log.Println("Menus seeded successfully")
 	return nil
 }
@@ -171,49 +156,27 @@ func UpdateMenuStructure() error {
 		return nil
 	}
 
-	// Find Users menu (might be under Users Management)
-	var userPageMenu permission.Menu
-	if err := database.DB.Where("url = ?", "/users").First(&userPageMenu).Error; err != nil {
-		log.Printf("Users menu not found, skipping update: %v", err)
+	// Find Healthcare/Master Data menu
+	var healthcareMenu permission.Menu
+	if err := database.DB.Where("url = ?", "/master-data").First(&healthcareMenu).Error; err != nil {
+		log.Printf("Master Data menu not found, skipping update: %v", err)
 		return nil
 	}
 
-	// Check if Users menu needs to be moved
-	if userPageMenu.ParentID == nil || *userPageMenu.ParentID != dataMasterMenu.ID {
-		// Find Users Management menu if exists
-		var usersManagementMenu permission.Menu
-		if err := database.DB.Where("url = ?", "/system/users").First(&usersManagementMenu).Error; err == nil {
-			// Users menu is under Users Management, need to move it
-			log.Printf("Moving Users menu from Users Management to Data Master")
-			
-			// Update Users menu parent to Data Master
-			userPageMenu.ParentID = &dataMasterMenu.ID
-			userPageMenu.Order = 1
-			if err := database.DB.Save(&userPageMenu).Error; err != nil {
-				return err
-			}
-			log.Printf("Updated Users menu parent to Data Master")
-
-			// Delete Users Management menu and its permissions
-			// First, delete permissions associated with Users Management
-			// Also delete from role_permissions junction table
-			if err := database.DB.Exec(
-				"DELETE FROM role_permissions WHERE permission_id IN (SELECT id FROM permissions WHERE menu_id = ?)",
-				usersManagementMenu.ID,
-			).Error; err != nil {
-				log.Printf("Warning: Failed to delete Users Management role permissions: %v", err)
-			}
-			if err := database.DB.Where("menu_id = ?", usersManagementMenu.ID).Delete(&permission.Permission{}).Error; err != nil {
-				log.Printf("Warning: Failed to delete Users Management permissions: %v", err)
-			}
-			
-			// Delete Users Management menu
-			if err := database.DB.Delete(&usersManagementMenu).Error; err != nil {
-				log.Printf("Warning: Failed to delete Users Management menu: %v", err)
-			} else {
-				log.Printf("Deleted Users Management menu")
-			}
+	// Find Users menu with old URL (/users)
+	var userPageMenu permission.Menu
+	if err := database.DB.Where("url = ?", "/users").First(&userPageMenu).Error; err == nil {
+		// Users menu exists with old URL, need to migrate
+		log.Printf("Migrating Users menu from /users to /master-data/users")
+		
+		// Update Users menu URL and parent to Master Data
+		userPageMenu.URL = "/master-data/users"
+		userPageMenu.ParentID = &healthcareMenu.ID
+		userPageMenu.Order = 1
+		if err := database.DB.Save(&userPageMenu).Error; err != nil {
+			return err
 		}
+		log.Printf("Updated Users menu URL to /master-data/users and parent to Master Data")
 	}
 
 	// Find and delete System menu if it exists and has no children
@@ -242,12 +205,10 @@ func UpdateMenuStructure() error {
 		}
 	}
 
-	var healthcareMenu permission.Menu
-	if err := database.DB.Where("url = ?", "/master-data").First(&healthcareMenu).Error; err == nil {
-		if healthcareMenu.ParentID != nil && *healthcareMenu.ParentID == dataMasterMenu.ID {
-			healthcareMenu.Order = 3
-			database.DB.Save(&healthcareMenu)
-		}
+	// Update Healthcare menu order
+	if healthcareMenu.ParentID != nil && *healthcareMenu.ParentID == dataMasterMenu.ID {
+		healthcareMenu.Order = 3
+		database.DB.Save(&healthcareMenu)
 	}
 
 	log.Println("Menu structure updated successfully")

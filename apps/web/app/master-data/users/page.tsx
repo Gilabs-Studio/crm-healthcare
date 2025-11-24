@@ -2,22 +2,22 @@
 
 import { DashboardLayout } from "@/components/layouts/dashboard-layout";
 import { AuthGuard } from "@/features/auth/components/auth-guard";
-import { DiagnosisManagement } from "@/features/master-data/components/diagnosis-management";
+import { UserManagement } from "@/features/master-data/user-management/components/user-management";
 
-function DiagnosisPageContent() {
+function UsersPageContent() {
   return (
     <DashboardLayout>
       <div className="container mx-auto py-6 px-4">
-        <DiagnosisManagement />
+        <UserManagement />
       </div>
     </DashboardLayout>
   );
 }
 
-export default function DiagnosisPage() {
+export default function UsersPage() {
   return (
     <AuthGuard>
-      <DiagnosisPageContent />
+      <UsersPageContent />
     </AuthGuard>
   );
 }

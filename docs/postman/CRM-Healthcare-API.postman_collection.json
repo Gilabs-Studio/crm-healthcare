@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "CRM Healthcare API",
-    "description": "API collection untuk CRM Healthcare/Pharmaceutical Platform",
+    "description": "API collection untuk CRM Healthcare/Pharmaceutical Platform - Sales CRM",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "crm-healthcare"
   },
@@ -203,862 +203,407 @@
       "description": "Endpoints untuk authentication dan authorization"
     },
     {
-      "name": "Users",
+      "name": "Web",
       "item": [
         {
-          "name": "List Users",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/v1/users?page=1&per_page=20",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "users"],
-              "query": [
-                {"key": "page", "value": "1"},
-                {"key": "per_page", "value": "20"},
-                {"key": "search", "value": "", "disabled": true},
-                {"key": "status", "value": "", "disabled": true},
-                {"key": "role_id", "value": "", "disabled": true}
-              ]
-            },
-            "description": "Get list of users with pagination"
-          }
-        },
-        {
-          "name": "Get User by ID",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/v1/users/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "users", ":id"],
-              "variable": [
-                {"key": "id", "value": "user_id"}
-              ]
-            },
-            "description": "Get user details by ID"
-          }
-        },
-        {
-          "name": "Create User",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"newuser@example.com\",\n  \"password\": \"password123\",\n  \"name\": \"New User\",\n  \"role_id\": \"role_id_here\",\n  \"status\": \"active\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{base_url}}/api/v1/users",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "users"]
-            },
-            "description": "Create a new user"
-          }
-        },
-        {
-          "name": "Update User",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Updated Name\",\n  \"role_id\": \"role_id_here\",\n  \"status\": \"active\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{base_url}}/api/v1/users/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "users", ":id"],
-              "variable": [
-                {"key": "id", "value": "user_id"}
-              ]
-            },
-            "description": "Update user information"
-          }
-        },
-        {
-          "name": "Delete User",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/v1/users/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "users", ":id"],
-              "variable": [
-                {"key": "id", "value": "user_id"}
-              ]
-            },
-            "description": "Delete a user"
-          }
-        },
-        {
-          "name": "Get User Permissions",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/v1/users/:id/permissions",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "users", ":id", "permissions"],
-              "variable": [
-                {"key": "id", "value": "user_id"}
-              ]
-            },
-            "description": "Get user permissions in hierarchical menu structure"
-          }
-        }
-      ]
-    },
-    {
-      "name": "Roles",
-      "item": [
-        {
-          "name": "List Roles",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/v1/roles",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "roles"]
-            },
-            "description": "Get list of all roles"
-          }
-        },
-        {
-          "name": "Get Role by ID",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/v1/roles/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "roles", ":id"],
-              "variable": [
-                {"key": "id", "value": "role_id"}
-              ]
-            },
-            "description": "Get role details by ID"
-          }
-        },
-        {
-          "name": "Create Role",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"New Role\",\n  \"code\": \"new_role\",\n  \"description\": \"Role description\",\n  \"status\": \"active\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{base_url}}/api/v1/roles",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "roles"]
-            },
-            "description": "Create a new role"
-          }
-        },
-        {
-          "name": "Update Role",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Updated Role\",\n  \"description\": \"Updated description\",\n  \"status\": \"active\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{base_url}}/api/v1/roles/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "roles", ":id"],
-              "variable": [
-                {"key": "id", "value": "role_id"}
-              ]
-            },
-            "description": "Update role information"
-          }
-        },
-        {
-          "name": "Delete Role",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/v1/roles/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "roles", ":id"],
-              "variable": [
-                {"key": "id", "value": "role_id"}
-              ]
-            },
-            "description": "Delete a role"
-          }
-        },
-        {
-          "name": "Assign Permissions to Role",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"permission_ids\": [\"permission_id_1\", \"permission_id_2\"]\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{base_url}}/api/v1/roles/:id/permissions",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "roles", ":id", "permissions"],
-              "variable": [
-                {"key": "id", "value": "role_id"}
-              ]
-            },
-            "description": "Assign permissions to a role"
-          }
-        }
-      ]
-    },
-    {
-      "name": "Permissions",
-      "item": [
-        {
-          "name": "List Permissions",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/v1/permissions",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "permissions"]
-            },
-            "description": "Get list of all permissions"
-          }
-        },
-        {
-          "name": "Get Permission by ID",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/v1/permissions/:id",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "permissions", ":id"],
-              "variable": [
-                {"key": "id", "value": "permission_id"}
-              ]
-            },
-            "description": "Get permission details by ID"
-          }
-        }
-      ]
-    },
-    {
-      "name": "Master Data",
-      "item": [
-        {
-          "name": "Diagnosis",
+          "name": "Master Data",
           "item": [
             {
-              "name": "List Diagnoses",
-              "request": {
-                "method": "GET",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}",
-                    "type": "text"
-                  }
-                ],
-                "url": {
-                  "raw": "{{base_url}}/api/v1/master-data/diagnosis?page=1&per_page=20",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "master-data", "diagnosis"],
-                  "query": [
-                    {"key": "page", "value": "1"},
-                    {"key": "per_page", "value": "20"},
-                    {"key": "search", "value": "", "disabled": true},
-                    {"key": "status", "value": "", "disabled": true}
-                  ]
-                },
-                "description": "Get list of diagnoses with pagination"
-              }
-            },
-            {
-              "name": "Get Diagnosis by ID",
-              "request": {
-                "method": "GET",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}",
-                    "type": "text"
-                  }
-                ],
-                "url": {
-                  "raw": "{{base_url}}/api/v1/master-data/diagnosis/:id",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "master-data", "diagnosis", ":id"],
-                  "variable": [
-                    {"key": "id", "value": "diagnosis_id"}
-                  ]
-                },
-                "description": "Get diagnosis details by ID"
-              }
-            },
-            {
-              "name": "Search Diagnoses",
-              "request": {
-                "method": "GET",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}",
-                    "type": "text"
-                  }
-                ],
-                "url": {
-                  "raw": "{{base_url}}/api/v1/master-data/diagnosis/search?query=diabetes&limit=10",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "master-data", "diagnosis", "search"],
-                  "query": [
-                    {"key": "query", "value": "diabetes"},
-                    {"key": "limit", "value": "10", "disabled": true},
-                    {"key": "status", "value": "", "disabled": true}
-                  ]
-                },
-                "description": "Search diagnoses by code or name"
-              }
-            },
-            {
-              "name": "Create Diagnosis",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}",
-                    "type": "text"
-                  },
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"code\": \"A00.0\",\n  \"name\": \"Kolera karena Vibrio cholerae 01, biovar cholerae\",\n  \"category_id\": \"category_id_here\",\n  \"description\": \"Kolera akut\",\n  \"status\": \"active\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
+              "name": "User Management",
+              "item": [
+                {
+                  "name": "Users",
+                  "item": [
+                    {
+                      "name": "List Users",
+                      "request": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Authorization",
+                            "value": "Bearer {{token}}",
+                            "type": "text"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{base_url}}/api/v1/users?page=1&per_page=20",
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "users"],
+                          "query": [
+                            {"key": "page", "value": "1"},
+                            {"key": "per_page", "value": "20"},
+                            {"key": "search", "value": "", "disabled": true},
+                            {"key": "status", "value": "", "disabled": true},
+                            {"key": "role_id", "value": "", "disabled": true}
+                          ]
+                        },
+                        "description": "Get list of users with pagination"
+                      }
+                    },
+                    {
+                      "name": "Get User by ID",
+                      "request": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Authorization",
+                            "value": "Bearer {{token}}",
+                            "type": "text"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{base_url}}/api/v1/users/:id",
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "users", ":id"],
+                          "variable": [
+                            {"key": "id", "value": "user_id"}
+                          ]
+                        },
+                        "description": "Get user details by ID"
+                      }
+                    },
+                    {
+                      "name": "Create User",
+                      "request": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Authorization",
+                            "value": "Bearer {{token}}",
+                            "type": "text"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"email\": \"newuser@example.com\",\n  \"password\": \"password123\",\n  \"name\": \"New User\",\n  \"role_id\": \"role_id_here\",\n  \"status\": \"active\"\n}",
+                          "options": {
+                            "raw": {
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{base_url}}/api/v1/users",
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "users"]
+                        },
+                        "description": "Create a new user"
+                      }
+                    },
+                    {
+                      "name": "Update User",
+                      "request": {
+                        "method": "PUT",
+                        "header": [
+                          {
+                            "key": "Authorization",
+                            "value": "Bearer {{token}}",
+                            "type": "text"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"name\": \"Updated Name\",\n  \"role_id\": \"role_id_here\",\n  \"status\": \"active\"\n}",
+                          "options": {
+                            "raw": {
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{base_url}}/api/v1/users/:id",
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "users", ":id"],
+                          "variable": [
+                            {"key": "id", "value": "user_id"}
+                          ]
+                        },
+                        "description": "Update user information"
+                      }
+                    },
+                    {
+                      "name": "Delete User",
+                      "request": {
+                        "method": "DELETE",
+                        "header": [
+                          {
+                            "key": "Authorization",
+                            "value": "Bearer {{token}}",
+                            "type": "text"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{base_url}}/api/v1/users/:id",
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "users", ":id"],
+                          "variable": [
+                            {"key": "id", "value": "user_id"}
+                          ]
+                        },
+                        "description": "Delete a user"
+                      }
+                    },
+                    {
+                      "name": "Get User Permissions",
+                      "request": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Authorization",
+                            "value": "Bearer {{token}}",
+                            "type": "text"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{base_url}}/api/v1/users/:id/permissions",
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "users", ":id", "permissions"],
+                          "variable": [
+                            {"key": "id", "value": "user_id"}
+                          ]
+                        },
+                        "description": "Get user permissions in hierarchical menu structure"
+                      }
                     }
-                  }
+                  ]
                 },
-                "url": {
-                  "raw": "{{base_url}}/api/v1/master-data/diagnosis",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "master-data", "diagnosis"]
-                },
-                "description": "Create a new diagnosis (ICD-10)"
-              }
-            },
-            {
-              "name": "Update Diagnosis",
-              "request": {
-                "method": "PUT",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}",
-                    "type": "text"
-                  },
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"name\": \"Updated Diagnosis Name\",\n  \"category_id\": \"category_id_here\",\n  \"description\": \"Updated description\",\n  \"status\": \"active\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
+                {
+                  "name": "Roles",
+                  "item": [
+                    {
+                      "name": "List Roles",
+                      "request": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Authorization",
+                            "value": "Bearer {{token}}",
+                            "type": "text"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{base_url}}/api/v1/roles",
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "roles"]
+                        },
+                        "description": "Get list of all roles"
+                      }
+                    },
+                    {
+                      "name": "Get Role by ID",
+                      "request": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Authorization",
+                            "value": "Bearer {{token}}",
+                            "type": "text"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{base_url}}/api/v1/roles/:id",
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "roles", ":id"],
+                          "variable": [
+                            {"key": "id", "value": "role_id"}
+                          ]
+                        },
+                        "description": "Get role details by ID"
+                      }
+                    },
+                    {
+                      "name": "Create Role",
+                      "request": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Authorization",
+                            "value": "Bearer {{token}}",
+                            "type": "text"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"name\": \"New Role\",\n  \"code\": \"new_role\",\n  \"description\": \"Role description\",\n  \"status\": \"active\"\n}",
+                          "options": {
+                            "raw": {
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{base_url}}/api/v1/roles",
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "roles"]
+                        },
+                        "description": "Create a new role"
+                      }
+                    },
+                    {
+                      "name": "Update Role",
+                      "request": {
+                        "method": "PUT",
+                        "header": [
+                          {
+                            "key": "Authorization",
+                            "value": "Bearer {{token}}",
+                            "type": "text"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"name\": \"Updated Role\",\n  \"description\": \"Updated description\",\n  \"status\": \"active\"\n}",
+                          "options": {
+                            "raw": {
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{base_url}}/api/v1/roles/:id",
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "roles", ":id"],
+                          "variable": [
+                            {"key": "id", "value": "role_id"}
+                          ]
+                        },
+                        "description": "Update role information"
+                      }
+                    },
+                    {
+                      "name": "Delete Role",
+                      "request": {
+                        "method": "DELETE",
+                        "header": [
+                          {
+                            "key": "Authorization",
+                            "value": "Bearer {{token}}",
+                            "type": "text"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{base_url}}/api/v1/roles/:id",
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "roles", ":id"],
+                          "variable": [
+                            {"key": "id", "value": "role_id"}
+                          ]
+                        },
+                        "description": "Delete a role"
+                      }
+                    },
+                    {
+                      "name": "Assign Permissions to Role",
+                      "request": {
+                        "method": "PUT",
+                        "header": [
+                          {
+                            "key": "Authorization",
+                            "value": "Bearer {{token}}",
+                            "type": "text"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"permission_ids\": [\"permission_id_1\", \"permission_id_2\"]\n}",
+                          "options": {
+                            "raw": {
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{base_url}}/api/v1/roles/:id/permissions",
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "roles", ":id", "permissions"],
+                          "variable": [
+                            {"key": "id", "value": "role_id"}
+                          ]
+                        },
+                        "description": "Assign permissions to a role"
+                      }
                     }
-                  }
-                },
-                "url": {
-                  "raw": "{{base_url}}/api/v1/master-data/diagnosis/:id",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "master-data", "diagnosis", ":id"],
-                  "variable": [
-                    {"key": "id", "value": "diagnosis_id"}
                   ]
                 },
-                "description": "Update diagnosis information"
-              }
-            },
-            {
-              "name": "Delete Diagnosis",
-              "request": {
-                "method": "DELETE",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}",
-                    "type": "text"
-                  }
-                ],
-                "url": {
-                  "raw": "{{base_url}}/api/v1/master-data/diagnosis/:id",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "master-data", "diagnosis", ":id"],
-                  "variable": [
-                    {"key": "id", "value": "diagnosis_id"}
+                {
+                  "name": "Permissions",
+                  "item": [
+                    {
+                      "name": "List Permissions",
+                      "request": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Authorization",
+                            "value": "Bearer {{token}}",
+                            "type": "text"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{base_url}}/api/v1/permissions",
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "permissions"]
+                        },
+                        "description": "Get list of all permissions"
+                      }
+                    },
+                    {
+                      "name": "Get Permission by ID",
+                      "request": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Authorization",
+                            "value": "Bearer {{token}}",
+                            "type": "text"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{base_url}}/api/v1/permissions/:id",
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "permissions", ":id"],
+                          "variable": [
+                            {"key": "id", "value": "permission_id"}
+                          ]
+                        },
+                        "description": "Get permission details by ID"
+                      }
+                    }
                   ]
-                },
-                "description": "Delete a diagnosis"
-              }
+                }
+              ],
+              "description": "User Management endpoints untuk mengelola users, roles, dan permissions"
             }
-          ]
-        },
-        {
-          "name": "Procedures",
-          "item": [
-            {
-              "name": "List Procedures",
-              "request": {
-                "method": "GET",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}",
-                    "type": "text"
-                  }
-                ],
-                "url": {
-                  "raw": "{{base_url}}/api/v1/master-data/procedures?page=1&per_page=20",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "master-data", "procedures"],
-                  "query": [
-                    {"key": "page", "value": "1"},
-                    {"key": "per_page", "value": "20"},
-                    {"key": "search", "value": "", "disabled": true},
-                    {"key": "status", "value": "", "disabled": true}
-                  ]
-                },
-                "description": "Get list of procedures with pagination"
-              }
-            },
-            {
-              "name": "Get Procedure by ID",
-              "request": {
-                "method": "GET",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}",
-                    "type": "text"
-                  }
-                ],
-                "url": {
-                  "raw": "{{base_url}}/api/v1/master-data/procedures/:id",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "master-data", "procedures", ":id"],
-                  "variable": [
-                    {"key": "id", "value": "procedure_id"}
-                  ]
-                },
-                "description": "Get procedure details by ID"
-              }
-            },
-            {
-              "name": "Search Procedures",
-              "request": {
-                "method": "GET",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}",
-                    "type": "text"
-                  }
-                ],
-                "url": {
-                  "raw": "{{base_url}}/api/v1/master-data/procedures/search?query=injection&limit=10",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "master-data", "procedures", "search"],
-                  "query": [
-                    {"key": "query", "value": "injection"},
-                    {"key": "limit", "value": "10", "disabled": true},
-                    {"key": "status", "value": "", "disabled": true}
-                  ]
-                },
-                "description": "Search procedures by code or name"
-              }
-            },
-            {
-              "name": "Create Procedure",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}",
-                    "type": "text"
-                  },
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"code\": \"PROC-001\",\n  \"name\": \"Suntik Intramuskular\",\n  \"category_id\": \"category_id_here\",\n  \"description\": \"Prosedur suntik intramuskular\",\n  \"price\": 50000,\n  \"status\": \"active\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "{{base_url}}/api/v1/master-data/procedures",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "master-data", "procedures"]
-                },
-                "description": "Create a new procedure"
-              }
-            },
-            {
-              "name": "Update Procedure",
-              "request": {
-                "method": "PUT",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}",
-                    "type": "text"
-                  },
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"name\": \"Updated Procedure Name\",\n  \"category_id\": \"category_id_here\",\n  \"description\": \"Updated description\",\n  \"price\": 75000,\n  \"status\": \"active\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "{{base_url}}/api/v1/master-data/procedures/:id",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "master-data", "procedures", ":id"],
-                  "variable": [
-                    {"key": "id", "value": "procedure_id"}
-                  ]
-                },
-                "description": "Update procedure information"
-              }
-            },
-            {
-              "name": "Delete Procedure",
-              "request": {
-                "method": "DELETE",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}",
-                    "type": "text"
-                  }
-                ],
-                "url": {
-                  "raw": "{{base_url}}/api/v1/master-data/procedures/:id",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "master-data", "procedures", ":id"],
-                  "variable": [
-                    {"key": "id", "value": "procedure_id"}
-                  ]
-                },
-                "description": "Delete a procedure"
-              }
-            }
-          ]
-        },
-        {
-          "name": "Categories",
-          "item": [
-            {
-              "name": "List Categories",
-              "request": {
-                "method": "GET",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}",
-                    "type": "text"
-                  }
-                ],
-                "url": {
-                  "raw": "{{base_url}}/api/v1/master-data/categories?page=1&per_page=20",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "master-data", "categories"],
-                  "query": [
-                    {"key": "page", "value": "1"},
-                    {"key": "per_page", "value": "20"},
-                    {"key": "type", "value": "", "disabled": true},
-                    {"key": "status", "value": "", "disabled": true},
-                    {"key": "search", "value": "", "disabled": true}
-                  ]
-                },
-                "description": "Get list of categories with pagination. Filter by type (diagnosis/procedure) and status."
-              }
-            },
-            {
-              "name": "Get Category by ID",
-              "request": {
-                "method": "GET",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}",
-                    "type": "text"
-                  }
-                ],
-                "url": {
-                  "raw": "{{base_url}}/api/v1/master-data/categories/:id",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "master-data", "categories", ":id"],
-                  "variable": [
-                    {"key": "id", "value": "category_id"}
-                  ]
-                },
-                "description": "Get category details by ID"
-              }
-            },
-            {
-              "name": "Create Category",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}",
-                    "type": "text"
-                  },
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"type\": \"diagnosis\",\n  \"name\": \"Penyakit Menular\",\n  \"description\": \"Kategori untuk penyakit menular\",\n  \"status\": \"active\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "{{base_url}}/api/v1/master-data/categories",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "master-data", "categories"]
-                },
-                "description": "Create a new category. Type must be 'diagnosis' or 'procedure'."
-              }
-            },
-            {
-              "name": "Update Category",
-              "request": {
-                "method": "PUT",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}",
-                    "type": "text"
-                  },
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"name\": \"Updated Category Name\",\n  \"description\": \"Updated description\",\n  \"status\": \"active\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "{{base_url}}/api/v1/master-data/categories/:id",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "master-data", "categories", ":id"],
-                  "variable": [
-                    {"key": "id", "value": "category_id"}
-                  ]
-                },
-                "description": "Update category information"
-              }
-            },
-            {
-              "name": "Delete Category",
-              "request": {
-                "method": "DELETE",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}",
-                    "type": "text"
-                  }
-                ],
-                "url": {
-                  "raw": "{{base_url}}/api/v1/master-data/categories/:id",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "master-data", "categories", ":id"],
-                  "variable": [
-                    {"key": "id", "value": "category_id"}
-                  ]
-                },
-                "description": "Delete a category"
-              }
-            }
-          ]
+          ],
+          "description": "Endpoints untuk master data Sales CRM"
         }
       ],
-      "description": "Endpoints untuk master data (diagnosis, procedures, dan categories)"
+      "description": "Endpoints untuk Web Application"
+    },
+    {
+      "name": "Mobile",
+      "item": [],
+      "description": "Endpoints untuk Mobile Application (akan ditambahkan sesuai kebutuhan)"
     },
     {
       "name": "Health Check",
@@ -1091,7 +636,8 @@
           },
           "response": []
         }
-      ]
+      ],
+      "description": "Health check endpoints"
     }
   ],
   "variable": [
