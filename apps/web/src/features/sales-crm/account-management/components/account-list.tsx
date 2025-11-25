@@ -6,6 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge, badgeVariants } from "@/components/ui/badge";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -153,29 +160,37 @@ export function AccountList() {
               className="pl-10 h-9"
             />
           </div>
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground"
+          <Select 
+            value={status || "all"} 
+            onValueChange={(value) => setStatus(value === "all" ? "" : value)}
           >
-            <option value="">All Status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
-          <select
-            value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-            className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground"
+            <SelectTrigger className="w-[140px] h-9">
+              <SelectValue placeholder="All Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="inactive">Inactive</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select 
+            value={categoryId || "all"} 
+            onValueChange={(value) => setCategoryId(value === "all" ? "" : value)}
           >
-            <option value="">All Categories</option>
-            {categories
-              .filter((cat) => cat.status === "active")
-              .map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-          </select>
+            <SelectTrigger className="w-[160px] h-9">
+              <SelectValue placeholder="All Categories" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              {categories
+                .filter((cat) => cat.status === "active")
+                .map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
         </div>
         <Button onClick={() => setIsCreateDialogOpen(true)} size="sm">
           <Plus className="h-4 w-4 mr-2" />
@@ -239,21 +254,27 @@ export function AccountList() {
                     <label htmlFor="rows-per-page" className="text-sm whitespace-nowrap">
                       Rows per page
                     </label>
-                    <select
-                      id="rows-per-page"
-                      value={pagination.per_page}
-                      onChange={(e) => {
-                        setPerPage(Number(e.target.value));
+                    <Select
+                      value={String(pagination.per_page)}
+                      onValueChange={(value) => {
+                        setPerPage(Number(value));
                         setPage(1);
                       }}
-                      className="h-9 rounded-md border border-input bg-background px-3 text-sm"
                     >
-                      {[10, 20, 50, 100].map((option) => (
-                        <option key={option} value={option}>
-                          {option}
-                        </option>
-                      ))}
-                    </select>
+                      <SelectTrigger
+                        id="rows-per-page"
+                        className="w-fit whitespace-nowrap h-9"
+                      >
+                        <SelectValue placeholder="Select rows" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[10, 20, 50, 100].map((option) => (
+                          <SelectItem key={option} value={String(option)}>
+                            {option}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="flex grow justify-center lg:justify-end text-sm whitespace-nowrap text-muted-foreground order-2">
                     <p>

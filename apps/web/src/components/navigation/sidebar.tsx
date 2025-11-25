@@ -5,12 +5,10 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
 import { 
-  Search,
   LogOut,
   ChevronDown,
   LayoutDashboard,
 } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { ThemeToggleButton } from "@/components/ui/theme-toggle";
@@ -173,26 +171,11 @@ function SidebarComponent() {
   };
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-64 border-r border border-sidebar-border bg-sidebar text-sidebar-foreground flex flex-col">
-      {/* Search */}
-      <div className="p-4 border-b border border-sidebar-border">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search"
-            className="pl-10 h-9 bg-background border-input"
-          />
-        </div>
-      </div>
-
+    <aside className="fixed left-0 top-0 h-screen w-64 border-r border-sidebar-border bg-sidebar text-sidebar-foreground flex flex-col z-50">
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto p-4 space-y-6">
+      <nav className="flex-1 overflow-y-auto p-4 space-y-1">
         {navSections.map((section) => (
           <div key={section.id} className="space-y-1">
-            <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              {section.label}
-            </div>
             {section.items.map((item) => {
               const hasChildren = item.children && item.children.length > 0;
               const isExpanded = expandedItems.includes(item.id);
@@ -203,10 +186,10 @@ function SidebarComponent() {
                   <Link href={item.href}>
                     <div
                       className={cn(
-                        "flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer",
+                        "flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer",
                         active
                           ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                          : "hover:bg-sidebar-accent/50"
+                          : "hover:bg-sidebar-accent/50 text-sidebar-foreground/70 hover:text-sidebar-foreground"
                       )}
                       onClick={(e) => {
                         if (hasChildren) {
@@ -216,13 +199,17 @@ function SidebarComponent() {
                       }}
                     >
                       <div className="flex items-center gap-3">
-                        {item.icon}
-                        <span>{item.label}</span>
+                        <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center">
+                          {item.icon}
+                        </div>
+                        <span className="whitespace-nowrap overflow-hidden">
+                          {item.label}
+                        </span>
                       </div>
                       {hasChildren && (
                         <ChevronDown
                           className={cn(
-                            "h-4 w-4 transition-transform",
+                            "h-4 w-4 transition-transform flex-shrink-0",
                             isExpanded && "rotate-180"
                           )}
                         />
@@ -244,10 +231,10 @@ function SidebarComponent() {
                                 <Link href={child.href}>
                                   <div
                                     className={cn(
-                                      "flex items-center justify-between px-3 py-2 rounded-md text-sm transition-colors",
+                                      "flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm transition-all",
                                       childActive
                                         ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                                        : "hover:bg-sidebar-accent/50"
+                                        : "hover:bg-sidebar-accent/50 text-sidebar-foreground/70 hover:text-sidebar-foreground"
                                     )}
                                     onClick={(e) => {
                                       if (hasGrandChildren) {
@@ -257,13 +244,15 @@ function SidebarComponent() {
                                     }}
                                   >
                                     <div className="flex items-center gap-3">
-                                      {child.icon}
-                                      <span>{child.label}</span>
+                                      <div className="flex-shrink-0 w-4 h-4 flex items-center justify-center">
+                                        {child.icon}
+                                      </div>
+                                      <span className="whitespace-nowrap overflow-hidden">{child.label}</span>
                                     </div>
                                     {hasGrandChildren && (
                                       <ChevronDown
                                         className={cn(
-                                          "h-4 w-4 transition-transform",
+                                          "h-3 w-3 transition-transform flex-shrink-0",
                                           isChildExpanded && "rotate-180"
                                         )}
                                       />
@@ -279,14 +268,16 @@ function SidebarComponent() {
                                           <Link key={grandChild.id} href={grandChild.href}>
                                             <div
                                               className={cn(
-                                                "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
+                                                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all",
                                                 isActive(grandChild.href)
                                                   ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                                                  : "hover:bg-sidebar-accent/50"
+                                                  : "hover:bg-sidebar-accent/50 text-sidebar-foreground/70 hover:text-sidebar-foreground"
                                               )}
                                             >
-                                              {grandChild.icon}
-                                              <span>{grandChild.label}</span>
+                                              <div className="flex-shrink-0 w-3 h-3 flex items-center justify-center">
+                                                {grandChild.icon}
+                                              </div>
+                                              <span className="whitespace-nowrap overflow-hidden">{grandChild.label}</span>
                                             </div>
                                           </Link>
                                         ))}
@@ -308,42 +299,38 @@ function SidebarComponent() {
         ))}
       </nav>
 
-      {/* Account Section - Modern Footer Design */}
+      {/* Footer - Minimalist Design */}
       {user && (
-        <div className="border-t border-sidebar-border bg-sidebar-accent/30 backdrop-blur-sm">
-          {/* User Profile Card */}
-          <div className="p-4">
-            <div className="flex items-center gap-3 mb-4">
-              <Avatar className="h-12 w-12 ring-2 ring-sidebar-accent ring-offset-2 ring-offset-sidebar">
-                <AvatarImage src={getAvatarUrl(user)} alt={user.name} />
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-semibold text-sidebar-foreground truncate">
-                  {user.name}
-                </div>
-                <div className="text-xs text-muted-foreground capitalize truncate">
-                  {user.role}
-                </div>
+        <div className="border-t border-sidebar-border p-4">
+          <div className="flex items-center gap-3 mb-3">
+            <Avatar className="h-10 w-10 flex-shrink-0">
+              <AvatarImage src={getAvatarUrl(user)} alt={user.name} />
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-medium text-sidebar-foreground truncate">
+                {user.name}
+              </div>
+              <div className="text-xs text-muted-foreground capitalize truncate">
+                {user.role}
               </div>
             </div>
-
-            {/* Actions Row */}
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleLogout}
-                className="flex-1 justify-center gap-2 h-9 text-sm text-destructive hover:text-destructive hover:bg-destructive/10 transition-all"
-              >
-                <LogOut className="h-4 w-4" />
-                <span>Logout</span>
-              </Button>
-              <ThemeToggleButton
-                variant="circle"
-                start="bottom-left"
-                className="size-9 bg-sidebar-accent hover:bg-sidebar-accent/80 transition-all shadow-sm"
-              />
-            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleLogout}
+              className="flex-1 justify-start gap-2 h-9 text-sm text-destructive hover:text-destructive hover:bg-destructive/10"
+            >
+              <LogOut className="h-4 w-4" />
+              <span>Logout</span>
+            </Button>
+            <ThemeToggleButton
+              variant="circle"
+              start="bottom-left"
+              className="size-9 bg-sidebar-accent hover:bg-sidebar-accent/80 transition-all"
+            />
           </div>
         </div>
       )}

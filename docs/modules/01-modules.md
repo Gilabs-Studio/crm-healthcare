@@ -403,6 +403,10 @@ interface Deal {
   closedAt?: string;
   createdAt: string;
   updatedAt: string;
+  // Fields to be added in Sprint 2 (Dev2):
+  nextStep?: string; // Next action/step for the deal
+  lastInteractedOn?: string; // Last interaction date (from Activity module)
+  progressToWon?: number; // Progress percentage to won stage
 }
 
 interface DealProduct {
@@ -411,6 +415,18 @@ interface DealProduct {
   price: number;
 }
 ```
+
+**Sales Funnel Report**:
+- Currently displays placeholder data for deal details
+- **Fields that need to be added in Sprint 2 (Dev2)**:
+  - `GET /api/v1/deals` - Endpoint to fetch individual deals
+  - `next_step` - Next action/step for each deal
+  - `last_interacted_on` - Last interaction date (from Activity module)
+  - `progress_to_won` - Calculated progress percentage based on stage and probability
+  - Deal value by stage (for Insights chart)
+  - Conversion rates between stages
+  - Time in stage metrics
+  - Forecast accuracy (expected vs actual close dates)
 
 **Relationships**:
 - ← Account Module (deal linked ke account)
@@ -594,6 +610,9 @@ interface Product {
 - `DateRangePicker` - Date range picker
 - `ReportFilters` - Report filters component
 - `ExportButton` - Export to PDF/Excel
+- `SalesFunnelViewer` - Sales Funnel viewer with 2 tabs (Table + Insights)
+- `SalesFunnelTable` - Sales Funnel table view with deal details
+- `SalesFunnelInsights` - Sales Funnel insights with charts and metrics
 
 **Services**:
 - `reportService.generateVisitReport()`

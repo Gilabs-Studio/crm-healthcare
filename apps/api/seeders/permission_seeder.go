@@ -22,6 +22,7 @@ func SeedPermissions() error {
 	var dashboardMenu permission.Menu
 	var userPageMenu permission.Menu
 	var salesCRMMenu, accountsMenu, pipelineMenu permission.Menu
+	var reportsMenu permission.Menu
 
 	database.DB.Where("url = ?", "/dashboard").First(&dashboardMenu)
 	database.DB.Where("url = ?", "/master-data/users").First(&userPageMenu)
@@ -45,6 +46,7 @@ func SeedPermissions() error {
 			log.Printf("Created Pipeline menu in permission seeder")
 		}
 	}
+	database.DB.Where("url = ?", "/reports").First(&reportsMenu)
 
 	// Define actions for each menu
 	actions := []struct {
@@ -86,6 +88,11 @@ func SeedPermissions() error {
 		{pipelineMenu.ID, "MOVE_DEALS", "Move Deals", "MOVE", &pipelineMenu},
 		{pipelineMenu.ID, "VIEW_SUMMARY", "View Summary", "SUMMARY", &pipelineMenu},
 		{pipelineMenu.ID, "VIEW_FORECAST", "View Forecast", "FORECAST", &pipelineMenu},
+
+		// Reports actions
+		{reportsMenu.ID, "VIEW_REPORTS", "View Reports", "VIEW", &reportsMenu},
+		{reportsMenu.ID, "GENERATE_REPORTS", "Generate Reports", "CREATE", &reportsMenu},
+		{reportsMenu.ID, "EXPORT_REPORTS", "Export Reports", "EXPORT", &reportsMenu},
 	}
 
 	// Create permissions

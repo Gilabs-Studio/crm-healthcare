@@ -50,11 +50,13 @@ const iconMap: Record<string, React.ReactNode> = {
   // Other icons
   calendar: <Calendar className="h-4 w-4" />,
   filetext: <FileText className="h-4 w-4" />,
+  "file-text": <FileText className="h-4 w-4" />,
   pill: <Pill className="h-4 w-4" />,
   package: <Package className="h-4 w-4" />,
   shoppingcart: <ShoppingCart className="h-4 w-4" />,
   receipt: <Receipt className="h-4 w-4" />,
   barchart3: <BarChart3 className="h-4 w-4" />,
+  "bar-chart-3": <BarChart3 className="h-4 w-4" />,
   settings: <Settings className="h-4 w-4" />,
   activity: <Activity className="h-4 w-4" />,
   stethoscope: <Stethoscope className="h-4 w-4" />,
@@ -65,6 +67,8 @@ const iconMap: Record<string, React.ReactNode> = {
   mappin: <MapPin className="h-4 w-4" />,
   ruler: <Ruler className="h-4 w-4" />,
   store: <Store className="h-4 w-4" />,
+  "map-pin": <MapPin className="h-4 w-4" />,
+  "clipboard-list": <ClipboardList className="h-4 w-4" />,
 };
 
 export function getMenuIcon(iconName: string): React.ReactNode {

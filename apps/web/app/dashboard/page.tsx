@@ -4,7 +4,13 @@ import { motion } from "framer-motion";
 import { DashboardLayout } from "@/components/layouts/dashboard-layout";
 import { AuthGuard } from "@/features/auth/components/auth-guard";
 import { useAuthStore } from "@/features/auth/stores/useAuthStore";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DashboardOverview } from "@/features/dashboard/components/dashboard-overview";
+import { VisitStatistics } from "@/features/dashboard/components/visit-statistics";
+import { ActivityTrends } from "@/features/dashboard/components/activity-trends";
+import { PipelineSummary } from "@/features/dashboard/components/pipeline-summary";
+import { TopAccounts } from "@/features/dashboard/components/top-accounts";
+import { TopSalesRep } from "@/features/dashboard/components/top-sales-rep";
+import { RecentActivities } from "@/features/dashboard/components/recent-activities";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -47,104 +53,29 @@ function DashboardContent() {
           </div>
         </motion.div>
 
-        <motion.div
-          variants={itemVariants}
-          className="grid gap-6 md:grid-cols-2 lg:grid-cols-4"
-        >
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Total Patients
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">0</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                No patients yet
-              </p>
-            </CardContent>
-          </Card>
+        <motion.div variants={itemVariants}>
+          <DashboardOverview />
+        </motion.div>
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Today&apos;s Appointments
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">0</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                No appointments scheduled
-              </p>
-            </CardContent>
-          </Card>
+        <motion.div variants={itemVariants}>
+          <VisitStatistics />
+        </motion.div>
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Pending Prescriptions
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">0</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                All prescriptions processed
-              </p>
-            </CardContent>
-          </Card>
+        <motion.div variants={itemVariants}>
+          <ActivityTrends />
+        </motion.div>
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Low Stock Items
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">0</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                All items in stock
-              </p>
-            </CardContent>
-          </Card>
+        <motion.div variants={itemVariants}>
+          <PipelineSummary />
         </motion.div>
 
         <motion.div variants={itemVariants} className="grid gap-6 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <button className="w-full text-left p-3 rounded-lg hover:bg-muted transition-colors">
-                <div className="font-medium">Register New Patient</div>
-                <div className="text-sm text-muted-foreground">
-                  Add a new patient to the system
-                </div>
-              </button>
-              <button className="w-full text-left p-3 rounded-lg hover:bg-muted transition-colors">
-                <div className="font-medium">Schedule Appointment</div>
-                <div className="text-sm text-muted-foreground">
-                  Book a new appointment
-                </div>
-              </button>
-              <button className="w-full text-left p-3 rounded-lg hover:bg-muted transition-colors">
-                <div className="font-medium">View Reports</div>
-                <div className="text-sm text-muted-foreground">
-                  Access system reports
-                </div>
-              </button>
-            </CardContent>
-          </Card>
+          <TopAccounts />
+          <TopSalesRep />
+        </motion.div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8 text-muted-foreground">
-                <p className="text-sm">No recent activity</p>
-              </div>
-            </CardContent>
-          </Card>
+        <motion.div variants={itemVariants}>
+          <RecentActivities />
         </motion.div>
       </motion.div>
     </DashboardLayout>
