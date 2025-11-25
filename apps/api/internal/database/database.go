@@ -12,6 +12,7 @@ import (
 	"github.com/gilabs/crm-healthcare/api/internal/domain/contact"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/contact_role"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/permission"
+	"github.com/gilabs/crm-healthcare/api/internal/domain/pipeline"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/role"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/user"
 	"gorm.io/driver/postgres"
@@ -39,7 +40,7 @@ func Connect() error {
 }
 
 // AutoMigrate runs database migrations
-// 
+//
 // PRODUCTION SAFETY:
 // - This function is SAFE for production use
 // - Tables are NEVER dropped in production mode (ENV=production)
@@ -73,6 +74,8 @@ func AutoMigrate() error {
 		&contact_role.ContactRole{},
 		&account.Account{},
 		&contact.Contact{},
+		&pipeline.PipelineStage{},
+		&pipeline.Deal{},
 	)
 	if err != nil {
 		return fmt.Errorf("failed to run migrations: %w", err)
@@ -91,7 +94,7 @@ func shouldDropTables() bool {
 	if config.AppConfig != nil {
 		env = config.AppConfig.Server.Env
 	}
-	
+
 	// Fallback to environment variable if config is not loaded yet
 	if env == "" {
 		env = os.Getenv("ENV")
@@ -127,7 +130,7 @@ func DropAllTables() error {
 	if config.AppConfig != nil {
 		env = config.AppConfig.Server.Env
 	}
-	
+
 	// Fallback to environment variable if config is not loaded yet
 	if env == "" {
 		env = os.Getenv("ENV")
@@ -163,7 +166,7 @@ func DropAllTables() error {
 	// Disable foreign key checks temporarily and drop all tables
 	// PostgreSQL doesn't have a simple way to disable FK checks, so we use CASCADE
 	log.Printf("⚠️  DEVELOPMENT MODE: Dropping %d tables...", len(tables))
-	
+
 	for _, table := range tables {
 		// Use CASCADE to drop dependent objects
 		dropSQL := fmt.Sprintf("DROP TABLE IF EXISTS %s CASCADE", table)
@@ -200,8 +203,8 @@ func migrateWithErrorHandling(models ...interface{}) error {
 			// Check if error is PostgreSQL error code 42704 (undefined_object)
 			// This happens when trying to DROP a constraint that doesn't exist
 			errStr := err.Error()
-			if strings.Contains(errStr, "SQLSTATE 42704") || 
-			   (strings.Contains(errStr, "does not exist") && strings.Contains(errStr, "constraint")) {
+			if strings.Contains(errStr, "SQLSTATE 42704") ||
+				(strings.Contains(errStr, "does not exist") && strings.Contains(errStr, "constraint")) {
 				log.Printf("Warning: Constraint error during migration (safe to ignore): %v", err)
 				log.Println("GORM will create the necessary constraints. This is expected during schema evolution.")
 				// Continue with next model - GORM might have partially succeeded
@@ -210,7 +213,7 @@ func migrateWithErrorHandling(models ...interface{}) error {
 			return fmt.Errorf("failed to migrate %T: %w", model, err)
 		}
 	}
-	
+
 	return nil
 }
 
@@ -234,7 +237,7 @@ func handleConstraintIssues() error {
 		WHERE conrelid = 'roles'::regclass
 		AND contype = 'u'
 	`).Scan(&constraints).Error
-	
+
 	if err != nil {
 		// If we can't query constraints, that's okay - continue anyway
 		return nil
@@ -252,7 +255,7 @@ func handleConstraintIssues() error {
 			AND a.attname = 'code'
 			LIMIT 1
 		`, constraint.ConstraintName).Scan(&columnName).Error
-		
+
 		if err == nil && columnName == "code" {
 			// Drop the constraint
 			dropSQL := fmt.Sprintf("ALTER TABLE roles DROP CONSTRAINT IF EXISTS %s", constraint.ConstraintName)
@@ -271,4 +274,3 @@ func Close() error {
 	}
 	return sqlDB.Close()
 }
-

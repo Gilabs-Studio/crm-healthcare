@@ -44,6 +44,11 @@ func SeedAll() error {
 		return err
 	}
 
+	// Seed pipeline stages
+	if err := SeedPipelineStages(); err != nil {
+		return err
+	}
+
 	return nil
 }
 
