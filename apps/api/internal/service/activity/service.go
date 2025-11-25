@@ -17,11 +17,17 @@ var (
 
 type Service struct {
 	activityRepo interfaces.ActivityRepository
+	accountRepo  interfaces.AccountRepository
+	contactRepo  interfaces.ContactRepository
+	userRepo     interfaces.UserRepository
 }
 
-func NewService(activityRepo interfaces.ActivityRepository) *Service {
+func NewService(activityRepo interfaces.ActivityRepository, accountRepo interfaces.AccountRepository, contactRepo interfaces.ContactRepository, userRepo interfaces.UserRepository) *Service {
 	return &Service{
 		activityRepo: activityRepo,
+		accountRepo:  accountRepo,
+		contactRepo:  contactRepo,
+		userRepo:     userRepo,
 	}
 }
 
@@ -48,6 +54,31 @@ func (s *Service) List(req *activity.ListActivitiesRequest) ([]activity.Activity
 			var metadata interface{}
 			if err := json.Unmarshal(a.Metadata, &metadata); err == nil {
 				response.Metadata = metadata
+			}
+		}
+		// Load Account
+		if a.AccountID != nil && *a.AccountID != "" {
+			if account, err := s.accountRepo.FindByID(*a.AccountID); err == nil {
+				response.Account = map[string]interface{}{
+					"id":   account.ID,
+					"name": account.Name,
+				}
+			}
+		}
+		// Load Contact
+		if a.ContactID != nil && *a.ContactID != "" {
+			if contact, err := s.contactRepo.FindByID(*a.ContactID); err == nil {
+				response.Contact = map[string]interface{}{
+					"id":   contact.ID,
+					"name": contact.Name,
+				}
+			}
+		}
+		// Load User
+		if user, err := s.userRepo.FindByID(a.UserID); err == nil {
+			response.User = map[string]interface{}{
+				"id":   user.ID,
+				"name": user.Name,
 			}
 		}
 		responses[i] = response
@@ -165,6 +196,31 @@ func (s *Service) GetTimeline(req *activity.ActivityTimelineRequest) ([]activity
 			var metadata interface{}
 			if err := json.Unmarshal(a.Metadata, &metadata); err == nil {
 				response.Metadata = metadata
+			}
+		}
+		// Load Account
+		if a.AccountID != nil && *a.AccountID != "" {
+			if account, err := s.accountRepo.FindByID(*a.AccountID); err == nil {
+				response.Account = map[string]interface{}{
+					"id":   account.ID,
+					"name": account.Name,
+				}
+			}
+		}
+		// Load Contact
+		if a.ContactID != nil && *a.ContactID != "" {
+			if contact, err := s.contactRepo.FindByID(*a.ContactID); err == nil {
+				response.Contact = map[string]interface{}{
+					"id":   contact.ID,
+					"name": contact.Name,
+				}
+			}
+		}
+		// Load User
+		if user, err := s.userRepo.FindByID(a.UserID); err == nil {
+			response.User = map[string]interface{}{
+				"id":   user.ID,
+				"name": user.Name,
 			}
 		}
 		responses[i] = response

@@ -65,6 +65,8 @@ const iconMap: Record<string, React.ReactNode> = {
   mappin: <MapPin className="h-4 w-4" />,
   ruler: <Ruler className="h-4 w-4" />,
   store: <Store className="h-4 w-4" />,
+  "map-pin": <MapPin className="h-4 w-4" />,
+  "clipboard-list": <ClipboardList className="h-4 w-4" />,
 };
 
 export function getMenuIcon(iconName: string): React.ReactNode {

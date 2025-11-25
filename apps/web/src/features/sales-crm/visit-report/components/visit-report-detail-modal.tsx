@@ -1,21 +1,30 @@
 "use client";
 
-import { Calendar, MapPin, CheckCircle2, XCircle, Clock, User, Building2, FileText } from "lucide-react";
+import { Calendar, MapPin, CheckCircle2, XCircle, Clock, User, Building2, FileText, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Drawer } from "@/components/ui/drawer";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useVisitReport, useCheckIn, useCheckOut, useApproveVisitReport, useRejectVisitReport } from "../hooks/useVisitReports";
+import {
+  useVisitReport,
+  useCheckIn,
+  useCheckOut,
+  useApproveVisitReport,
+  useRejectVisitReport,
+  useUploadPhoto,
+  useActivityTimeline,
+} from "../hooks/useVisitReports";
 import { toast } from "sonner";
 import { useState } from "react";
-import { useActivityTimeline } from "../hooks/useVisitReports";
-import type { VisitReport } from "../types";
+import { PhotoUploadDialog } from "./photo-upload-dialog";
+import { ActivityTimeline } from "./activity-timeline";
 
 const statusColors: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   draft: "outline",
@@ -42,7 +51,9 @@ export function VisitReportDetailModal({
   const checkOut = useCheckOut();
   const approve = useApproveVisitReport();
   const reject = useRejectVisitReport();
+  const uploadPhoto = useUploadPhoto();
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
+  const [isPhotoUploadDialogOpen, setIsPhotoUploadDialogOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
 
   const visitReport = data?.data;
@@ -74,44 +85,95 @@ export function VisitReportDetailModal({
     });
   };
 
+  const getCurrentLocation = (): Promise<{ latitude: number; longitude: number; address: string }> => {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error("Geolocation is not supported by your browser"));
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          
+          // Try to get address from reverse geocoding (using a free service)
+          let address = "";
+          try {
+            const response = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`
+            );
+            const data = await response.json();
+            if (data.display_name) {
+              address = data.display_name;
+            } else {
+              address = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+            }
+          } catch (error) {
+            // Fallback to coordinates if reverse geocoding fails
+            address = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+          }
+
+          resolve({ latitude, longitude, address });
+        },
+        (error) => {
+          reject(error);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0,
+        }
+      );
+    });
+  };
+
   const handleCheckIn = async () => {
     if (!visitReportId || !visitReport) return;
     try {
-      // Get current location (simplified - in real app, use geolocation API)
+      toast.loading("Getting your location...", { id: "checkin-location" });
+      const location = await getCurrentLocation();
+      toast.dismiss("checkin-location");
+      
       await checkIn.mutateAsync({
         id: visitReportId,
         data: {
-          location: {
-            latitude: 0,
-            longitude: 0,
-            address: "Location to be captured",
-          },
+          location,
         },
       });
       toast.success("Checked in successfully");
       onVisitReportUpdated?.();
     } catch (error) {
-      // Error already handled
+      toast.dismiss("checkin-location");
+      if (error instanceof Error) {
+        toast.error("Failed to get location", { description: error.message });
+      } else {
+        toast.error("Failed to check in");
+      }
     }
   };
 
   const handleCheckOut = async () => {
     if (!visitReportId || !visitReport) return;
     try {
+      toast.loading("Getting your location...", { id: "checkout-location" });
+      const location = await getCurrentLocation();
+      toast.dismiss("checkout-location");
+      
       await checkOut.mutateAsync({
         id: visitReportId,
         data: {
-          location: {
-            latitude: 0,
-            longitude: 0,
-            address: "Location to be captured",
-          },
+          location,
         },
       });
       toast.success("Checked out successfully");
       onVisitReportUpdated?.();
     } catch (error) {
-      // Error already handled
+      toast.dismiss("checkout-location");
+      if (error instanceof Error) {
+        toast.error("Failed to get location", { description: error.message });
+      } else {
+        toast.error("Failed to check out");
+      }
     }
   };
 
@@ -142,13 +204,29 @@ export function VisitReportDetailModal({
     }
   };
 
+  const handleUploadPhoto = async (photoUrl: string) => {
+    if (!visitReportId) return;
+    try {
+      await uploadPhoto.mutateAsync({
+        id: visitReportId,
+        data: { photo_url: photoUrl },
+      });
+      toast.success("Photo uploaded successfully");
+      onVisitReportUpdated?.();
+    } catch (error) {
+      // Error already handled
+    }
+  };
+
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Visit Report Details</DialogTitle>
-          </DialogHeader>
+      <Drawer
+        open={open}
+        onOpenChange={onOpenChange}
+        title="Visit Report Details"
+        side="right"
+        className="max-w-3xl"
+      >
 
           {isLoading && (
             <div className="space-y-6">
@@ -326,25 +404,51 @@ export function VisitReportDetailModal({
               </Card>
 
               {/* Photos */}
-              {visitReport.photos && visitReport.photos.length > 0 && (
-                <Card>
-                  <CardHeader>
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
                     <CardTitle>Photos</CardTitle>
-                  </CardHeader>
-                  <CardContent>
+                    {(visitReport.status === "draft" || visitReport.status === "submitted") && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setIsPhotoUploadDialogOpen(true)}
+                        disabled={uploadPhoto.isPending}
+                      >
+                        <Upload className="h-4 w-4 mr-2" />
+                        Upload Photo
+                      </Button>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {visitReport.photos && visitReport.photos.length > 0 ? (
                     <div className="grid grid-cols-3 gap-4">
-                      {visitReport.photos.map((photo, index) => (
-                        <img
-                          key={index}
-                          src={photo}
-                          alt={`Visit photo ${index + 1}`}
-                          className="w-full h-32 object-cover rounded-md"
-                        />
+                      {visitReport.photos.map((photo) => (
+                        <div key={photo} className="relative group">
+                          <img
+                            src={photo}
+                            alt="Visit documentation"
+                            className="w-full h-32 object-cover rounded-md border"
+                          />
+                          <a
+                            href={photo}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-md"
+                          >
+                            <span className="text-white text-xs">View</span>
+                          </a>
+                        </div>
                       ))}
                     </div>
-                  </CardContent>
-                </Card>
-              )}
+                  ) : (
+                    <div className="text-center text-muted-foreground py-8">
+                      No photos uploaded yet
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
               {/* Approval Information */}
               {visitReport.approved_at && (
@@ -376,32 +480,14 @@ export function VisitReportDetailModal({
               )}
 
               {/* Activity Timeline */}
-              {activities.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Recent Activities</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {activities.slice(0, 5).map((activity) => (
-                        <div key={activity.id} className="flex items-start gap-3 text-sm">
-                          <div className="w-2 h-2 rounded-full bg-primary mt-2" />
-                          <div className="flex-1">
-                            <div className="font-medium">{activity.description}</div>
-                            <div className="text-muted-foreground text-xs">
-                              {formatDateTime(activity.timestamp)}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+              <ActivityTimeline
+                activities={activities}
+                isLoading={!timelineData}
+                accountId={visitReport.account_id}
+              />
             </div>
           )}
-        </DialogContent>
-      </Dialog>
+      </Drawer>
 
       {/* Reject Dialog */}
       <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
@@ -442,6 +528,14 @@ export function VisitReportDetailModal({
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Photo Upload Dialog */}
+      <PhotoUploadDialog
+        open={isPhotoUploadDialogOpen}
+        onOpenChange={setIsPhotoUploadDialogOpen}
+        onUpload={handleUploadPhoto}
+        isLoading={uploadPhoto.isPending}
+      />
     </>
   );
 }
