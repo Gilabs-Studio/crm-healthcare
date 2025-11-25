@@ -5,7 +5,7 @@
 **Role**: Develop modul-modul Sales CRM secara fullstack (backend + frontend)  
 **Versi**: 2.0  
 **Status**: Active  
-**Last Updated**: 2025-01-15
+**Last Updated**: 2025-11-25
 
 > **📊 Visualisasi Project**: Lihat [**PROJECT_DIAGRAMS.md**](../PROJECT_DIAGRAMS.md) untuk memahami scope, fitur, dan user flow secara visual.
 
@@ -82,26 +82,33 @@ Developer 2 bertanggung jawab untuk:
 
 **Goal**: Implement Sales Pipeline Management secara fullstack (backend + frontend)
 
+**Progress Update (2025-11-25)**:
+- ✅ **Backend Implementation**: 100% Complete
+  - All APIs implemented and tested
+  - Database migrations and seeders completed
+  - Postman collection updated
+- ⏳ **Frontend Implementation**: Pending (0% Complete)
+
 **Backend Tasks**:
-- [ ] Create pipeline stage model dan migration
-- [ ] Create deal model dan migration
-- [ ] Create pipeline repository interface dan implementation
-- [ ] Create deal repository interface dan implementation
-- [ ] Create pipeline service
-- [ ] Create deal service
-- [ ] Implement pipeline list API (`GET /api/v1/pipelines`)
-- [ ] Implement pipeline detail API (`GET /api/v1/pipelines/:id`)
-- [ ] Implement deal list API (`GET /api/v1/deals`)
-- [ ] Implement deal detail API (`GET /api/v1/deals/:id`)
-- [ ] Implement create deal API (`POST /api/v1/deals`)
-- [ ] Implement update deal API (`PUT /api/v1/deals/:id`)
-- [ ] Implement delete deal API (`DELETE /api/v1/deals/:id`)
-- [ ] Implement move deal API (`POST /api/v1/deals/:id/move`)
-- [ ] Implement pipeline summary API (`GET /api/v1/pipelines/summary`)
-- [ ] Implement forecast API (`GET /api/v1/pipelines/forecast`)
-- [ ] Add pagination support
-- [ ] Add validation
-- [ ] Add pipeline stages seeder
+- [x] Create pipeline stage model dan migration
+- [x] Create deal model dan migration
+- [x] Create pipeline repository interface dan implementation
+- [x] Create deal repository interface dan implementation
+- [x] Create pipeline service
+- [x] Create deal service
+- [x] Implement pipeline list API (`GET /api/v1/pipelines`)
+- [x] Implement pipeline detail API (`GET /api/v1/pipelines/:id`)
+- [x] Implement deal list API (`GET /api/v1/deals`)
+- [x] Implement deal detail API (`GET /api/v1/deals/:id`)
+- [x] Implement create deal API (`POST /api/v1/deals`)
+- [x] Implement update deal API (`PUT /api/v1/deals/:id`)
+- [x] Implement delete deal API (`DELETE /api/v1/deals/:id`)
+- [x] Implement move deal API (`POST /api/v1/deals/:id/move`)
+- [x] Implement pipeline summary API (`GET /api/v1/pipelines/summary`)
+- [x] Implement forecast API (`GET /api/v1/pipelines/forecast`)
+- [x] Add pagination support
+- [x] Add validation
+- [x] Add pipeline stages seeder
 
 **Frontend Tasks**:
 - [ ] Create pipeline types (`types/pipeline.d.ts`)
@@ -118,28 +125,28 @@ Developer 2 bertanggung jawab untuk:
 - [ ] Create forecast component
 
 **Postman Collection**:
-- [ ] Add pipeline APIs ke Postman collection (Web section)
+- [x] Add pipeline APIs ke Postman collection (Web section)
 
 **Acceptance Criteria**:
-- ✅ Pipeline APIs bekerja dengan baik
-- ✅ Deal CRUD APIs bekerja dengan baik
-- ✅ Move deal API bekerja
-- ✅ Pipeline summary dan forecast bekerja
-- ✅ Frontend terintegrasi dengan backend APIs
-- ✅ User dapat melihat pipeline dalam kanban view
-- ✅ User dapat create dan edit deal
-- ✅ User dapat move deal antar stages (drag-and-drop)
-- ✅ Pipeline summary dan forecast ditampilkan
-- ✅ UI/UX modern dan intuitive
-- ✅ Postman collection updated
+- ✅ Pipeline APIs bekerja dengan baik (Backend ✅)
+- ✅ Deal CRUD APIs bekerja dengan baik (Backend ✅)
+- ✅ Move deal API bekerja (Backend ✅)
+- ✅ Pipeline summary dan forecast bekerja (Backend ✅)
+- ⏳ Frontend terintegrasi dengan backend APIs (Pending)
+- ⏳ User dapat melihat pipeline dalam kanban view (Pending)
+- ⏳ User dapat create dan edit deal (Pending)
+- ⏳ User dapat move deal antar stages (drag-and-drop) (Pending)
+- ⏳ Pipeline summary dan forecast ditampilkan (Pending)
+- ⏳ UI/UX modern dan intuitive (Pending)
+- ✅ Postman collection updated (Backend ✅)
 
 **Testing** (Manual testing):
-- Test pipeline APIs (backend)
-- Test deal CRUD (backend + frontend)
-- Test move deal (backend + frontend)
-- Test forecast calculation
-- Test kanban view
-- Test drag-and-drop
+- ✅ Test pipeline APIs (backend) - **DONE**
+- ⏳ Test deal CRUD (backend + frontend) - Backend ✅, Frontend Pending
+- ⏳ Test move deal (backend + frontend) - Backend ✅, Frontend Pending
+- ✅ Test forecast calculation (backend) - **DONE**
+- ⏳ Test kanban view (frontend) - **Pending**
+- ⏳ Test drag-and-drop (frontend) - **Pending**
 
 **Estimated Time**: 6-7 days
 
@@ -288,7 +295,7 @@ Developer 2 bertanggung jawab untuk:
 |--------|------|----------|--------|
 | Sprint 0 | Foundation Review | 2-3 days | ⏳ Pending |
 | Sprint 1 | User Management Review | 2-3 days | ⏳ Pending |
-| Sprint 2 | Sales Pipeline (Fullstack) | 6-7 days | ⏳ Pending |
+| Sprint 2 | Sales Pipeline (Fullstack) | 6-7 days | 🔄 In Progress (Backend ✅, Frontend ⏳) |
 | Sprint 3 | Task & Reminder (Fullstack) | 4-5 days | ⏳ Pending |
 | Sprint 4 | Product Management (Fullstack) | 3-4 days | ⏳ Pending |
 | Sprint 5 | Integration & Testing | 3-4 days | ⏳ Pending |

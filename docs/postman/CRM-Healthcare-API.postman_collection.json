@@ -1154,6 +1154,468 @@
               "description": "Contact Management endpoints untuk mengelola contacts (Doctors, PICs, Managers)"
             },
             {
+              "name": "Sales Pipeline Management",
+              "item": [
+                {
+                  "name": "Pipeline Stages",
+                  "item": [
+                    {
+                      "name": "List Pipeline Stages",
+                      "request": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Authorization",
+                            "value": "Bearer {{token}}",
+                            "type": "text"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{base_url}}/api/v1/pipelines?is_active=true",
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "pipelines"],
+                          "query": [
+                            {"key": "is_active", "value": "true", "disabled": true}
+                          ]
+                        },
+                        "description": "Get list of all pipeline stages"
+                      },
+                      "response": [
+                        {
+                          "name": "Success Response",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{base_url}}/api/v1/pipelines",
+                              "host": ["{{base_url}}"],
+                              "path": ["api", "v1", "pipelines"]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "json",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"stage_abc123\",\n      \"name\": \"Lead\",\n      \"code\": \"lead\",\n      \"order\": 1,\n      \"color\": \"#94A3B8\",\n      \"is_active\": true,\n      \"is_won\": false,\n      \"is_lost\": false,\n      \"description\": \"New lead that needs qualification\",\n      \"created_at\": \"2024-01-15T10:30:45+07:00\",\n      \"updated_at\": \"2024-01-15T10:30:45+07:00\"\n    },\n    {\n      \"id\": \"stage_def456\",\n      \"name\": \"Qualification\",\n      \"code\": \"qualification\",\n      \"order\": 2,\n      \"color\": \"#3B82F6\",\n      \"is_active\": true,\n      \"is_won\": false,\n      \"is_lost\": false,\n      \"description\": \"Qualifying the lead to determine if it's a good fit\",\n      \"created_at\": \"2024-01-15T10:30:45+07:00\",\n      \"updated_at\": \"2024-01-15T10:30:45+07:00\"\n    }\n  ],\n  \"meta\": {\n    \"filters\": {\n      \"is_active\": true\n    }\n  },\n  \"timestamp\": \"2024-01-15T10:30:45+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Get Pipeline Stage by ID",
+                      "request": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Authorization",
+                            "value": "Bearer {{token}}",
+                            "type": "text"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{base_url}}/api/v1/pipelines/:id",
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "pipelines", ":id"],
+                          "variable": [
+                            {"key": "id", "value": "pipeline_stage_id"}
+                          ]
+                        },
+                        "description": "Get pipeline stage details by ID"
+                      },
+                      "response": []
+                    },
+                    {
+                      "name": "Get Pipeline Summary",
+                      "request": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Authorization",
+                            "value": "Bearer {{token}}",
+                            "type": "text"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{base_url}}/api/v1/pipelines/summary",
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "pipelines", "summary"]
+                        },
+                        "description": "Get pipeline summary statistics (total deals, won/lost/open deals, value by stage)"
+                      },
+                      "response": [
+                        {
+                          "name": "Success Response",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{base_url}}/api/v1/pipelines/summary",
+                              "host": ["{{base_url}}"],
+                              "path": ["api", "v1", "pipelines", "summary"]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "json",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "{\n  \"success\": true,\n  \"data\": {\n    \"total_deals\": 150,\n    \"total_value\": 5000000000,\n    \"total_value_formatted\": \"Rp 50.000.000\",\n    \"won_deals\": 45,\n    \"won_value\": 2000000000,\n    \"won_value_formatted\": \"Rp 20.000.000\",\n    \"lost_deals\": 20,\n    \"lost_value\": 500000000,\n    \"lost_value_formatted\": \"Rp 5.000.000\",\n    \"open_deals\": 85,\n    \"open_value\": 2500000000,\n    \"open_value_formatted\": \"Rp 25.000.000\",\n    \"by_stage\": [\n      {\n        \"stage_id\": \"stage_abc123\",\n        \"stage_name\": \"Lead\",\n        \"stage_code\": \"lead\",\n        \"deal_count\": 30,\n        \"total_value\": 1000000000,\n        \"total_value_formatted\": \"Rp 10.000.000\"\n      },\n      {\n        \"stage_id\": \"stage_def456\",\n        \"stage_name\": \"Qualification\",\n        \"stage_code\": \"qualification\",\n        \"deal_count\": 25,\n        \"total_value\": 800000000,\n        \"total_value_formatted\": \"Rp 8.000.000\"\n      }\n    ]\n  },\n  \"timestamp\": \"2024-01-15T10:30:45+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Get Forecast",
+                      "request": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Authorization",
+                            "value": "Bearer {{token}}",
+                            "type": "text"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{base_url}}/api/v1/pipelines/forecast?period=month",
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "pipelines", "forecast"],
+                          "query": [
+                            {"key": "period", "value": "month", "description": "month, quarter, or year"}
+                          ]
+                        },
+                        "description": "Get forecast data for deals (expected revenue, weighted revenue)"
+                      },
+                      "response": []
+                    }
+                  ],
+                  "description": "Pipeline Stages endpoints untuk mengelola pipeline stages (Lead, Qualification, Proposal, Negotiation, Closed Won, Closed Lost)"
+                },
+                {
+                  "name": "Deals",
+                  "item": [
+                    {
+                      "name": "List Deals",
+                      "request": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Authorization",
+                            "value": "Bearer {{token}}",
+                            "type": "text"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{base_url}}/api/v1/deals?page=1&per_page=20",
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "deals"],
+                          "query": [
+                            {"key": "page", "value": "1"},
+                            {"key": "per_page", "value": "20"},
+                            {"key": "search", "value": "", "disabled": true},
+                            {"key": "stage_id", "value": "", "disabled": true},
+                            {"key": "account_id", "value": "", "disabled": true},
+                            {"key": "assigned_to", "value": "", "disabled": true},
+                            {"key": "status", "value": "", "disabled": true, "description": "open, won, lost"},
+                            {"key": "source", "value": "", "disabled": true}
+                          ]
+                        },
+                        "description": "Get list of deals with pagination and filters"
+                      },
+                      "response": [
+                        {
+                          "name": "Success Response",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{base_url}}/api/v1/deals?page=1&per_page=20",
+                              "host": ["{{base_url}}"],
+                              "path": ["api", "v1", "deals"],
+                              "query": [
+                                {"key": "page", "value": "1"},
+                                {"key": "per_page", "value": "20"}
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "json",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"deal_abc123\",\n      \"title\": \"New Deal Opportunity\",\n      \"description\": \"Deal description here\",\n      \"account_id\": \"account_xyz789\",\n      \"account\": {\n        \"id\": \"account_xyz789\",\n        \"name\": \"Rumah Sakit Umum\"\n      },\n      \"contact_id\": \"contact_def456\",\n      \"contact\": {\n        \"id\": \"contact_def456\",\n        \"name\": \"Dr. John Doe\",\n        \"email\": \"doctor@example.com\",\n        \"phone\": \"081234567890\"\n      },\n      \"stage_id\": \"stage_abc123\",\n      \"stage\": {\n        \"id\": \"stage_abc123\",\n        \"name\": \"Lead\",\n        \"code\": \"lead\",\n        \"order\": 1,\n        \"color\": \"#94A3B8\",\n        \"is_active\": true,\n        \"is_won\": false,\n        \"is_lost\": false\n      },\n      \"value\": 50000000,\n      \"value_formatted\": \"Rp 500.000\",\n      \"probability\": 50,\n      \"expected_close_date\": \"2024-12-31T00:00:00+07:00\",\n      \"actual_close_date\": null,\n      \"assigned_to\": \"user_789\",\n      \"assigned_user\": {\n        \"id\": \"user_789\",\n        \"name\": \"Sales Rep Name\",\n        \"email\": \"sales@example.com\"\n      },\n      \"status\": \"open\",\n      \"source\": \"website\",\n      \"notes\": \"Additional notes\",\n      \"created_by\": \"user_789\",\n      \"created_at\": \"2024-01-15T10:30:45+07:00\",\n      \"updated_at\": \"2024-01-15T10:30:45+07:00\"\n    }\n  ],\n  \"meta\": {\n    \"pagination\": {\n      \"page\": 1,\n      \"per_page\": 20,\n      \"total\": 150,\n      \"total_pages\": 8,\n      \"has_next\": true,\n      \"has_prev\": false,\n      \"next_page\": 2,\n      \"prev_page\": null\n    },\n    \"filters\": {}\n  },\n  \"timestamp\": \"2024-01-15T10:30:45+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Get Deal by ID",
+                      "request": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Authorization",
+                            "value": "Bearer {{token}}",
+                            "type": "text"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{base_url}}/api/v1/deals/:id",
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "deals", ":id"],
+                          "variable": [
+                            {"key": "id", "value": "deal_id"}
+                          ]
+                        },
+                        "description": "Get deal details by ID"
+                      },
+                      "response": []
+                    },
+                    {
+                      "name": "Create Deal",
+                      "request": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Authorization",
+                            "value": "Bearer {{token}}",
+                            "type": "text"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"title\": \"New Deal Opportunity\",\n  \"description\": \"Deal description here\",\n  \"account_id\": \"account_id_here\",\n  \"contact_id\": \"contact_id_here\",\n  \"stage_id\": \"pipeline_stage_id_here\",\n  \"value\": 50000000,\n  \"probability\": 50,\n  \"expected_close_date\": \"2024-12-31T00:00:00+07:00\",\n  \"assigned_to\": \"user_id_here\",\n  \"source\": \"website\",\n  \"notes\": \"Additional notes\"\n}",
+                          "options": {
+                            "raw": {
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{base_url}}/api/v1/deals",
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "deals"]
+                        },
+                        "description": "Create a new deal. Value is in smallest currency unit (sen). Probability is 0-100 percentage."
+                      },
+                      "response": [
+                        {
+                          "name": "Success Response",
+                          "originalRequest": {
+                            "method": "POST",
+                            "header": [
+                              {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                              },
+                              {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                              }
+                            ],
+                            "body": {
+                              "mode": "raw",
+                              "raw": "{\n  \"title\": \"New Deal Opportunity\",\n  \"description\": \"Deal description here\",\n  \"account_id\": \"account_xyz789\",\n  \"contact_id\": \"contact_def456\",\n  \"stage_id\": \"stage_abc123\",\n  \"value\": 50000000,\n  \"probability\": 50,\n  \"expected_close_date\": \"2024-12-31T00:00:00+07:00\",\n  \"assigned_to\": \"user_789\",\n  \"source\": \"website\",\n  \"notes\": \"Additional notes\"\n}",
+                              "options": {
+                                "raw": {
+                                  "language": "json"
+                                }
+                              }
+                            },
+                            "url": {
+                              "raw": "{{base_url}}/api/v1/deals",
+                              "host": ["{{base_url}}"],
+                              "path": ["api", "v1", "deals"]
+                            }
+                          },
+                          "status": "Created",
+                          "code": 201,
+                          "_postman_previewlanguage": "json",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"deal_abc123\",\n    \"title\": \"New Deal Opportunity\",\n    \"description\": \"Deal description here\",\n    \"account_id\": \"account_xyz789\",\n    \"account\": {\n      \"id\": \"account_xyz789\",\n      \"name\": \"Rumah Sakit Umum\"\n    },\n    \"contact_id\": \"contact_def456\",\n    \"contact\": {\n      \"id\": \"contact_def456\",\n      \"name\": \"Dr. John Doe\",\n      \"email\": \"doctor@example.com\",\n      \"phone\": \"081234567890\"\n    },\n    \"stage_id\": \"stage_abc123\",\n    \"stage\": {\n      \"id\": \"stage_abc123\",\n      \"name\": \"Lead\",\n      \"code\": \"lead\",\n      \"order\": 1,\n      \"color\": \"#94A3B8\",\n      \"is_active\": true,\n      \"is_won\": false,\n      \"is_lost\": false\n    },\n    \"value\": 50000000,\n    \"value_formatted\": \"Rp 500.000\",\n    \"probability\": 50,\n    \"expected_close_date\": \"2024-12-31T00:00:00+07:00\",\n    \"actual_close_date\": null,\n    \"assigned_to\": \"user_789\",\n    \"assigned_user\": {\n      \"id\": \"user_789\",\n      \"name\": \"Sales Rep Name\",\n      \"email\": \"sales@example.com\"\n    },\n    \"status\": \"open\",\n    \"source\": \"website\",\n    \"notes\": \"Additional notes\",\n    \"created_by\": \"user_789\",\n    \"created_at\": \"2024-01-15T10:30:45+07:00\",\n    \"updated_at\": \"2024-01-15T10:30:45+07:00\"\n  },\n  \"meta\": {\n    \"created_by\": \"user_789\"\n  },\n  \"timestamp\": \"2024-01-15T10:30:45+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
+                        },
+                        {
+                          "name": "Error Response - Account Not Found",
+                          "originalRequest": {
+                            "method": "POST",
+                            "header": [
+                              {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                              },
+                              {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                              }
+                            ],
+                            "body": {
+                              "mode": "raw",
+                              "raw": "{\n  \"title\": \"New Deal Opportunity\",\n  \"account_id\": \"invalid_account_id\",\n  \"stage_id\": \"stage_abc123\",\n  \"value\": 50000000\n}",
+                              "options": {
+                                "raw": {
+                                  "language": "json"
+                                }
+                              }
+                            },
+                            "url": {
+                              "raw": "{{base_url}}/api/v1/deals",
+                              "host": ["{{base_url}}"],
+                              "path": ["api", "v1", "deals"]
+                            }
+                          },
+                          "status": "Not Found",
+                          "code": 404,
+                          "_postman_previewlanguage": "json",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "application/json"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"NOT_FOUND\",\n    \"message\": \"Resource not found\",\n    \"details\": {\n      \"resource\": \"account\",\n      \"resource_id\": \"invalid_account_id\"\n    }\n  },\n  \"timestamp\": \"2024-01-15T10:30:45+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Update Deal",
+                      "request": {
+                        "method": "PUT",
+                        "header": [
+                          {
+                            "key": "Authorization",
+                            "value": "Bearer {{token}}",
+                            "type": "text"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"title\": \"Updated Deal Title\",\n  \"description\": \"Updated description\",\n  \"stage_id\": \"pipeline_stage_id_here\",\n  \"value\": 60000000,\n  \"probability\": 75,\n  \"expected_close_date\": \"2024-12-31T00:00:00+07:00\",\n  \"status\": \"open\"\n}",
+                          "options": {
+                            "raw": {
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{base_url}}/api/v1/deals/:id",
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "deals", ":id"],
+                          "variable": [
+                            {"key": "id", "value": "deal_id"}
+                          ]
+                        },
+                        "description": "Update deal information. All fields are optional."
+                      },
+                      "response": []
+                    },
+                    {
+                      "name": "Move Deal",
+                      "request": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Authorization",
+                            "value": "Bearer {{token}}",
+                            "type": "text"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"stage_id\": \"pipeline_stage_id_here\"\n}",
+                          "options": {
+                            "raw": {
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{base_url}}/api/v1/deals/:id/move",
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "deals", ":id", "move"],
+                          "variable": [
+                            {"key": "id", "value": "deal_id"}
+                          ]
+                        },
+                        "description": "Move deal to a different pipeline stage. Status will be automatically updated based on stage (won/lost/open)."
+                      },
+                      "response": []
+                    },
+                    {
+                      "name": "Delete Deal",
+                      "request": {
+                        "method": "DELETE",
+                        "header": [
+                          {
+                            "key": "Authorization",
+                            "value": "Bearer {{token}}",
+                            "type": "text"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{base_url}}/api/v1/deals/:id",
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "deals", ":id"],
+                          "variable": [
+                            {"key": "id", "value": "deal_id"}
+                          ]
+                        },
+                        "description": "Delete a deal (soft delete)"
+                      },
+                      "response": []
+                    }
+                  ],
+                  "description": "Deals endpoints untuk mengelola sales deals/opportunities"
+                }
+              ],
+              "description": "Sales Pipeline Management endpoints untuk mengelola pipeline stages dan deals"
+            },
+            {
               "name": "Visit Reports",
               "item": [
                 {
