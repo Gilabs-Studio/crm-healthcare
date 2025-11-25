@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { SidebarWrapper } from "./sidebar-wrapper";
+import { Breadcrumb } from "@/components/navigation/breadcrumb";
 import { useAuthStore } from "@/features/auth/stores/useAuthStore";
 import { cn } from "@/lib/utils";
 
@@ -23,7 +24,10 @@ export function AppLayout({ children }: AppLayoutProps) {
     <div className="flex min-h-screen bg-background">
       <SidebarWrapper />
       <main className={cn("flex-1 transition-all duration-200", hasSidebar && "ml-64")}>
-        {children}
+        <Breadcrumb />
+        <div className="p-6">
+          {children}
+        </div>
       </main>
     </div>
   );

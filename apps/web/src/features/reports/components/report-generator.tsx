@@ -29,14 +29,14 @@ export function ReportGenerator() {
   const [endDate, setEndDate] = useState<string>(new Date().toISOString().split("T")[0]);
   const [accountId, setAccountId] = useState<string>("");
   const [salesRepId, setSalesRepId] = useState<string>("");
-  const [status, setStatus] = useState<string>("");
+  const [status, setStatus] = useState<string>("all");
 
   const visitReportParams = {
     start_date: startDate,
     end_date: endDate,
     account_id: accountId || undefined,
     sales_rep_id: salesRepId || undefined,
-    status: status || undefined,
+    status: status === "all" ? undefined : status,
   };
 
   const { data: visitReport, isLoading: visitLoading } = useVisitReportReport(visitReportParams);
@@ -119,7 +119,7 @@ export function ReportGenerator() {
                   <SelectValue placeholder="All Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Status</SelectItem>
+                  <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="pending">Pending</SelectItem>
                   <SelectItem value="approved">Approved</SelectItem>
                   <SelectItem value="rejected">Rejected</SelectItem>
