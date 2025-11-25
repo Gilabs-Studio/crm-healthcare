@@ -7,6 +7,9 @@ interface SidebarContextValue {
   collapsed: boolean;
   setCollapsed: (collapsed: boolean) => void;
   toggleCollapsed: () => void;
+  mobileOpen: boolean;
+  setMobileOpen: (open: boolean) => void;
+  toggleMobileOpen: () => void;
 }
 
 const SidebarContext = createContext<SidebarContextValue | undefined>(undefined);
@@ -29,9 +32,13 @@ interface SidebarProviderProps {
 export function SidebarProvider({ children }: SidebarProviderProps) {
   const isMobile = useIsMobile();
   const [userPreference, setUserPreference] = useState(getUserPreference);
+  const [mobileOpenState, setMobileOpenState] = useState(false);
 
   // On mobile, always collapse. On desktop, use user preference
   const collapsed = isMobile ? true : userPreference;
+
+  // Mobile sidebar is always closed on desktop
+  const mobileOpen = isMobile ? mobileOpenState : false;
 
   // Sync user preference to localStorage whenever it changes (only for desktop)
   useEffect(() => {
@@ -61,13 +68,26 @@ export function SidebarProvider({ children }: SidebarProviderProps) {
     [isMobile]
   );
 
+  const toggleMobileOpen = useCallback(() => {
+    // Always allow toggle - the mobileOpen computed value will handle desktop case
+    setMobileOpenState((prev) => !prev);
+  }, []);
+
+  const handleSetMobileOpen = useCallback((open: boolean) => {
+    // Always allow setting - the mobileOpen computed value will handle desktop case
+    setMobileOpenState(open);
+  }, []);
+
   const contextValue = useMemo(
     () => ({
       collapsed,
       setCollapsed: handleSetCollapsed,
       toggleCollapsed,
+      mobileOpen,
+      setMobileOpen: handleSetMobileOpen,
+      toggleMobileOpen,
     }),
-    [collapsed, handleSetCollapsed, toggleCollapsed]
+    [collapsed, handleSetCollapsed, toggleCollapsed, mobileOpen, handleSetMobileOpen, toggleMobileOpen]
   );
 
   return (

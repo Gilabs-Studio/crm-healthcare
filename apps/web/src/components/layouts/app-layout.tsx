@@ -5,6 +5,7 @@ import { SidebarWrapper } from "./sidebar-wrapper";
 import { Breadcrumb } from "@/components/navigation/breadcrumb";
 import { useAuthStore } from "@/features/auth/stores/useAuthStore";
 import { useSidebar } from "@/contexts/sidebar-context";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
 interface AppLayoutProps {
@@ -18,6 +19,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   const pathname = usePathname();
   const { isAuthenticated } = useAuthStore();
   const { collapsed } = useSidebar();
+  const isMobile = useIsMobile();
   
   // Determine if sidebar should be shown
   const hasSidebar = !NO_SIDEBAR_ROUTES.has(pathname) && isAuthenticated;
@@ -28,11 +30,12 @@ export function AppLayout({ children }: AppLayoutProps) {
       <main
         className={cn(
           "flex-1 transition-[margin-left] duration-200 ease-in-out will-change-[margin-left] w-full max-w-full overflow-x-hidden",
-          hasSidebar && (collapsed ? "ml-16" : "ml-64")
+          // On mobile, no margin. On desktop, use sidebar width
+          hasSidebar && !isMobile && (collapsed ? "ml-16" : "ml-64")
         )}
       >
         <Breadcrumb />
-        <div className="p-6 w-full max-w-full overflow-x-hidden">
+        <div className="p-4 md:p-6 w-full max-w-full overflow-x-hidden">
           {children}
         </div>
       </main>

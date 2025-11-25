@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, memo } from "react";
+import { useState, useMemo, memo, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { 
@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   ChevronLeft,
   ChevronRight,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
@@ -115,7 +116,29 @@ function SidebarComponent() {
   const { logout, user } = useAuthStore();
   const { data: permissionsData } = useUserPermissions();
   const isMobile = useIsMobile();
-  const { collapsed, toggleCollapsed } = useSidebar();
+  const { collapsed, toggleCollapsed, mobileOpen, setMobileOpen } = useSidebar();
+  
+  // Track previous pathname to only close on actual navigation
+  const prevPathnameRef = useRef(pathname);
+  const mountedRef = useRef(false);
+
+  // Close mobile sidebar on navigation (only when pathname actually changes, not on mount)
+  useEffect(() => {
+    // Skip on initial mount
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      prevPathnameRef.current = pathname;
+      return;
+    }
+    
+    // Only close if pathname actually changed and sidebar is open
+    if (isMobile && mobileOpen && pathname !== prevPathnameRef.current) {
+      setMobileOpen(false);
+    }
+    
+    // Update ref after checking
+    prevPathnameRef.current = pathname;
+  }, [pathname, isMobile, mobileOpen, setMobileOpen]);
 
   // Build navigation from permissions or use fallback
   const navSections = useMemo(() => {
@@ -181,6 +204,247 @@ function SidebarComponent() {
     return `https://api.dicebear.com/7.x/lorelei/svg?seed=${encodeURIComponent(userData?.email || "user")}`;
   };
 
+  // Mobile: Drawer with overlay
+  if (isMobile) {
+    return (
+      <>
+        {/* Overlay - only show when sidebar is open */}
+        {mobileOpen && (
+          <div
+            className="fixed inset-0 bg-black/50 z-40 transition-opacity"
+            onClick={() => {
+              setMobileOpen(false);
+            }}
+            aria-hidden="true"
+          />
+        )}
+        
+        {/* Sidebar Drawer */}
+        <aside
+          className={cn(
+            "fixed left-0 top-0 h-screen border-r border-sidebar-border bg-sidebar text-sidebar-foreground flex flex-col z-50",
+            "transition-transform duration-300 ease-out",
+            mobileOpen ? "translate-x-0" : "-translate-x-full"
+          )}
+          onClick={(e) => {
+            // Prevent clicks inside sidebar from bubbling to overlay
+            e.stopPropagation();
+          }}
+          style={{
+            transform: "translateZ(0)",
+            backfaceVisibility: "hidden",
+            width: "280px",
+          }}
+        >
+          {/* Header with close button */}
+          <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-sidebar-foreground">
+                Menu
+              </h2>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              onClick={() => setMobileOpen(false)}
+              aria-label="Close sidebar"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Navigation */}
+          <nav className="flex-1 overflow-y-auto p-4 space-y-1">
+            {navSections.map((section) => (
+              <div key={section.id} className="space-y-1">
+                {section.items.map((item) => {
+                  const hasChildren = item.children && item.children.length > 0;
+                  const isExpanded = expandedItems.includes(item.id);
+                  const active = isParentActive(item);
+
+                  const handleItemClick = (e: React.MouseEvent) => {
+                    e.stopPropagation(); // Prevent event bubbling
+                    if (hasChildren) {
+                      e.preventDefault();
+                      toggleExpand(item.id);
+                    } else {
+                      // Close sidebar on navigation
+                      setMobileOpen(false);
+                    }
+                  };
+
+                  const navItemContent = (
+                    <div
+                      className={cn(
+                        "flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer",
+                        active
+                          ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                          : "hover:bg-sidebar-accent/50 text-sidebar-foreground/70 hover:text-sidebar-foreground"
+                      )}
+                      onClick={handleItemClick}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center">
+                          {item.icon}
+                        </div>
+                        <span className="whitespace-nowrap overflow-hidden">
+                          {item.label}
+                        </span>
+                      </div>
+                      {hasChildren && (
+                        <ChevronDown
+                          className={cn(
+                            "h-4 w-4 transition-transform flex-shrink-0",
+                            isExpanded && "rotate-180"
+                          )}
+                        />
+                      )}
+                    </div>
+                  );
+
+                  return (
+                    <div key={item.id}>
+                      {hasChildren ? (
+                        navItemContent
+                      ) : (
+                        <Link href={item.href} onClick={handleItemClick}>
+                          {navItemContent}
+                        </Link>
+                      )}
+
+                      {hasChildren && isExpanded && (
+                        <div className="pl-7 pt-1 space-y-1">
+                          {item.children.map((child) => {
+                            const hasGrandChildren = child.children && child.children.length > 0;
+                            const isChildExpanded = expandedItems.includes(child.id);
+                            const childActive = isParentActive(child);
+
+                            const handleChildClick = (e: React.MouseEvent) => {
+                              e.stopPropagation(); // Prevent event bubbling
+                              if (hasGrandChildren) {
+                                e.preventDefault();
+                                toggleExpand(child.id);
+                              } else {
+                                setMobileOpen(false);
+                              }
+                            };
+
+                            const childNavItemContent = (
+                              <div
+                                className={cn(
+                                  "flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm transition-colors",
+                                  childActive
+                                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                                    : "hover:bg-sidebar-accent/50 text-sidebar-foreground/70 hover:text-sidebar-foreground"
+                                )}
+                                onClick={handleChildClick}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className="flex-shrink-0 w-4 h-4 flex items-center justify-center">
+                                    {child.icon}
+                                  </div>
+                                  <span className="whitespace-nowrap overflow-hidden">{child.label}</span>
+                                </div>
+                                {hasGrandChildren && (
+                                  <ChevronDown
+                                    className={cn(
+                                      "h-3 w-3 transition-transform flex-shrink-0",
+                                      isChildExpanded && "rotate-180"
+                                    )}
+                                  />
+                                )}
+                              </div>
+                            );
+
+                            return (
+                              <div key={child.id}>
+                                {hasGrandChildren ? (
+                                  childNavItemContent
+                                ) : (
+                                  <Link href={child.href} onClick={handleChildClick}>
+                                    {childNavItemContent}
+                                  </Link>
+                                )}
+
+                                {hasGrandChildren && isChildExpanded && (
+                                  <div className="pl-7 pt-1 space-y-1">
+                                    {child.children?.map((grandChild) => (
+                                      <Link
+                                        key={grandChild.id}
+                                        href={grandChild.href}
+                                        onClick={() => setMobileOpen(false)}
+                                      >
+                                        <div
+                                          className={cn(
+                                            "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors",
+                                            isActive(grandChild.href)
+                                              ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                                              : "hover:bg-sidebar-accent/50 text-sidebar-foreground/70 hover:text-sidebar-foreground"
+                                          )}
+                                        >
+                                          <div className="flex-shrink-0 w-3 h-3 flex items-center justify-center">
+                                            {grandChild.icon}
+                                          </div>
+                                          <span className="whitespace-nowrap overflow-hidden">{grandChild.label}</span>
+                                        </div>
+                                      </Link>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+          </nav>
+
+          {/* Footer */}
+          {user && (
+            <div className="border-t border-sidebar-border p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <Avatar className="h-10 w-10 flex-shrink-0">
+                  <AvatarImage src={getAvatarUrl(user)} alt={user.name} />
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium text-sidebar-foreground truncate">
+                    {user.name}
+                  </div>
+                  <div className="text-xs text-muted-foreground capitalize truncate">
+                    {user.role}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLogout}
+                  className="flex-1 justify-start gap-2 h-9 text-sm text-destructive hover:text-destructive hover:bg-destructive/10"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Logout</span>
+                </Button>
+                <ThemeToggleButton
+                  variant="circle"
+                  start="bottom-left"
+                  className="size-9 bg-sidebar-accent hover:bg-sidebar-accent/80 transition-all"
+                />
+              </div>
+            </div>
+          )}
+        </aside>
+      </>
+    );
+  }
+
+  // Desktop: Fixed sidebar
   return (
     <aside
       className={cn(
@@ -331,7 +595,11 @@ function SidebarComponent() {
                       </Tooltip>
                     </TooltipProvider>
                   ) : (
-                    <Link href={item.href}>{navItemContent}</Link>
+                    hasChildren ? (
+                      <div>{navItemContent}</div>
+                    ) : (
+                      <Link href={item.href}>{navItemContent}</Link>
+                    )
                   )}
 
                   {hasChildren && !collapsed && isExpanded && (
@@ -377,7 +645,11 @@ function SidebarComponent() {
 
                             return (
                               <div key={child.id}>
-                                <Link href={child.href}>{childNavItemContent}</Link>
+                                {hasGrandChildren ? (
+                                  <div>{childNavItemContent}</div>
+                                ) : (
+                                  <Link href={child.href}>{childNavItemContent}</Link>
+                                )}
 
                                 {hasGrandChildren && isChildExpanded && (
                                   <div className="pl-7 pt-1 space-y-1">
