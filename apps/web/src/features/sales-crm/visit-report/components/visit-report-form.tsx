@@ -22,7 +22,8 @@ import {
 import { useAccounts } from "../../account-management/hooks/useAccounts";
 import { useContacts } from "../../account-management/hooks/useContacts";
 import type { VisitReport } from "../types";
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { DateTimePicker } from "@/components/ui/date-time-picker";
 
 interface VisitReportFormProps {
   readonly visitReport?: VisitReport;
@@ -41,6 +42,40 @@ export function VisitReportForm({
   const { data: accountsData } = useAccounts({ per_page: 100 });
   const accounts = accountsData?.data || [];
 
+  // Parse visit_date from backend (YYYY-MM-DD) to Date and time
+  const parseVisitDate = (dateString: string): { date: Date; time: string | null } => {
+    if (!dateString) {
+      const now = new Date();
+      return { date: now, time: `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}` };
+    }
+    
+    // Check if it's already datetime format (YYYY-MM-DD HH:mm)
+    const datetimeMatch = dateString.match(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2})$/);
+    if (datetimeMatch) {
+      const [, datePart, timePart] = datetimeMatch;
+      const [year, month, day] = datePart.split("-").map(Number);
+      const [hours, minutes] = timePart.split(":").map(Number);
+      const date = new Date(year, month - 1, day, hours, minutes);
+      return { date, time: timePart };
+    }
+    
+    // Otherwise parse as date only
+    const [year, month, day] = dateString.split("-").map(Number);
+    const date = new Date(year, month - 1, day);
+    return { date, time: "09:00" }; // Default time
+  };
+
+  const defaultVisitDateTime = useMemo(() => {
+    if (visitReport?.visit_date) {
+      return parseVisitDate(visitReport.visit_date);
+    }
+    const now = new Date();
+    return {
+      date: now,
+      time: `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`,
+    };
+  }, [visitReport?.visit_date]);
+
   const {
     register,
     handleSubmit,
@@ -53,14 +88,19 @@ export function VisitReportForm({
       ? {
           account_id: visitReport.account_id,
           contact_id: visitReport.contact_id || undefined,
-          visit_date: visitReport.visit_date,
+          visit_date: visitReport.visit_date.includes(" ") 
+            ? visitReport.visit_date 
+            : `${visitReport.visit_date} ${defaultVisitDateTime.time}`,
           purpose: visitReport.purpose,
           notes: visitReport.notes || "",
         }
       : {
-          visit_date: new Date().toISOString().split("T")[0],
+          visit_date: `${new Date().toISOString().split("T")[0]} ${defaultVisitDateTime.time}`,
         },
   });
+
+  const [selectedDate, setSelectedDate] = useState<Date | null>(defaultVisitDateTime.date);
+  const [selectedTime, setSelectedTime] = useState<string | null>(defaultVisitDateTime.time);
 
   const selectedAccountId = watch("account_id");
   const { data: contactsData } = useContacts({
@@ -78,6 +118,16 @@ export function VisitReportForm({
 
   const handleFormSubmit = async (data: CreateVisitReportFormData | UpdateVisitReportFormData) => {
     await onSubmit(data);
+  };
+
+  const handleDateTimeChange = (date: Date | null, time: string | null) => {
+    if (date && time) {
+      const dateStr = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
+      const datetimeStr = `${dateStr} ${time}`;
+      setValue("visit_date", datetimeStr, { shouldValidate: true });
+      setSelectedDate(date);
+      setSelectedTime(time);
+    }
   };
 
   return (
@@ -128,8 +178,12 @@ export function VisitReportForm({
       )}
 
       <Field orientation="vertical">
-        <FieldLabel>Visit Date *</FieldLabel>
-        <Input type="date" {...register("visit_date")} />
+        <FieldLabel>Visit Date & Time *</FieldLabel>
+        <DateTimePicker
+          date={selectedDate}
+          time={selectedTime}
+          onDateChange={handleDateTimeChange}
+        />
         {errors.visit_date && <FieldError>{errors.visit_date.message}</FieldError>}
       </Field>
 

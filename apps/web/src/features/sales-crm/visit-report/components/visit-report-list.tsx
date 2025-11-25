@@ -17,6 +17,8 @@ import { useVisitReportList } from "../hooks/useVisitReportList";
 import { VisitReportForm } from "./visit-report-form";
 import { VisitReportDetailModal } from "./visit-report-detail-modal";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
+import type { DateRange } from "react-day-picker";
 import {
   Dialog,
   DialogContent,
@@ -230,19 +232,52 @@ export function VisitReportList() {
               ))}
             </SelectContent>
           </Select>
-          <Input
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            placeholder="Start Date"
-            className="h-9 w-[150px]"
-          />
-          <Input
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            placeholder="End Date"
-            className="h-9 w-[150px]"
+          <DateRangePicker
+            dateRange={
+              startDate && endDate
+                ? {
+                    from: (() => {
+                      const d = new Date(startDate + "T00:00:00");
+                      d.setHours(0, 0, 0, 0);
+                      return d;
+                    })(),
+                    to: (() => {
+                      const d = new Date(endDate + "T00:00:00");
+                      d.setHours(0, 0, 0, 0);
+                      return d;
+                    })(),
+                  }
+                : startDate
+                  ? {
+                      from: (() => {
+                        const d = new Date(startDate + "T00:00:00");
+                        d.setHours(0, 0, 0, 0);
+                        return d;
+                      })(),
+                      to: undefined,
+                    }
+                  : undefined
+            }
+            onDateChange={(range) => {
+              if (range?.from) {
+                const fromDate = new Date(range.from);
+                fromDate.setHours(0, 0, 0, 0);
+                const fromStr = `${fromDate.getFullYear()}-${String(fromDate.getMonth() + 1).padStart(2, "0")}-${String(fromDate.getDate()).padStart(2, "0")}`;
+                setStartDate(fromStr);
+                
+                if (range.to) {
+                  const toDate = new Date(range.to);
+                  toDate.setHours(0, 0, 0, 0);
+                  const toStr = `${toDate.getFullYear()}-${String(toDate.getMonth() + 1).padStart(2, "0")}-${String(toDate.getDate()).padStart(2, "0")}`;
+                  setEndDate(toStr);
+                } else {
+                  setEndDate("");
+                }
+              } else {
+                setStartDate("");
+                setEndDate("");
+              }
+            }}
           />
         </div>
         <Button onClick={() => setIsCreateDialogOpen(true)} size="sm">

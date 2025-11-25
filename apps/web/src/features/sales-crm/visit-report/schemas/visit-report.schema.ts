@@ -9,7 +9,7 @@ const locationSchema = z.object({
 export const createVisitReportSchema = z.object({
   account_id: z.string().uuid("Invalid account ID"),
   contact_id: z.string().uuid("Invalid contact ID").optional(),
-  visit_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)"),
+  visit_date: z.string().regex(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/, "Invalid date format (YYYY-MM-DD HH:mm)"),
   purpose: z.string().min(3, "Purpose must be at least 3 characters"),
   notes: z.string().optional(),
   check_in_location: locationSchema.optional(),
@@ -20,7 +20,7 @@ export const createVisitReportSchema = z.object({
 export const updateVisitReportSchema = z.object({
   account_id: z.string().uuid("Invalid account ID").optional(),
   contact_id: z.string().uuid("Invalid contact ID").optional(),
-  visit_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)").optional(),
+  visit_date: z.string().regex(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/, "Invalid date format (YYYY-MM-DD HH:mm)").optional(),
   purpose: z.string().min(3, "Purpose must be at least 3 characters").optional(),
   notes: z.string().optional(),
   check_in_location: locationSchema.optional(),
