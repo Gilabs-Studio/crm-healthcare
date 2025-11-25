@@ -7,6 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { DataTable, type Column } from "@/components/ui/data-table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useUserList } from "../hooks/useUserList";
 import { UserForm } from "./user-form";
 import { UserDetailModal } from "./user-detail-modal";
@@ -161,27 +168,35 @@ export function UserList() {
               className="pl-10 h-9"
             />
           </div>
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground"
+          <Select 
+            value={status || "all"} 
+            onValueChange={(value) => setStatus(value === "all" ? "" : value)}
           >
-            <option value="">All Status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
-          <select
-            value={roleId}
-            onChange={(e) => setRoleId(e.target.value)}
-            className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground"
+            <SelectTrigger className="w-[140px] h-9">
+              <SelectValue placeholder="All Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="inactive">Inactive</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select 
+            value={roleId || "all"} 
+            onValueChange={(value) => setRoleId(value === "all" ? "" : value)}
           >
-            <option value="">All Roles</option>
-            {roles.map((role) => (
-              <option key={role.id} value={role.id}>
-                {role.name}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="w-[140px] h-9">
+              <SelectValue placeholder="All Roles" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Roles</SelectItem>
+              {roles.map((role) => (
+                <SelectItem key={role.id} value={role.id}>
+                  {role.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <Button onClick={() => setIsCreateDialogOpen(true)} size="sm">
           <Plus className="h-4 w-4 mr-2" />
