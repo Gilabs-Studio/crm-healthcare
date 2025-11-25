@@ -98,6 +98,19 @@ func SeedMenus() error {
 	}
 	log.Printf("Created menu: %s", visitReportsMenu.Name)
 
+	// Create Reports menu (root level)
+	reportsMenu := permission.Menu{
+		Name:   "Reports",
+		Icon:   "file-text",
+		URL:    "/reports",
+		Order:  4,
+		Status: "active",
+	}
+	if err := database.DB.Create(&reportsMenu).Error; err != nil {
+		return err
+	}
+	log.Printf("Created menu: %s", reportsMenu.Name)
+
 	log.Println("Menus seeded successfully")
 	return nil
 }
