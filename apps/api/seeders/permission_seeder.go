@@ -22,11 +22,13 @@ func SeedPermissions() error {
 	var dashboardMenu permission.Menu
 	var userPageMenu permission.Menu
 	var salesCRMMenu, accountsMenu permission.Menu
+	var reportsMenu permission.Menu
 
 	database.DB.Where("url = ?", "/dashboard").First(&dashboardMenu)
 	database.DB.Where("url = ?", "/master-data/users").First(&userPageMenu)
 	database.DB.Where("url = ?", "/sales-crm").First(&salesCRMMenu)
 	database.DB.Where("url = ?", "/accounts").First(&accountsMenu)
+	database.DB.Where("url = ?", "/reports").First(&reportsMenu)
 
 	// Define actions for each menu
 	actions := []struct {
@@ -58,6 +60,11 @@ func SeedPermissions() error {
 		{accountsMenu.ID, "DETAIL_ACCOUNTS", "Detail Accounts", "DETAIL", &accountsMenu},
 		{accountsMenu.ID, "CATEGORY", "Manage Categories", "CATEGORY", &accountsMenu},
 		{accountsMenu.ID, "ROLE", "Manage Contact Roles", "ROLE", &accountsMenu},
+
+		// Reports actions
+		{reportsMenu.ID, "VIEW_REPORTS", "View Reports", "VIEW", &reportsMenu},
+		{reportsMenu.ID, "GENERATE_REPORTS", "Generate Reports", "CREATE", &reportsMenu},
+		{reportsMenu.ID, "EXPORT_REPORTS", "Export Reports", "EXPORT", &reportsMenu},
 	}
 
 	// Create permissions

@@ -1475,6 +1475,266 @@
               "description": "Visit Report Management endpoints untuk mengelola visit reports dengan check-in/out, GPS, dan dokumentasi foto"
             },
             {
+              "name": "Dashboard",
+              "item": [
+                {
+                  "name": "Get Overview",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/dashboard/overview?period=today",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "dashboard", "overview"],
+                      "query": [
+                        {"key": "period", "value": "today", "description": "today, week, month, year"},
+                        {"key": "start_date", "value": "", "disabled": true},
+                        {"key": "end_date", "value": "", "disabled": true},
+                        {"key": "limit", "value": "", "disabled": true}
+                      ]
+                    },
+                    "description": "Get dashboard overview statistics"
+                  }
+                },
+                {
+                  "name": "Get Visit Statistics",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/dashboard/visits?period=month",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "dashboard", "visits"],
+                      "query": [
+                        {"key": "period", "value": "month", "description": "today, week, month, year"},
+                        {"key": "start_date", "value": "", "disabled": true},
+                        {"key": "end_date", "value": "", "disabled": true},
+                        {"key": "limit", "value": "", "disabled": true}
+                      ]
+                    },
+                    "description": "Get detailed visit statistics"
+                  }
+                },
+                {
+                  "name": "Get Pipeline Summary",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/dashboard/pipeline?period=month",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "dashboard", "pipeline"],
+                      "query": [
+                        {"key": "period", "value": "month", "description": "today, week, month, year"},
+                        {"key": "start_date", "value": "", "disabled": true},
+                        {"key": "end_date", "value": "", "disabled": true}
+                      ]
+                    },
+                    "description": "Get sales pipeline summary"
+                  }
+                },
+                {
+                  "name": "Get Top Accounts",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/dashboard/top-accounts?limit=10",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "dashboard", "top-accounts"],
+                      "query": [
+                        {"key": "limit", "value": "10", "description": "Number of top accounts to return"},
+                        {"key": "period", "value": "", "disabled": true},
+                        {"key": "start_date", "value": "", "disabled": true},
+                        {"key": "end_date", "value": "", "disabled": true}
+                      ]
+                    },
+                    "description": "Get top performing accounts"
+                  }
+                },
+                {
+                  "name": "Get Top Sales Rep",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/dashboard/top-sales-rep?limit=10",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "dashboard", "top-sales-rep"],
+                      "query": [
+                        {"key": "limit", "value": "10", "description": "Number of top sales reps to return"},
+                        {"key": "period", "value": "", "disabled": true},
+                        {"key": "start_date", "value": "", "disabled": true},
+                        {"key": "end_date", "value": "", "disabled": true}
+                      ]
+                    },
+                    "description": "Get top performing sales representatives"
+                  }
+                },
+                {
+                  "name": "Get Recent Activities",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/dashboard/recent-activities?limit=20",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "dashboard", "recent-activities"],
+                      "query": [
+                        {"key": "limit", "value": "20", "description": "Number of recent activities to return"},
+                        {"key": "period", "value": "", "disabled": true},
+                        {"key": "start_date", "value": "", "disabled": true},
+                        {"key": "end_date", "value": "", "disabled": true}
+                      ]
+                    },
+                    "description": "Get recent activities"
+                  }
+                }
+              ],
+              "description": "Dashboard endpoints untuk mendapatkan overview dan statistik dashboard"
+            },
+            {
+              "name": "Reports",
+              "item": [
+                {
+                  "name": "Get Visit Report Report",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/reports/visit-reports?start_date=2024-01-01&end_date=2024-01-31",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "reports", "visit-reports"],
+                      "query": [
+                        {"key": "start_date", "value": "2024-01-01", "description": "Start date (required)"},
+                        {"key": "end_date", "value": "2024-01-31", "description": "End date (required)"},
+                        {"key": "account_id", "value": "", "disabled": true},
+                        {"key": "sales_rep_id", "value": "", "disabled": true},
+                        {"key": "status", "value": "", "disabled": true},
+                        {"key": "page", "value": "", "disabled": true},
+                        {"key": "per_page", "value": "", "disabled": true}
+                      ]
+                    },
+                    "description": "Get visit report report with statistics"
+                  }
+                },
+                {
+                  "name": "Get Pipeline Report",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/reports/pipeline?start_date=2024-01-01&end_date=2024-01-31",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "reports", "pipeline"],
+                      "query": [
+                        {"key": "start_date", "value": "2024-01-01", "description": "Start date (required)"},
+                        {"key": "end_date", "value": "2024-01-31", "description": "End date (required)"}
+                      ]
+                    },
+                    "description": "Get pipeline report"
+                  }
+                },
+                {
+                  "name": "Get Sales Performance Report",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/reports/sales-performance?start_date=2024-01-01&end_date=2024-01-31",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "reports", "sales-performance"],
+                      "query": [
+                        {"key": "start_date", "value": "2024-01-01", "description": "Start date (required)"},
+                        {"key": "end_date", "value": "2024-01-31", "description": "End date (required)"},
+                        {"key": "sales_rep_id", "value": "", "disabled": true}
+                      ]
+                    },
+                    "description": "Get sales performance report"
+                  }
+                },
+                {
+                  "name": "Get Account Activity Report",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/reports/account-activity?start_date=2024-01-01&end_date=2024-01-31&account_id=account_id_here",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "reports", "account-activity"],
+                      "query": [
+                        {"key": "start_date", "value": "2024-01-01", "description": "Start date (required)"},
+                        {"key": "end_date", "value": "2024-01-31", "description": "End date (required)"},
+                        {"key": "account_id", "value": "account_id_here", "description": "Account ID (required)"}
+                      ]
+                    },
+                    "description": "Get account activity report for a specific account"
+                  }
+                }
+              ],
+              "description": "Report endpoints untuk generate berbagai jenis laporan"
+            },
+            {
               "name": "Activities",
               "item": [
                 {
