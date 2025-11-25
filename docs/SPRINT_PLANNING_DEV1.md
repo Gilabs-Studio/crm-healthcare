@@ -174,48 +174,49 @@ Developer 1 bertanggung jawab untuk:
 **Goal**: Implement Visit Report & Activity Tracking secara fullstack (backend + frontend)
 
 **Backend Tasks**:
-- [ ] Create visit report model dan migration
-- [ ] Create activity model dan migration
-- [ ] Create visit report repository interface dan implementation
-- [ ] Create activity repository interface dan implementation
-- [ ] Create visit report service
-- [ ] Create activity service
-- [ ] Implement visit report list API (`GET /api/v1/visit-reports`)
-- [ ] Implement visit report detail API (`GET /api/v1/visit-reports/:id`)
-- [ ] Implement create visit report API (`POST /api/v1/visit-reports`)
-- [ ] Implement update visit report API (`PUT /api/v1/visit-reports/:id`)
-- [ ] Implement delete visit report API (`DELETE /api/v1/visit-reports/:id`)
-- [ ] Implement check-in API (`POST /api/v1/visit-reports/:id/check-in`)
-- [ ] Implement check-out API (`POST /api/v1/visit-reports/:id/check-out`)
-- [ ] Implement approve visit report API (`POST /api/v1/visit-reports/:id/approve`)
-- [ ] Implement reject visit report API (`POST /api/v1/visit-reports/:id/reject`)
-- [ ] Implement photo upload API (`POST /api/v1/visit-reports/:id/photos`)
-- [ ] Implement activity list API (`GET /api/v1/activities`)
-- [ ] Implement activity timeline API (`GET /api/v1/accounts/:id/activities`)
-- [ ] Add GPS location tracking
-- [ ] Add pagination support
-- [ ] Add validation
-- [ ] Add file storage setup
+- [x] Create visit report model dan migration
+- [x] Create activity model dan migration
+- [x] Create visit report repository interface dan implementation
+- [x] Create activity repository interface dan implementation
+- [x] Create visit report service
+- [x] Create activity service
+- [x] Implement visit report list API (`GET /api/v1/visit-reports`)
+- [x] Implement visit report detail API (`GET /api/v1/visit-reports/:id`)
+- [x] Implement create visit report API (`POST /api/v1/visit-reports`)
+- [x] Implement update visit report API (`PUT /api/v1/visit-reports/:id`)
+- [x] Implement delete visit report API (`DELETE /api/v1/visit-reports/:id`)
+- [x] Implement check-in API (`POST /api/v1/visit-reports/:id/check-in`)
+- [x] Implement check-out API (`POST /api/v1/visit-reports/:id/check-out`)
+- [x] Implement approve visit report API (`POST /api/v1/visit-reports/:id/approve`)
+- [x] Implement reject visit report API (`POST /api/v1/visit-reports/:id/reject`)
+- [x] Implement photo upload API (`POST /api/v1/visit-reports/:id/photos`)
+- [x] Implement activity list API (`GET /api/v1/activities`)
+- [x] Implement activity timeline API (`GET /api/v1/accounts/:id/activities`)
+- [x] Add GPS location tracking
+- [x] Add pagination support
+- [x] Add validation
+- [x] Add file storage setup
+- [x] Add visit report and activity seeders
 
 **Frontend Tasks**:
-- [ ] Create visit report types (`types/visit-report.d.ts`)
-- [ ] Create activity types (`types/activity.d.ts`)
-- [ ] Create visit report service (`visitReportService`)
-- [ ] Create activity service (`activityService`)
-- [ ] Create visit report list page (`/visit-reports`)
-- [ ] Create visit report form component (`VisitReportForm`)
-- [ ] Create visit report detail page (`/visit-reports/[id]`)
-- [ ] Create activity timeline component (`ActivityTimeline`)
-- [ ] Create photo upload component
-- [ ] Create visit report status badge component
-- [ ] Add visit report search and filter
-- [ ] Create supervisor review UI (approve/reject)
-- [ ] Add activity timeline di account detail page
+- [x] Create visit report types (`types/visit-report.d.ts`)
+- [x] Create activity types (`types/activity.d.ts`)
+- [x] Create visit report service (`visitReportService`)
+- [x] Create activity service (`activityService`)
+- [x] Create visit report list page (`/visit-reports`)
+- [x] Create visit report form component (`VisitReportForm`)
+- [x] Create visit report detail page (`/visit-reports/[id]`)
+- [x] Create activity timeline component (`ActivityTimeline`)
+- [x] Create photo upload component
+- [x] Create visit report status badge component
+- [x] Add visit report search and filter
+- [x] Create supervisor review UI (approve/reject)
+- [x] Add activity timeline di account detail page
 
 **Postman Collection**:
-- [ ] Add visit report APIs ke Postman collection (Web section)
-- [ ] Add visit report APIs ke Postman collection (Mobile section)
-- [ ] Add activity APIs ke Postman collection (Web section)
+- [x] Add visit report APIs ke Postman collection (Web section)
+- [x] Add visit report APIs ke Postman collection (Mobile section)
+- [x] Add activity APIs ke Postman collection (Web section)
 
 **Acceptance Criteria**:
 - ✅ Visit report CRUD APIs bekerja dengan baik
@@ -389,8 +390,8 @@ Developer 1 bertanggung jawab untuk:
 | Sprint 0 | Foundation Review | 3-4 days | ✅ Completed |
 | Sprint 1 | User Management Review | 3-4 days | ✅ Completed |
 | Sprint 2 | Master Data Cleanup | 1-2 days | ✅ Completed |
-| Sprint 3 | Account & Contact (Fullstack) | 6-7 days | ⏳ Pending |
-| Sprint 4 | Visit Report (Fullstack) | 7-8 days | ⏳ Pending |
+| Sprint 3 | Account & Contact (Fullstack) | 6-7 days | ✅ Completed |
+| Sprint 4 | Visit Report (Fullstack) | 7-8 days | ✅ Completed |
 | Sprint 5 | Dashboard & Reports (Fullstack) | 6-7 days | ⏳ Pending |
 | Sprint 6 | Settings (Fullstack) | 3-4 days | ⏳ Pending |
 | Sprint 7 | Integration & Testing | 3-4 days | ⏳ Pending |

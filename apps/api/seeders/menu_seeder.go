@@ -84,6 +84,20 @@ func SeedMenus() error {
 	}
 	log.Printf("Created menu: %s", accountsMenu.Name)
 
+	// Create Visit Reports menu under Sales CRM
+	visitReportsMenu := permission.Menu{
+		Name:     "Visit Reports",
+		Icon:     "map-pin",
+		URL:      "/visit-reports",
+		ParentID: &salesCRMMenu.ID,
+		Order:    2,
+		Status:   "active",
+	}
+	if err := database.DB.Create(&visitReportsMenu).Error; err != nil {
+		return err
+	}
+	log.Printf("Created menu: %s", visitReportsMenu.Name)
+
 	log.Println("Menus seeded successfully")
 	return nil
 }
