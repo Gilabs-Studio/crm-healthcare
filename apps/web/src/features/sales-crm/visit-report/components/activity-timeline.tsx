@@ -3,7 +3,6 @@
 import { Activity, Clock, User, Building2, Contact, Phone, Mail, CheckSquare, TrendingUp } from "lucide-react";
 import { DataTable, type Column } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Activity as ActivityType } from "../types/activity";
 
@@ -167,54 +166,30 @@ export function ActivityTimeline({ activities, isLoading, accountId }: ActivityT
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Activity Timeline</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {Array.from({ length: 5 }, (_, i) => (
-              <Skeleton key={`skeleton-${i}`} className="h-16 w-full" />
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <div className="space-y-3">
+        {Array.from({ length: 5 }, (_, i) => (
+          <Skeleton key={`skeleton-${i}`} className="h-16 w-full" />
+        ))}
+      </div>
     );
   }
 
   if (activities.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Activity Timeline</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center text-muted-foreground py-8">
-            No activities found
-          </div>
-        </CardContent>
-      </Card>
+      <div className="text-center text-muted-foreground py-8">
+        No activities found
+      </div>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Activity className="h-5 w-5" />
-          Activity Timeline
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <DataTable
-          columns={columns}
-          data={activities}
-          isLoading={isLoading}
-          emptyMessage="No activities found"
-          itemName="activity"
-        />
-      </CardContent>
-    </Card>
+    <DataTable
+      columns={columns}
+      data={activities}
+      isLoading={isLoading}
+      emptyMessage="No activities found"
+      itemName="activity"
+    />
   );
 }
 

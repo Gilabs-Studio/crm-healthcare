@@ -102,12 +102,18 @@ func (h *VisitReportHandler) Create(c *gin.Context) {
 	// Get user ID from context (set by auth middleware)
 	userID, exists := c.Get("user_id")
 	if !exists {
-		req.SalesRepID = "" // Will fail validation
-	} else {
-		if id, ok := userID.(string); ok {
-			req.SalesRepID = id
-		}
+		errors.UnauthorizedResponse(c, "")
+		return
 	}
+
+	userIDStr, ok := userID.(string)
+	if !ok {
+		errors.UnauthorizedResponse(c, "")
+		return
+	}
+
+	// Set SalesRepID from authenticated user
+	req.SalesRepID = userIDStr
 
 	createdVisitReport, err := h.visitReportService.Create(&req)
 	if err != nil {

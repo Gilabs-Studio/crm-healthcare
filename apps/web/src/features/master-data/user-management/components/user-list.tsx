@@ -190,11 +190,11 @@ export function UserList() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Roles</SelectItem>
-              {roles.map((role) => (
+            {roles.map((role) => (
                 <SelectItem key={role.id} value={role.id}>
-                  {role.name}
+                {role.name}
                 </SelectItem>
-              ))}
+            ))}
             </SelectContent>
           </Select>
         </div>

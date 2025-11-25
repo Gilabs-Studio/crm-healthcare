@@ -168,6 +168,11 @@ func (s *Service) GetByID(id string) (*visit_report.VisitReportResponse, error) 
 
 // Create creates a new visit report
 func (s *Service) Create(req *visit_report.CreateVisitReportRequest) (*visit_report.VisitReportResponse, error) {
+	// Validate SalesRepID
+	if req.SalesRepID == "" {
+		return nil, errors.New("sales_rep_id is required")
+	}
+
 	// Verify account exists
 	_, err := s.accountRepo.FindByID(req.AccountID)
 	if err != nil {

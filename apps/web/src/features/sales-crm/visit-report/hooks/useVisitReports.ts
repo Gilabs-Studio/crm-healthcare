@@ -200,3 +200,30 @@ export function useActivityTimeline(params?: {
   });
 }
 
+export function useCreateActivity() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: {
+      type: "visit" | "call" | "email" | "task" | "deal";
+      account_id: string; // Required - activity must be linked to an account
+      contact_id?: string;
+      description: string;
+      timestamp: string;
+      metadata?: Record<string, unknown>;
+    }) => activityService.create(data),
+    onSuccess: (_, variables) => {
+      // Invalidate activities queries
+      queryClient.invalidateQueries({ queryKey: ["activities"] });
+      queryClient.invalidateQueries({ queryKey: ["activities", "timeline"] });
+      
+      // If account_id is provided, invalidate timeline for that account
+      if (variables.account_id) {
+        queryClient.invalidateQueries({
+          queryKey: ["activities", "timeline", { account_id: variables.account_id }],
+        });
+      }
+    },
+  });
+}
+

@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar, MapPin, CheckCircle2, XCircle, Clock, User, Building2, FileText, Upload } from "lucide-react";
+import { Calendar, MapPin, CheckCircle2, XCircle, Clock, User, Building2, FileText, Upload, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,6 +25,7 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { PhotoUploadDialog } from "./photo-upload-dialog";
 import { ActivityTimeline } from "./activity-timeline";
+import { CreateActivityDialog } from "./create-activity-dialog";
 
 const statusColors: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   draft: "outline",
@@ -54,6 +55,7 @@ export function VisitReportDetailModal({
   const uploadPhoto = useUploadPhoto();
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
   const [isPhotoUploadDialogOpen, setIsPhotoUploadDialogOpen] = useState(false);
+  const [isCreateActivityDialogOpen, setIsCreateActivityDialogOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
 
   const visitReport = data?.data;
@@ -480,11 +482,28 @@ export function VisitReportDetailModal({
               )}
 
               {/* Activity Timeline */}
-              <ActivityTimeline
-                activities={activities}
-                isLoading={!timelineData}
-                accountId={visitReport.account_id}
-              />
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>Activity Timeline</CardTitle>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setIsCreateActivityDialogOpen(true)}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Activity
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <ActivityTimeline
+                    activities={activities}
+                    isLoading={!timelineData}
+                    accountId={visitReport.account_id}
+                  />
+                </CardContent>
+              </Card>
             </div>
           )}
       </Drawer>
@@ -536,6 +555,20 @@ export function VisitReportDetailModal({
         onUpload={handleUploadPhoto}
         isLoading={uploadPhoto.isPending}
       />
+
+      {/* Create Activity Dialog */}
+      {visitReport && (
+        <CreateActivityDialog
+          open={isCreateActivityDialogOpen}
+          onOpenChange={setIsCreateActivityDialogOpen}
+          accountId={visitReport.account_id}
+          contactId={visitReport.contact_id || undefined}
+          onSuccess={() => {
+            // Refresh timeline - query will auto-refresh due to invalidation in hook
+            onVisitReportUpdated?.();
+          }}
+        />
+      )}
     </>
   );
 }

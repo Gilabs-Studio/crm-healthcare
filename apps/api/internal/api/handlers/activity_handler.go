@@ -102,12 +102,18 @@ func (h *ActivityHandler) Create(c *gin.Context) {
 	// Get user ID from context (set by auth middleware)
 	userID, exists := c.Get("user_id")
 	if !exists {
-		req.UserID = "" // Will fail validation
-	} else {
-		if id, ok := userID.(string); ok {
-			req.UserID = id
-		}
+		errors.UnauthorizedResponse(c, "")
+		return
 	}
+
+	userIDStr, ok := userID.(string)
+	if !ok {
+		errors.UnauthorizedResponse(c, "")
+		return
+	}
+
+	// Set UserID from authenticated user
+	req.UserID = userIDStr
 
 	createdActivity, err := h.activityService.Create(&req)
 	if err != nil {

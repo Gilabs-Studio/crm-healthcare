@@ -89,7 +89,7 @@ type CreateActivityRequest struct {
 	Type        string      `json:"type" binding:"required,oneof=visit call email task deal"`
 	AccountID   *string     `json:"account_id" binding:"omitempty,uuid"`
 	ContactID   *string     `json:"contact_id" binding:"omitempty,uuid"`
-	UserID      string      `json:"user_id" binding:"required,uuid"`
+	UserID      string      `json:"user_id" binding:"omitempty,uuid"` // Will be set from context
 	Description string      `json:"description" binding:"required,min=3"`
 	Timestamp   string      `json:"timestamp" binding:"required"`
 	Metadata    interface{} `json:"metadata" binding:"omitempty"`

@@ -130,6 +130,11 @@ func (s *Service) GetByID(id string) (*activity.ActivityResponse, error) {
 
 // Create creates a new activity
 func (s *Service) Create(req *activity.CreateActivityRequest) (*activity.ActivityResponse, error) {
+	// Validate UserID
+	if req.UserID == "" {
+		return nil, errors.New("user_id is required")
+	}
+
 	// Parse timestamp
 	timestamp, err := time.Parse(time.RFC3339, req.Timestamp)
 	if err != nil {

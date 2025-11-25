@@ -37,5 +37,17 @@ export const activityService = {
     const response = await apiClient.get<ActivityTimelineResponse>("/activities/timeline", { params });
     return response.data;
   },
+
+  async create(data: {
+    type: "visit" | "call" | "email" | "task" | "deal";
+    account_id: string; // Required - activity must be linked to an account
+    contact_id?: string;
+    description: string;
+    timestamp: string;
+    metadata?: Record<string, unknown>;
+  }): Promise<ActivityResponse> {
+    const response = await apiClient.post<ActivityResponse>("/activities", data);
+    return response.data;
+  },
 };
 

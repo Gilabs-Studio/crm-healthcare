@@ -121,7 +121,7 @@ func (vr *VisitReport) ToVisitReportResponse() *VisitReportResponse {
 type CreateVisitReportRequest struct {
 	AccountID        string     `json:"account_id" binding:"required,uuid"`
 	ContactID        *string    `json:"contact_id" binding:"omitempty,uuid"`
-	SalesRepID       string     `json:"sales_rep_id" binding:"required,uuid"`
+	SalesRepID       string     `json:"sales_rep_id" binding:"omitempty,uuid"` // Will be set from context
 	VisitDate        string     `json:"visit_date" binding:"required"`
 	Purpose          string     `json:"purpose" binding:"required,min=3"`
 	Notes            string     `json:"notes" binding:"omitempty"`

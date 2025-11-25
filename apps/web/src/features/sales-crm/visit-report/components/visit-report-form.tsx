@@ -85,7 +85,7 @@ export function VisitReportForm({
       <Field orientation="vertical">
         <FieldLabel>Account *</FieldLabel>
         <Select
-          value={watch("account_id") || ""}
+          value={watch("account_id") || undefined}
           onValueChange={(value) => setValue("account_id", value)}
           disabled={isEdit}
         >
