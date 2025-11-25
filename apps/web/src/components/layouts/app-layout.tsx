@@ -12,7 +12,7 @@ interface AppLayoutProps {
 }
 
 // Routes that should NOT show sidebar
-const NO_SIDEBAR_ROUTES = ["/", "/login", "/forgot-password", "/reset-password"];
+const NO_SIDEBAR_ROUTES = new Set(["/", "/login", "/forgot-password", "/reset-password"]);
 
 export function AppLayout({ children }: AppLayoutProps) {
   const pathname = usePathname();
@@ -20,19 +20,19 @@ export function AppLayout({ children }: AppLayoutProps) {
   const { collapsed } = useSidebar();
   
   // Determine if sidebar should be shown
-  const hasSidebar = !NO_SIDEBAR_ROUTES.includes(pathname) && isAuthenticated;
+  const hasSidebar = !NO_SIDEBAR_ROUTES.has(pathname) && isAuthenticated;
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-background w-full max-w-full overflow-x-hidden">
       <SidebarWrapper />
       <main
         className={cn(
-          "flex-1 transition-[margin-left] duration-200 ease-in-out will-change-[margin-left]",
+          "flex-1 transition-[margin-left] duration-200 ease-in-out will-change-[margin-left] w-full max-w-full overflow-x-hidden",
           hasSidebar && (collapsed ? "ml-16" : "ml-64")
         )}
       >
         <Breadcrumb />
-        <div className="p-6">
+        <div className="p-6 w-full max-w-full overflow-x-hidden">
           {children}
         </div>
       </main>
