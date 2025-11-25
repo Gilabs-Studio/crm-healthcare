@@ -47,5 +47,61 @@ export const reportService = {
     );
     return response.data;
   },
+
+  async exportVisitReportReport(
+    params?: ReportRequestParams,
+    format: "csv" | "excel" = "csv"
+  ): Promise<Blob> {
+    const response = await apiClient.get("/reports/visit-reports/export", {
+      params: {
+        ...params,
+        format,
+      },
+      responseType: "blob",
+    });
+    return response.data;
+  },
+
+  async exportPipelineReport(
+    params?: ReportRequestParams,
+    format: "csv" | "excel" = "csv"
+  ): Promise<Blob> {
+    const response = await apiClient.get("/reports/pipeline/export", {
+      params: {
+        ...params,
+        format,
+      },
+      responseType: "blob",
+    });
+    return response.data;
+  },
+
+  async exportSalesPerformanceReport(
+    params?: ReportRequestParams,
+    format: "csv" | "excel" = "csv"
+  ): Promise<Blob> {
+    const response = await apiClient.get("/reports/sales-performance/export", {
+      params: {
+        ...params,
+        format,
+      },
+      responseType: "blob",
+    });
+    return response.data;
+  },
+
+  async exportAccountActivityReport(
+    params?: ReportRequestParams,
+    format: "csv" | "excel" = "csv"
+  ): Promise<Blob> {
+    const response = await apiClient.get("/reports/account-activity/export", {
+      params: {
+        ...params,
+        format,
+      },
+      responseType: "blob",
+    });
+    return response.data;
+  },
 };
 

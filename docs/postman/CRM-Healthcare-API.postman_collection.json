@@ -1661,6 +1661,33 @@
                   }
                 },
                 {
+                  "name": "Export Visit Report Report",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/reports/visit-reports/export?start_date=2024-01-01&end_date=2024-01-31&format=csv",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "reports", "visit-reports", "export"],
+                      "query": [
+                        {"key": "start_date", "value": "2024-01-01", "description": "Start date (required)"},
+                        {"key": "end_date", "value": "2024-01-31", "description": "End date (required)"},
+                        {"key": "format", "value": "csv", "description": "Export format: csv or excel"},
+                        {"key": "account_id", "value": "", "disabled": true},
+                        {"key": "sales_rep_id", "value": "", "disabled": true},
+                        {"key": "status", "value": "", "disabled": true}
+                      ]
+                    },
+                    "description": "Export visit report report as CSV or Excel file"
+                  }
+                },
+                {
                   "name": "Get Pipeline Report",
                   "request": {
                     "method": "GET",
@@ -1681,6 +1708,30 @@
                       ]
                     },
                     "description": "Get pipeline report"
+                  }
+                },
+                {
+                  "name": "Export Pipeline Report",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/reports/pipeline/export?start_date=2024-01-01&end_date=2024-01-31&format=csv",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "reports", "pipeline", "export"],
+                      "query": [
+                        {"key": "start_date", "value": "2024-01-01", "description": "Start date (required)"},
+                        {"key": "end_date", "value": "2024-01-31", "description": "End date (required)"},
+                        {"key": "format", "value": "csv", "description": "Export format: csv or excel"}
+                      ]
+                    },
+                    "description": "Export pipeline report as CSV or Excel file"
                   }
                 },
                 {
@@ -1708,6 +1759,31 @@
                   }
                 },
                 {
+                  "name": "Export Sales Performance Report",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/reports/sales-performance/export?start_date=2024-01-01&end_date=2024-01-31&format=csv",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "reports", "sales-performance", "export"],
+                      "query": [
+                        {"key": "start_date", "value": "2024-01-01", "description": "Start date (required)"},
+                        {"key": "end_date", "value": "2024-01-31", "description": "End date (required)"},
+                        {"key": "format", "value": "csv", "description": "Export format: csv or excel"},
+                        {"key": "sales_rep_id", "value": "", "disabled": true}
+                      ]
+                    },
+                    "description": "Export sales performance report as CSV or Excel file"
+                  }
+                },
+                {
                   "name": "Get Account Activity Report",
                   "request": {
                     "method": "GET",
@@ -1729,6 +1805,31 @@
                       ]
                     },
                     "description": "Get account activity report for a specific account"
+                  }
+                },
+                {
+                  "name": "Export Account Activity Report",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/reports/account-activity/export?start_date=2024-01-01&end_date=2024-01-31&account_id=account_id_here&format=csv",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "reports", "account-activity", "export"],
+                      "query": [
+                        {"key": "start_date", "value": "2024-01-01", "description": "Start date (required)"},
+                        {"key": "end_date", "value": "2024-01-31", "description": "End date (required)"},
+                        {"key": "account_id", "value": "account_id_here", "description": "Account ID (required)"},
+                        {"key": "format", "value": "csv", "description": "Export format: csv or excel"}
+                      ]
+                    },
+                    "description": "Export account activity report as CSV or Excel file"
                   }
                 }
               ],

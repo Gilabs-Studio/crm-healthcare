@@ -15,6 +15,12 @@ func SetupReportRoutes(router *gin.RouterGroup, reportHandler *handlers.ReportHa
 		reports.GET("/pipeline", reportHandler.GetPipelineReport)
 		reports.GET("/sales-performance", reportHandler.GetSalesPerformanceReport)
 		reports.GET("/account-activity", reportHandler.GetAccountActivityReport)
+		
+		// Export endpoints
+		reports.GET("/visit-reports/export", reportHandler.ExportVisitReportReport)
+		reports.GET("/pipeline/export", reportHandler.ExportPipelineReport)
+		reports.GET("/sales-performance/export", reportHandler.ExportSalesPerformanceReport)
+		reports.GET("/account-activity/export", reportHandler.ExportAccountActivityReport)
 	}
 }
 

@@ -13,13 +13,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { FileText, Download, Calendar } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { FileText, Download, FileSpreadsheet, FileText as FileTextIcon, ChevronDown } from "lucide-react";
 import { useVisitReportReport } from "../hooks/useReports";
 import { usePipelineReport } from "../hooks/useReports";
 import { useSalesPerformanceReport } from "../hooks/useReports";
 import { VisitReportViewer } from "./visit-report-viewer";
 import { PipelineReportViewer } from "./pipeline-report-viewer";
 import { SalesPerformanceReportViewer } from "./sales-performance-report-viewer";
+import { SalesFunnelViewer } from "./sales-funnel-viewer";
+import { reportService } from "../services/reportService";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export function ReportGenerator() {
   const [reportType, setReportType] = useState<"visit" | "pipeline" | "sales-performance">("visit");
@@ -30,6 +39,7 @@ export function ReportGenerator() {
   const [accountId, setAccountId] = useState<string>("");
   const [salesRepId, setSalesRepId] = useState<string>("");
   const [status, setStatus] = useState<string>("all");
+  const [exportPopoverOpen, setExportPopoverOpen] = useState(false);
 
   const visitReportParams = {
     start_date: startDate,
@@ -50,13 +60,62 @@ export function ReportGenerator() {
     sales_rep_id: salesRepId || undefined,
   });
 
-  const handleGenerate = () => {
-    // Reports are auto-generated when params change due to React Query
-  };
+  const exportMutation = useMutation({
+    mutationFn: async (format: "csv" | "excel") => {
+      let blob: Blob;
+      let filename: string;
 
-  const handleExport = () => {
-    // TODO: Implement export functionality
-    console.log("Export report");
+      switch (reportType) {
+        case "visit":
+          blob = await reportService.exportVisitReportReport(visitReportParams, format);
+          filename = `visit-report-${startDate}-${endDate}.${format === "csv" ? "csv" : "xlsx"}`;
+          break;
+        case "pipeline":
+          blob = await reportService.exportPipelineReport(
+            {
+              start_date: startDate,
+              end_date: endDate,
+            },
+            format
+          );
+          filename = `pipeline-report-${startDate}-${endDate}.${format === "csv" ? "csv" : "xlsx"}`;
+          break;
+        case "sales-performance":
+          blob = await reportService.exportSalesPerformanceReport(
+            {
+              start_date: startDate,
+              end_date: endDate,
+              sales_rep_id: salesRepId || undefined,
+            },
+            format
+          );
+          filename = `sales-performance-report-${startDate}-${endDate}.${format === "csv" ? "csv" : "xlsx"}`;
+          break;
+        default:
+          throw new Error("Invalid report type");
+      }
+
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    },
+    onSuccess: () => {
+      toast.success("Report exported successfully");
+    },
+    onError: (error) => {
+      toast.error("Failed to export report");
+      console.error("Export error:", error);
+    },
+  });
+
+  const handleExport = (format: "csv" | "excel") => {
+    exportMutation.mutate(format);
   };
 
   return (
@@ -130,14 +189,45 @@ export function ReportGenerator() {
           )}
 
           <div className="flex items-center gap-2">
-            <Button onClick={handleGenerate}>
-              <Calendar className="h-4 w-4 mr-2" />
-              Generate Report
-            </Button>
-            <Button variant="outline" onClick={handleExport}>
-              <Download className="h-4 w-4 mr-2" />
-              Export
-            </Button>
+            <Popover open={exportPopoverOpen} onOpenChange={setExportPopoverOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="default"
+                  disabled={exportMutation.isPending}
+                  className="gap-2"
+                >
+                  <Download className="h-4 w-4" />
+                  {exportMutation.isPending ? "Exporting..." : "Export Report"}
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-48 p-2" align="start">
+                <div className="space-y-1">
+                  <button
+                    onClick={() => {
+                      handleExport("csv");
+                      setExportPopoverOpen(false);
+                    }}
+                    disabled={exportMutation.isPending}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <FileTextIcon className="h-4 w-4" />
+                    Export as CSV
+                  </button>
+                  <button
+                    onClick={() => {
+                      handleExport("excel");
+                      setExportPopoverOpen(false);
+                    }}
+                    disabled={exportMutation.isPending}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <FileSpreadsheet className="h-4 w-4" />
+                    Export as Excel
+                  </button>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
         </CardContent>
       </Card>
@@ -159,7 +249,7 @@ export function ReportGenerator() {
             </TabsContent>
 
             <TabsContent value="pipeline" className="mt-6">
-              <PipelineReportViewer data={pipelineReport?.data} isLoading={pipelineLoading} />
+              <SalesFunnelViewer data={pipelineReport?.data} isLoading={pipelineLoading} />
             </TabsContent>
 
             <TabsContent value="sales-performance" className="mt-6">
