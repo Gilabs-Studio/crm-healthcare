@@ -1,6 +1,7 @@
 package deal
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -270,17 +271,47 @@ func (r *repository) GetForecast(periodType string, start, end time.Time) (*pipe
 func formatCurrency(amount int64) string {
 	// Convert to Rupiah (divide by 100 if stored in sen)
 	rupiah := float64(amount) / 100.0
-	// Simple formatting - in production use proper number formatting
-	return "Rp " + formatNumber(rupiah)
+	// Format with thousand separator
+	formatted := formatNumber(rupiah)
+	return "Rp " + formatted
 }
 
 // formatNumber formats number with thousand separator
 func formatNumber(n float64) string {
-	// Simple implementation - in production use proper formatting
-	// For now, just return basic string representation
-	if n == 0 {
+	// Convert to int64 to remove decimal places
+	amount := int64(n)
+
+	// Handle zero case
+	if amount == 0 {
 		return "0"
 	}
-	// Basic formatting - in production use proper number formatting library
-	return ""
+
+	// Handle negative numbers
+	negative := false
+	if amount < 0 {
+		negative = true
+		amount = -amount
+	}
+
+	// Convert to string
+	str := fmt.Sprintf("%d", amount)
+	length := len(str)
+
+	// Add thousand separators (dot for Indonesian format)
+	// Split into chunks of 3 digits from right
+	var parts []string
+	for i := length; i > 0; i -= 3 {
+		start := i - 3
+		if start < 0 {
+			start = 0
+		}
+		parts = append([]string{str[start:i]}, parts...)
+	}
+
+	result := strings.Join(parts, ".")
+	if negative {
+		result = "-" + result
+	}
+
+	return result
 }

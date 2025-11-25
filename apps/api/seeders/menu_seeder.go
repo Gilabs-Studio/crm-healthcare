@@ -84,6 +84,20 @@ func SeedMenus() error {
 	}
 	log.Printf("Created menu: %s", accountsMenu.Name)
 
+	// Create Pipeline menu under Sales CRM
+	pipelineMenu := permission.Menu{
+		Name:     "Pipeline",
+		Icon:     "trending-up",
+		URL:      "/pipeline",
+		ParentID: &salesCRMMenu.ID,
+		Order:    2,
+		Status:   "active",
+	}
+	if err := database.DB.Create(&pipelineMenu).Error; err != nil {
+		return err
+	}
+	log.Printf("Created menu: %s", pipelineMenu.Name)
+
 	log.Println("Menus seeded successfully")
 	return nil
 }
@@ -176,6 +190,28 @@ func UpdateMenuStructure() error {
 				log.Printf("Warning: Failed to delete System menu: %v", err)
 			} else {
 				log.Printf("Deleted System menu")
+			}
+		}
+	}
+
+	// Add Pipeline menu if it doesn't exist
+	var pipelineMenu permission.Menu
+	if err := database.DB.Where("url = ?", "/pipeline").First(&pipelineMenu).Error; err != nil {
+		// Pipeline menu doesn't exist, create it
+		var salesCRMMenu permission.Menu
+		if err := database.DB.Where("url = ?", "/sales-crm").First(&salesCRMMenu).Error; err == nil {
+			pipelineMenu = permission.Menu{
+				Name:     "Pipeline",
+				Icon:     "trending-up",
+				URL:      "/pipeline",
+				ParentID: &salesCRMMenu.ID,
+				Order:    2,
+				Status:   "active",
+			}
+			if err := database.DB.Create(&pipelineMenu).Error; err != nil {
+				log.Printf("Warning: Failed to create Pipeline menu: %v", err)
+			} else {
+				log.Printf("Created Pipeline menu")
 			}
 		}
 	}

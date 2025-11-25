@@ -136,19 +136,19 @@ func (s *Service) CreateDeal(req *pipeline.CreateDealRequest, createdBy string) 
 	}
 
 	deal := &pipeline.Deal{
-		Title:            req.Title,
-		Description:      req.Description,
-		AccountID:        req.AccountID,
-		ContactID:        req.ContactID,
-		StageID:          req.StageID,
-		Value:            req.Value,
-		Probability:      req.Probability,
+		Title:             req.Title,
+		Description:       req.Description,
+		AccountID:         req.AccountID,
+		ContactID:         req.ContactID,
+		StageID:           req.StageID,
+		Value:             req.Value,
+		Probability:       req.Probability,
 		ExpectedCloseDate: req.ExpectedCloseDate,
-		AssignedTo:       req.AssignedTo,
-		Status:           status,
-		Source:           req.Source,
-		Notes:            req.Notes,
-		CreatedBy:        createdBy,
+		AssignedTo:        req.AssignedTo,
+		Status:            status,
+		Source:            req.Source,
+		Notes:             req.Notes,
+		CreatedBy:         createdBy,
 	}
 
 	if err := s.dealRepo.Create(deal); err != nil {
@@ -218,11 +218,12 @@ func (s *Service) UpdateDeal(id string, req *pipeline.UpdateDealRequest) (*pipel
 			deal.Status = "open"
 		}
 	}
-	if req.Value > 0 {
-		deal.Value = req.Value
+	// Update value if provided (using pointer to distinguish between not provided and zero value)
+	if req.Value != nil {
+		deal.Value = *req.Value
 	}
-	if req.Probability >= 0 {
-		deal.Probability = req.Probability
+	if req.Probability != nil {
+		deal.Probability = *req.Probability
 	}
 	if req.ExpectedCloseDate != nil {
 		deal.ExpectedCloseDate = req.ExpectedCloseDate
@@ -350,4 +351,3 @@ type PaginationResult struct {
 	Total      int
 	TotalPages int
 }
-
