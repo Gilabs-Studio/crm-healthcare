@@ -14,7 +14,9 @@ import (
 	"github.com/gilabs/crm-healthcare/api/internal/domain/contact_role"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/permission"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/pipeline"
+	"github.com/gilabs/crm-healthcare/api/internal/domain/reminder"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/role"
+	"github.com/gilabs/crm-healthcare/api/internal/domain/task"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/user"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/visit_report"
 	"gorm.io/driver/postgres"
@@ -78,6 +80,8 @@ func AutoMigrate() error {
 		&contact.Contact{},
 		&pipeline.PipelineStage{},
 		&pipeline.Deal{},
+		&task.Task{},
+		&reminder.Reminder{},
 		&visit_report.VisitReport{},
 		&activity.Activity{},
 	)

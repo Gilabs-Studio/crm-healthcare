@@ -49,6 +49,11 @@ func SeedAll() error {
 		return err
 	}
 
+	// Seed tasks (requires users, accounts, contacts)
+	if err := SeedTasks(); err != nil {
+		return err
+	}
+
 	// Seed visit reports (requires accounts, contacts, and users)
 	if err := SeedVisitReports(); err != nil {
 		return err
