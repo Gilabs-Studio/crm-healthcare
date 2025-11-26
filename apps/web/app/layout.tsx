@@ -5,6 +5,7 @@ import { ReactQueryProvider } from "@/lib/react-query";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { AppLayout } from "@/components/layouts/app-layout";
+import { SidebarProvider } from "@/contexts/sidebar-context";
 import { Toaster } from "sonner";
 
 const geistSans = Geist({
@@ -20,6 +21,12 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "CRM Healthcare Platform",
   description: "CRM Healthcare/Pharmaceutical Platform",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
+  },
 };
 
 export default function RootLayout({
@@ -40,7 +47,9 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <ReactQueryProvider>
-              <AppLayout>{children}</AppLayout>
+              <SidebarProvider>
+                <AppLayout>{children}</AppLayout>
+              </SidebarProvider>
               <Toaster position="top-right" richColors />
             </ReactQueryProvider>
           </ThemeProvider>

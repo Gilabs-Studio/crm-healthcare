@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export interface Column<T> {
   id: string;
@@ -67,6 +68,8 @@ export function DataTable<T extends { id: string }>({
   itemName = "item",
   perPageOptions = [10, 20, 50, 100],
 }: DataTableProps<T>) {
+  const isMobile = useIsMobile();
+
   const getPageNumbers = () => {
     if (!pagination) return [];
 
@@ -96,6 +99,155 @@ export function DataTable<T extends { id: string }>({
     return pages;
   };
 
+  // Mobile card view
+  if (isMobile) {
+    return (
+      <div className="border rounded-lg">
+        {isLoading ? (
+          <div className="p-4 space-y-3">
+            {Array.from({ length: 5 }, (_, i) => (
+              <Skeleton key={`skeleton-card-${i}`} className="h-32 w-full rounded-lg" />
+            ))}
+          </div>
+        ) : (
+          <>
+            {data.length === 0 ? (
+              <div className="text-center text-muted-foreground py-12 px-4">
+                {emptyMessage}
+              </div>
+            ) : (
+              <div className="divide-y">
+                {data.map((row) => (
+                  <div
+                    key={row.id}
+                    className="p-4 hover:bg-muted/30 transition-colors border-b last:border-b-0"
+                  >
+                    <div className="space-y-2.5">
+                      {columns.map((column, index) => {
+                        const isFirstColumn = index === 0;
+                        return (
+                          <div
+                            key={column.id}
+                            className={cn(
+                              "flex flex-col gap-1",
+                              isFirstColumn && "pb-2 border-b border-border/50"
+                            )}
+                          >
+                            <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                              {column.header}
+                            </div>
+                            <div className={cn(
+                              "text-sm",
+                              isFirstColumn && "font-semibold text-foreground"
+                            )}>
+                              {column.accessor(row)}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Mobile Pagination */}
+            {pagination && (
+              <div className="border-t bg-muted/30 px-4 py-3 space-y-3">
+                {/* Rows per page selector */}
+                {onPerPageChange && (
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="rows-per-page-mobile" className="text-sm">
+                      Rows per page
+                    </Label>
+                    <Select
+                      value={String(pagination.per_page)}
+                      onValueChange={(value) => {
+                        onPerPageChange?.(Number(value));
+                        onPageChange?.(1);
+                      }}
+                    >
+                      <SelectTrigger
+                        id="rows-per-page-mobile"
+                        className="w-20 h-8 text-sm"
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {perPageOptions.map((option) => (
+                          <SelectItem key={option} value={String(option)}>
+                            {option}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {/* Page info */}
+                <div className="text-center text-sm text-muted-foreground">
+                  <span className="text-foreground font-semibold">
+                    {(pagination.page - 1) * pagination.per_page + 1}-
+                    {Math.min(
+                      pagination.page * pagination.per_page,
+                      pagination.total
+                    )}
+                  </span>{" "}
+                  of{" "}
+                  <span className="text-foreground font-semibold">
+                    {pagination.total}
+                  </span>
+                </div>
+
+                {/* Pagination controls */}
+                {pagination.total_pages > 1 && (
+                  <div className="flex items-center justify-center gap-1">
+                    <Pagination>
+                      <PaginationContent>
+                        <PaginationItem>
+                          <PaginationPrevious
+                            onClick={() =>
+                              onPageChange?.(Math.max(1, pagination.page - 1))
+                            }
+                            disabled={!pagination.has_prev || isLoading}
+                            className={cn(
+                              (!pagination.has_prev || isLoading) &&
+                                "pointer-events-none opacity-50 cursor-not-allowed"
+                            )}
+                            aria-disabled={!pagination.has_prev || isLoading}
+                          />
+                        </PaginationItem>
+
+                        <PaginationItem>
+                          <span className="px-3 py-1 text-sm">
+                            Page {pagination.page} of {pagination.total_pages}
+                          </span>
+                        </PaginationItem>
+
+                        <PaginationItem>
+                          <PaginationNext
+                            onClick={() => onPageChange?.(pagination.page + 1)}
+                            disabled={!pagination.has_next || isLoading}
+                            className={cn(
+                              (!pagination.has_next || isLoading) &&
+                                "pointer-events-none opacity-50 cursor-not-allowed"
+                            )}
+                            aria-disabled={!pagination.has_next || isLoading}
+                          />
+                        </PaginationItem>
+                      </PaginationContent>
+                    </Pagination>
+                  </div>
+                )}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    );
+  }
+
+  // Desktop table view
   return (
     <div className="border rounded-lg">
       {isLoading ? (

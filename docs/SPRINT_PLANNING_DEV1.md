@@ -257,7 +257,7 @@ Developer 1 bertanggung jawab untuk:
 - [x] Implement sales performance report API (`GET /api/v1/reports/sales-performance`)
 - [x] Implement account activity report API (`GET /api/v1/reports/account-activity`)
 - [x] Add date range filtering
-- [ ] Add export functionality (PDF/Excel) - basic
+- [x] Add export functionality (PDF/Excel) - basic
 
 **Frontend Tasks**:
 - [x] Create dashboard service (`dashboardService`)
@@ -270,12 +270,12 @@ Developer 1 bertanggung jawab untuk:
 - [x] Create top accounts component
 - [x] Create top sales rep component
 - [x] Create recent activities component
-- [ ] Create charts (using recharts atau similar)
+- [x] Create charts (using recharts atau similar)
 - [x] Create reports list page (`/reports`)
 - [x] Create report generator component
 - [x] Create report viewer component
 - [x] Add date range picker
-- [ ] Add export functionality (PDF/Excel)
+- [x] Add export functionality (PDF/Excel)
 
 **Postman Collection**:
 - [x] Add dashboard APIs ke Postman collection (Web section)
