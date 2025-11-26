@@ -59,6 +59,11 @@ func SeedAll() error {
 		return err
 	}
 
+	// Seed settings
+	if err := SeedSettings(); err != nil {
+		return err
+	}
+
 	return nil
 }
 
