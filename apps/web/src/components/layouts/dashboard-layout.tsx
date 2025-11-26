@@ -50,8 +50,17 @@ const Header = memo(function Header({
   fallbackAvatarUrl: string;
 }) {
   const [currentSrc, setCurrentSrc] = React.useState<string | undefined>(
-    avatarUrl || fallbackAvatarUrl
+    avatarUrl && avatarUrl.trim() !== "" ? avatarUrl : fallbackAvatarUrl
   );
+
+  // Sync local image src when avatar url from store changes (e.g. after rehydration/refresh)
+  React.useEffect(() => {
+    if (avatarUrl && avatarUrl.trim() !== "") {
+      setCurrentSrc(avatarUrl);
+    } else {
+      setCurrentSrc(fallbackAvatarUrl);
+    }
+  }, [avatarUrl, fallbackAvatarUrl]);
 
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
