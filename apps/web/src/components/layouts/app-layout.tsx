@@ -35,7 +35,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         )}
       >
         <Breadcrumb />
-        <div className="p-4 md:p-6 w-full max-w-full overflow-x-hidden">
+        <div>
           {children}
         </div>
       </main>
