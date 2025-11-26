@@ -1,14 +1,14 @@
 "use client";
 
 import type React from "react";
+import { DashboardLayout } from "@/components/layouts/dashboard-layout";
 
 interface AppLayoutProps {
   readonly children: React.ReactNode;
 }
 
-// AppLayout is now a thin shell – main layout & navigation are handled by DashboardLayout per page
+// AppLayout wraps all authenticated pages with the main DashboardLayout (sidebar + header)
 export function AppLayout({ children }: AppLayoutProps) {
-  return <>{children}</>;
+  return <DashboardLayout>{children}</DashboardLayout>;
 }
-
 

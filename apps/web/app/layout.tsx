@@ -5,7 +5,6 @@ import { ReactQueryProvider } from "@/lib/react-query";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { AppLayout } from "@/components/layouts/app-layout";
-import { SidebarProvider } from "@/contexts/sidebar-context";
 import { Toaster } from "sonner";
 
 const geistSans = Geist({
@@ -53,9 +52,7 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <ReactQueryProvider>
-              <SidebarProvider>
-                <AppLayout>{children}</AppLayout>
-              </SidebarProvider>
+              <AppLayout>{children}</AppLayout>
               <Toaster position="top-right" richColors />
             </ReactQueryProvider>
           </ThemeProvider>
