@@ -15,6 +15,7 @@ import (
 	"github.com/gilabs/crm-healthcare/api/internal/domain/permission"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/pipeline"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/role"
+	"github.com/gilabs/crm-healthcare/api/internal/domain/settings"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/user"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/visit_report"
 	"gorm.io/driver/postgres"
@@ -80,6 +81,7 @@ func AutoMigrate() error {
 		&pipeline.Deal{},
 		&visit_report.VisitReport{},
 		&activity.Activity{},
+		&settings.Settings{},
 	)
 	if err != nil {
 		return fmt.Errorf("failed to run migrations: %w", err)
