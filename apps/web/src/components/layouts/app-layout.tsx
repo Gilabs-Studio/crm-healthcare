@@ -4,6 +4,8 @@ import { usePathname } from "next/navigation";
 import { SidebarWrapper } from "./sidebar-wrapper";
 import { Breadcrumb } from "@/components/navigation/breadcrumb";
 import { useAuthStore } from "@/features/auth/stores/useAuthStore";
+import { useSidebar } from "@/contexts/sidebar-context";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
 interface AppLayoutProps {
@@ -11,21 +13,29 @@ interface AppLayoutProps {
 }
 
 // Routes that should NOT show sidebar
-const NO_SIDEBAR_ROUTES = ["/", "/login", "/forgot-password", "/reset-password"];
+const NO_SIDEBAR_ROUTES = new Set(["/", "/login", "/forgot-password", "/reset-password"]);
 
 export function AppLayout({ children }: AppLayoutProps) {
   const pathname = usePathname();
   const { isAuthenticated } = useAuthStore();
+  const { collapsed } = useSidebar();
+  const isMobile = useIsMobile();
   
   // Determine if sidebar should be shown
-  const hasSidebar = !NO_SIDEBAR_ROUTES.includes(pathname) && isAuthenticated;
+  const hasSidebar = !NO_SIDEBAR_ROUTES.has(pathname) && isAuthenticated;
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-background w-full max-w-full overflow-x-hidden">
       <SidebarWrapper />
-      <main className={cn("flex-1 transition-all duration-200", hasSidebar && "ml-64")}>
+      <main
+        className={cn(
+          "flex-1 transition-[margin-left] duration-200 ease-in-out will-change-[margin-left] w-full max-w-full overflow-x-hidden",
+          // On mobile, no margin. On desktop, use sidebar width
+          hasSidebar && !isMobile && (collapsed ? "ml-16" : "ml-64")
+        )}
+      >
         <Breadcrumb />
-        <div className="p-6">
+        <div className="p-4 md:p-6 w-full max-w-full overflow-x-hidden">
           {children}
         </div>
       </main>

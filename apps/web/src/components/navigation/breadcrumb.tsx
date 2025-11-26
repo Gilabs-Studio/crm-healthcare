@@ -2,11 +2,16 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { ChevronRight, Home } from "lucide-react";
+import { ChevronRight, Home, Menu } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useSidebar } from "@/contexts/sidebar-context";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function Breadcrumb() {
   const pathname = usePathname();
+  const isMobile = useIsMobile();
+  const { toggleMobileOpen } = useSidebar();
 
   // Skip breadcrumb on auth pages
   const NO_BREADCRUMB_ROUTES = ["/", "/login", "/forgot-password", "/reset-password"];
@@ -17,11 +22,6 @@ export function Breadcrumb() {
   // Generate breadcrumb items from pathname
   const pathSegments = pathname.split("/").filter(Boolean);
   
-  // If pathname is /dashboard, only show Home
-  if (pathname === "/dashboard") {
-    return null;
-  }
-  
   const breadcrumbItems = [
     {
       label: "Home",
@@ -31,10 +31,13 @@ export function Breadcrumb() {
     },
     ...pathSegments.map((segment, index) => {
       const href = "/" + pathSegments.slice(0, index + 1).join("/");
-      const label = segment
-        .split("-")
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(" ");
+      // Special handling for dashboard
+      const label = segment === "dashboard" 
+        ? "Dashboard"
+        : segment
+            .split("-")
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ");
       
       return {
         label,
@@ -45,12 +48,24 @@ export function Breadcrumb() {
     }),
   ];
 
-  if (breadcrumbItems.length <= 1) {
-    return null;
-  }
-
   return (
-    <nav className="flex items-center gap-1.5 px-6 py-3 text-sm text-muted-foreground border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <nav className="flex items-center gap-2 px-4 md:px-6 py-3 text-sm text-muted-foreground border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      {/* Mobile menu toggle */}
+      {isMobile && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 w-8 p-0 mr-1"
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleMobileOpen();
+          }}
+          aria-label="Toggle menu"
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
+      )}
+      
       {breadcrumbItems.map((item, index) => {
         const isLast = index === breadcrumbItems.length - 1;
         const Icon = item.icon;

@@ -257,7 +257,7 @@ Developer 1 bertanggung jawab untuk:
 - [x] Implement sales performance report API (`GET /api/v1/reports/sales-performance`)
 - [x] Implement account activity report API (`GET /api/v1/reports/account-activity`)
 - [x] Add date range filtering
-- [ ] Add export functionality (PDF/Excel) - basic
+- [x] Add export functionality (PDF/Excel) - basic
 
 **Frontend Tasks**:
 - [x] Create dashboard service (`dashboardService`)
@@ -270,12 +270,12 @@ Developer 1 bertanggung jawab untuk:
 - [x] Create top accounts component
 - [x] Create top sales rep component
 - [x] Create recent activities component
-- [ ] Create charts (using recharts atau similar)
+- [x] Create charts (using recharts atau similar)
 - [x] Create reports list page (`/reports`)
 - [x] Create report generator component
 - [x] Create report viewer component
 - [x] Add date range picker
-- [ ] Add export functionality (PDF/Excel)
+- [x] Add export functionality (PDF/Excel)
 
 **Postman Collection**:
 - [x] Add dashboard APIs ke Postman collection (Web section)
@@ -313,31 +313,38 @@ Developer 1 bertanggung jawab untuk:
 **Goal**: Implement Settings secara fullstack (backend + frontend)
 
 **Backend Tasks**:
-- [ ] Create settings model dan migration
-- [ ] Create settings repository interface dan implementation
-- [ ] Create settings service
-- [ ] Implement get settings API (`GET /api/v1/settings`)
-- [ ] Implement update settings API (`PUT /api/v1/settings`)
-- [ ] Implement general settings API
-- [ ] Implement notification settings API
-- [ ] Implement pipeline settings API
-- [ ] Add validation
+- [x] Create settings model dan migration
+- [x] Create settings repository interface dan implementation
+- [x] Create settings service
+- [x] Implement get settings API (`GET /api/v1/settings`)
+- [x] Implement update settings API (`PUT /api/v1/settings`)
+- [x] Implement general settings API
+- [x] Implement notification settings API
+- [x] Implement pipeline settings API
+- [x] Add validation
 
 **Frontend Tasks**:
-- [ ] Create settings service (`settingsService`)
-- [ ] Create settings types (`types/settings.d.ts`)
-- [ ] Create settings dashboard (`/settings`)
-- [ ] Create general settings page (`/settings/general`)
-- [ ] Create notification settings page (`/settings/notifications`)
-- [ ] Create pipeline settings page (`/settings/pipeline`)
-- [ ] Improve UI/UX consistency
-- [ ] Add loading states di semua pages
-- [ ] Add error boundaries
-- [ ] Optimize bundle size
-- [ ] Cross-browser testing
+- [x] Create settings service (`settingsService`)
+- [x] Create settings types (`types/settings.d.ts`)
+- [x] Create settings dashboard (`/settings`)
+- [x] Create general settings page (`/settings/general`)
+- [x] Create notification settings page (`/settings/notifications`)
+- [x] Create pipeline settings page (`/settings/pipeline`)
+- [x] Improve UI/UX consistency
+- [x] Add loading states di semua pages
+- [x] Add error boundaries
+- [x] Optimize bundle size
+- [x] Cross-browser testing
 
 **Postman Collection**:
-- [ ] Add settings APIs ke Postman collection (Web section)
+- [x] Add settings APIs ke Postman collection (Web section)
+
+**Menu & Permissions**:
+- [x] Add Settings menu to menu seeder
+- [x] Add Settings permissions to permission seeder
+
+**Seeder**:
+- [x] Add settings seeder data with related IDs
 
 **Acceptance Criteria**:
 - ✅ Settings APIs bekerja dengan baik
@@ -398,8 +405,8 @@ Developer 1 bertanggung jawab untuk:
 | Sprint 2 | Master Data Cleanup | 1-2 days | ✅ Completed |
 | Sprint 3 | Account & Contact (Fullstack) | 6-7 days | ✅ Completed |
 | Sprint 4 | Visit Report (Fullstack) | 7-8 days | ✅ Completed |
-| Sprint 5 | Dashboard & Reports (Fullstack) | 6-7 days | ✅ In Progress |
-| Sprint 6 | Settings (Fullstack) | 3-4 days | ⏳ Pending |
+| Sprint 5 | Dashboard & Reports (Fullstack) | 6-7 days | ✅ Completed |
+| Sprint 6 | Settings (Fullstack) | 3-4 days | ✅ Completed |
 | Sprint 7 | Integration & Testing | 3-4 days | ⏳ Pending |
 
 **Total Estimated Time**: 33-40 days (4.7-5.7 weeks)
