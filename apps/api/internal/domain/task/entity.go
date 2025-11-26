@@ -14,19 +14,19 @@ type Task struct {
 	ID          string         `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
 	Title       string         `gorm:"type:varchar(255);not null" json:"title"`
 	Description string         `gorm:"type:text" json:"description"`
-	Type        string         `gorm:"type:varchar(50);not null;default:'general'" json:"type"` // general, call, email, meeting, follow_up
-	Status      string         `gorm:"type:varchar(20);not null;default:'pending'" json:"status"` // pending, in_progress, completed, cancelled
-	Priority    string         `gorm:"type:varchar(20);default:'medium'" json:"priority"`        // low, medium, high, urgent
-	DueDate     *time.Time     `gorm:"type:timestamp" json:"due_date"`
-	CompletedAt *time.Time     `gorm:"type:timestamp" json:"completed_at"`
-	AssignedTo  string         `gorm:"type:uuid;index" json:"assigned_to"` // User ID
-	AssignedUser *UserRef      `gorm:"foreignKey:AssignedTo" json:"assigned_user,omitempty"`
-	AccountID   string         `gorm:"type:uuid;index" json:"account_id"` // Optional: link to account
-	Account     *AccountRef   `gorm:"foreignKey:AccountID" json:"account,omitempty"`
-	ContactID   string         `gorm:"type:uuid;index" json:"contact_id"` // Optional: link to contact
-	Contact     *ContactRef   `gorm:"foreignKey:ContactID" json:"contact,omitempty"`
-	DealID      string         `gorm:"type:uuid;index" json:"deal_id"` // Optional: link to deal
-	Deal        *DealRef       `gorm:"foreignKey:DealID" json:"deal,omitempty"`
+	Type         string         `gorm:"type:varchar(50);not null;default:'general'" json:"type"`   // general, call, email, meeting, follow_up
+	Status       string         `gorm:"type:varchar(20);not null;default:'pending'" json:"status"` // pending, in_progress, completed, cancelled
+	Priority     string         `gorm:"type:varchar(20);default:'medium'" json:"priority"`         // low, medium, high, urgent
+	DueDate      *time.Time     `gorm:"type:timestamp" json:"due_date"`
+	CompletedAt  *time.Time     `gorm:"type:timestamp" json:"completed_at"`
+	AssignedTo   *string        `gorm:"type:uuid;index" json:"assigned_to"` // User ID (optional)
+	AssignedUser *UserRef       `gorm:"foreignKey:AssignedTo" json:"assigned_user,omitempty"`
+	AccountID    *string        `gorm:"type:uuid;index" json:"account_id"` // Optional: link to account
+	Account      *AccountRef    `gorm:"foreignKey:AccountID" json:"account,omitempty"`
+	ContactID    *string        `gorm:"type:uuid;index" json:"contact_id"` // Optional: link to contact
+	Contact      *ContactRef    `gorm:"foreignKey:ContactID" json:"contact,omitempty"`
+	DealID       *string        `gorm:"type:uuid;index" json:"deal_id"` // Optional: link to deal
+	Deal         *DealRef       `gorm:"foreignKey:DealID" json:"deal,omitempty"`
 	CreatedBy   string         `gorm:"type:uuid;index" json:"created_by"`
 	CreatedAt   time.Time      `json:"created_at"`
 	UpdatedAt   time.Time      `json:"updated_at"`
@@ -154,13 +154,26 @@ func (t *Task) ToTaskResponse() *TaskResponse {
 		Priority:    t.Priority,
 		DueDate:     t.DueDate,
 		CompletedAt: t.CompletedAt,
-		AssignedTo:  t.AssignedTo,
-		AccountID:   t.AccountID,
-		ContactID:   t.ContactID,
-		DealID:      t.DealID,
+		AssignedTo:  "",
+		AccountID:   "",
+		ContactID:   "",
+		DealID:      "",
 		CreatedBy:   t.CreatedBy,
 		CreatedAt:   t.CreatedAt,
 		UpdatedAt:   t.UpdatedAt,
+	}
+
+	if t.AssignedTo != nil {
+		resp.AssignedTo = *t.AssignedTo
+	}
+	if t.AccountID != nil {
+		resp.AccountID = *t.AccountID
+	}
+	if t.ContactID != nil {
+		resp.ContactID = *t.ContactID
+	}
+	if t.DealID != nil {
+		resp.DealID = *t.DealID
 	}
 
 	if t.AssignedUser != nil {

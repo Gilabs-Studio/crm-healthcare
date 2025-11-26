@@ -198,20 +198,20 @@ Developer 2 bertanggung jawab untuk:
 
 **Frontend Tasks**:
 
-- [ ] Create task types (`types/task.d.ts`)
-- [ ] Create task service (`taskService`)
-- [ ] Create task list page (`/tasks`)
-- [ ] Create task form component (`TaskForm`)
-- [ ] Create task card component (`TaskCard`)
-- [ ] Create task detail page (`/tasks/[id]`)
-- [ ] Add task filter (status, assignee, due date)
-- [ ] Create reminder settings component
-- [ ] Add task linked ke account/contact
+- [x] Create task types (`types/task.d.ts`)
+- [x] Create task service (`taskService`)
+- [x] Create task list page (`/tasks`)
+- [x] Create task form component (`TaskForm`)
+- [x] Create task card component (`TaskCard`)
+- [x] Create task detail page (`/tasks/[id]`)
+- [x] Add task filter (status, assignee, due date)
+- [x] Create reminder settings component
+- [x] Add task linked ke account/contact
 
 **Postman Collection**:
 
-- [ ] Add task APIs ke Postman collection (Web section)
-- [ ] Add task APIs ke Postman collection (Mobile section)
+- [x] Add task APIs ke Postman collection (Web section)
+- [x] Add task APIs ke Postman collection (Mobile section)
 
 **Acceptance Criteria**:
 

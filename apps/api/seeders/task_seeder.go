@@ -78,9 +78,9 @@ func SeedTasks() error {
 			Status:      "pending",
 			Priority:    "high",
 			DueDate:     &tomorrow,
-			AssignedTo:  defaultUser.ID,
-			AccountID:   accountID1,
-			ContactID:   contactID1,
+			AssignedTo:  &defaultUser.ID,
+			AccountID:   &accountID1,
+			ContactID:   &contactID1,
 			CreatedBy:   defaultUser.ID,
 		},
 		{
@@ -90,9 +90,9 @@ func SeedTasks() error {
 			Status:      "in_progress",
 			Priority:    "urgent",
 			DueDate:     &nextWeek,
-			AssignedTo:  defaultUser.ID,
-			AccountID:   accountID2,
-			ContactID:   contactID2,
+			AssignedTo:  &defaultUser.ID,
+			AccountID:   &accountID2,
+			ContactID:   &contactID2,
 			CreatedBy:   defaultUser.ID,
 		},
 		{
@@ -102,21 +102,20 @@ func SeedTasks() error {
 			Status:      "pending",
 			Priority:    "medium",
 			DueDate:     &tomorrow,
-			AssignedTo:  defaultUser.ID,
-			AccountID:   accountID3,
-			ContactID:   contactID3,
+			AssignedTo:  &defaultUser.ID,
+			AccountID:   &accountID3,
+			ContactID:   &contactID3,
 			CreatedBy:   defaultUser.ID,
 		},
 	}
 
 	for _, t := range tasks {
 		// Skip tasks that don't have minimum required foreign keys
-		if t.AccountID == "" {
+		if t.AccountID == nil {
 			continue
 		}
 
-		// Omit optional DealID when it's empty to avoid inserting invalid UUID ("") values
-		if err := database.DB.Omit("DealID").Create(&t).Error; err != nil {
+		if err := database.DB.Create(&t).Error; err != nil {
 			return err
 		}
 		log.Printf("Created task: %s (id: %s, status: %s, priority: %s)", t.Title, t.ID, t.Status, t.Priority)

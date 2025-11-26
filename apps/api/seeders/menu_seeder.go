@@ -104,13 +104,27 @@ func SeedMenus() error {
 		Icon:     "map-pin",
 		URL:      "/visit-reports",
 		ParentID: &salesCRMMenu.ID,
-		Order:    2,
+		Order:    3,
 		Status:   "active",
 	}
 	if err := database.DB.Create(&visitReportsMenu).Error; err != nil {
 		return err
 	}
 	log.Printf("Created menu: %s", visitReportsMenu.Name)
+
+	// Create Tasks menu under Sales CRM
+	tasksMenu := permission.Menu{
+		Name:     "Tasks",
+		Icon:     "clipboard-list",
+		URL:      "/tasks",
+		ParentID: &salesCRMMenu.ID,
+		Order:    4,
+		Status:   "active",
+	}
+	if err := database.DB.Create(&tasksMenu).Error; err != nil {
+		return err
+	}
+	log.Printf("Created menu: %s", tasksMenu.Name)
 
 	// Create Reports menu (root level)
 	reportsMenu := permission.Menu{
@@ -252,6 +266,27 @@ func UpdateMenuStructure() error {
 				log.Printf("Warning: Failed to create Pipeline menu: %v", err)
 			} else {
 				log.Printf("Created Pipeline menu")
+			}
+		}
+	}
+
+	// Add Tasks menu if it doesn't exist
+	var tasksMenu permission.Menu
+	if err := database.DB.Where("url = ?", "/tasks").First(&tasksMenu).Error; err != nil {
+		var salesCRMMenu permission.Menu
+		if err := database.DB.Where("url = ?", "/sales-crm").First(&salesCRMMenu).Error; err == nil {
+			tasksMenu = permission.Menu{
+				Name:     "Tasks",
+				Icon:     "clipboard-list",
+				URL:      "/tasks",
+				ParentID: &salesCRMMenu.ID,
+				Order:    4,
+				Status:   "active",
+			}
+			if err := database.DB.Create(&tasksMenu).Error; err != nil {
+				log.Printf("Warning: Failed to create Tasks menu: %v", err)
+			} else {
+				log.Printf("Created Tasks menu")
 			}
 		}
 	}

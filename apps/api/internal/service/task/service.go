@@ -153,6 +153,26 @@ func (s *Service) CreateTask(req *task.CreateTaskRequest, createdBy string) (*ta
 		priority = "medium"
 	}
 
+	var assignedToPtr *string
+	if req.AssignedTo != "" {
+		assignedToPtr = &req.AssignedTo
+	}
+
+	var accountIDPtr *string
+	if req.AccountID != "" {
+		accountIDPtr = &req.AccountID
+	}
+
+	var contactIDPtr *string
+	if req.ContactID != "" {
+		contactIDPtr = &req.ContactID
+	}
+
+	var dealIDPtr *string
+	if req.DealID != "" {
+		dealIDPtr = &req.DealID
+	}
+
 	t := &task.Task{
 		Title:       req.Title,
 		Description: req.Description,
@@ -160,10 +180,10 @@ func (s *Service) CreateTask(req *task.CreateTaskRequest, createdBy string) (*ta
 		Status:      "pending",
 		Priority:    priority,
 		DueDate:     req.DueDate,
-		AssignedTo:  req.AssignedTo,
-		AccountID:   req.AccountID,
-		ContactID:   req.ContactID,
-		DealID:      req.DealID,
+		AssignedTo:  assignedToPtr,
+		AccountID:   accountIDPtr,
+		ContactID:   contactIDPtr,
+		DealID:      dealIDPtr,
 		CreatedBy:   createdBy,
 	}
 
@@ -225,7 +245,7 @@ func (s *Service) UpdateTask(id string, req *task.UpdateTaskRequest) (*task.Task
 			}
 			return nil, err
 		}
-		t.AssignedTo = req.AssignedTo
+		t.AssignedTo = &req.AssignedTo
 	}
 	if req.AccountID != "" {
 		// Validate account exists
@@ -236,7 +256,7 @@ func (s *Service) UpdateTask(id string, req *task.UpdateTaskRequest) (*task.Task
 			}
 			return nil, err
 		}
-		t.AccountID = req.AccountID
+		t.AccountID = &req.AccountID
 	}
 	if req.ContactID != "" {
 		// Validate contact exists
@@ -247,7 +267,7 @@ func (s *Service) UpdateTask(id string, req *task.UpdateTaskRequest) (*task.Task
 			}
 			return nil, err
 		}
-		t.ContactID = req.ContactID
+		t.ContactID = &req.ContactID
 	}
 	if req.DealID != "" {
 		// Validate deal exists
@@ -258,7 +278,7 @@ func (s *Service) UpdateTask(id string, req *task.UpdateTaskRequest) (*task.Task
 			}
 			return nil, err
 		}
-		t.DealID = req.DealID
+		t.DealID = &req.DealID
 	}
 
 	if err := s.taskRepo.Update(t); err != nil {
@@ -306,7 +326,8 @@ func (s *Service) AssignTask(id string, req *task.AssignTaskRequest) (*task.Task
 		return nil, err
 	}
 
-	t.AssignedTo = req.AssignedTo
+	// Assign pointer to keep AssignedTo nullable
+	t.AssignedTo = &req.AssignedTo
 
 	if err := s.taskRepo.Update(t); err != nil {
 		return nil, err
