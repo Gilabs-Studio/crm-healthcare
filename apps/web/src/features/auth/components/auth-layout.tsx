@@ -25,7 +25,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
       </div>
 
       {/* Right Side - Form (1/3) */}
-      <div className="bg-background flex w-full items-center justify-center p-8 lg:w-1/3">
+      <div className="flex w-full items-center justify-center p-8 lg:w-1/3">
         <div className="w-full max-w-md space-y-8">
           {/* Mobile Logo */}
           <div className="mb-8 flex items-center justify-center gap-3 lg:hidden">

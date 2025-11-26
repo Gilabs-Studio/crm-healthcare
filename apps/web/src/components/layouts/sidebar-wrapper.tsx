@@ -1,24 +1,11 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import { memo } from "react";
-import { Sidebar } from "@/components/navigation/sidebar";
-import { useAuthStore } from "@/features/auth/stores/useAuthStore";
+import type React from "react";
 
-// Routes that should NOT show sidebar
-const NO_SIDEBAR_ROUTES = ["/", "/login", "/forgot-password", "/reset-password"];
-
-function SidebarWrapperContent() {
-  const pathname = usePathname();
-  const { isAuthenticated } = useAuthStore();
-
-  // Don't show sidebar on auth pages or if not authenticated
-  if (NO_SIDEBAR_ROUTES.includes(pathname) || !isAuthenticated) {
-    return null;
-  }
-
-  return <Sidebar />;
+// Deprecated wrapper – sidebar is now controlled inside DashboardLayout.
+// Kept only to avoid breaking any legacy imports.
+export function SidebarWrapper({ children }: { children?: React.ReactNode }) {
+  return <>{children}</>;
 }
 
-export const SidebarWrapper = memo(SidebarWrapperContent);
 

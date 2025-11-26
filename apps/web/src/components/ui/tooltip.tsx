@@ -74,7 +74,6 @@ function Tooltip({ children, delayDuration = 150 }: TooltipProps) {
         data-tooltip 
         onMouseEnter={handleMouseEnter} 
         onMouseLeave={handleMouseLeave} 
-        className="relative inline-block"
       >
         {children}
       </div>
