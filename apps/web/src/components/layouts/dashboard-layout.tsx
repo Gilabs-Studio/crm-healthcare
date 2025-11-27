@@ -12,6 +12,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ThemeToggleButton as ThemeToggle } from "@/components/ui/theme-toggle";
+import { Separator } from "@/components/ui/separator";
 import { getMenuIcon } from "@/lib/menu-icons";
 import {
   Sidebar,
@@ -49,6 +50,8 @@ const Header = memo(function Header({
   avatarUrl?: string;
   fallbackAvatarUrl: string;
 }) {
+  const pathname = usePathname();
+
   const [currentSrc, setCurrentSrc] = React.useState<string | undefined>(
     avatarUrl && avatarUrl.trim() !== "" ? avatarUrl : fallbackAvatarUrl
   );
@@ -62,20 +65,75 @@ const Header = memo(function Header({
     }
   }, [avatarUrl, fallbackAvatarUrl]);
 
-  return (
-    <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-      <SidebarTrigger className="-ml-1" />
-      <div className="ml-2 flex flex-col">
-        <span className="text-sm font-semibold">Healthcare CRM</span>
-      </div>
+  const breadcrumbItems = React.useMemo(() => {
+    const segmentToLabel = (segment: string) => {
+      const map: Record<string, string> = {
+        dashboard: "Dashboard",
+        "visit-reports": "Visit Reports",
+        accounts: "Accounts",
+        deals: "Deals",
+        pipeline: "Pipeline",
+        products: "Products",
+        "product-categories": "Product Categories",
+        reports: "Reports",
+        tasks: "Tasks",
+        settings: "Settings",
+        "master-data": "Master Data",
+      };
 
-      <div className="ml-auto flex items-center gap-2">
+      if (map[segment]) return map[segment];
+
+      return segment
+        .split("-")
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join(" ");
+    };
+
+    if (!pathname || pathname === "/dashboard") {
+      return ["Dashboard"];
+    }
+
+    const segments = pathname.split("/").filter(Boolean);
+    const items: string[] = ["Dashboard"];
+
+    segments.forEach((segment, index) => {
+      if (segment === "dashboard" && index === 0) return;
+      items.push(segmentToLabel(segment));
+    });
+
+    return items;
+  }, [pathname]);
+
+  return (
+    <header className="flex h-16 shrink-0 items-center gap-3 border-b px-4">
+      <SidebarTrigger className="-ml-1 size-8" />
+      <Separator orientation="vertical"/>
+      <nav
+        aria-label="Breadcrumb"
+        className="flex items-center gap-1 text-xs text-muted-foreground"
+      >
+        {breadcrumbItems.map((item, index) => {
+          const isLast = index === breadcrumbItems.length - 1;
+          return (
+            <React.Fragment key={`${item}-${index}`}>
+              {index > 0 && (
+                <span className="mx-1 text-muted-foreground/70">/</span>
+              )}
+              <span className={isLast ? "font-medium text-foreground" : ""}>
+                {item}
+              </span>
+            </React.Fragment>
+          );
+        })}
+      </nav>
+
+      <div className="ml-auto flex items-center gap-4 pr-4">
         <ThemeToggle className="size-8" />
         <Button
           variant="ghost"
-          className="flex items-center gap-2 rounded-full p-1 hover:bg-muted transition-colors"
+          className="flex h-8 w-8 items-center justify-center rounded-full p-0 hover:bg-muted transition-colors"
         >
-          <Avatar>
+          <Avatar className="h-8 w-8">
             <AvatarImage
               src={currentSrc}
               alt={userName}

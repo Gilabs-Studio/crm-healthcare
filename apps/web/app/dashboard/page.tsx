@@ -38,7 +38,7 @@ function DashboardContent() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="space-y-6 p-8"
+      className="space-y-6 p-4"
     >
       <motion.div variants={itemVariants}>
         <div className="flex items-center justify-between">
