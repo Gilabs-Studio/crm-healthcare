@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { useProducts } from "../hooks/useProducts";
 import type { Product } from "../types/product";
+import { useTranslations } from "next-intl";
 
 interface ProductSelectorProps {
   readonly value?: Product | null;
@@ -22,6 +23,7 @@ interface ProductSelectorProps {
 }
 
 export function ProductSelector({ value, onChange, label = "Product" }: ProductSelectorProps) {
+  const t = useTranslations("productManagement.selector");
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState<string>("");
 
@@ -41,7 +43,9 @@ export function ProductSelector({ value, onChange, label = "Product" }: ProductS
 
   return (
     <div className="space-y-1.5">
-      <div className="text-sm font-medium leading-none">{label}</div>
+      <div className="text-sm font-medium leading-none">
+        {label ?? t("label")}
+      </div>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
           <Button variant="outline" className="w-full justify-between">
@@ -50,24 +54,26 @@ export function ProductSelector({ value, onChange, label = "Product" }: ProductS
                 <>
                   <span className="font-medium text-sm">{value.name}</span>
                   <span className="text-xs text-muted-foreground">
-                    SKU: {value.sku} • {value.price_formatted}
+                    {t("skuPrefix")}: {value.sku} • {value.price_formatted}
                   </span>
                 </>
               ) : (
-                <span className="text-sm text-muted-foreground">Select product</span>
+                <span className="text-sm text-muted-foreground">
+                  {t("buttonPlaceholder")}
+                </span>
               )}
             </div>
           </Button>
         </DialogTrigger>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Select Product</DialogTitle>
+            <DialogTitle>{t("dialogTitle")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search products..."
+                placeholder={t("searchPlaceholder")}
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 className="pl-8"
@@ -77,13 +83,13 @@ export function ProductSelector({ value, onChange, label = "Product" }: ProductS
             <div className="max-h-80 overflow-y-auto rounded-md border">
               {isLoading && (
                 <div className="px-4 py-6 text-center text-sm text-muted-foreground">
-                  Loading products...
+                  {t("loading")}
                 </div>
               )}
 
               {!isLoading && products.length === 0 && (
                 <div className="px-4 py-6 text-center text-sm text-muted-foreground">
-                  No products found.
+                  {t("empty")}
                 </div>
               )}
 
@@ -99,7 +105,7 @@ export function ProductSelector({ value, onChange, label = "Product" }: ProductS
                       <div>
                         <div className="font-medium">{product.name}</div>
                         <div className="text-xs text-muted-foreground mt-0.5">
-                          SKU: {product.sku} • {product.price_formatted}
+                          {t("skuPrefix")}: {product.sku} • {product.price_formatted}
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-1">
@@ -108,7 +114,9 @@ export function ProductSelector({ value, onChange, label = "Product" }: ProductS
                             {product.category.name}
                           </Badge>
                         )}
-                        <div className="text-xs text-muted-foreground">Stock: {product.stock}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {t("stockPrefix")}: {product.stock}
+                        </div>
                       </div>
                     </div>
                   </button>
@@ -123,7 +131,7 @@ export function ProductSelector({ value, onChange, label = "Product" }: ProductS
                 className="self-start text-xs text-muted-foreground"
                 onClick={() => onChange(null)}
               >
-                Clear selection
+                {t("clearSelection")}
               </Button>
             )}
           </div>

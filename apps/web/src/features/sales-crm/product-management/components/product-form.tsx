@@ -22,6 +22,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { useProductCategories } from "../hooks/useProducts";
 import type { Product } from "../types/product";
+import { useTranslations } from "next-intl";
 
 interface ProductFormProps {
   readonly product?: Product;
@@ -34,6 +35,7 @@ export function ProductForm({ product, onSubmit, onCancel, isLoading }: ProductF
   const isEdit = !!product;
   const { data: categoriesData } = useProductCategories();
   const categories = categoriesData?.data ?? [];
+  const t = useTranslations("productManagement.form");
 
   const {
     register,
@@ -99,32 +101,32 @@ export function ProductForm({ product, onSubmit, onCancel, isLoading }: ProductF
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
       <Field orientation="vertical">
-        <FieldLabel>Name *</FieldLabel>
-        <Input {...register("name")} placeholder="Product name" />
+        <FieldLabel>{t("nameLabel")} *</FieldLabel>
+        <Input {...register("name")} placeholder={t("namePlaceholder")} />
         {errors.name && <FieldError>{errors.name.message}</FieldError>}
       </Field>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Field orientation="vertical">
-          <FieldLabel>SKU *</FieldLabel>
-          <Input {...register("sku")} placeholder="SKU code" />
+          <FieldLabel>{t("skuLabel")} *</FieldLabel>
+          <Input {...register("sku")} placeholder={t("skuPlaceholder")} />
           {errors.sku && <FieldError>{errors.sku.message}</FieldError>}
         </Field>
 
         <Field orientation="vertical">
-          <FieldLabel>Barcode</FieldLabel>
-          <Input {...register("barcode")} placeholder="Barcode (optional)" />
+          <FieldLabel>{t("barcodeLabel")}</FieldLabel>
+          <Input {...register("barcode")} placeholder={t("barcodePlaceholder")} />
           {errors.barcode && <FieldError>{errors.barcode.message}</FieldError>}
         </Field>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Field orientation="vertical">
-          <FieldLabel>Price (Rp) *</FieldLabel>
+          <FieldLabel>{t("priceLabel")} *</FieldLabel>
           <Input
             type="number"
             {...register("price", { valueAsNumber: true })}
-            placeholder="0"
+            placeholder={t("pricePlaceholder")}
             min={0}
             step="0.01"
           />
@@ -132,11 +134,11 @@ export function ProductForm({ product, onSubmit, onCancel, isLoading }: ProductF
         </Field>
 
         <Field orientation="vertical">
-          <FieldLabel>Cost (Rp)</FieldLabel>
+          <FieldLabel>{t("costLabel")}</FieldLabel>
           <Input
             type="number"
             {...register("cost", { valueAsNumber: true })}
-            placeholder="0"
+            placeholder={t("costPlaceholder")}
             min={0}
             step="0.01"
           />
@@ -144,11 +146,11 @@ export function ProductForm({ product, onSubmit, onCancel, isLoading }: ProductF
         </Field>
 
         <Field orientation="vertical">
-          <FieldLabel>Stock</FieldLabel>
+          <FieldLabel>{t("stockLabel")}</FieldLabel>
           <Input
             type="number"
             {...register("stock", { valueAsNumber: true })}
-            placeholder="0"
+            placeholder={t("stockPlaceholder")}
             min={0}
           />
           {errors.stock && <FieldError>{errors.stock.message}</FieldError>}
@@ -156,13 +158,13 @@ export function ProductForm({ product, onSubmit, onCancel, isLoading }: ProductF
       </div>
 
       <Field orientation="vertical">
-        <FieldLabel>Category *</FieldLabel>
+        <FieldLabel>{t("categoryLabel")} *</FieldLabel>
         <Select
           value={watch("category_id") || ""}
           onValueChange={(value) => setValue("category_id", value)}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select category" />
+            <SelectValue placeholder={t("categoryPlaceholder")} />
           </SelectTrigger>
           <SelectContent>
             {categories.map((category) => (
@@ -177,7 +179,7 @@ export function ProductForm({ product, onSubmit, onCancel, isLoading }: ProductF
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Field orientation="horizontal" className="items-center justify-between">
-          <FieldLabel>Taxable</FieldLabel>
+          <FieldLabel>{t("taxableLabel")}</FieldLabel>
           <Switch
             checked={!!taxable}
             onCheckedChange={(checked) => setValue("taxable", checked)}
@@ -185,17 +187,17 @@ export function ProductForm({ product, onSubmit, onCancel, isLoading }: ProductF
         </Field>
 
         <Field orientation="vertical">
-          <FieldLabel>Status</FieldLabel>
+          <FieldLabel>{t("statusLabel")}</FieldLabel>
           <Select
             value={watch("status") || "active"}
             onValueChange={(value) => setValue("status", value as "active" | "inactive")}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select status" />
+              <SelectValue placeholder={t("statusPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
+              <SelectItem value="active">{t("statusActive")}</SelectItem>
+              <SelectItem value="inactive">{t("statusInactive")}</SelectItem>
             </SelectContent>
           </Select>
           {errors.status && <FieldError>{errors.status.message}</FieldError>}
@@ -203,17 +205,21 @@ export function ProductForm({ product, onSubmit, onCancel, isLoading }: ProductF
       </div>
 
       <Field orientation="vertical">
-        <FieldLabel>Description</FieldLabel>
-        <Textarea {...register("description")} placeholder="Product description" rows={3} />
+        <FieldLabel>{t("descriptionLabel")}</FieldLabel>
+        <Textarea
+          {...register("description")}
+          placeholder={t("descriptionPlaceholder")}
+          rows={3}
+        />
         {errors.description && <FieldError>{errors.description.message}</FieldError>}
       </Field>
 
       <div className="flex justify-end gap-2 pt-4">
         <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
-          Cancel
+          {t("cancel")}
         </Button>
         <Button type="submit" disabled={isLoading}>
-          {isLoading ? "Saving..." : isEdit ? "Update" : "Create"}
+          {isLoading ? t("submitting") : isEdit ? t("submitUpdate") : t("submitCreate")}
         </Button>
       </div>
     </form>

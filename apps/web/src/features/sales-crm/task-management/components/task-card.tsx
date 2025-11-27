@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, CheckCircle2, Edit2, Trash2, User } from "lucide-react";
 import type { Task } from "../types";
+import { useTranslations } from "next-intl";
 
 interface TaskCardProps {
   readonly task: Task;
@@ -30,6 +31,8 @@ const priorityVariantMap: Record<Task["priority"], "default" | "secondary" | "ou
   };
 
 export function TaskCard({ task, onEdit, onDelete, onComplete, onClickTitle }: TaskCardProps) {
+  const t = useTranslations("taskManagement.card");
+
   const dueLabel =
     task.due_date &&
     new Date(task.due_date).toLocaleDateString("id-ID", {
@@ -72,12 +75,14 @@ export function TaskCard({ task, onEdit, onDelete, onComplete, onClickTitle }: T
         <div className="flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">
           {task.account && (
             <span className="truncate max-w-[180px]">
-              Account: <span className="text-foreground font-medium">{task.account.name}</span>
+              {t("accountLabel")}{" "}
+              <span className="text-foreground font-medium">{task.account.name}</span>
             </span>
           )}
           {task.contact && (
             <span className="truncate max-w-[180px]">
-              Contact: <span className="text-foreground font-medium">{task.contact.name}</span>
+              {t("contactLabel")}{" "}
+              <span className="text-foreground font-medium">{task.contact.name}</span>
             </span>
           )}
           {task.assigned_user && (
@@ -89,7 +94,7 @@ export function TaskCard({ task, onEdit, onDelete, onComplete, onClickTitle }: T
           {dueLabel && (
             <span className="inline-flex items-center gap-1">
               <Calendar className="h-3 w-3" />
-              <span>Due {dueLabel}</span>
+              <span>{t("duePrefix", { date: dueLabel })}</span>
             </span>
           )}
         </div>
@@ -103,7 +108,7 @@ export function TaskCard({ task, onEdit, onDelete, onComplete, onClickTitle }: T
             variant="ghost"
             className="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
             onClick={onComplete}
-            title="Mark as completed"
+            title={t("markCompletedTooltip")}
           >
             <CheckCircle2 className="h-3.5 w-3.5" />
           </Button>
@@ -114,7 +119,7 @@ export function TaskCard({ task, onEdit, onDelete, onComplete, onClickTitle }: T
           variant="ghost"
           className="h-8 w-8"
           onClick={onEdit}
-          title="Edit task"
+          title={t("editTooltip")}
         >
           <Edit2 className="h-3.5 w-3.5" />
         </Button>
@@ -124,7 +129,7 @@ export function TaskCard({ task, onEdit, onDelete, onComplete, onClickTitle }: T
           variant="ghost"
           className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
           onClick={onDelete}
-          title="Delete task"
+          title={t("deleteTooltip")}
         >
           <Trash2 className="h-3.5 w-3.5" />
         </Button>

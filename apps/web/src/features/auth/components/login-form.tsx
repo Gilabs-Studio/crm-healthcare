@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
@@ -27,6 +28,7 @@ import { useLogin } from "../hooks/useLogin";
 import type { AuthError } from "../types/errors";
 
 export function LoginForm() {
+  const t = useTranslations("auth.login");
   const { isAuthenticated } = useAuthStore();
   const { handleLogin, isLoading, error, clearError } = useLogin();
 
@@ -87,20 +89,20 @@ export function LoginForm() {
       >
         <Card className="border border-border/60 bg-card/90 shadow-sm">
           <CardHeader className="space-y-2 px-6 pb-2 pt-6">
-            <CardTitle className="text-2xl">Welcome back</CardTitle>
+            <CardTitle className="text-2xl">{t("title")}</CardTitle>
             <CardDescription className="text-sm text-muted-foreground">
-              Sign in to your CRM Healthcare account to continue
+              {t("description")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5 px-6 pb-6 pt-2">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
               <FieldGroup className="space-y-4">
                 <Field className="space-y-2">
-                  <FieldLabel htmlFor="email">Email</FieldLabel>
+                  <FieldLabel htmlFor="email">{t("emailLabel")}</FieldLabel>
                   <Input
                     id="email"
                     type="email"
-                    placeholder="admin@example.com"
+                    placeholder={t("emailPlaceholder")}
                     {...register("email")}
                     disabled={isFormLoading}
                     aria-invalid={!!errors.email}
@@ -113,18 +115,18 @@ export function LoginForm() {
 
                 <Field className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <FieldLabel htmlFor="password">Password</FieldLabel>
+                    <FieldLabel htmlFor="password">{t("passwordLabel")}</FieldLabel>
                     <button
                       type="button"
                       className="text-xs font-medium text-primary hover:underline"
                     >
-                      Forgot password?
+                      {t("forgotPassword")}
                     </button>
                   </div>
                   <Input
                     id="password"
                     type="password"
-                    placeholder="Enter your password"
+                    placeholder={t("passwordPlaceholder")}
                     {...register("password")}
                     disabled={isFormLoading}
                     aria-invalid={!!errors.password}
@@ -142,7 +144,7 @@ export function LoginForm() {
                     disabled={isFormLoading}
                   />
                   <span className="text-sm text-muted-foreground">
-                    Remember me
+                    {t("rememberMe")}
                   </span>
                 </label>
               </Field>
@@ -159,7 +161,7 @@ export function LoginForm() {
                     disabled={isFormLoading}
                     className="h-11 w-full text-sm font-semibold tracking-wide"
                   >
-                    {isFormLoading ? "Signing in..." : "Sign in"}
+                    {isFormLoading ? t("submitting") : t("submit")}
                   </Button>
                 </Field>
               </FieldGroup>

@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Building2, User, DollarSign, TrendingUp, Calendar, Circle } from "lucide-react";
 import type { Deal } from "../types";
 import { formatCurrency } from "../utils/format";
+import { useTranslations } from "next-intl";
 
 interface DealCardProps {
   readonly deal: Deal;
@@ -13,11 +14,13 @@ interface DealCardProps {
 }
 
 export function DealCard({ deal, onClick }: DealCardProps) {
+  const t = useTranslations("pipelineManagement.dealCard");
+
   const valueFormatted = deal.value_formatted || formatCurrency(deal.value ?? 0);
-  const accountName = deal.account?.name || "Unknown Account";
+  const accountName = deal.account?.name || t("unknownAccount");
   const contactName = deal.contact?.name;
   const assignedUserName = deal.assigned_user?.name;
-  const stageName = deal.stage?.name || "Unknown Stage";
+  const stageName = deal.stage?.name || t("unknownStage");
   const stageColor = deal.stage?.color || "#3B82F6";
 
   const getStatusBadgeVariant = (status: string) => {
@@ -49,21 +52,21 @@ export function DealCard({ deal, onClick }: DealCardProps) {
         <div className="space-y-2.5">
           <div className="flex items-center gap-2 text-sm">
             <Building2 className="h-4 w-4 text-muted-foreground shrink-0" />
-            <span className="text-muted-foreground shrink-0">Account:</span>
+            <span className="text-muted-foreground shrink-0">{t("accountLabel")}</span>
             <span className="font-medium text-foreground truncate">{accountName}</span>
           </div>
 
           {contactName && (
             <div className="flex items-center gap-2 text-sm">
               <User className="h-4 w-4 text-muted-foreground shrink-0" />
-              <span className="text-muted-foreground shrink-0">Contact:</span>
+              <span className="text-muted-foreground shrink-0">{t("contactLabel")}</span>
               <span className="font-medium text-foreground truncate">{contactName}</span>
             </div>
           )}
 
           <div className="flex items-center gap-2 text-sm">
             <DollarSign className="h-4 w-4 text-muted-foreground shrink-0" />
-            <span className="text-muted-foreground shrink-0">Value:</span>
+            <span className="text-muted-foreground shrink-0">{t("valueLabel")}</span>
             <span className="font-semibold text-foreground truncate text-base">
               {valueFormatted || formatCurrency(deal.value ?? 0)}
             </span>
@@ -72,7 +75,7 @@ export function DealCard({ deal, onClick }: DealCardProps) {
           {deal.probability > 0 && (
             <div className="flex items-center gap-2 text-sm">
               <TrendingUp className="h-4 w-4 text-muted-foreground shrink-0" />
-              <span className="text-muted-foreground shrink-0">Probability:</span>
+              <span className="text-muted-foreground shrink-0">{t("probabilityLabel")}</span>
               <span className="font-medium text-foreground">{deal.probability}%</span>
             </div>
           )}
@@ -80,7 +83,7 @@ export function DealCard({ deal, onClick }: DealCardProps) {
           {deal.expected_close_date && (
             <div className="flex items-center gap-2 text-sm">
               <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
-              <span className="text-muted-foreground shrink-0">Expected Close:</span>
+              <span className="text-muted-foreground shrink-0">{t("expectedCloseLabel")}</span>
               <span className="font-medium text-foreground truncate">
                 {new Date(deal.expected_close_date).toLocaleDateString("id-ID", {
                   day: "numeric",

@@ -102,7 +102,7 @@ const createAnimation = (
       name: `${variant}-${start}${blur ? "-blur" : ""}`,
       css: `
        ::view-transition-group(root) {
-        animation-duration: 0.7s;
+        animation-duration: 1s;
         animation-timing-function: var(--expo-out);
       }
             
@@ -255,7 +255,7 @@ const createAnimation = (
 
 export const useThemeToggle = ({
   variant = "circle",
-  start = "bottom-left",
+  start = "top-right",
   blur = false,
   gifUrl = "",
 }: {
@@ -330,7 +330,7 @@ export const useThemeToggle = ({
 export const ThemeToggleButton = ({
   className = "",
   variant = "circle",
-  start = "bottom-left",
+  start = "top-right",
   blur = false,
   gifUrl = "",
 }: {

@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Users, TrendingUp, Building2, Activity } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { SalesPerformanceReport } from "../types";
+import { useTranslations } from "next-intl";
 
 interface SalesPerformanceReportViewerProps {
   data?: SalesPerformanceReport;
@@ -15,6 +16,8 @@ export function SalesPerformanceReportViewer({
   data,
   isLoading,
 }: SalesPerformanceReportViewerProps) {
+  const t = useTranslations("reportsFeature.salesPerformanceReportViewer");
+  const tCommon = useTranslations("reportsFeature.common");
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -27,7 +30,7 @@ export function SalesPerformanceReportViewer({
   if (!data) {
     return (
       <div className="text-center py-8 text-muted-foreground">
-        <p className="text-sm">No data available. Please generate a report.</p>
+        <p className="text-sm">{tCommon("noData")}</p>
       </div>
     );
   }
@@ -39,7 +42,7 @@ export function SalesPerformanceReportViewer({
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Visits
+              {t("summary.totalVisits")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -49,7 +52,7 @@ export function SalesPerformanceReportViewer({
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Accounts
+              {t("summary.totalAccounts")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -59,7 +62,7 @@ export function SalesPerformanceReportViewer({
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Avg Visits/Account
+              {t("summary.avgVisitsPerAccount")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -76,7 +79,7 @@ export function SalesPerformanceReportViewer({
           <CardHeader>
             <div className="flex items-center gap-2">
               <Users className="h-5 w-5" />
-              <CardTitle>Sales Rep Performance</CardTitle>
+              <CardTitle>{t("bySalesRepTitle")}</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
@@ -92,21 +95,29 @@ export function SalesPerformanceReportViewer({
                     <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                       <div className="flex items-center gap-1">
                         <Activity className="h-3 w-3" />
-                        <span>{item.visit_count} visits</span>
+                        <span>
+                          {t("visitsLabel", { count: item.visit_count })}
+                        </span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Building2 className="h-3 w-3" />
-                        <span>{item.account_count} accounts</span>
+                        <span>
+                          {t("accountsLabel", { count: item.account_count })}
+                        </span>
                       </div>
                       <div className="flex items-center gap-1">
                         <TrendingUp className="h-3 w-3" />
-                        <span>{item.activity_count} activities</span>
+                        <span>
+                          {t("activitiesLabel", { count: item.activity_count })}
+                        </span>
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <Badge variant="outline">
-                      {item.completion_rate.toFixed(1)}% completion
+                      {t("completionBadge", {
+                        rate: item.completion_rate.toFixed(1),
+                      })}
                     </Badge>
                   </div>
                 </div>

@@ -22,6 +22,7 @@ import {
 import { useAccounts } from "../hooks/useAccounts";
 import { useContactRoles } from "../hooks/useContactRoles";
 import type { Contact } from "../types";
+import { useTranslations } from "next-intl";
 
 interface ContactFormProps {
   readonly contact?: Contact;
@@ -43,6 +44,7 @@ export function ContactForm({
   const accounts = accountsData?.data || [];
   const { data: contactRolesData } = useContactRoles();
   const contactRoles = contactRolesData?.data || [];
+  const t = useTranslations("accountManagement.contactForm");
 
   const {
     register,
@@ -76,14 +78,14 @@ export function ContactForm({
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
       <Field orientation="vertical">
-        <FieldLabel>Account *</FieldLabel>
+        <FieldLabel>{t("accountLabel")}{""}*</FieldLabel>
         <Select
           value={selectedAccountId || ""}
           onValueChange={(value) => setValue("account_id", value)}
           disabled={isEdit}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select an account" />
+            <SelectValue placeholder={t("accountPlaceholder")} />
           </SelectTrigger>
           <SelectContent>
             {accounts.map((account) => (
@@ -97,19 +99,19 @@ export function ContactForm({
       </Field>
 
       <Field orientation="vertical">
-        <FieldLabel>Name *</FieldLabel>
-        <Input {...register("name")} placeholder="Contact Name" />
+        <FieldLabel>{t("nameLabel")}{""}*</FieldLabel>
+        <Input {...register("name")} placeholder={t("namePlaceholder")} />
         {errors.name && <FieldError>{errors.name.message}</FieldError>}
       </Field>
 
       <Field orientation="vertical">
-        <FieldLabel>Role *</FieldLabel>
+        <FieldLabel>{t("roleLabel")}{""}*</FieldLabel>
         <Select
           value={watch("role_id") || ""}
           onValueChange={(value) => setValue("role_id", value)}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select role" />
+            <SelectValue placeholder={t("rolePlaceholder")} />
           </SelectTrigger>
           <SelectContent>
             {contactRoles
@@ -126,36 +128,36 @@ export function ContactForm({
 
       <div className="grid grid-cols-2 gap-4">
         <Field orientation="vertical">
-          <FieldLabel>Phone</FieldLabel>
-          <Input {...register("phone")} placeholder="Phone number" />
+          <FieldLabel>{t("phoneLabel")}</FieldLabel>
+          <Input {...register("phone")} placeholder={t("phonePlaceholder")} />
           {errors.phone && <FieldError>{errors.phone.message}</FieldError>}
         </Field>
 
         <Field orientation="vertical">
-          <FieldLabel>Email</FieldLabel>
-          <Input type="email" {...register("email")} placeholder="email@example.com" />
+          <FieldLabel>{t("emailLabel")}</FieldLabel>
+          <Input type="email" {...register("email")} placeholder={t("emailPlaceholder")} />
           {errors.email && <FieldError>{errors.email.message}</FieldError>}
         </Field>
       </div>
 
       <Field orientation="vertical">
-        <FieldLabel>Position</FieldLabel>
-        <Input {...register("position")} placeholder="Position/Title" />
+        <FieldLabel>{t("positionLabel")}</FieldLabel>
+        <Input {...register("position")} placeholder={t("positionPlaceholder")} />
         {errors.position && <FieldError>{errors.position.message}</FieldError>}
       </Field>
 
       <Field orientation="vertical">
-        <FieldLabel>Notes</FieldLabel>
-        <Textarea {...register("notes")} placeholder="Additional notes" rows={3} />
+        <FieldLabel>{t("notesLabel")}</FieldLabel>
+        <Textarea {...register("notes")} placeholder={t("notesPlaceholder")} rows={3} />
         {errors.notes && <FieldError>{errors.notes.message}</FieldError>}
       </Field>
 
       <div className="flex justify-end gap-2 pt-4">
         <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
-          Cancel
+          {t("cancel")}
         </Button>
         <Button type="submit" disabled={isLoading}>
-          {isLoading ? "Saving..." : isEdit ? "Update" : "Create"}
+          {isLoading ? t("submitting") : isEdit ? t("submitUpdate") : t("submitCreate")}
         </Button>
       </div>
     </form>

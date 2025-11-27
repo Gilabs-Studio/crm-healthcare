@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { useCategories } from "../hooks/useCategories";
 import type { Account } from "../types";
+import { useTranslations } from "next-intl";
 
 interface AccountFormProps {
   readonly account?: Account;
@@ -33,6 +34,7 @@ export function AccountForm({ account, onSubmit, onCancel, isLoading }: AccountF
   const isEdit = !!account;
   const { data: categoriesData } = useCategories();
   const categories = categoriesData?.data || [];
+  const t = useTranslations("accountManagement.accountForm");
 
   const {
     register,
@@ -66,19 +68,19 @@ export function AccountForm({ account, onSubmit, onCancel, isLoading }: AccountF
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
       <Field orientation="vertical">
-        <FieldLabel>Name *</FieldLabel>
-        <Input {...register("name")} placeholder="Account Name" />
+        <FieldLabel>{t("nameLabel")}{""}*</FieldLabel>
+        <Input {...register("name")} placeholder={t("namePlaceholder")} />
         {errors.name && <FieldError>{errors.name.message}</FieldError>}
       </Field>
 
       <Field orientation="vertical">
-        <FieldLabel>Category *</FieldLabel>
+        <FieldLabel>{t("categoryLabel")}{""}*</FieldLabel>
         <Select
           value={watch("category_id") || ""}
           onValueChange={(value) => setValue("category_id", value)}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select category" />
+            <SelectValue placeholder={t("categoryPlaceholder")} />
           </SelectTrigger>
           <SelectContent>
             {categories
@@ -94,41 +96,41 @@ export function AccountForm({ account, onSubmit, onCancel, isLoading }: AccountF
       </Field>
 
       <Field orientation="vertical">
-        <FieldLabel>Address</FieldLabel>
-        <Textarea {...register("address")} placeholder="Full address" rows={3} />
+        <FieldLabel>{t("addressLabel")}</FieldLabel>
+        <Textarea {...register("address")} placeholder={t("addressPlaceholder")} rows={3} />
         {errors.address && <FieldError>{errors.address.message}</FieldError>}
       </Field>
 
       <div className="grid grid-cols-2 gap-4">
         <Field orientation="vertical">
-          <FieldLabel>City</FieldLabel>
-          <Input {...register("city")} placeholder="City" />
+          <FieldLabel>{t("cityLabel")}</FieldLabel>
+          <Input {...register("city")} placeholder={t("cityPlaceholder")} />
           {errors.city && <FieldError>{errors.city.message}</FieldError>}
         </Field>
 
         <Field orientation="vertical">
-          <FieldLabel>Province</FieldLabel>
-          <Input {...register("province")} placeholder="Province" />
+          <FieldLabel>{t("provinceLabel")}</FieldLabel>
+          <Input {...register("province")} placeholder={t("provincePlaceholder")} />
           {errors.province && <FieldError>{errors.province.message}</FieldError>}
         </Field>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <Field orientation="vertical">
-          <FieldLabel>Phone</FieldLabel>
-          <Input {...register("phone")} placeholder="Phone number" />
+          <FieldLabel>{t("phoneLabel")}</FieldLabel>
+          <Input {...register("phone")} placeholder={t("phonePlaceholder")} />
           {errors.phone && <FieldError>{errors.phone.message}</FieldError>}
         </Field>
 
         <Field orientation="vertical">
-          <FieldLabel>Email</FieldLabel>
-          <Input type="email" {...register("email")} placeholder="email@example.com" />
+          <FieldLabel>{t("emailLabel")}</FieldLabel>
+          <Input type="email" {...register("email")} placeholder={t("emailPlaceholder")} />
           {errors.email && <FieldError>{errors.email.message}</FieldError>}
         </Field>
       </div>
 
       <Field orientation="vertical">
-        <FieldLabel>Status</FieldLabel>
+        <FieldLabel>{t("statusLabel")}</FieldLabel>
         <Select
           value={watch("status") || "active"}
           onValueChange={(value) => setValue("status", value as "active" | "inactive")}
@@ -137,8 +139,8 @@ export function AccountForm({ account, onSubmit, onCancel, isLoading }: AccountF
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="inactive">Inactive</SelectItem>
+            <SelectItem value="active">{t("statusActive")}</SelectItem>
+            <SelectItem value="inactive">{t("statusInactive")}</SelectItem>
           </SelectContent>
         </Select>
         {errors.status && <FieldError>{errors.status.message}</FieldError>}
@@ -146,10 +148,10 @@ export function AccountForm({ account, onSubmit, onCancel, isLoading }: AccountF
 
       <div className="flex justify-end gap-2 pt-4">
         <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
-          Cancel
+          {t("cancel")}
         </Button>
         <Button type="submit" disabled={isLoading}>
-          {isLoading ? "Saving..." : isEdit ? "Update" : "Create"}
+          {isLoading ? t("submitting") : isEdit ? t("submitUpdate") : t("submitCreate")}
         </Button>
       </div>
     </form>

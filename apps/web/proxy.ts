@@ -5,9 +5,10 @@ export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get("token")?.value;
 
-  // If accessing login page and already authenticated, redirect to dashboard
+  // If accessing root and already authenticated, redirect to default-locale dashboard
   if (pathname === "/" && token) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    const target = "/en/dashboard"; // default locale is "en"
+    return NextResponse.redirect(new URL(target, request.url));
   }
 
   // If accessing protected routes without token, let client-side handle redirect

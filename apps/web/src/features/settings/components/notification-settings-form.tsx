@@ -11,10 +11,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Switch } from "@/components/ui/switch";
 import { useSettings, useUpdateSettings } from "../hooks/useSettings";
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 export function NotificationSettingsForm() {
   const { data, isLoading } = useSettings();
   const updateSettings = useUpdateSettings();
+  const t = useTranslations("settings.notifications");
 
   const {
     register,
@@ -60,7 +62,7 @@ export function NotificationSettingsForm() {
       await updateSettings.mutateAsync({
         notifications: formData as Record<string, string>,
       });
-      toast.success("Notification settings updated successfully");
+      toast.success(t("toast.success"));
     } catch (error) {
       // Error already handled in api-client interceptor
     }
@@ -70,8 +72,8 @@ export function NotificationSettingsForm() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Notification Settings</CardTitle>
-          <CardDescription>Configure how you receive notifications</CardDescription>
+          <CardTitle>{t("loading.title")}</CardTitle>
+          <CardDescription>{t("loading.description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -87,16 +89,16 @@ export function NotificationSettingsForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Notification Settings</CardTitle>
-        <CardDescription>Configure how you receive notifications</CardDescription>
+        <CardTitle>{t("title")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <FieldLabel>Email Notifications</FieldLabel>
+              <FieldLabel>{t("sections.email.label")}</FieldLabel>
               <p className="text-sm text-muted-foreground">
-                Receive notifications via email
+                {t("sections.email.description")}
               </p>
             </div>
             <Switch
@@ -107,9 +109,9 @@ export function NotificationSettingsForm() {
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <FieldLabel>SMS Notifications</FieldLabel>
+              <FieldLabel>{t("sections.sms.label")}</FieldLabel>
               <p className="text-sm text-muted-foreground">
-                Receive notifications via SMS
+                {t("sections.sms.description")}
               </p>
             </div>
             <Switch
@@ -120,9 +122,9 @@ export function NotificationSettingsForm() {
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <FieldLabel>Push Notifications</FieldLabel>
+              <FieldLabel>{t("sections.push.label")}</FieldLabel>
               <p className="text-sm text-muted-foreground">
-                Receive push notifications in browser
+                {t("sections.push.description")}
               </p>
             </div>
             <Switch
@@ -135,9 +137,9 @@ export function NotificationSettingsForm() {
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <FieldLabel>Visit Report Notifications</FieldLabel>
+              <FieldLabel>{t("sections.visitReport.label")}</FieldLabel>
               <p className="text-sm text-muted-foreground">
-                Get notified about visit report updates
+                {t("sections.visitReport.description")}
               </p>
             </div>
             <Switch
@@ -148,9 +150,9 @@ export function NotificationSettingsForm() {
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <FieldLabel>Task Reminder Notifications</FieldLabel>
+              <FieldLabel>{t("sections.taskReminder.label")}</FieldLabel>
               <p className="text-sm text-muted-foreground">
-                Get reminded about upcoming tasks
+                {t("sections.taskReminder.description")}
               </p>
             </div>
             <Switch
@@ -161,9 +163,9 @@ export function NotificationSettingsForm() {
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <FieldLabel>Pipeline Update Notifications</FieldLabel>
+              <FieldLabel>{t("sections.pipelineUpdate.label")}</FieldLabel>
               <p className="text-sm text-muted-foreground">
-                Get notified about pipeline changes
+                {t("sections.pipelineUpdate.description")}
               </p>
             </div>
             <Switch
@@ -177,7 +179,7 @@ export function NotificationSettingsForm() {
               type="submit"
               disabled={updateSettings.isPending}
             >
-              {updateSettings.isPending ? "Saving..." : "Save Changes"}
+              {updateSettings.isPending ? t("buttons.saving") : t("buttons.saveChanges")}
             </Button>
           </div>
         </form>

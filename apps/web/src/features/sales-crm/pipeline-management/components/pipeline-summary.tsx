@@ -12,9 +12,11 @@ import {
 } from "lucide-react";
 import { usePipelineSummary } from "../hooks/usePipelines";
 import { formatCurrency } from "../utils/format";
+import { useTranslations } from "next-intl";
 
 export function PipelineSummary() {
   const { data, isLoading } = usePipelineSummary();
+  const t = useTranslations("pipelineManagement.pipelineSummary");
 
   if (isLoading) {
     return (
@@ -45,14 +47,14 @@ export function PipelineSummary() {
     return (
       <div className="space-y-6">
         <div>
-          <h3 className="text-2xl font-bold tracking-tight">Pipeline Summary</h3>
+          <h3 className="text-2xl font-bold tracking-tight">{t("title")}</h3>
           <p className="text-sm text-muted-foreground mt-1">
-            Overview of your sales pipeline performance
+            {t("description")}
           </p>
         </div>
         <Card className="p-6 border-border">
           <div className="text-center py-12">
-            <p className="text-muted-foreground">No summary data available</p>
+            <p className="text-muted-foreground">{t("noData")}</p>
           </div>
         </Card>
       </div>
@@ -63,7 +65,7 @@ export function PipelineSummary() {
 
   const summaryCards = [
     {
-      label: "Total Deals",
+      label: t("totalDeals"),
       value: summary.total_deals,
       amount: summary.total_value_formatted || formatCurrency(summary.total_value),
       icon: Briefcase,
@@ -71,7 +73,7 @@ export function PipelineSummary() {
       bgColor: "bg-blue-50 dark:bg-blue-950",
     },
     {
-      label: "Open Deals",
+      label: t("openDeals"),
       value: summary.open_deals,
       amount: summary.open_value_formatted || formatCurrency(summary.open_value),
       icon: FolderOpen,
@@ -79,7 +81,7 @@ export function PipelineSummary() {
       bgColor: "bg-amber-50 dark:bg-amber-950",
     },
     {
-      label: "Won Deals",
+      label: t("wonDeals"),
       value: summary.won_deals,
       amount: summary.won_value_formatted || formatCurrency(summary.won_value),
       icon: CheckCircle2,
@@ -87,7 +89,7 @@ export function PipelineSummary() {
       bgColor: "bg-green-50 dark:bg-green-950",
     },
     {
-      label: "Lost Deals",
+      label: t("lostDeals"),
       value: summary.lost_deals,
       amount: summary.lost_value_formatted || formatCurrency(summary.lost_value),
       icon: XCircle,
@@ -99,9 +101,9 @@ export function PipelineSummary() {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-2xl font-bold tracking-tight">Pipeline Summary</h3>
+        <h3 className="text-2xl font-bold tracking-tight">{t("title")}</h3>
         <p className="text-sm text-muted-foreground mt-1">
-          Overview of your sales pipeline performance
+          {t("description")}
         </p>
       </div>
       
@@ -133,7 +135,7 @@ export function PipelineSummary() {
         <Card className="p-6 border-border">
           <div className="flex items-center gap-2 mb-6">
             <TrendingUp className="h-5 w-5 text-muted-foreground" />
-            <h4 className="text-lg font-semibold">Performance by Stage</h4>
+            <h4 className="text-lg font-semibold">{t("performanceByStageTitle")}</h4>
           </div>
           <div className="space-y-3">
             {summary.by_stage.map((stage) => (
@@ -145,7 +147,8 @@ export function PipelineSummary() {
                   <p className="font-semibold text-foreground mb-1">{stage.stage_name}</p>
                   <div className="flex items-center gap-2">
                     <Badge variant="secondary" className="text-xs">
-                      {stage.deal_count} {stage.deal_count === 1 ? "deal" : "deals"}
+                      {stage.deal_count}{" "}
+                      {stage.deal_count === 1 ? t("stageDealsSingular") : t("stageDealsPlural")}
                     </Badge>
                   </div>
                 </div>

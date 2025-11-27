@@ -1,3 +1,24 @@
+import type { routing } from "@/i18n/routing";
+
+export type Locale = (typeof routing)["locales"][number];
+
+declare global {
+  interface IntlMessages {
+    common: Record<string, string>;
+    nav: Record<string, string>;
+    dashboard: Record<string, string>;
+    dashboardOverview: Record<string, string>;
+    activityTrends: Record<string, string>;
+    visitStatistics: Record<string, string>;
+    pipelineSummary: Record<string, string>;
+    recentActivities: Record<string, string>;
+    topAccounts: Record<string, string>;
+    topSalesReps: Record<string, string>;
+    sidebar: Record<string, string>;
+    notFound: Record<string, string>;
+  }
+}
+
 export interface DashboardOverview {
   period: {
     type: string;

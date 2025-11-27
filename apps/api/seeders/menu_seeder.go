@@ -17,11 +17,15 @@ func SeedMenus() error {
 		return nil
 	}
 
+	// Base path for frontend routes (for i18n support, keep URLs locale-agnostic).
+	// Frontend akan menambahkan prefix locale sendiri (mis. "/en" atau "/id").
+	basePath := ""
+
 	// Create Dashboard menu (root level)
 	dashboardMenu := permission.Menu{
 		Name:   "Dashboard",
 		Icon:   "layout-dashboard",
-		URL:    "/dashboard",
+		URL:    basePath + "/dashboard",
 		Order:  1,
 		Status: "active",
 	}
@@ -34,7 +38,7 @@ func SeedMenus() error {
 	dataMasterMenu := permission.Menu{
 		Name:   "Data Master",
 		Icon:   "database",
-		URL:    "/data-master",
+		URL:    basePath + "/data-master",
 		Order:  2,
 		Status: "active",
 	}
@@ -47,7 +51,7 @@ func SeedMenus() error {
 	userPageMenu := permission.Menu{
 		Name:     "Users",
 		Icon:     "users",
-		URL:      "/master-data/users",
+		URL:      basePath + "/master-data/users",
 		ParentID: &dataMasterMenu.ID,
 		Order:    1,
 		Status:   "active",
@@ -61,7 +65,7 @@ func SeedMenus() error {
 	salesCRMMenu := permission.Menu{
 		Name:   "Sales CRM",
 		Icon:   "briefcase",
-		URL:    "/sales-crm",
+		URL:    basePath + "/sales-crm",
 		Order:  3,
 		Status: "active",
 	}
@@ -74,7 +78,7 @@ func SeedMenus() error {
 	accountsMenu := permission.Menu{
 		Name:     "Accounts",
 		Icon:     "building-2",
-		URL:      "/accounts",
+		URL:      basePath + "/accounts",
 		ParentID: &salesCRMMenu.ID,
 		Order:    1,
 		Status:   "active",
@@ -88,7 +92,7 @@ func SeedMenus() error {
 	pipelineMenu := permission.Menu{
 		Name:     "Pipeline",
 		Icon:     "trending-up",
-		URL:      "/pipeline",
+		URL:      basePath + "/pipeline",
 		ParentID: &salesCRMMenu.ID,
 		Order:    2,
 		Status:   "active",
@@ -102,7 +106,7 @@ func SeedMenus() error {
 	visitReportsMenu := permission.Menu{
 		Name:     "Visit Reports",
 		Icon:     "map-pin",
-		URL:      "/visit-reports",
+		URL:      basePath + "/visit-reports",
 		ParentID: &salesCRMMenu.ID,
 		Order:    3,
 		Status:   "active",
@@ -116,7 +120,7 @@ func SeedMenus() error {
 	tasksMenu := permission.Menu{
 		Name:     "Tasks",
 		Icon:     "clipboard-list",
-		URL:      "/tasks",
+		URL:      basePath + "/tasks",
 		ParentID: &salesCRMMenu.ID,
 		Order:    4,
 		Status:   "active",
@@ -130,7 +134,7 @@ func SeedMenus() error {
 	productsMenu := permission.Menu{
 		Name:     "Products",
 		Icon:     "package",
-		URL:      "/products",
+		URL:      basePath + "/products",
 		ParentID: &dataMasterMenu.ID,
 		Order:    2,
 		Status:   "active",
@@ -144,7 +148,7 @@ func SeedMenus() error {
 	reportsMenu := permission.Menu{
 		Name:   "Reports",
 		Icon:   "file-text",
-		URL:    "/reports",
+		URL:    basePath + "/reports",
 		Order:  4,
 		Status: "active",
 	}
@@ -157,7 +161,7 @@ func SeedMenus() error {
 	settingsMenu := permission.Menu{
 		Name:   "Settings",
 		Icon:   "settings",
-		URL:    "/settings",
+		URL:    basePath + "/settings",
 		Order:  5,
 		Status: "active",
 	}

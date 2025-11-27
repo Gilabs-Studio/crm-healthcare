@@ -1,5 +1,9 @@
-import { LoginForm } from "@/features/auth/components/login-form";
+import { redirect } from "next/navigation";
+import { routing } from "@/i18n/routing";
 
-export default function LoginPage() {
-  return <LoginForm />;
+export default function RootRedirectPage() {
+  // Redirect root "/" ke default locale login, contoh: "/en/login"
+  redirect(`/${routing.defaultLocale}/login`);
 }
+
+

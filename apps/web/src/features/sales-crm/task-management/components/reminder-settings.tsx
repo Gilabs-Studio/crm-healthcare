@@ -30,6 +30,7 @@ import {
   type UpdateReminderFormData,
 } from "../schemas/reminder.schema";
 import { useTaskReminders } from "../hooks/useTaskList";
+import { useTranslations } from "next-intl";
 
 interface ReminderSettingsProps {
   readonly taskId: string;
@@ -43,6 +44,9 @@ export function ReminderSettings({ taskId }: ReminderSettingsProps) {
     handleUpdateReminder,
     handleDeleteReminder,
   } = useTaskReminders(taskId);
+
+  const t = useTranslations("taskManagement.reminders");
+  const tDialog = useTranslations("taskManagement.reminderDialog");
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingReminder, setEditingReminder] = useState<Reminder | null>(null);
@@ -64,7 +68,7 @@ export function ReminderSettings({ taskId }: ReminderSettingsProps) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Clock className="h-4 w-4 text-muted-foreground" />
-          <h3 className="text-sm font-semibold">Reminders</h3>
+          <h3 className="text-sm font-semibold">{t("title")}</h3>
         </div>
         <Button
           type="button"
@@ -74,14 +78,14 @@ export function ReminderSettings({ taskId }: ReminderSettingsProps) {
           onClick={() => setIsCreateDialogOpen(true)}
         >
           <Plus className="h-3.5 w-3.5" />
-          <span className="text-xs">Add Reminder</span>
+          <span className="text-xs">{t("addButton")}</span>
         </Button>
       </div>
 
       {isLoading ? (
-        <p className="text-xs text-muted-foreground">Loading reminders...</p>
+        <p className="text-xs text-muted-foreground">{t("loading")}</p>
       ) : reminders.length === 0 ? (
-        <p className="text-xs text-muted-foreground">No reminders yet.</p>
+        <p className="text-xs text-muted-foreground">{t("empty")}</p>
       ) : (
         <div className="space-y-2">
           {reminders.map((reminder) => (
@@ -107,7 +111,7 @@ export function ReminderSettings({ taskId }: ReminderSettingsProps) {
                   variant="ghost"
                   className="h-7 w-7"
                   onClick={() => setEditingReminder(reminder)}
-                  title="Edit reminder"
+                  title={tDialog("editTitle")}
                 >
                   <Clock className="h-3.5 w-3.5" />
                 </Button>
@@ -117,7 +121,7 @@ export function ReminderSettings({ taskId }: ReminderSettingsProps) {
                   variant="ghost"
                   className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
                   onClick={() => setDeletingReminderId(reminder.id)}
-                  title="Delete reminder"
+                  title={t("deleteTitle")}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
@@ -168,9 +172,9 @@ export function ReminderSettings({ taskId }: ReminderSettingsProps) {
           await handleDeleteReminder(deletingReminderId);
           setDeletingReminderId(null);
         }}
-        title="Delete Reminder?"
-        description="Are you sure you want to delete this reminder? This action cannot be undone."
-        itemName="reminder"
+        title={t("deleteTitle")}
+        description={t("deleteDescription")}
+        itemName={t("deleteItemName")}
         isLoading={false}
       />
     </div>
@@ -275,7 +279,9 @@ function ReminderDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[480px]">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit Reminder" : "Add Reminder"}</DialogTitle>
+          <DialogTitle>
+            {isEdit ? tDialog("editTitle") : tDialog("createTitle")}
+          </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -284,7 +290,7 @@ function ReminderDialog({
           )}
 
           <Field orientation="vertical">
-            <FieldLabel>Remind At *</FieldLabel>
+            <FieldLabel>{tDialog("remindAtLabel")} *</FieldLabel>
             <Input
               type="datetime-local"
               {...register("remind_at" as "remind_at")}
@@ -295,7 +301,7 @@ function ReminderDialog({
           </Field>
 
           <Field orientation="vertical">
-            <FieldLabel>Channel</FieldLabel>
+            <FieldLabel>{tDialog("channelLabel")}</FieldLabel>
             <Select
               value={(watch("reminder_type") as string | undefined) ?? "in_app"}
               onValueChange={(value) =>
@@ -303,22 +309,22 @@ function ReminderDialog({
               }
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select channel" />
+                <SelectValue placeholder={tDialog("channelPlaceholder")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="in_app">In App</SelectItem>
-                <SelectItem value="email">Email</SelectItem>
-                <SelectItem value="sms">SMS</SelectItem>
+                <SelectItem value="in_app">{tDialog("channelInApp")}</SelectItem>
+                <SelectItem value="email">{tDialog("channelEmail")}</SelectItem>
+                <SelectItem value="sms">{tDialog("channelSms")}</SelectItem>
               </SelectContent>
             </Select>
             {errors.reminder_type && <FieldError>{errors.reminder_type.message}</FieldError>}
           </Field>
 
           <Field orientation="vertical">
-            <FieldLabel>Message</FieldLabel>
+            <FieldLabel>{tDialog("messageLabel")}</FieldLabel>
             <Textarea
               {...register("message" as "message")}
-              placeholder="Optional reminder message"
+              placeholder={tDialog("messagePlaceholder")}
               rows={3}
             />
             {errors.message && <FieldError>{errors.message.message}</FieldError>}
@@ -326,9 +332,11 @@ function ReminderDialog({
 
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              {tDialog("cancel")}
             </Button>
-            <Button type="submit">{isEdit ? "Update" : "Create"}</Button>
+            <Button type="submit">
+              {isEdit ? tDialog("submitUpdate") : tDialog("submitCreate")}
+            </Button>
           </div>
         </form>
       </DialogContent>

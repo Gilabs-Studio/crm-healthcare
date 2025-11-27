@@ -21,6 +21,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
+import { useTranslations } from "next-intl";
 
 export function CategoryList() {
   const {
@@ -42,13 +43,15 @@ export function CategoryList() {
     updateCategory,
   } = useCategoryList();
 
+  const t = useTranslations("accountManagement.categoryList");
+
   return (
     <div className="space-y-4">
       {/* Header with Actions */}
       <div className="flex items-center justify-end">
         <Button onClick={() => setIsCreateDialogOpen(true)} size="sm">
           <Plus className="h-4 w-4 mr-2" />
-          Add Category
+          {t("addCategory")}
         </Button>
       </div>
 
@@ -64,19 +67,19 @@ export function CategoryList() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[200px]">Name</TableHead>
-                <TableHead>Code</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead className="w-[120px]">Badge Color</TableHead>
-                <TableHead className="w-[100px]">Status</TableHead>
-                <TableHead className="w-[120px] text-right">Actions</TableHead>
+                <TableHead className="w-[200px]">{t("table.name")}</TableHead>
+                <TableHead>{t("table.code")}</TableHead>
+                <TableHead>{t("table.description")}</TableHead>
+                <TableHead className="w-[120px]">{t("table.badgeColor")}</TableHead>
+                <TableHead className="w-[100px]">{t("table.status")}</TableHead>
+                <TableHead className="w-[120px] text-right">{t("table.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {categories.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                    No categories found
+                      {t("empty")}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -133,7 +136,7 @@ export function CategoryList() {
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Create Category</DialogTitle>
+            <DialogTitle>{t("createTitle")}</DialogTitle>
           </DialogHeader>
           <CategoryForm
             onSubmit={handleCreate}
@@ -148,7 +151,7 @@ export function CategoryList() {
         <Dialog open={!!editingCategory} onOpenChange={(open) => !open && setEditingCategory(null)}>
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
-              <DialogTitle>Edit Category</DialogTitle>
+              <DialogTitle>{t("editTitle")}</DialogTitle>
             </DialogHeader>
             <CategoryForm
               category={categoryForEdit}
@@ -169,11 +172,13 @@ export function CategoryList() {
           }
         }}
         onConfirm={handleDeleteConfirm}
-        title="Delete Category?"
+        title={t("deleteTitle")}
         description={
           deletingCategoryId
-            ? `Are you sure you want to delete category "${categories.find((c) => c.id === deletingCategoryId)?.name || "this category"}"? This action cannot be undone.`
-            : "Are you sure you want to delete this category? This action cannot be undone."
+            ? t("deleteDescriptionWithName", {
+                name: categories.find((c) => c.id === deletingCategoryId)?.name || "this category",
+              })
+            : t("deleteDescription")
         }
         itemName="category"
         isLoading={deleteCategory.isPending}

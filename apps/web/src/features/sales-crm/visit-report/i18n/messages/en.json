@@ -1,0 +1,158 @@
+{
+  "visitReportManagement": {
+    "page": {
+      "title": "Visit Reports",
+      "description": "Track and manage sales visits with check-in/out, GPS, and documentation"
+    }
+  },
+  "visitReportForm": {
+    "fields": {
+      "accountLabel": "Account",
+      "accountPlaceholder": "Select an account",
+      "contactLabel": "Contact",
+      "contactPlaceholder": "Select a contact (optional)",
+      "visitDateTimeLabel": "Visit Date & Time",
+      "purposeLabel": "Purpose",
+      "purposePlaceholder": "Describe the purpose of this visit",
+      "notesLabel": "Notes",
+      "notesPlaceholder": "Additional notes about the visit"
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "submitCreate": "Create",
+      "submitUpdate": "Update",
+      "submitting": "Saving..."
+    }
+  },
+  "visitReportDetail": {
+    "drawerTitle": "Visit Report Details",
+    "header": {
+      "statusBadge": "Status",
+      "visitDate": "Visit Date"
+    },
+    "actions": {
+      "reject": "Reject",
+      "approve": "Approve",
+      "checkIn": "Check In",
+      "checkOut": "Check Out",
+      "gettingLocation": "Getting your location...",
+      "checkInSuccess": "Checked in successfully",
+      "checkInGetLocationFailed": "Failed to get location",
+      "checkInFailed": "Failed to check in",
+      "checkOutSuccess": "Checked out successfully",
+      "checkOutGetLocationFailed": "Failed to get location",
+      "checkOutFailed": "Failed to check out",
+      "approveSuccess": "Visit report approved",
+      "rejectSuccess": "Visit report rejected",
+      "uploadPhotoSuccess": "Photo uploaded successfully"
+    },
+    "sections": {
+      "visitInformationTitle": "Visit Information",
+      "accountLabel": "Account",
+      "contactLabel": "Contact",
+      "purposeLabel": "Purpose",
+      "notesLabel": "Notes",
+      "checkInOutTitle": "Check In/Out",
+      "checkInLabel": "Check In",
+      "checkOutLabel": "Check Out",
+      "notCheckedIn": "Not checked in",
+      "notCheckedOut": "Not checked out",
+      "photosTitle": "Photos",
+      "noPhotos": "No photos uploaded yet",
+      "viewPhoto": "View",
+      "approvalTitle": "Approval",
+      "approvedAtLabel": "Approved at",
+      "rejectionTitle": "Rejection",
+      "rejectionReasonLabel": "Reason",
+      "activityTimelineTitle": "Activity Timeline",
+      "addActivity": "Add Activity"
+    },
+    "rejectDialog": {
+      "title": "Reject Visit Report",
+      "reasonLabel": "Reason",
+      "reasonPlaceholder": "Enter rejection reason",
+      "cancel": "Cancel",
+      "submit": "Reject",
+      "submitting": "Rejecting..."
+    },
+    "errors": {
+      "geolocationUnsupported": "Geolocation is not supported by your browser"
+    },
+    "loadError": "Failed to load visit report details"
+  },
+  "photoUploadDialog": {
+    "title": "Upload Photo",
+    "description": "Upload a photo for this visit report. You can either select a file or enter a photo URL.",
+    "fields": {
+      "selectPhotoLabel": "Select Photo",
+      "photoUrlLabel": "Photo URL",
+      "photoUrlPlaceholder": "https://example.com/photo.jpg"
+    },
+    "errors": {
+      "selectImageFile": "Please select an image file",
+      "fileTooLarge": "File size must be less than 5MB",
+      "missingPhoto": "Please select a photo or enter a photo URL"
+    },
+    "previewNote": "Note: In production, this will be uploaded to a file storage service",
+    "dividerOr": "Or",
+    "buttons": {
+      "cancel": "Cancel",
+      "upload": "Upload Photo",
+      "uploading": "Uploading..."
+    }
+  },
+  "visitReportList": {
+    "table": {
+      "visitDate": "Visit Date",
+      "account": "Account",
+      "purpose": "Purpose",
+      "status": "Status",
+      "checkIn": "Check In",
+      "actions": "Actions"
+    },
+    "filters": {
+      "searchPlaceholder": "Search visit reports...",
+      "allStatus": "All Status",
+      "allAccounts": "All Accounts"
+    },
+    "buttons": {
+      "addVisitReport": "Add Visit Report",
+      "viewDetails": "View Details",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "empty": {
+      "table": "No visit reports found"
+    },
+    "dialogs": {
+      "createTitle": "Create Visit Report",
+      "editTitle": "Edit Visit Report",
+      "deleteTitle": "Delete Visit Report?",
+      "deleteDescription": "Are you sure you want to delete this visit report? This action cannot be undone.",
+      "itemName": "visit report"
+    }
+  },
+  "visitReportActivityTimeline": {
+    "table": {
+      "type": "Type",
+      "description": "Description",
+      "account": "Account",
+      "contact": "Contact",
+      "user": "User",
+      "timestamp": "Timestamp"
+    },
+    "meta": {
+      "statusLabel": "Status",
+      "actionLabel": "Action",
+      "visitDateLabel": "Date",
+      "durationLabel": "Duration",
+      "outcomeLabel": "Outcome",
+      "subjectLabel": "Subject",
+      "priorityLabel": "Priority",
+      "valueLabel": "Value"
+    },
+    "empty": "No activities found"
+  }
+}
+
+

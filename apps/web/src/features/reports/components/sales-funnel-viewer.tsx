@@ -4,10 +4,11 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Info, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import type { PipelineReport } from "../types";
 import { SalesFunnelTable } from "./sales-funnel-table";
 import { SalesFunnelInsights } from "./sales-funnel-insights";
+import { useTranslations } from "next-intl";
 
 interface SalesFunnelViewerProps {
   data?: PipelineReport;
@@ -15,6 +16,8 @@ interface SalesFunnelViewerProps {
 }
 
 export function SalesFunnelViewer({ data, isLoading }: SalesFunnelViewerProps) {
+  const t = useTranslations("reportsFeature.salesFunnelViewer");
+  const tCommon = useTranslations("reportsFeature.common");
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -27,7 +30,7 @@ export function SalesFunnelViewer({ data, isLoading }: SalesFunnelViewerProps) {
   if (!data) {
     return (
       <div className="text-center py-8 text-muted-foreground">
-        <p className="text-sm">No data available. Please generate a report.</p>
+        <p className="text-sm">{tCommon("noData")}</p>
       </div>
     );
   }
@@ -37,15 +40,13 @@ export function SalesFunnelViewer({ data, isLoading }: SalesFunnelViewerProps) {
       {/* Reminder Alert for Missing Data */}
       <Alert>
         <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Data Availability Notice</AlertTitle>
+        <AlertTitle>{t("dataNoticeTitle")}</AlertTitle>
         <AlertDescription>
           <p className="text-sm mb-2">
-            This Sales Funnel view displays available data from the current sprint. Some fields may show placeholders
-            until the Sales Pipeline Management module is fully implemented (Sprint 2 - Dev2).
+            {t("dataNoticeDescription")}
           </p>
           <p className="text-sm font-medium">
-            Fields that will be available after Sprint 2: Deal details, Contact information, Last interaction dates,
-            Next steps, and Progress indicators.
+            {t("dataNoticeFields")}
           </p>
         </AlertDescription>
       </Alert>
@@ -53,8 +54,8 @@ export function SalesFunnelViewer({ data, isLoading }: SalesFunnelViewerProps) {
       {/* Main Tabs */}
       <Tabs defaultValue="table" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="table">Sales Funnel</TabsTrigger>
-          <TabsTrigger value="insights">Insights</TabsTrigger>
+          <TabsTrigger value="table">{t("tabTable")}</TabsTrigger>
+          <TabsTrigger value="insights">{t("tabInsights")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="table" className="mt-6">

@@ -1,0 +1,87 @@
+{
+  "pipelineManagement": {
+    "dealCard": {
+      "unknownAccount": "Akun tidak dikenal",
+      "unknownStage": "Tahap tidak dikenal",
+      "accountLabel": "Akun:",
+      "contactLabel": "Kontak:",
+      "valueLabel": "Nilai:",
+      "probabilityLabel": "Probabilitas:",
+      "expectedCloseLabel": "Perkiraan Tutup:"
+    },
+    "dealForm": {
+      "titleLabel": "Judul",
+      "titleRequired": "Judul *",
+      "titlePlaceholder": "Judul deal",
+      "descriptionLabel": "Deskripsi",
+      "descriptionPlaceholder": "Deskripsi deal",
+      "accountLabel": "Akun",
+      "accountRequired": "Akun *",
+      "accountPlaceholder": "Pilih akun",
+      "contactLabel": "Kontak",
+      "contactPlaceholder": "Pilih kontak (opsional)",
+      "contactNone": "Tidak ada",
+      "stageLabel": "Tahap",
+      "stageRequired": "Tahap *",
+      "stagePlaceholder": "Pilih tahap",
+      "valueLabel": "Nilai (Rp)",
+      "valueRequired": "Nilai (Rp) *",
+      "valuePlaceholder": "0",
+      "probabilityLabel": "Probabilitas (%)",
+      "probabilityPlaceholder": "0",
+      "expectedCloseDateLabel": "Perkiraan Tanggal Tutup",
+      "assignedToLabel": "Ditugaskan ke",
+      "assignedToPlaceholder": "Pilih user (opsional)",
+      "assignedToNone": "Tidak ada",
+      "sourceLabel": "Sumber",
+      "sourcePlaceholder": "mis: website, referral, cold_call",
+      "notesLabel": "Catatan",
+      "notesPlaceholder": "Catatan tambahan",
+      "cancel": "Batal",
+      "submitCreate": "Buat",
+      "submitUpdate": "Perbarui",
+      "submitting": "Menyimpan..."
+    },
+    "forecast": {
+      "title": "Proyeksi Pendapatan",
+      "description": "Proyeksi pendapatan berdasarkan deal di pipeline",
+      "noData": "Tidak ada data proyeksi",
+      "periodLabel": "Periode Proyeksi",
+      "periodMonth": "Bulan Ini",
+      "periodQuarter": "Kuartal Ini",
+      "periodYear": "Tahun Ini",
+      "expectedRevenueLabel": "Pendapatan Diharapkan",
+      "expectedRevenueHint": "Berdasarkan nilai deal",
+      "weightedRevenueLabel": "Pendapatan Tertimbang",
+      "weightedRevenueHint": "Berdasarkan probabilitas",
+      "dealsInForecastTitle": "Deal dalam Proyeksi",
+      "dealsSingular": "deal",
+      "dealsPlural": "deal",
+      "dealValuePrefix": "Nilai deal:"
+    },
+    "kanban": {
+      "title": "Sales Pipeline",
+      "description": "Kelola dan pantau peluang penjualan Anda",
+      "newDeal": "Deal Baru",
+      "noDeals": "Belum ada deal",
+      "noDealsHint": "Tarik deal ke sini atau buat baru",
+      "createDialogTitle": "Buat Deal",
+      "editDialogTitle": "Edit Deal"
+    },
+    "pipelineSummary": {
+      "title": "Ringkasan Pipeline",
+      "description": "Gambaran performa pipeline penjualan Anda",
+      "noData": "Tidak ada data ringkasan",
+      "totalDeals": "Total Deal",
+      "openDeals": "Deal Terbuka",
+      "wonDeals": "Deal Menang",
+      "lostDeals": "Deal Kalah",
+      "performanceByStageTitle": "Performa per Tahap",
+      "stageDealsSingular": "deal",
+      "stageDealsPlural": "deal"
+    }
+  }
+}
+
+
+

@@ -27,6 +27,7 @@ import {
 import { useAccounts } from "@/features/sales-crm/account-management/hooks/useAccounts";
 import { useContacts } from "@/features/sales-crm/account-management/hooks/useContacts";
 import { useUsers } from "@/features/master-data/user-management/hooks/useUsers";
+import { useTranslations } from "next-intl";
 
 interface TaskFormProps {
   readonly task?: Task;
@@ -37,6 +38,7 @@ interface TaskFormProps {
 
 export function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFormProps) {
   const isEdit = !!task;
+  const t = useTranslations("taskManagement.form");
 
   const { data: accountsData } = useAccounts({ status: "active", per_page: 100 });
   const accounts = accountsData?.data ?? [];
@@ -158,26 +160,30 @@ export function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFormProps)
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
       <Field orientation="vertical">
-        <FieldLabel>Title *</FieldLabel>
-        <Input {...register("title")} placeholder="Task title" />
+        <FieldLabel>{t("titleLabel")} *</FieldLabel>
+        <Input {...register("title")} placeholder={t("titlePlaceholder")} />
         {errors.title && <FieldError>{errors.title.message}</FieldError>}
       </Field>
 
       <Field orientation="vertical">
-        <FieldLabel>Description</FieldLabel>
-        <Textarea {...register("description")} placeholder="Task description" rows={3} />
+        <FieldLabel>{t("descriptionLabel")}</FieldLabel>
+        <Textarea
+          {...register("description")}
+          placeholder={t("descriptionPlaceholder")}
+          rows={3}
+        />
         {errors.description && <FieldError>{errors.description.message}</FieldError>}
       </Field>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Field orientation="vertical">
-          <FieldLabel>Type</FieldLabel>
+          <FieldLabel>{t("typeLabel")}</FieldLabel>
           <Select
             value={(watch("type") as string | undefined) ?? "general"}
             onValueChange={(value) => setValue("type", value as (typeof taskTypeValues)[number])}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select type" />
+              <SelectValue placeholder={t("typePlaceholder")} />
             </SelectTrigger>
             <SelectContent>
               {taskTypeValues.map((value) => (
@@ -191,7 +197,7 @@ export function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFormProps)
         </Field>
 
         <Field orientation="vertical">
-          <FieldLabel>Priority</FieldLabel>
+          <FieldLabel>{t("priorityLabel")}</FieldLabel>
           <Select
             value={(watch("priority") as string | undefined) ?? "medium"}
             onValueChange={(value) =>
@@ -199,7 +205,7 @@ export function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFormProps)
             }
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select priority" />
+              <SelectValue placeholder={t("priorityPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
               {taskPriorityValues.map((value) => (
@@ -214,7 +220,7 @@ export function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFormProps)
 
         {isEdit && (
           <Field orientation="vertical">
-            <FieldLabel>Status</FieldLabel>
+            <FieldLabel>{t("statusLabel")}</FieldLabel>
             <Select
               value={(watch("status") as string | undefined) ?? task?.status ?? "pending"}
               onValueChange={(value) =>
@@ -222,7 +228,7 @@ export function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFormProps)
               }
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select status" />
+                <SelectValue placeholder={t("statusPlaceholder")} />
               </SelectTrigger>
               <SelectContent>
                 {taskStatusValues.map((value) => (
@@ -239,22 +245,22 @@ export function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFormProps)
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field orientation="vertical">
-          <FieldLabel>Due Date</FieldLabel>
+          <FieldLabel>{t("dueDateLabel")}</FieldLabel>
           <Input type="date" {...register("due_date")} />
           {errors.due_date && <FieldError>{errors.due_date.message}</FieldError>}
         </Field>
 
         <Field orientation="vertical">
-          <FieldLabel>Assigned To</FieldLabel>
+          <FieldLabel>{t("assignedToLabel")}</FieldLabel>
           <Select
             value={(watch("assigned_to") as string | undefined) ?? ""}
             onValueChange={(value) => setValue("assigned_to", value === "none" ? "" : value)}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select assignee (optional)" />
+              <SelectValue placeholder={t("assignedToPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="none">None</SelectItem>
+              <SelectItem value="none">{t("assignedToNone")}</SelectItem>
               {users.map((user) => (
                 <SelectItem key={user.id} value={user.id}>
                   {user.name}
@@ -267,16 +273,16 @@ export function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFormProps)
       </div>
 
       <Field orientation="vertical">
-        <FieldLabel>Account</FieldLabel>
+        <FieldLabel>{t("accountLabel")}</FieldLabel>
         <Select
           value={(watch("account_id") as string | undefined) ?? ""}
           onValueChange={(value) => setValue("account_id", value === "none" ? "" : value)}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select account (optional)" />
+            <SelectValue placeholder={t("accountPlaceholder")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="none">None</SelectItem>
+            <SelectItem value="none">{t("accountNone")}</SelectItem>
             {accounts.map((account) => (
               <SelectItem key={account.id} value={account.id}>
                 {account.name}
@@ -288,17 +294,17 @@ export function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFormProps)
       </Field>
 
       <Field orientation="vertical">
-        <FieldLabel>Contact</FieldLabel>
+        <FieldLabel>{t("contactLabel")}</FieldLabel>
         <Select
           value={(watch("contact_id") as string | undefined) ?? ""}
           onValueChange={(value) => setValue("contact_id", value === "none" ? "" : value)}
           disabled={!watch("account_id") && !task?.account_id}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select contact (optional)" />
+            <SelectValue placeholder={t("contactPlaceholder")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="none">None</SelectItem>
+            <SelectItem value="none">{t("contactNone")}</SelectItem>
             {contacts.map((contact) => (
               <SelectItem key={contact.id} value={contact.id}>
                 {contact.name}
@@ -311,10 +317,10 @@ export function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFormProps)
 
       <div className="flex justify-end gap-2 pt-4">
         <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
-          Cancel
+          {t("cancel")}
         </Button>
         <Button type="submit" disabled={isLoading}>
-          {isLoading ? "Saving..." : isEdit ? "Update" : "Create"}
+          {isLoading ? t("submitting") : isEdit ? t("submitUpdate") : t("submitCreate")}
         </Button>
       </div>
     </form>

@@ -21,6 +21,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
+import { useTranslations } from "next-intl";
 
 export function ContactRoleList() {
   const {
@@ -42,13 +43,15 @@ export function ContactRoleList() {
     updateContactRole,
   } = useContactRoleList();
 
+  const t = useTranslations("accountManagement.contactRoleList");
+
   return (
     <div className="space-y-4">
       {/* Header with Actions */}
       <div className="flex items-center justify-end">
         <Button onClick={() => setIsCreateDialogOpen(true)} size="sm">
           <Plus className="h-4 w-4 mr-2" />
-          Add Contact Role
+          {t("addContactRole")}
         </Button>
       </div>
 
@@ -64,19 +67,19 @@ export function ContactRoleList() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[200px]">Name</TableHead>
-                <TableHead>Code</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead className="w-[120px]">Badge Color</TableHead>
-                <TableHead className="w-[100px]">Status</TableHead>
-                <TableHead className="w-[120px] text-right">Actions</TableHead>
+                <TableHead className="w-[200px]">{t("table.name")}</TableHead>
+                <TableHead>{t("table.code")}</TableHead>
+                <TableHead>{t("table.description")}</TableHead>
+                <TableHead className="w-[120px]">{t("table.badgeColor")}</TableHead>
+                <TableHead className="w-[100px]">{t("table.status")}</TableHead>
+                <TableHead className="w-[120px] text-right">{t("table.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {contactRoles.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                    No contact roles found
+                    {t("empty")}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -133,7 +136,7 @@ export function ContactRoleList() {
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Create Contact Role</DialogTitle>
+            <DialogTitle>{t("createTitle")}</DialogTitle>
           </DialogHeader>
           <ContactRoleForm
             onSubmit={handleCreate}
@@ -148,7 +151,7 @@ export function ContactRoleList() {
         <Dialog open={!!editingContactRole} onOpenChange={(open) => !open && setEditingContactRole(null)}>
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
-              <DialogTitle>Edit Contact Role</DialogTitle>
+              <DialogTitle>{t("editTitle")}</DialogTitle>
             </DialogHeader>
             <ContactRoleForm
               contactRole={contactRoleForEdit}
@@ -169,13 +172,17 @@ export function ContactRoleList() {
           }
         }}
         onConfirm={handleDeleteConfirm}
-        title="Delete Contact Role?"
+        title={t("deleteTitle")}
         description={
           deletingContactRoleId
-            ? `Are you sure you want to delete contact role "${contactRoles.find((r) => r.id === deletingContactRoleId)?.name || "this contact role"}"? This action cannot be undone.`
-            : "Are you sure you want to delete this contact role? This action cannot be undone."
+            ? t("deleteDescriptionWithName", {
+                name:
+                  contactRoles.find((r) => r.id === deletingContactRoleId)?.name ||
+                  "this contact role",
+              })
+            : t("deleteDescription")
         }
-        itemName="contact role"
+        itemName={t("deleteItemName")}
         isLoading={deleteContactRole.isPending}
       />
     </div>

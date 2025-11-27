@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { UserForm } from "./user-form";
 import type { User as UserType } from "../types";
+import { useTranslations } from "next-intl";
 
 interface UserDetailModalProps {
   readonly userId: string | null;
@@ -32,6 +33,7 @@ export function UserDetailModal({ userId, open, onOpenChange, onUserUpdated }: U
   const updateUser = useUpdateUser();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const t = useTranslations("userManagement.detailModal");
 
   const user = data?.data;
 
@@ -39,7 +41,7 @@ export function UserDetailModal({ userId, open, onOpenChange, onUserUpdated }: U
     if (!user || !userId) return;
     try {
       await deleteUser.mutateAsync(userId);
-      toast.success("User deleted successfully");
+      toast.success(t("toastDeleted"));
       onOpenChange(false);
       onUserUpdated?.();
     } catch (error) {
@@ -60,7 +62,7 @@ export function UserDetailModal({ userId, open, onOpenChange, onUserUpdated }: U
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>User Details</DialogTitle>
+            <DialogTitle>{t("title")}</DialogTitle>
           </DialogHeader>
 
           {isLoading && (
@@ -90,7 +92,7 @@ export function UserDetailModal({ userId, open, onOpenChange, onUserUpdated }: U
 
           {error && (
             <div className="text-center text-muted-foreground py-8">
-              Failed to load user details
+              {t("loadError")}
             </div>
           )}
 
@@ -112,7 +114,7 @@ export function UserDetailModal({ userId, open, onOpenChange, onUserUpdated }: U
                     onClick={() => setIsEditDialogOpen(true)}
                   >
                     <Edit className="h-4 w-4 mr-2" />
-                    Edit
+                    {t("header.edit")}
                   </Button>
                   <Button
                     variant="destructive"
@@ -121,7 +123,7 @@ export function UserDetailModal({ userId, open, onOpenChange, onUserUpdated }: U
                     disabled={deleteUser.isPending}
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
-                    Delete
+                    {t("header.delete")}
                   </Button>
                 </div>
               </div>
@@ -129,15 +131,17 @@ export function UserDetailModal({ userId, open, onOpenChange, onUserUpdated }: U
               {/* User Info Card */}
               <Card>
                 <CardHeader>
-                  <CardTitle>User Information</CardTitle>
-                  <CardDescription>Basic user details and account information</CardDescription>
+                  <CardTitle>{t("userInfo.title")}</CardTitle>
+                  <CardDescription>
+                    {t("userInfo.description")}
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <User className="h-4 w-4" />
-                        <span>Name</span>
+                        <span>{t("userInfo.name")}</span>
                       </div>
                       <div className="text-base font-medium">{user.name}</div>
                     </div>
@@ -145,7 +149,7 @@ export function UserDetailModal({ userId, open, onOpenChange, onUserUpdated }: U
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Mail className="h-4 w-4" />
-                        <span>Email</span>
+                        <span>{t("userInfo.email")}</span>
                       </div>
                       <div className="text-base font-medium">{user.email}</div>
                     </div>
@@ -153,7 +157,7 @@ export function UserDetailModal({ userId, open, onOpenChange, onUserUpdated }: U
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Shield className="h-4 w-4" />
-                        <span>Role</span>
+                        <span>{t("userInfo.role")}</span>
                       </div>
                       <div>
                         <Badge variant="outline" className="font-normal">
@@ -164,7 +168,7 @@ export function UserDetailModal({ userId, open, onOpenChange, onUserUpdated }: U
 
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <span>Status</span>
+                        <span>{t("userInfo.status")}</span>
                       </div>
                       <div>
                         <Badge variant={user.status === "active" ? "active" : "inactive"}>
@@ -176,20 +180,24 @@ export function UserDetailModal({ userId, open, onOpenChange, onUserUpdated }: U
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Calendar className="h-4 w-4" />
-                        <span>Created At</span>
+                        <span>{t("userInfo.createdAt")}</span>
                       </div>
                       <div className="text-base font-medium">
-                        {user.created_at ? new Date(user.created_at).toLocaleDateString() : "N/A"}
+                        {user.created_at
+                          ? new Date(user.created_at).toLocaleDateString()
+                          : t("userInfo.notAvailable")}
                       </div>
                     </div>
 
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Calendar className="h-4 w-4" />
-                        <span>Updated At</span>
+                        <span>{t("userInfo.updatedAt")}</span>
                       </div>
                       <div className="text-base font-medium">
-                        {user.updated_at ? new Date(user.updated_at).toLocaleDateString() : "N/A"}
+                        {user.updated_at
+                          ? new Date(user.updated_at).toLocaleDateString()
+                          : t("userInfo.notAvailable")}
                       </div>
                     </div>
                   </div>
@@ -200,27 +208,33 @@ export function UserDetailModal({ userId, open, onOpenChange, onUserUpdated }: U
               {user.role && (
                 <Card>
                   <CardHeader>
-                    <CardTitle>Role Information</CardTitle>
-                    <CardDescription>Role details and assigned permissions</CardDescription>
+                    <CardTitle>{t("roleInfo.title")}</CardTitle>
+                    <CardDescription>
+                      {t("roleInfo.description")}
+                    </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Shield className="h-4 w-4" />
-                        <span>Role Name</span>
+                        <span>{t("roleInfo.name")}</span>
                       </div>
                       <div className="text-base font-medium">{user.role.name}</div>
                     </div>
 
                     {user.role.description && (
                       <div className="space-y-2">
-                        <div className="text-sm text-muted-foreground">Description</div>
+                        <div className="text-sm text-muted-foreground">
+                          {t("roleInfo.descriptionLabel")}
+                        </div>
                         <div className="text-base">{user.role.description}</div>
                       </div>
                     )}
 
                     <div className="space-y-2">
-                      <div className="text-sm text-muted-foreground">Role Code</div>
+                      <div className="text-sm text-muted-foreground">
+                        {t("roleInfo.code")}
+                      </div>
                       <Badge variant="outline" className="font-mono">
                         {user.role.code}
                       </Badge>
@@ -228,7 +242,11 @@ export function UserDetailModal({ userId, open, onOpenChange, onUserUpdated }: U
 
                     {user.role.permissions && user.role.permissions.length > 0 && (
                       <div className="space-y-3">
-                        <div className="text-sm font-medium">Permissions ({user.role.permissions.length})</div>
+                        <div className="text-sm font-medium">
+                          {t("roleInfo.permissions", {
+                            count: user.role.permissions.length,
+                          })}
+                        </div>
                         <div className="flex flex-wrap gap-2">
                           {user.role.permissions.map((permission) => (
                             <Badge key={permission.id} variant="outline" className="font-normal">
@@ -241,7 +259,7 @@ export function UserDetailModal({ userId, open, onOpenChange, onUserUpdated }: U
 
                     {(!user.role.permissions || user.role.permissions.length === 0) && (
                       <div className="text-sm text-muted-foreground">
-                        No permissions assigned to this role
+                        {t("roleInfo.noPermissions")}
                       </div>
                     )}
                   </CardContent>
@@ -257,7 +275,7 @@ export function UserDetailModal({ userId, open, onOpenChange, onUserUpdated }: U
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
-              <DialogTitle>Edit User</DialogTitle>
+              <DialogTitle>{t("editDialogTitle")}</DialogTitle>
             </DialogHeader>
             <UserForm
               user={user}
@@ -265,7 +283,7 @@ export function UserDetailModal({ userId, open, onOpenChange, onUserUpdated }: U
                 try {
                   await updateUser.mutateAsync({ id: userId!, data: formData });
                   setIsEditDialogOpen(false);
-                  toast.success("User updated successfully");
+                  toast.success(t("toastUpdated"));
                   onUserUpdated?.();
                 } catch (error) {
                   // Error already handled in api-client interceptor
@@ -283,13 +301,13 @@ export function UserDetailModal({ userId, open, onOpenChange, onUserUpdated }: U
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
         onConfirm={handleDeleteConfirm}
-        title="Delete User?"
+        title={t("deleteDialogTitle")}
         description={
           user
-            ? `Are you sure you want to delete user "${user.name}"? This action cannot be undone.`
-            : "Are you sure you want to delete this user? This action cannot be undone."
+            ? t("deleteDialogDescriptionWithName", { name: user.name })
+            : t("deleteDialogDescription")
         }
-        itemName="user"
+        itemName={t("deleteDialogItemName")}
         isLoading={deleteUser.isPending}
       />
     </>

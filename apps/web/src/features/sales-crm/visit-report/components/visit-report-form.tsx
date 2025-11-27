@@ -24,6 +24,7 @@ import { useContacts } from "../../account-management/hooks/useContacts";
 import type { VisitReport } from "../types";
 import { useEffect, useMemo, useState } from "react";
 import { DateTimePicker } from "@/components/ui/date-time-picker";
+import { useTranslations } from "next-intl";
 
 interface VisitReportFormProps {
   readonly visitReport?: VisitReport;
@@ -41,6 +42,7 @@ export function VisitReportForm({
   const isEdit = !!visitReport;
   const { data: accountsData } = useAccounts({ per_page: 100 });
   const accounts = accountsData?.data || [];
+  const t = useTranslations("visitReportForm");
 
   // Parse visit_date from backend (YYYY-MM-DD) to Date and time
   const parseVisitDate = (dateString: string): { date: Date; time: string | null } => {
@@ -133,14 +135,16 @@ export function VisitReportForm({
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
       <Field orientation="vertical">
-        <FieldLabel>Account *</FieldLabel>
+        <FieldLabel>
+          {t("fields.accountLabel")} *
+        </FieldLabel>
         <Select
           value={watch("account_id") || undefined}
           onValueChange={(value) => setValue("account_id", value)}
           disabled={isEdit}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select an account" />
+            <SelectValue placeholder={t("fields.accountPlaceholder")} />
           </SelectTrigger>
           <SelectContent>
             {accounts
@@ -157,13 +161,13 @@ export function VisitReportForm({
 
       {selectedAccountId && (
         <Field orientation="vertical">
-          <FieldLabel>Contact</FieldLabel>
+          <FieldLabel>{t("fields.contactLabel")}</FieldLabel>
           <Select
             value={watch("contact_id") || undefined}
             onValueChange={(value) => setValue("contact_id", value || undefined)}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select a contact (optional)" />
+              <SelectValue placeholder={t("fields.contactPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
               {contacts.map((contact) => (
@@ -178,7 +182,9 @@ export function VisitReportForm({
       )}
 
       <Field orientation="vertical">
-        <FieldLabel>Visit Date & Time *</FieldLabel>
+        <FieldLabel>
+          {t("fields.visitDateTimeLabel")} *
+        </FieldLabel>
         <DateTimePicker
           date={selectedDate}
           time={selectedTime}
@@ -188,20 +194,22 @@ export function VisitReportForm({
       </Field>
 
       <Field orientation="vertical">
-        <FieldLabel>Purpose *</FieldLabel>
+        <FieldLabel>
+          {t("fields.purposeLabel")} *
+        </FieldLabel>
         <Textarea
           {...register("purpose")}
-          placeholder="Describe the purpose of this visit"
+          placeholder={t("fields.purposePlaceholder")}
           rows={4}
         />
         {errors.purpose && <FieldError>{errors.purpose.message}</FieldError>}
       </Field>
 
       <Field orientation="vertical">
-        <FieldLabel>Notes</FieldLabel>
+        <FieldLabel>{t("fields.notesLabel")}</FieldLabel>
         <Textarea
           {...register("notes")}
-          placeholder="Additional notes about the visit"
+          placeholder={t("fields.notesPlaceholder")}
           rows={3}
         />
         {errors.notes && <FieldError>{errors.notes.message}</FieldError>}
@@ -209,10 +217,14 @@ export function VisitReportForm({
 
       <div className="flex justify-end gap-2 pt-4">
         <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
-          Cancel
+          {t("buttons.cancel")}
         </Button>
         <Button type="submit" disabled={isLoading}>
-          {isLoading ? "Saving..." : isEdit ? "Update" : "Create"}
+          {isLoading
+            ? t("buttons.submitting")
+            : isEdit
+              ? t("buttons.submitUpdate")
+              : t("buttons.submitCreate")}
         </Button>
       </div>
     </form>
