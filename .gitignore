@@ -32,7 +32,6 @@ bin/
 *.dll
 *.so
 *.dylib
-server
 
 # Go specific
 *.test
