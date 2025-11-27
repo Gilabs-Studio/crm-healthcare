@@ -97,7 +97,7 @@ export function VisitStatistics() {
 
   return (
     <Card>
-      <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
+      <CardHeader className="relative flex items-center gap-2 space-y-0 sm:flex-row">
         <div className="grid flex-1 gap-1">
           <div className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5" />
