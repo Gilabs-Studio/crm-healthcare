@@ -64,7 +64,7 @@ export function ReminderSettings({ taskId }: ReminderSettingsProps) {
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Clock className="h-4 w-4 text-muted-foreground" />
@@ -74,7 +74,7 @@ export function ReminderSettings({ taskId }: ReminderSettingsProps) {
           type="button"
           size="sm"
           variant="outline"
-          className="h-8 gap-1.5"
+          className="h-8 gap-2"
           onClick={() => setIsCreateDialogOpen(true)}
         >
           <Plus className="h-3.5 w-3.5" />
@@ -83,33 +83,42 @@ export function ReminderSettings({ taskId }: ReminderSettingsProps) {
       </div>
 
       {isLoading ? (
-        <p className="text-xs text-muted-foreground">{t("loading")}</p>
+        <p className="text-sm text-muted-foreground">{t("loading")}</p>
       ) : reminders.length === 0 ? (
-        <p className="text-xs text-muted-foreground">{t("empty")}</p>
+        <div className="flex flex-col items-center justify-center py-8 text-center">
+          <div className="rounded-full bg-muted p-3 mb-3">
+            <Clock className="h-5 w-5 text-muted-foreground" />
+          </div>
+          <p className="text-sm text-muted-foreground">{t("empty")}</p>
+        </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {reminders.map((reminder) => (
             <div
               key={reminder.id}
-              className="flex items-start justify-between rounded-md border bg-muted/40 px-3 py-2 text-xs"
+              className="group flex items-start justify-between rounded-lg border bg-card p-4 hover:border-primary/20 hover:shadow-sm transition-all"
             >
-              <div>
-                <p className="font-medium">
-                  {formatDateTime(reminder.remind_at)}{" "}
-                  <span className="text-muted-foreground">({reminder.reminder_type})</span>
-                </p>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium">
+                    {formatDateTime(reminder.remind_at)}
+                  </span>
+                  <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">
+                    {reminder.reminder_type}
+                  </span>
+                </div>
                 {reminder.message && (
-                  <p className="mt-1 text-muted-foreground whitespace-pre-wrap">
+                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">
                     {reminder.message}
                   </p>
                 )}
               </div>
-              <div className="flex items-center gap-1 ml-3 shrink-0">
+              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <Button
                   type="button"
                   size="icon-sm"
                   variant="ghost"
-                  className="h-7 w-7"
+                  className="h-8 w-8"
                   onClick={() => setEditingReminder(reminder)}
                   title={tDialog("editTitle")}
                 >
@@ -119,7 +128,7 @@ export function ReminderSettings({ taskId }: ReminderSettingsProps) {
                   type="button"
                   size="icon-sm"
                   variant="ghost"
-                  className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+                  className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                   onClick={() => setDeletingReminderId(reminder.id)}
                   title={t("deleteTitle")}
                 >
@@ -201,6 +210,7 @@ function ReminderDialog({
   onUpdate,
 }: ReminderDialogProps) {
   const isEdit = mode === "edit" && !!reminder;
+  const tDialog = useTranslations("taskManagement.reminderDialog");
 
   const {
     register,
@@ -277,14 +287,14 @@ function ReminderDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[480px]">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
             {isEdit ? tDialog("editTitle") : tDialog("createTitle")}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {!isEdit && (
             <input type="hidden" {...register("task_id" as "task_id")} value={taskId} />
           )}
@@ -296,6 +306,7 @@ function ReminderDialog({
               {...register("remind_at" as "remind_at")}
               value={(watch("remind_at") as string | undefined) ?? ""}
               onChange={(event) => setValue("remind_at" as "remind_at", event.target.value)}
+              className="h-9"
             />
             {errors.remind_at && <FieldError>{errors.remind_at.message}</FieldError>}
           </Field>
@@ -308,7 +319,7 @@ function ReminderDialog({
                 setValue("reminder_type" as "reminder_type", value as "in_app" | "email" | "sms")
               }
             >
-              <SelectTrigger>
+              <SelectTrigger className="h-9">
                 <SelectValue placeholder={tDialog("channelPlaceholder")} />
               </SelectTrigger>
               <SelectContent>
@@ -330,7 +341,7 @@ function ReminderDialog({
             {errors.message && <FieldError>{errors.message.message}</FieldError>}
           </Field>
 
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="flex justify-end gap-3 pt-4 border-t">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               {tDialog("cancel")}
             </Button>

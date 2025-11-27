@@ -53,14 +53,6 @@ export function DeleteDialog({
             handleOpenChange(false);
           }
         }}
-        onPointerDownOutside={(e) => {
-          // Allow closing on outside click if not loading
-          if (isLoading) {
-            // Prevent closing if loading
-            e.preventDefault();
-          }
-          // If not loading, let it close naturally (don't prevent default)
-        }}
       >
         <AlertDialogHeader>
           <AlertDialogTitle>

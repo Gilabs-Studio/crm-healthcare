@@ -2,7 +2,9 @@
   "taskManagement": {
     "page": {
       "title": "Manajemen Task & Reminder",
-      "description": "Kelola task, follow-up, dan pengingat di seluruh akun dan deal"
+      "description": "Kelola task, follow-up, dan pengingat di seluruh akun dan deal",
+      "viewList": "Tampilan daftar",
+      "viewBoard": "Tampilan board"
     },
     "list": {
       "searchPlaceholder": "Cari task...",
@@ -34,17 +36,70 @@
       "buttons": {
         "addTask": "Tambah Task",
         "createTitle": "Buat Task",
-        "editTitle": "Edit Task"
+        "editTitle": "Edit Task",
+        "markComplete": "Selesai"
       },
       "table": {
         "columnTask": "Task",
+        "columnType": "Tipe",
+        "columnStatus": "Status",
+        "columnPriority": "Prioritas",
+        "columnContact": "Kontak",
+        "columnAssignee": "Penanggung Jawab",
         "columnDueDate": "Jatuh Tempo",
+        "columnActions": "Aksi",
         "empty": "Tidak ada task",
         "itemName": "task"
       },
       "deleteDialog": {
         "title": "Hapus Task?",
         "description": "Apakah Anda yakin ingin menghapus task ini? Tindakan ini tidak dapat dibatalkan."
+      }
+    },
+    "board": {
+      "columns": {
+        "todo": "To Do",
+        "inProgress": "Dalam Proses",
+        "completed": "Selesai",
+        "cancelled": "Dibatalkan"
+      },
+      "emptyColumn": "Belum ada task di kolom ini.",
+      "moreFilters": "Filter lainnya",
+      "filtersTitle": "Filter task",
+      "dueDateRange": "Rentang tanggal jatuh tempo",
+      "resetFilters": "Reset",
+      "applyFilters": "Terapkan"
+    },
+    "detail": {
+      "drawerTitle": "Detail Task",
+      "loadError": "Gagal memuat detail task",
+      "actions": {
+        "markComplete": "Tandai Selesai",
+        "edit": "Edit",
+        "delete": "Hapus",
+        "editTitle": "Edit Task",
+        "completeSuccess": "Task berhasil ditandai selesai",
+        "updateSuccess": "Task berhasil diperbarui",
+        "deleteSuccess": "Task berhasil dihapus"
+      },
+      "sections": {
+        "taskInformationTitle": "Informasi Task",
+        "typeLabel": "Tipe",
+        "dueDateLabel": "Jatuh Tempo",
+        "completedAtLabel": "Diselesaikan Pada",
+        "assignmentTitle": "Penugasan & Relasi",
+        "assignedToLabel": "Ditugaskan ke",
+        "accountLabel": "Akun",
+        "contactLabel": "Kontak",
+        "remindersTitle": "Reminder",
+        "metadataTitle": "Metadata",
+        "createdAtLabel": "Dibuat",
+        "updatedAtLabel": "Terakhir Diperbarui"
+      },
+      "deleteDialog": {
+        "title": "Hapus Task?",
+        "description": "Apakah Anda yakin ingin menghapus task ini? Tindakan ini tidak dapat dibatalkan.",
+        "itemName": "task"
       }
     },
     "card": {

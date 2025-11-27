@@ -5,14 +5,11 @@ export const reminderTypeValues: ReminderType[] = ["in_app", "email", "sms"];
 
 export const createReminderSchema = z.object({
   task_id: z
-    .string({
-      required_error: "Task is required",
-    })
+    .string()
+    .min(1, "Task is required")
     .uuid("Invalid task ID"),
   remind_at: z
-    .string({
-      required_error: "Reminder time is required",
-    })
+    .string()
     .refine(
       (value) => {
         const date = new Date(value);

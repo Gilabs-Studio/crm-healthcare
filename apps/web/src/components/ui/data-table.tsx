@@ -55,6 +55,7 @@ interface DataTableProps<T> {
   readonly onPerPageChange?: (perPage: number) => void;
   readonly itemName?: string; // e.g., "diagnosis", "procedure"
   readonly perPageOptions?: readonly number[]; // e.g., [10, 20, 50, 100]
+  readonly onResetFilters?: () => void;
 }
 
 export function DataTable<T extends { id: string }>({
@@ -67,6 +68,7 @@ export function DataTable<T extends { id: string }>({
   onPerPageChange,
   itemName = "item",
   perPageOptions = [10, 20, 50, 100],
+  onResetFilters,
 }: DataTableProps<T>) {
   const isMobile = useIsMobile();
 
@@ -349,9 +351,18 @@ export function DataTable<T extends { id: string }>({
                   </p>
                 </div>
 
-                {/* Pagination controls */}
+                {/* Pagination controls + optional reset filters */}
                 {pagination.total_pages > 1 && (
-                  <div className="order-1 lg:order-3">
+                  <div className="flex items-center gap-3 order-1 lg:order-3">
+                    {onResetFilters && (
+                      <button
+                        type="button"
+                        onClick={() => onResetFilters()}
+                        className="text-xs font-medium text-muted-foreground hover:text-primary underline-offset-4 hover:underline"
+                      >
+                        Reset filters
+                      </button>
+                    )}
                     <Pagination>
                       <PaginationContent>
                         <PaginationItem>

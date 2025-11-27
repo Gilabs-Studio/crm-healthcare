@@ -39,7 +39,7 @@ interface TooltipProps {
 
 function Tooltip({ children, delayDuration = 150 }: TooltipProps) {
   const [open, setOpen] = React.useState(false);
-  const timeoutRef = React.useRef<NodeJS.Timeout>();
+  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
   const handleMouseEnter = () => {
     if (timeoutRef.current) {

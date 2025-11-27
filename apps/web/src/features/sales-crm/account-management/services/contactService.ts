@@ -1,11 +1,6 @@
 import apiClient from "@/lib/api-client";
-import type {
-  Contact,
-  ListContactsResponse,
-  ContactResponse,
-  CreateContactFormData,
-  UpdateContactFormData,
-} from "../types";
+import type { Contact, ListContactsResponse, ContactResponse } from "../types";
+import type { CreateContactFormData, UpdateContactFormData } from "../schemas/contact.schema";
 
 export const contactService = {
   async list(params?: {

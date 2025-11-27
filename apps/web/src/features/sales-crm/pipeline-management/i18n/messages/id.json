@@ -66,7 +66,10 @@
       "noDeals": "Belum ada deal",
       "noDealsHint": "Tarik deal ke sini atau buat baru",
       "createDialogTitle": "Buat Deal",
-      "editDialogTitle": "Edit Deal"
+      "editDialogTitle": "Edit Deal",
+      "toastDealMoved": "Deal dipindahkan ke {stage}",
+      "toastDealCreated": "Deal berhasil dibuat",
+      "toastDealUpdated": "Deal berhasil diperbarui"
     },
     "pipelineSummary": {
       "title": "Ringkasan Pipeline",
@@ -79,6 +82,13 @@
       "performanceByStageTitle": "Performa per Tahap",
       "stageDealsSingular": "deal",
       "stageDealsPlural": "deal"
+    },
+    "page": {
+      "title": "Sales Pipeline",
+      "description": "Kelola pipeline sales dan pantau performa penjualan",
+      "tabKanban": "Kanban",
+      "tabSummary": "Ringkasan",
+      "tabForecast": "Proyeksi"
     }
   }
 }

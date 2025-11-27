@@ -9,9 +9,8 @@ export const taskPriorityValues: TaskPriority[] = ["low", "medium", "high", "urg
 
 export const createTaskSchema = z.object({
   title: z
-    .string({
-      required_error: "Title is required",
-    })
+    .string()
+    .min(1, "Title is required")
     .min(3, "Title must be at least 3 characters")
     .max(255, "Title must be at most 255 characters"),
   description: z.string().optional(),
@@ -65,9 +64,8 @@ export const updateTaskSchema = z.object({
 
 export const assignTaskSchema = z.object({
   assigned_to: z
-    .string({
-      required_error: "Assignee is required",
-    })
+    .string()
+    .min(1, "Assignee is required")
     .uuid("Invalid user ID"),
 });
 

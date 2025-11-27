@@ -2,9 +2,8 @@ import { z } from "zod";
 
 export const createProductCategorySchema = z.object({
   name: z
-    .string({
-      required_error: "Name is required",
-    })
+    .string()
+    .min(1, "Name is required")
     .min(3, "Name must be at least 3 characters"),
   slug: z
     .string()

@@ -3,7 +3,7 @@
 import React, { memo, useMemo, useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/routing";
-import { HelpCircle } from "lucide-react";
+import { Bell, HelpCircle, Search } from "lucide-react";
 
 import { useAuthStore } from "@/features/auth/stores/useAuthStore";
 import { useUserPermissions } from "@/features/master-data/user-management/hooks/useUserPermissions";
@@ -11,9 +11,25 @@ import type { MenuWithActions } from "@/features/master-data/user-management/typ
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import { ThemeToggleButton as ThemeToggle } from "@/components/ui/theme-toggle";
 import { Separator } from "@/components/ui/separator";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { getMenuIcon } from "@/lib/menu-icons";
+import { useLogout } from "@/features/auth/hooks/useLogout";
+import { useDashboardCommandPalette } from "@/features/layout/hooks/useDashboardCommandPalette";
 import {
   Sidebar,
   SidebarContent,
@@ -52,6 +68,7 @@ const Header = memo(function Header({
 }) {
   const locale = useLocale();
   const tSidebar = useTranslations("sidebar");
+  const logout = useLogout();
   const pathname = usePathname();
 
   const [currentSrc, setCurrentSrc] = React.useState<string | undefined>(
@@ -67,102 +84,125 @@ const Header = memo(function Header({
     }
   }, [avatarUrl, fallbackAvatarUrl]);
 
-  const breadcrumbItems = React.useMemo(() => {
-    const segmentToLabel = (segment: string) => {
-      const map: Record<string, string> = {
-        dashboard: tSidebar("dashboard"),
-        "visit-reports": tSidebar("visitReports"),
-        accounts: tSidebar("accounts"),
-        deals: tSidebar("deals"),
-        pipeline: tSidebar("pipeline"),
-        products: tSidebar("products"),
-        "product-categories": tSidebar("productCategories"),
-        reports: tSidebar("reports"),
-        tasks: tSidebar("tasks"),
-        settings: tSidebar("settings"),
-        "master-data": tSidebar("masterData"),
-      };
-
-      if (map[segment]) return map[segment];
-
-      return segment
-        .split("-")
-        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-        .join(" ");
-    };
-
-    if (!pathname || pathname === "/dashboard") {
-      return ["Dashboard"];
-    }
-
-    const segments = pathname.split("/").filter(Boolean);
-    const items: string[] = ["Dashboard"];
-
-    segments.forEach((segment, index) => {
-      if (segment === "dashboard" && index === 0) return;
-      items.push(segmentToLabel(segment));
-    });
-
-    return items;
-  }, [pathname]);
-
   return (
-    <header className="flex h-16 shrink-0 items-center gap-3 border-b px-4">
+    <header className="sticky top-0 z-50 flex h-16 shrink-0 items-center gap-3 border-b bg-background/80 px-4 backdrop-blur">
       <SidebarTrigger className="-ml-1 size-8" />
-      <Separator orientation="vertical"/>
-      <nav
-        aria-label="Breadcrumb"
-        className="flex items-center gap-1 text-xs text-muted-foreground"
-      >
-        {breadcrumbItems.map((item, index) => {
-          const isLast = index === breadcrumbItems.length - 1;
-          return (
-            <React.Fragment key={`${item}-${index}`}>
-              {index > 0 && (
-                <span className="mx-1 text-muted-foreground/70">/</span>
-              )}
-              <span className={isLast ? "font-medium text-foreground" : ""}>
-                {item}
-              </span>
-            </React.Fragment>
-          );
-        })}
-      </nav>
+      <Separator orientation="vertical" />
 
-      <div className="ml-auto flex items-center gap-4 pr-4">
-        {/* Locale toggle */}
+      <div className="lg:flex-1">
+        {/* Desktop search input */}
+        <div className="relative hidden max-w-sm flex-1 lg:block">
+          <Search
+            className="text-muted-foreground pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2"
+            aria-hidden="true"
+          />
+          <input
+            type="search"
+            placeholder="Search..."
+            className="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground border-input h-9 w-full cursor-pointer rounded-md border bg-background/60 px-3 py-1 pr-4 pl-10 text-sm shadow-sm outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          />
+          <div className="bg-muted text-muted-foreground absolute right-2 top-1/2 hidden -translate-y-1/2 items-center gap-0.5 rounded-sm px-1.5 py-0.5 font-mono text-[10px] font-medium sm:flex">
+            <span>⌘</span>
+            <span>K</span>
+          </div>
+        </div>
+
+        {/* Mobile search button */}
+        <div className="block lg:hidden">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-9"
+            type="button"
+          >
+            <Search className="h-4 w-4" aria-hidden="true" />
+            <span className="sr-only">Open search</span>
+          </Button>
+        </div>
+      </div>
+
+      <div className="ml-auto flex items-center gap-1">
+        {/* Notifications */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative size-8"
+          type="button"
+        >
+          <Bell className="h-4 w-4" aria-hidden="true" />
+          <span className="bg-destructive absolute end-1 top-1 block size-2 rounded-full" />
+          <span className="sr-only">Open notifications</span>
+        </Button>
+
+        {/* Theme toggle – now driven by internal minimal UI */}
+        <ThemeToggle />
+
+        {/* Language toggle (replaces settings) */}
         <Link
           href={pathname || "/dashboard"}
           locale={locale === "en" ? "id" : "en"}
           scroll={false}
         >
           <Button
-            variant="outline"
-            className="h-8 w-10 text-xs font-medium"
+            variant="ghost"
+            size="icon"
+            className="h-9 w-11 rounded-2xl bg-background/80 text-xs font-semibold shadow-sm hover:bg-accent/60"
+            type="button"
           >
             {locale === "en" ? "ID" : "EN"}
           </Button>
         </Link>
-        <ThemeToggle className="size-8" />
-        <Button
-          variant="ghost"
-          className="flex h-8 w-8 items-center justify-center rounded-full p-0 hover:bg-muted transition-colors"
-        >
-          <Avatar className="h-8 w-8">
-            <AvatarImage
-              src={currentSrc}
-              alt={userName}
-              onError={() => {
-                if (currentSrc !== fallbackAvatarUrl) {
-                  setCurrentSrc(fallbackAvatarUrl);
-                }
-              }}
-            />
-            {avatarUrl && (
-              <AvatarFallback className="bg-primary/10 text-primary font-medium" />
-            )}
-          </Avatar>
-        </Button>
+
+        {/* Thin separator between lang toggle and avatar */}
+        <div className="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-1/2 data-[orientation=vertical]:w-px mx-2 h-4 w-px" />
+
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="ghost"
+              className="flex h-8 w-8 items-center justify-center rounded-full p-0 hover:bg-muted transition-colors"
+            >
+              <Avatar className="h-8 w-8">
+                <AvatarImage
+                  src={currentSrc}
+                  alt={userName}
+                  onError={() => {
+                    if (currentSrc !== fallbackAvatarUrl) {
+                      setCurrentSrc(fallbackAvatarUrl);
+                    }
+                  }}
+                />
+                {avatarUrl && (
+                  <AvatarFallback className="bg-primary/10 text-primary font-medium" />
+                )}
+              </Avatar>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-56 p-2" align="end">
+            <div className="px-2 py-1.5 text-xs text-muted-foreground">
+              <div className="text-foreground text-sm font-medium">
+                {userName}
+              </div>
+            </div>
+            <Separator className="my-1" />
+            <div className="flex flex-col gap-1">
+              <Link
+                href="/settings"
+                locale={locale}
+                className="flex w-full items-center rounded-md px-2 py-1.5 text-sm hover:bg-muted"
+              >
+                {tSidebar("settings")}
+              </Link>
+              <button
+                type="button"
+                onClick={logout}
+                className="flex w-full items-center rounded-md px-2 py-1.5 text-left text-sm text-destructive hover:bg-destructive/10"
+              >
+                Logout
+              </button>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
     </header>
   );
@@ -286,6 +326,9 @@ export const DashboardLayout = memo(function DashboardLayout({
 }: DashboardLayoutProps) {
   const { user } = useAuthStore();
   const { data: permissionsData, error } = useUserPermissions();
+  const commandPalette = useDashboardCommandPalette({
+    menus: permissionsData?.data?.menus,
+  });
 
   const userName = user?.name ?? "User";
   const primaryAvatarUrl =
@@ -382,6 +425,50 @@ export const DashboardLayout = memo(function DashboardLayout({
           </div>
         </SidebarInset>
       </div>
+
+      <Dialog open={commandPalette.isOpen} onOpenChange={commandPalette.toggle}>
+        <DialogContent
+          showCloseButton={false}
+          className="p-0 shadow-2xl sm:max-w-xl"
+        >
+          <DialogTitle className="sr-only">Command palette</DialogTitle>
+          <Command>
+            <CommandInput placeholder="Type a command or search..." />
+            <CommandList>
+              <CommandEmpty>No menu found.</CommandEmpty>
+              {Object.entries(
+                commandPalette.items.reduce<Record<string, typeof commandPalette.items>>(
+                  (groups, item) => {
+                    const group = item.group || "Menus";
+                    if (!groups[group]) {
+                      groups[group] = [];
+                    }
+                    groups[group].push(item);
+                    return groups;
+                  },
+                  {}
+                )
+              ).map(([group, items]) => (
+                <CommandGroup key={group} heading={group}>
+                  {items.map((item) => (
+                    <CommandItem
+                      key={`${group}-${item.id}-${item.href}`}
+                      value={item.name}
+                      onSelect={() => commandPalette.onSelectItem(item.href)}
+                    >
+                      {getMenuIcon(item.icon)}
+                      <span className="flex-1 truncate">{item.name}</span>
+                      <span className="text-muted-foreground text-xs">
+                        {item.href}
+                      </span>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              ))}
+            </CommandList>
+          </Command>
+        </DialogContent>
+      </Dialog>
     </SidebarProvider>
   );
 });

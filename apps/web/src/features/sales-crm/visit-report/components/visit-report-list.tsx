@@ -310,6 +310,14 @@ export function VisitReportList() {
         onPerPageChange={setPerPage}
         itemName={t("dialogs.itemName")}
         perPageOptions={[10, 20, 50, 100]}
+        onResetFilters={() => {
+          setSearch("");
+          setStatus("");
+          setAccountId("");
+          setStartDate("");
+          setEndDate("");
+          setPage(1);
+        }}
       />
 
       {/* Create Dialog */}
@@ -319,7 +327,9 @@ export function VisitReportList() {
             <DialogTitle>{t("dialogs.createTitle")}</DialogTitle>
           </DialogHeader>
           <VisitReportForm
-            onSubmit={handleCreate}
+            onSubmit={async (data) => {
+              await handleCreate(data as any);
+            }}
             onCancel={() => setIsCreateDialogOpen(false)}
             isLoading={createVisitReport.isPending}
           />
@@ -335,7 +345,7 @@ export function VisitReportList() {
             </DialogHeader>
             <VisitReportForm
               visitReport={editingVisitReportData.data}
-              onSubmit={handleUpdate}
+            onSubmit={(data) => handleUpdate(data)}
               onCancel={() => setEditingVisitReport(null)}
               isLoading={updateVisitReport.isPending}
             />

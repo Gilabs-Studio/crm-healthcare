@@ -26,7 +26,7 @@ export function useContactList() {
     per_page: perPage,
     search,
     account_id: accountId,
-    role,
+    role_id: role,
   });
   const { data: editingContactData } = useContact(editingContact || "");
   const deleteContact = useDeleteContact();

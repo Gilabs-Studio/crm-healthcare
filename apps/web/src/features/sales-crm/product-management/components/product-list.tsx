@@ -91,7 +91,15 @@ export function ProductList() {
             </DialogHeader>
             <ProductForm
               product={selectedProduct}
-              onSubmit={selectedProduct ? handleUpdate : handleCreate}
+              onSubmit={
+                selectedProduct
+                  ? async (data) => {
+                      await handleUpdate(data as any);
+                    }
+                  : async (data) => {
+                      await handleCreate(data as any);
+                    }
+              }
               onCancel={() => {
                 setIsDialogOpen(false);
                 resetDialogState();

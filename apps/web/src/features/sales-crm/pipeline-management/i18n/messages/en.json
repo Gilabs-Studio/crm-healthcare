@@ -66,7 +66,10 @@
       "noDeals": "No deals",
       "noDealsHint": "Drag deals here or create new",
       "createDialogTitle": "Create Deal",
-      "editDialogTitle": "Edit Deal"
+      "editDialogTitle": "Edit Deal",
+      "toastDealMoved": "Deal moved to {stage}",
+      "toastDealCreated": "Deal created successfully",
+      "toastDealUpdated": "Deal updated successfully"
     },
     "pipelineSummary": {
       "title": "Pipeline Summary",
@@ -79,6 +82,13 @@
       "performanceByStageTitle": "Performance by Stage",
       "stageDealsSingular": "deal",
       "stageDealsPlural": "deals"
+    },
+    "page": {
+      "title": "Sales Pipeline",
+      "description": "Manage your sales opportunities and track performance",
+      "tabKanban": "Kanban Board",
+      "tabSummary": "Summary",
+      "tabForecast": "Forecast"
     }
   }
 }

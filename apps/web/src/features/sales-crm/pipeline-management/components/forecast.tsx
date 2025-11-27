@@ -98,11 +98,11 @@ export function Forecast() {
 
           {/* Revenue Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card className="p-5 bg-muted/50 border-border">
+            <Card className="p-5 bg-card border-border">
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-950">
-                    <DollarSign className="h-5 w-5 text-blue-600" />
+                  <div className="p-2 rounded-lg bg-secondary">
+                    <DollarSign className="h-5 w-5 text-secondary-foreground" />
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-medium text-muted-foreground">{t("expectedRevenueLabel")}</p>

@@ -59,6 +59,11 @@ func SeedAll() error {
 		return err
 	}
 
+	// Seed deals (requires users, accounts, contacts, pipeline stages)
+	if err := SeedDeals(); err != nil {
+		return err
+	}
+
 	// Seed tasks (requires users, accounts, contacts)
 	if err := SeedTasks(); err != nil {
 		return err

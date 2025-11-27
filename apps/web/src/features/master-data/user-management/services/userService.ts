@@ -1,11 +1,6 @@
 import apiClient from "@/lib/api-client";
-import type {
-  User,
-  ListUsersResponse,
-  UserResponse,
-  CreateUserFormData,
-  UpdateUserFormData,
-} from "../types";
+import type { User, ListUsersResponse, UserResponse } from "../types";
+import type { CreateUserFormData, UpdateUserFormData } from "../schemas/user.schema";
 import type { ListRolesResponse, Role } from "../types";
 import type { ListPermissionsResponse, Permission, UserPermissionsApiResponse } from "../types";
 

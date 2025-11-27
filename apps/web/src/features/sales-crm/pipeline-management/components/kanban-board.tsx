@@ -95,9 +95,8 @@ export function KanbanBoard({ onDealClick }: KanbanBoardProps) {
               <div className="flex items-center gap-2.5 mb-4 flex-shrink-0 pb-3 border-b border-border">
                 <div
                   className="w-3 h-3 rounded-full shrink-0 ring-2 ring-offset-2 ring-offset-background"
-                  style={{ 
+                  style={{
                     backgroundColor: stage.color,
-                    ringColor: stage.color + "40"
                   }}
                 />
                 <h3 className="font-semibold text-base truncate flex-1">{stage.name}</h3>
@@ -153,7 +152,9 @@ export function KanbanBoard({ onDealClick }: KanbanBoardProps) {
             <DialogTitle>{t("createDialogTitle")}</DialogTitle>
           </DialogHeader>
           <DealForm
-            onSubmit={handleCreateDeal}
+            onSubmit={async (data) => {
+              await handleCreateDeal(data as any);
+            }}
             onCancel={closeCreateDialog}
             isLoading={isCreating}
           />
@@ -169,7 +170,7 @@ export function KanbanBoard({ onDealClick }: KanbanBoardProps) {
             </DialogHeader>
             <DealForm
               deal={editingDeal}
-              onSubmit={handleUpdateDeal}
+              onSubmit={(data) => handleUpdateDeal(data)}
               onCancel={closeEditDialog}
               isLoading={isUpdating}
             />

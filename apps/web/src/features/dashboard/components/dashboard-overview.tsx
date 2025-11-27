@@ -4,10 +4,11 @@ import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useDashboardOverview } from "../hooks/useDashboard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Target, Users, Briefcase, DollarSign } from "lucide-react";
 
 export function DashboardOverview() {
   const t = useTranslations("dashboardOverview");
-  const { data, isLoading } = useDashboardOverview({ period: "today" });
+  const { data, isLoading } = useDashboardOverview({ period: "month" });
 
   if (isLoading) {
     return (
@@ -33,33 +34,49 @@ export function DashboardOverview() {
     return null;
   }
 
+  const targetProgress = overview.target?.progress_percent ?? 0;
+
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(value);
+
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      {/* Target progress */}
       <Card>
-        <CardHeader className="pb-2">
+        <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
           <CardTitle className="text-sm font-medium text-muted-foreground">
-            {t("totalVisits.title")}
+            {t("targetProgress.title")}
           </CardTitle>
+          <Target className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{overview.visit_stats.total}</div>
+          <div className="text-2xl font-bold">
+            {Math.round(targetProgress)}%
+          </div>
           <p className="text-xs text-muted-foreground mt-1">
-            {t("totalVisits.description", {
-              completed: overview.visit_stats.completed,
-              pending: overview.visit_stats.pending,
+            {t("targetProgress.description", {
+              progress: Math.round(targetProgress),
             })}
           </p>
         </CardContent>
       </Card>
 
+      {/* Total customers/accounts */}
       <Card>
-        <CardHeader className="pb-2">
+        <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
           <CardTitle className="text-sm font-medium text-muted-foreground">
             {t("totalAccounts.title")}
           </CardTitle>
+          <Users className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{overview.account_stats.total}</div>
+          <div className="text-2xl font-bold">
+            {overview.account_stats.total}
+          </div>
           <p className="text-xs text-muted-foreground mt-1">
             {t("totalAccounts.description", {
               active: overview.account_stats.active,
@@ -69,36 +86,41 @@ export function DashboardOverview() {
         </CardContent>
       </Card>
 
+      {/* Total deals */}
       <Card>
-        <CardHeader className="pb-2">
+        <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
           <CardTitle className="text-sm font-medium text-muted-foreground">
-            {t("totalActivities.title")}
+            {t("totalDeals.title")}
           </CardTitle>
+          <Briefcase className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{overview.activity_stats.total}</div>
+          <div className="text-2xl font-bold">
+            {overview.deals.total_deals}
+          </div>
           <p className="text-xs text-muted-foreground mt-1">
-            {t("totalActivities.description", {
-              visits: overview.activity_stats.visits,
-              calls: overview.activity_stats.calls,
-              emails: overview.activity_stats.emails,
+            {t("totalDeals.description", {
+              open: overview.deals.open_deals,
+              won: overview.deals.won_deals,
             })}
           </p>
         </CardContent>
       </Card>
 
+      {/* Total revenue */}
       <Card>
-        <CardHeader className="pb-2">
+        <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
           <CardTitle className="text-sm font-medium text-muted-foreground">
-            {t("approvedVisits.title")}
+            {t("totalRevenue.title")}
           </CardTitle>
+          <DollarSign className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{overview.visit_stats.approved}</div>
+          <div className="text-2xl font-bold">
+            {formatCurrency(overview.revenue.total_revenue)}
+          </div>
           <p className="text-xs text-muted-foreground mt-1">
-            {t("approvedVisits.description", {
-              rejected: overview.visit_stats.rejected,
-            })}
+            {t("totalRevenue.description")}
           </p>
         </CardContent>
       </Card>
