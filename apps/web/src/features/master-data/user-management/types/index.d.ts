@@ -66,6 +66,7 @@ export interface MenuWithActions {
 
 export interface UserPermissionsResponse {
   menus: MenuWithActions[];
+  permissions?: Permission[];
 }
 
 export interface ListUsersResponse {

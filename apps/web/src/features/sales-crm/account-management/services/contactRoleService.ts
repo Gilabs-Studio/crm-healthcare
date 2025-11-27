@@ -1,11 +1,9 @@
 import { apiClient } from "@/lib/api-client";
+import type { ContactRole, ListContactRolesResponse, ContactRoleResponse } from "../types";
 import type {
-  ContactRole,
-  ListContactRolesResponse,
-  ContactRoleResponse,
   CreateContactRoleFormData,
   UpdateContactRoleFormData,
-} from "../types";
+} from "../schemas/contact-role.schema";
 
 export const contactRoleService = {
   async list(): Promise<ListContactRolesResponse> {

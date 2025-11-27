@@ -77,7 +77,6 @@ function PaginationPrevious({
   return (
     <PaginationLink
       aria-label="Go to previous page"
-      size="default"
       className={cn(
         "gap-1.5 px-3 sm:px-4 h-9 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-all duration-200",
         className
@@ -97,7 +96,6 @@ function PaginationNext({
   return (
     <PaginationLink
       aria-label="Go to next page"
-      size="default"
       className={cn(
         "gap-1.5 px-3 sm:px-4 h-9 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-all duration-200",
         className
@@ -117,7 +115,6 @@ function PaginationFirst({
   return (
     <PaginationLink
       aria-label="Go to first page"
-      size="default"
       className={cn(
         "h-9 w-9 p-0 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-all duration-200",
         className
@@ -136,7 +133,6 @@ function PaginationLast({
   return (
     <PaginationLink
       aria-label="Go to last page"
-      size="default"
       className={cn(
         "h-9 w-9 p-0 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-all duration-200",
         className

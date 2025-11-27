@@ -561,12 +561,16 @@ function SidebarMenuButton({
     };
   }
 
+  const tooltipAlignProps = {
+    side: 'right' as const,
+    align: 'center',
+  } as unknown as React.ComponentProps<typeof TooltipContent>;
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>{button}</TooltipTrigger>
       <TooltipContent
-        side='right'
-        align='center'
+        {...tooltipAlignProps}
         hidden={state !== 'collapsed' || isMobile}
         {...tooltip}
       />

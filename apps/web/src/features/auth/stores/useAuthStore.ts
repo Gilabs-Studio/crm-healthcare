@@ -9,7 +9,11 @@ import { authService } from "../services/authService";
 interface AuthStore extends AuthState {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  refreshToken: () => Promise<void>;
+  /**
+   * Refresh the access token using the current refresh token.
+   * Kept separate from the `refreshToken` string in `AuthState` to avoid name collisions.
+   */
+  refreshSession: () => Promise<void>;
   setUser: (user: User | null) => void;
   setToken: (token: string | null) => void;
   clearError: () => void;
@@ -83,7 +87,7 @@ export const useAuthStore = create<AuthStore>()(
         }
       },
 
-      refreshToken: async () => {
+      refreshSession: async () => {
         const { refreshToken: currentRefreshToken } = get();
         if (!currentRefreshToken) {
           throw new Error("No refresh token available");

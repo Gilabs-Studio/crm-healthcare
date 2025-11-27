@@ -15,7 +15,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useAccounts } from "../hooks/useAccounts";
-import type { Contact } from "../types";
+import type { Contact, ContactRole } from "../types";
+import { ContactDetailModal } from "./contact-detail-modal";
 
 export function ContactList() {
   const {
@@ -54,8 +55,12 @@ export function ContactList() {
     setIsDetailModalOpen(true);
   };
 
-  const getRoleBadgeVariant = (role: string) => {
-    switch (role) {
+  const getRoleBadgeVariant = (role: ContactRole | undefined) => {
+    if (!role) {
+      return "outline";
+    }
+
+    switch (role.code) {
       case "doctor":
         return "default";
       case "pic":
@@ -86,7 +91,7 @@ export function ContactList() {
       header: "Role",
       accessor: (row) => (
         <Badge variant={getRoleBadgeVariant(row.role)} className="font-normal capitalize">
-          {row.role}
+          {row.role?.name ?? "-"}
         </Badge>
       ),
     },
@@ -209,6 +214,12 @@ export function ContactList() {
         onPerPageChange={setPerPage}
         itemName="contact"
         perPageOptions={[10, 20, 50, 100]}
+        onResetFilters={() => {
+          setSearch("");
+          setAccountId("");
+          setRole("");
+          setPage(1);
+        }}
       />
 
       {/* Create Dialog */}
@@ -218,7 +229,9 @@ export function ContactList() {
             <DialogTitle>Create Contact</DialogTitle>
           </DialogHeader>
           <ContactForm
-            onSubmit={handleCreate}
+            onSubmit={async (data) => {
+              await handleCreate(data as any);
+            }}
             onCancel={() => setIsCreateDialogOpen(false)}
             isLoading={createContact.isPending}
             defaultAccountId={accountId || undefined}
@@ -235,7 +248,7 @@ export function ContactList() {
             </DialogHeader>
             <ContactForm
               contact={editingContactData.data}
-              onSubmit={handleUpdate}
+              onSubmit={(data) => handleUpdate(data)}
               onCancel={() => setEditingContact(null)}
               isLoading={updateContact.isPending}
             />
@@ -243,21 +256,16 @@ export function ContactList() {
         </Dialog>
       )}
 
-      {/* Contact Detail Modal - Placeholder for now */}
-      {viewingContactId && (
-        <Dialog open={isDetailModalOpen} onOpenChange={setIsDetailModalOpen}>
-          <DialogContent className="sm:max-w-[600px]">
-            <DialogHeader>
-              <DialogTitle>Contact Details</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Contact detail view will be implemented here
-              </p>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
+      <ContactDetailModal
+        contactId={viewingContactId}
+        open={isDetailModalOpen}
+        onOpenChange={(open) => {
+          setIsDetailModalOpen(open);
+          if (!open) {
+            setViewingContactId(null);
+          }
+        }}
+      />
     </div>
   );
 }

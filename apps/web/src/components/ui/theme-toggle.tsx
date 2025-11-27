@@ -47,6 +47,9 @@ const generateSVG = (variant: AnimationVariant, start: AnimationStart) => {
       return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><defs><filter id="blur"><feGaussianBlur stdDeviation="2"/></filter></defs><circle cx="20" cy="20" r="18" fill="white" filter="url(%23blur)"/></svg>`;
     }
     const positionCoords = getPositionCoords(start);
+    if (!positionCoords) {
+      throw new Error(`Invalid start position: ${start}`);
+    }
     const { cx, cy } = positionCoords;
     return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><defs><filter id="blur"><feGaussianBlur stdDeviation="2"/></filter></defs><circle cx="${cx}" cy="${cy}" r="18" fill="white" filter="url(%23blur)"/></svg>`;
   }
@@ -351,8 +354,8 @@ export const ThemeToggleButton = ({
     <button
       type="button"
       className={cn(
-        "size-10 cursor-pointer rounded-full transition-all duration-300 active:scale-95",
-        isDark ? "bg-black text-white" : "bg-white text-black",
+        "inline-flex h-8 w-8 items-center justify-center rounded-full bg-background/80 text-muted-foreground shadow-sm transition-all duration-200 hover:bg-accent/60 active:scale-95",
+        isDark ? "text-foreground" : "",
         className
       )}
       onClick={toggleTheme}
@@ -361,6 +364,7 @@ export const ThemeToggleButton = ({
       <span className="sr-only">Toggle theme</span>
       <svg
         xmlns="http://www.w3.org/2000/svg"
+        className="h-4 w-4"
         aria-hidden="true"
         fill="currentColor"
         strokeLinecap="round"

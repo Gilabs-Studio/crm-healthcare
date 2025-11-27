@@ -113,7 +113,7 @@ func main() {
 	pipelineService := pipelineservice.NewService(pipelineRepo, dealRepo, accountRepo)
 	activityService := activityservice.NewService(activityRepo, accountRepo, contactRepo, userRepo)
 	visitReportService := visitreportservice.NewService(visitReportRepo, accountRepo, contactRepo, userRepo, activityRepo)
-	dashboardService := dashboardservice.NewService(visitReportRepo, accountRepo, activityRepo, userRepo)
+	dashboardService := dashboardservice.NewService(visitReportRepo, accountRepo, activityRepo, userRepo, dealRepo, taskRepo, settingsRepo)
 	reportService := reportservice.NewService(visitReportRepo, accountRepo, activityRepo, userRepo)
 	settingsService := settingsservice.NewService(settingsRepo)
 	productService := productservice.NewService(productRepo, productCategoryRepo)

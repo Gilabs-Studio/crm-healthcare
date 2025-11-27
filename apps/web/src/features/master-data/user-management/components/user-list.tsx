@@ -228,6 +228,12 @@ export function UserList() {
         onPerPageChange={setPerPage}
         itemName="user"
         perPageOptions={[10, 20, 50, 100]}
+        onResetFilters={() => {
+          setSearch("");
+          setStatus("");
+          setRoleId("");
+          setPage(1);
+        }}
       />
 
       {/* Create Dialog */}
@@ -237,7 +243,9 @@ export function UserList() {
             <DialogTitle>Create User</DialogTitle>
           </DialogHeader>
           <UserForm
-            onSubmit={handleCreate}
+            onSubmit={async (data) => {
+              await handleCreate(data as any);
+            }}
             onCancel={() => setIsCreateDialogOpen(false)}
             isLoading={createUser.isPending}
           />
@@ -253,7 +261,9 @@ export function UserList() {
             </DialogHeader>
             <UserForm
               user={editingUserData.data}
-              onSubmit={handleUpdate}
+              onSubmit={async (data) => {
+                await handleUpdate(data as any);
+              }}
               onCancel={() => setEditingUser(null)}
               isLoading={updateUser.isPending}
             />

@@ -1,9 +1,7 @@
 import { z } from "zod";
 
 export const createActivitySchema = z.object({
-  type: z.enum(["visit", "call", "email", "task", "deal"], {
-    errorMap: () => ({ message: "Invalid activity type" }),
-  }),
+  type: z.enum(["visit", "call", "email", "task", "deal"] as const),
   account_id: z.string().uuid("Invalid account ID").optional(),
   contact_id: z.string().uuid("Invalid contact ID").optional(),
   description: z.string().min(3, "Description must be at least 3 characters"),
@@ -15,7 +13,7 @@ export const createActivitySchema = z.object({
     },
     { message: "Invalid timestamp format (must be ISO 8601 datetime)" }
   ),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type CreateActivityFormData = z.infer<typeof createActivitySchema>;

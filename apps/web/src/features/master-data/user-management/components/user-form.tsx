@@ -77,7 +77,19 @@ export function UserForm({ user, onSubmit, onCancel, isLoading }: UserFormProps)
             {...register("password")}
             placeholder={t("passwordPlaceholder")}
           />
-          {errors.password && <FieldError>{errors.password.message}</FieldError>}
+          {(
+            errors as {
+              password?: { message?: string };
+            }
+          ).password && (
+            <FieldError>
+              {(
+                errors as {
+                  password?: { message?: string };
+                }
+              ).password?.message}
+            </FieldError>
+          )}
         </Field>
       )}
 

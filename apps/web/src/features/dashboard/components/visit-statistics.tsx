@@ -177,7 +177,13 @@ export function VisitStatistics() {
                   content={
                     <ChartTooltipContent
                       labelFormatter={(value) => {
-                        return new Date(value).toLocaleDateString(locale, {
+                        const dateValue =
+                          typeof value === "string" || typeof value === "number"
+                            ? new Date(value)
+                            : value instanceof Date
+                              ? value
+                              : new Date(String(value));
+                        return dateValue.toLocaleDateString(locale, {
                           month: "short",
                           day: "numeric",
                           year: "numeric",

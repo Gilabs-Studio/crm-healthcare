@@ -1,19 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { Calendar, Filter, Plus, Search } from "lucide-react";
+import { Plus, Search, Eye, Edit, Trash2, CheckCircle2, Calendar as CalendarIcon, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DataTable, type Column } from "@/components/ui/data-table";
-import { DateRangePicker } from "@/components/ui/date-range-picker";
-import type { DateRange } from "react-day-picker";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { useTaskList } from "../hooks/useTaskList";
 import type { Task } from "../types";
 import { TaskForm } from "./task-form";
-import { TaskCard } from "./task-card";
+import { TaskDetailModal } from "./task-detail-modal";
 import { useUsers } from "@/features/master-data/user-management/hooks/useUsers";
 import { useAccounts } from "@/features/sales-crm/account-management/hooks/useAccounts";
 import { useTranslations } from "next-intl";
@@ -68,12 +67,26 @@ export function TaskList() {
   const { data: accountsData } = useAccounts({ status: "active", per_page: 100 });
   const accounts = accountsData?.data ?? [];
 
-  const [selectedTaskIdForDetail, setSelectedTaskIdForDetail] = useState<string | null>(null);
-  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+  const [viewingTaskId, setViewingTaskId] = useState<string | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   const handleViewTask = (taskId: string) => {
-    setSelectedTaskIdForDetail(taskId);
-    setIsDetailDialogOpen(true);
+    setViewingTaskId(taskId);
+    setIsDetailModalOpen(true);
+  };
+
+  const statusVariantMap: Record<Task["status"], "default" | "secondary" | "outline" | "destructive"> = {
+    pending: "outline",
+    in_progress: "secondary",
+    completed: "default",
+    cancelled: "destructive",
+  };
+
+  const priorityVariantMap: Record<Task["priority"], "default" | "secondary" | "outline" | "destructive"> = {
+    low: "outline",
+    medium: "secondary",
+    high: "default",
+    urgent: "destructive",
   };
 
   const formatDate = (dateString: string | null) => {
@@ -91,43 +104,151 @@ export function TaskList() {
       id: "title",
       header: t("table.columnTask"),
       accessor: (row) => (
-        <TaskCard
-          task={row}
-          onEdit={() => setEditingTaskId(row.id)}
-          onDelete={() => handleDeleteClick(row.id)}
-          onComplete={() => handleComplete(row.id)}
-          onClickTitle={() => handleViewTask(row.id)}
-        />
+        <button
+          onClick={() => handleViewTask(row.id)}
+          className="font-medium text-primary hover:underline text-left"
+        >
+          {row.title}
+        </button>
       ),
+      className: "w-[250px]",
+    },
+    {
+      id: "contact",
+      header: t("table.columnContact"),
+      accessor: (row) =>
+        row.contact ? (
+          <button
+            type="button"
+            className="text-sm text-primary hover:underline"
+            // detail modal contact akan di-handle di level yang lebih tinggi bila diperlukan
+          >
+            {row.contact.name}
+          </button>
+        ) : (
+          <span className="text-sm text-muted-foreground">-</span>
+        ),
+      className: "w-[160px]",
+    },
+    {
+      id: "type",
+      header: t("table.columnType"),
+      accessor: (row) => (
+        <Badge variant="outline" className="font-normal">
+          {row.type.replace("_", " ")}
+        </Badge>
+      ),
+      className: "w-[100px]",
+    },
+    {
+      id: "status",
+      header: t("table.columnStatus"),
+      accessor: (row) => (
+        <Badge variant={statusVariantMap[row.status]} className="font-normal">
+          {row.status.replace("_", " ")}
+        </Badge>
+      ),
+      className: "w-[120px]",
+    },
+    {
+      id: "priority",
+      header: t("table.columnPriority"),
+      accessor: (row) => (
+        <Badge variant={priorityVariantMap[row.priority]} className="font-normal">
+          {row.priority}
+        </Badge>
+      ),
+      className: "w-[100px]",
+    },
+    {
+      id: "assigned_to",
+      header: t("table.columnAssignee"),
+      accessor: (row) => (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          {row.assigned_user ? (
+            <>
+              <User className="h-3.5 w-3.5" />
+              <span className="truncate">{row.assigned_user.name}</span>
+            </>
+          ) : (
+            <span>-</span>
+          )}
+        </div>
+      ),
+      className: "w-[150px]",
     },
     {
       id: "due_date",
       header: t("table.columnDueDate"),
       accessor: (row) => (
-        <span className="text-xs text-muted-foreground">{formatDate(row.due_date)}</span>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          {row.due_date ? (
+            <>
+              <CalendarIcon className="h-3.5 w-3.5" />
+              <span>{formatDate(row.due_date)}</span>
+            </>
+          ) : (
+            <span>-</span>
+          )}
+        </div>
       ),
-      className: "w-[120px] text-right align-top pt-4",
+      className: "w-[140px]",
+    },
+    {
+      id: "actions",
+      header: t("table.columnActions"),
+      accessor: (row) => (
+        <div className="flex items-center justify-end gap-1">
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className="h-8 w-8"
+            title="View Details"
+            onClick={() => handleViewTask(row.id)}
+          >
+            <Eye className="h-3.5 w-3.5" />
+          </Button>
+          {row.status !== "completed" && row.status !== "cancelled" && (
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="h-8 w-8 text-primary hover:text-primary hover:bg-primary/10"
+              onClick={() => handleComplete(row.id)}
+              title={t("buttons.markComplete")}
+            >
+              <CheckCircle2 className="h-3.5 w-3.5" />
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={() => setEditingTaskId(row.id)}
+            className="h-8 w-8"
+            title="Edit"
+          >
+            <Edit className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={() => handleDeleteClick(row.id)}
+            className="h-8 w-8 text-destructive hover:text-destructive"
+            title="Delete"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      ),
+      className: "w-[160px] text-right",
     },
   ];
 
-  const currentRange: DateRange | undefined =
-    startDueDate && endDueDate
-      ? {
-          from: new Date(`${startDueDate}T00:00:00`),
-          to: new Date(`${endDueDate}T00:00:00`),
-        }
-      : startDueDate
-        ? {
-            from: new Date(`${startDueDate}T00:00:00`),
-            to: undefined,
-          }
-        : undefined;
-
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-3 flex-wrap">
+      {/* Header with Actions */}
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-3 flex-1 flex-wrap">
-          <div className="relative flex-1 min-w-[200px] max-w-sm">
+          <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder={t("searchPlaceholder")}
@@ -187,7 +308,7 @@ export function TaskList() {
             value={assignedTo || "all"}
             onValueChange={(value) => setAssignedTo(value === "all" ? "" : value)}
           >
-            <SelectTrigger className="w-[180px] h-9">
+            <SelectTrigger className="w-40 h-9">
               <SelectValue placeholder={t("filters.assigneePlaceholder")} />
             </SelectTrigger>
             <SelectContent>
@@ -200,55 +321,7 @@ export function TaskList() {
             </SelectContent>
           </Select>
 
-          <Select
-            value={accountId || "all"}
-            onValueChange={(value) => setAccountId(value === "all" ? "" : value)}
-          >
-            <SelectTrigger className="w-[180px] h-9">
-              <SelectValue placeholder={t("filters.accountPlaceholder")} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t("filters.accountAll")}</SelectItem>
-              {accounts.map((account) => (
-                <SelectItem key={account.id} value={account.id}>
-                  {account.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-            <DateRangePicker
-              dateRange={currentRange}
-              onDateChange={(range) => {
-                if (range?.from) {
-                  const fromDate = new Date(range.from);
-                  fromDate.setHours(0, 0, 0, 0);
-                  const fromStr = `${fromDate.getFullYear()}-${String(fromDate.getMonth() + 1).padStart(
-                    2,
-                    "0",
-                  )}-${String(fromDate.getDate()).padStart(2, "0")}`;
-                  setStartDueDate(fromStr);
-
-                  if (range.to) {
-                    const toDate = new Date(range.to);
-                    toDate.setHours(0, 0, 0, 0);
-                    const toStr = `${toDate.getFullYear()}-${String(toDate.getMonth() + 1).padStart(
-                      2,
-                      "0",
-                    )}-${String(toDate.getDate()).padStart(2, "0")}`;
-                    setEndDueDate(toStr);
-                  } else {
-                    setEndDueDate("");
-                  }
-                } else {
-                  setStartDueDate("");
-                  setEndDueDate("");
-                }
-              }}
-            />
-          </div>
+          {/* account & date filters disembunyikan untuk tampilan yang lebih ringkas */}
         </div>
 
         <Button type="button" onClick={() => setIsCreateDialogOpen(true)} size="sm">
@@ -257,6 +330,7 @@ export function TaskList() {
         </Button>
       </div>
 
+      {/* Table */}
       <DataTable
         columns={columns}
         data={tasks}
@@ -278,6 +352,17 @@ export function TaskList() {
         onPerPageChange={setPerPage}
         itemName={t("table.itemName")}
         perPageOptions={[10, 20, 50, 100]}
+        onResetFilters={() => {
+          setSearch("");
+          setStatus("");
+          setPriority("");
+          setType("");
+          setAssignedTo("");
+          setAccountId("");
+          setStartDueDate("");
+          setEndDueDate("");
+          setPage(1);
+        }}
       />
 
       {/* Create Task Dialog */}
@@ -287,7 +372,9 @@ export function TaskList() {
             <DialogTitle>{t("buttons.createTitle")}</DialogTitle>
           </DialogHeader>
           <TaskForm
-            onSubmit={handleCreate}
+            onSubmit={async (data) => {
+              await handleCreate(data as any);
+            }}
             onCancel={() => setIsCreateDialogOpen(false)}
             isLoading={createTask.isPending}
           />
@@ -303,13 +390,30 @@ export function TaskList() {
             </DialogHeader>
             <TaskForm
               task={editingTaskData.data}
-              onSubmit={handleUpdate}
+              onSubmit={async (data) => {
+                await handleUpdate(data as any);
+              }}
               onCancel={() => setEditingTaskId(null)}
               isLoading={updateTask.isPending}
             />
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Task Detail Modal */}
+      <TaskDetailModal
+        taskId={viewingTaskId}
+        open={isDetailModalOpen}
+        onOpenChange={(open) => {
+          setIsDetailModalOpen(open);
+          if (!open) {
+            setViewingTaskId(null);
+          }
+        }}
+        onTaskUpdated={() => {
+          // Refresh handled by query invalidation
+        }}
+      />
 
       {/* Delete Dialog */}
       <DeleteDialog

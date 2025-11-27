@@ -2,9 +2,10 @@ import { z } from "zod";
 
 export const createAccountSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters"),
-  category_id: z.string().uuid("Invalid category ID", {
-    required_error: "Category is required",
-  }),
+  category_id: z
+    .string()
+    .min(1, "Category is required")
+    .uuid("Invalid category ID"),
   address: z.string().optional(),
   city: z.string().optional(),
   province: z.string().optional(),

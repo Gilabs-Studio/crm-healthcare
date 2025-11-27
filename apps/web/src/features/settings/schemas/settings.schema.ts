@@ -27,9 +27,9 @@ export const pipelineSettingsSchema = z.object({
 });
 
 export const updateSettingsSchema = z.object({
-  general: z.record(z.string()).optional(),
-  notifications: z.record(z.string()).optional(),
-  pipeline: z.record(z.string()).optional(),
+  general: z.record(z.string(), z.string()).optional(),
+  notifications: z.record(z.string(), z.string()).optional(),
+  pipeline: z.record(z.string(), z.string()).optional(),
 });
 
 export type GeneralSettingsFormData = z.infer<typeof generalSettingsSchema>;
