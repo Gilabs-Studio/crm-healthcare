@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Sora } from "next/font/google";
+import { getLocale } from "next-intl/server";
+import { routing } from "@/i18n/routing";
+import type { Locale } from "@/features/dashboard/types";
 import "./globals.css";
-import { ReactQueryProvider } from "@/lib/react-query";
-import { ErrorBoundary } from "@/components/error-boundary";
-import { ThemeProvider } from "@/components/providers/theme-provider";
-import { AppLayout } from "@/components/layouts/app-layout";
-import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,29 +32,27 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  let locale: Locale;
+  try {
+    const localeValue = await getLocale();
+    locale = routing.locales.includes(localeValue as Locale)
+      ? (localeValue as Locale)
+      : routing.defaultLocale;
+  } catch {
+    locale = routing.defaultLocale;
+  }
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${headingFont.variable} antialiased`}
       >
-        <ErrorBoundary>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="light"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <ReactQueryProvider>
-              <AppLayout>{children}</AppLayout>
-              <Toaster position="top-right" richColors />
-            </ReactQueryProvider>
-          </ThemeProvider>
-        </ErrorBoundary>
+        {children}
       </body>
     </html>
   );

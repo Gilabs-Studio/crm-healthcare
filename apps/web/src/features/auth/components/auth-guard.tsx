@@ -1,9 +1,8 @@
-"use client";
+ "use client";
 
 import { useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname } from "@/i18n/routing";
 import { useAuthGuard } from "../hooks/useAuthGuard";
-import { Skeleton } from "@/components/ui/skeleton";
 
 interface AuthGuardProps {
   readonly children: React.ReactNode;
@@ -16,7 +15,8 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.push("/");
+      // Redirect to locale-scoped login page, e.g. "/en/login"
+      router.push("/login");
     }
   }, [isAuthenticated, isLoading, router, pathname]);
 

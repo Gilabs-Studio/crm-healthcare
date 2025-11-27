@@ -1,0 +1,38 @@
+{
+  "common": {
+    "dashboard": "Dashboard",
+    "products": "Produk",
+    "customers": "Pelanggan",
+    "search": "Cari...",
+    "save": "Simpan",
+    "cancel": "Batal",
+    "delete": "Hapus",
+    "edit": "Edit",
+    "add": "Tambah",
+    "back": "Kembali",
+    "next": "Selanjutnya",
+    "loading": "Memuat...",
+    "error": "Terjadi kesalahan",
+    "success": "Berhasil"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "products": "Produk",
+    "customers": "Pelanggan"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "overview": "Ringkasan",
+    "totalSales": "Total Penjualan",
+    "totalOrders": "Total Pesanan",
+    "totalCustomers": "Total Pelanggan"
+  },
+  "notFound": {
+    "label": "404",
+    "title": "Halaman tidak ditemukan",
+    "description": "Halaman yang kamu cari tidak ditemukan atau mungkin sudah dipindahkan.",
+    "backHome": "Kembali ke dashboard"
+  }
+}
+
+

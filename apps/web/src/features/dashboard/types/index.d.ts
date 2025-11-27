@@ -1,3 +1,40 @@
+import type { routing } from "@/i18n/routing";
+
+export type Locale = (typeof routing)["locales"][number];
+
+declare global {
+  interface IntlMessages {
+    common: {
+      dashboard: string;
+      products: string;
+      customers: string;
+      search: string;
+      save: string;
+      cancel: string;
+      delete: string;
+      edit: string;
+      add: string;
+      back: string;
+      next: string;
+      loading: string;
+      error: string;
+      success: string;
+    };
+    nav: {
+      dashboard: string;
+      products: string;
+      customers: string;
+    };
+    dashboard: {
+      title: string;
+      overview: string;
+      totalSales: string;
+      totalOrders: string;
+      totalCustomers: string;
+    };
+  }
+}
+
 export interface DashboardOverview {
   period: {
     type: string;

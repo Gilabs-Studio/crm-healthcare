@@ -1,0 +1,38 @@
+{
+  "common": {
+    "dashboard": "Dashboard",
+    "products": "Products",
+    "customers": "Customers",
+    "search": "Search...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "back": "Back",
+    "next": "Next",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "products": "Products",
+    "customers": "Customers"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "overview": "Overview",
+    "totalSales": "Total Sales",
+    "totalOrders": "Total Orders",
+    "totalCustomers": "Total Customers"
+  },
+  "notFound": {
+    "label": "404",
+    "title": "Page not found",
+    "description": "The page you’re looking for doesn’t exist or may have been moved.",
+    "backHome": "Back to dashboard"
+  }
+}
+
+

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname } from "@/i18n/routing";
 import { useAuthStore } from "../stores/useAuthStore";
 
 export function useAuthGuard() {
@@ -18,7 +18,7 @@ export function useAuthGuard() {
     }
 
     const token = localStorage.getItem("token");
-    
+
     // If we have token in localStorage, wait a bit for Zustand to rehydrate
     if (token) {
       // Give Zustand time to rehydrate (max 500ms)
@@ -38,8 +38,9 @@ export function useAuthGuard() {
       // No token, check immediately
       // Use setTimeout to defer setState and avoid setState in effect
       setTimeout(() => setIsChecking(false), 0);
-      if (pathname !== "/") {
-        router.push("/");
+      if (pathname !== "/login") {
+        // Redirect unauthenticated users to locale-scoped login ("/[locale]/login")
+        router.push("/login");
       }
     }
   }, [pathname, router]);
@@ -49,10 +50,10 @@ export function useAuthGuard() {
     if (typeof window === "undefined") {
       return;
     }
-    if (!isChecking && !isAuthenticated && pathname !== "/") {
+    if (!isChecking && !isAuthenticated && pathname !== "/login") {
       const token = localStorage.getItem("token");
       if (!token) {
-        router.push("/");
+        router.push("/login");
       }
     }
   }, [isAuthenticated, isChecking, pathname, router]);

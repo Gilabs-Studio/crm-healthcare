@@ -2,24 +2,25 @@
 
 import { DashboardLayout } from "@/components/layouts/dashboard-layout";
 import { AuthGuard } from "@/features/auth/components/auth-guard";
-import { ProductManagement } from "@/features/sales-crm/product-management/components/product-management";
+import { ProductCategoryList } from "@/features/sales-crm/product-management/components/product-category-list";
 
-function ProductsPageContent() {
+function ProductCategoriesPageContent() {
   return (
     <DashboardLayout>
       <div className="container mx-auto py-6 px-4">
-        <ProductManagement />
+        <ProductCategoryList />
       </div>
     </DashboardLayout>
   );
 }
 
-export default function ProductsPage() {
+export default function ProductCategoriesPage() {
   return (
     <AuthGuard>
-      <ProductsPageContent />
+      <ProductCategoriesPageContent />
     </AuthGuard>
   );
 }
+
 
 
