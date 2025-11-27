@@ -128,6 +128,20 @@ Server akan berjalan di `http://localhost:8080`
 - `GET /ping` - Ping endpoint
 - `GET /api/v1/` - API version info
 
+**Menjalankan API via Docker + Web dari root:**
+
+Di root project (bukan di folder lain), tersedia script helper:
+
+```bash
+cd D:\Files\Documents\Pekerjaan\Gilabs\crm-healthcare
+pnpm run dev:web-api-docker
+```
+
+Script ini akan:
+- `cd apps/api && docker compose down` (reset container)
+- `docker compose up -d` (menjalankan API + database di background)
+- `cd ../web && pnpm dev` (menjalankan web Next.js dalam mode development)
+
 ### Web (`apps/web`)
 
 Frontend menggunakan Next.js 16.
