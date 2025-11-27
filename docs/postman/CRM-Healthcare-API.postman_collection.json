@@ -2544,6 +2544,352 @@
                 }
               ],
               "description": "Settings endpoints untuk mengelola system settings (general, notifications, pipeline)"
+            },
+            {
+              "name": "Tasks",
+              "item": [
+                {
+                  "name": "List Tasks",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/tasks?page=1&per_page=20",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "tasks"],
+                      "query": [
+                        {"key": "page", "value": "1"},
+                        {"key": "per_page", "value": "20"},
+                        {"key": "search", "value": "", "disabled": true},
+                        {"key": "status", "value": "", "disabled": true, "description": "pending, in_progress, completed, cancelled"},
+                        {"key": "priority", "value": "", "disabled": true, "description": "low, medium, high, urgent"},
+                        {"key": "type", "value": "", "disabled": true, "description": "general, call, email, meeting, follow_up"},
+                        {"key": "assigned_to", "value": "", "disabled": true},
+                        {"key": "account_id", "value": "", "disabled": true},
+                        {"key": "contact_id", "value": "", "disabled": true},
+                        {"key": "deal_id", "value": "", "disabled": true},
+                        {"key": "due_date_from", "value": "", "disabled": true},
+                        {"key": "due_date_to", "value": "", "disabled": true}
+                      ]
+                    },
+                    "description": "Get list of tasks with pagination and filters"
+                  }
+                },
+                {
+                  "name": "Get Task by ID",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/tasks/:id",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "tasks", ":id"],
+                      "variable": [
+                        {"key": "id", "value": "task_id"}
+                      ]
+                    },
+                    "description": "Get task details by ID"
+                  }
+                },
+                {
+                  "name": "Create Task",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"title\": \"Follow up with client\",\n  \"description\": \"Call client to discuss proposal\",\n  \"type\": \"call\",\n  \"priority\": \"high\",\n  \"due_date\": \"2024-01-20T10:00:00+07:00\",\n  \"assigned_to\": \"user_id_here\",\n  \"account_id\": \"account_id_here\",\n  \"contact_id\": \"contact_id_here\",\n  \"deal_id\": \"deal_id_here\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/tasks",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "tasks"]
+                    },
+                    "description": "Create a new task"
+                  }
+                },
+                {
+                  "name": "Update Task",
+                  "request": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"title\": \"Updated task title\",\n  \"description\": \"Updated description\",\n  \"status\": \"in_progress\",\n  \"priority\": \"urgent\",\n  \"due_date\": \"2024-01-25T10:00:00+07:00\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/tasks/:id",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "tasks", ":id"],
+                      "variable": [
+                        {"key": "id", "value": "task_id"}
+                      ]
+                    },
+                    "description": "Update task information"
+                  }
+                },
+                {
+                  "name": "Delete Task",
+                  "request": {
+                    "method": "DELETE",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/tasks/:id",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "tasks", ":id"],
+                      "variable": [
+                        {"key": "id", "value": "task_id"}
+                      ]
+                    },
+                    "description": "Delete a task"
+                  }
+                },
+                {
+                  "name": "Assign Task",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"assigned_to\": \"user_id_here\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/tasks/:id/assign",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "tasks", ":id", "assign"],
+                      "variable": [
+                        {"key": "id", "value": "task_id"}
+                      ]
+                    },
+                    "description": "Assign a task to a user"
+                  }
+                },
+                {
+                  "name": "Complete Task",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/tasks/:id/complete",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "tasks", ":id", "complete"],
+                      "variable": [
+                        {"key": "id", "value": "task_id"}
+                      ]
+                    },
+                    "description": "Mark a task as completed"
+                  }
+                },
+                {
+                  "name": "List Reminders",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/tasks/reminders?page=1&per_page=20",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "tasks", "reminders"],
+                      "query": [
+                        {"key": "page", "value": "1"},
+                        {"key": "per_page", "value": "20"},
+                        {"key": "task_id", "value": "", "disabled": true},
+                        {"key": "reminder_type", "value": "", "disabled": true, "description": "in_app, email, sms"},
+                        {"key": "is_sent", "value": "", "disabled": true},
+                        {"key": "remind_at_from", "value": "", "disabled": true},
+                        {"key": "remind_at_to", "value": "", "disabled": true}
+                      ]
+                    },
+                    "description": "Get list of reminders with pagination"
+                  }
+                },
+                {
+                  "name": "Get Reminder by ID",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/tasks/reminders/:id",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "tasks", "reminders", ":id"],
+                      "variable": [
+                        {"key": "id", "value": "reminder_id"}
+                      ]
+                    },
+                    "description": "Get reminder details by ID"
+                  }
+                },
+                {
+                  "name": "Create Reminder",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"task_id\": \"task_id_here\",\n  \"remind_at\": \"2024-01-20T09:00:00+07:00\",\n  \"reminder_type\": \"email\",\n  \"message\": \"Don't forget to follow up with client\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/tasks/reminders",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "tasks", "reminders"]
+                    },
+                    "description": "Create a new reminder for a task"
+                  }
+                },
+                {
+                  "name": "Update Reminder",
+                  "request": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"remind_at\": \"2024-01-20T10:00:00+07:00\",\n  \"reminder_type\": \"in_app\",\n  \"message\": \"Updated reminder message\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/tasks/reminders/:id",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "tasks", "reminders", ":id"],
+                      "variable": [
+                        {"key": "id", "value": "reminder_id"}
+                      ]
+                    },
+                    "description": "Update reminder information"
+                  }
+                },
+                {
+                  "name": "Delete Reminder",
+                  "request": {
+                    "method": "DELETE",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/tasks/reminders/:id",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "tasks", "reminders", ":id"],
+                      "variable": [
+                        {"key": "id", "value": "reminder_id"}
+                      ]
+                    },
+                    "description": "Delete a reminder"
+                  }
+                }
+              ],
+              "description": "Task & Reminder Management endpoints untuk mengelola tasks dan reminders"
             }
           ],
           "description": "Endpoints untuk master data Sales CRM"

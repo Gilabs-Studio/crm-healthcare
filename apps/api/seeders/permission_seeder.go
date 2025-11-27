@@ -21,7 +21,7 @@ func SeedPermissions() error {
 	// Get menus
 	var dashboardMenu permission.Menu
 	var userPageMenu permission.Menu
-	var salesCRMMenu, accountsMenu, pipelineMenu permission.Menu
+	var salesCRMMenu, accountsMenu, pipelineMenu, tasksMenu, productsMenu, productCategoriesMenu permission.Menu
 	var reportsMenu permission.Menu
 	var settingsMenu permission.Menu
 
@@ -47,6 +47,9 @@ func SeedPermissions() error {
 			log.Printf("Created Pipeline menu in permission seeder")
 		}
 	}
+	database.DB.Where("url = ?", "/tasks").First(&tasksMenu)
+	database.DB.Where("url = ?", "/products").First(&productsMenu)
+	database.DB.Where("url = ?", "/product-categories").First(&productCategoriesMenu)
 	database.DB.Where("url = ?", "/reports").First(&reportsMenu)
 	database.DB.Where("url = ?", "/settings").First(&settingsMenu)
 
@@ -90,6 +93,25 @@ func SeedPermissions() error {
 		{pipelineMenu.ID, "MOVE_DEALS", "Move Deals", "MOVE", &pipelineMenu},
 		{pipelineMenu.ID, "VIEW_SUMMARY", "View Summary", "SUMMARY", &pipelineMenu},
 		{pipelineMenu.ID, "VIEW_FORECAST", "View Forecast", "FORECAST", &pipelineMenu},
+
+		// Task & Reminder actions
+		{tasksMenu.ID, "VIEW_TASKS", "View Tasks", "VIEW", &tasksMenu},
+		{tasksMenu.ID, "CREATE_TASKS", "Create Tasks", "CREATE", &tasksMenu},
+		{tasksMenu.ID, "EDIT_TASKS", "Edit Tasks", "EDIT", &tasksMenu},
+		{tasksMenu.ID, "DELETE_TASKS", "Delete Tasks", "DELETE", &tasksMenu},
+		{tasksMenu.ID, "ASSIGN_TASKS", "Assign Tasks", "ASSIGN", &tasksMenu},
+
+		// Products actions
+		{productsMenu.ID, "VIEW_PRODUCTS", "View Products", "VIEW", &productsMenu},
+		{productsMenu.ID, "CREATE_PRODUCTS", "Create Products", "CREATE", &productsMenu},
+		{productsMenu.ID, "EDIT_PRODUCTS", "Edit Products", "EDIT", &productsMenu},
+		{productsMenu.ID, "DELETE_PRODUCTS", "Delete Products", "DELETE", &productsMenu},
+
+		// Product Categories actions
+		{productCategoriesMenu.ID, "VIEW_PRODUCT_CATEGORIES", "View Product Categories", "VIEW", &productCategoriesMenu},
+		{productCategoriesMenu.ID, "CREATE_PRODUCT_CATEGORIES", "Create Product Categories", "CREATE", &productCategoriesMenu},
+		{productCategoriesMenu.ID, "EDIT_PRODUCT_CATEGORIES", "Edit Product Categories", "EDIT", &productCategoriesMenu},
+		{productCategoriesMenu.ID, "DELETE_PRODUCT_CATEGORIES", "Delete Product Categories", "DELETE", &productCategoriesMenu},
 
 		// Reports actions
 		{reportsMenu.ID, "VIEW_REPORTS", "View Reports", "VIEW", &reportsMenu},

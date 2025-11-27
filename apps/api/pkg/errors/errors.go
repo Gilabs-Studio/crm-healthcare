@@ -95,6 +95,14 @@ var ErrorCodeMap = map[string]ErrorInfo{
 		HTTPStatus: http.StatusNotFound,
 		Message:    "Resource not found",
 	},
+	"PRODUCT_NOT_FOUND": {
+		HTTPStatus: http.StatusNotFound,
+		Message:    "Product not found",
+	},
+	"CATEGORY_NOT_FOUND": {
+		HTTPStatus: http.StatusNotFound,
+		Message:    "Category not found",
+	},
 	"CONFLICT": {
 		HTTPStatus: http.StatusConflict,
 		Message:    "Conflict with current state",

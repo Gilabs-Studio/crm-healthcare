@@ -1,0 +1,488 @@
+package handlers
+
+import (
+	"github.com/gilabs/crm-healthcare/api/internal/domain/reminder"
+	"github.com/gilabs/crm-healthcare/api/internal/domain/task"
+	taskservice "github.com/gilabs/crm-healthcare/api/internal/service/task"
+	"github.com/gilabs/crm-healthcare/api/pkg/errors"
+	"github.com/gilabs/crm-healthcare/api/pkg/response"
+	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
+)
+
+type TaskHandler struct {
+	taskService *taskservice.Service
+}
+
+func NewTaskHandler(taskService *taskservice.Service) *TaskHandler {
+	return &TaskHandler{
+		taskService: taskService,
+	}
+}
+
+// List handles list tasks request
+func (h *TaskHandler) List(c *gin.Context) {
+	var req task.ListTasksRequest
+
+	if err := c.ShouldBindQuery(&req); err != nil {
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			errors.HandleValidationError(c, validationErrors)
+			return
+		}
+		errors.InvalidQueryParamResponse(c)
+		return
+	}
+
+	tasks, pagination, err := h.taskService.ListTasks(&req)
+	if err != nil {
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	meta := &response.Meta{
+		Pagination: &response.PaginationMeta{
+			Page:       pagination.Page,
+			PerPage:    pagination.PerPage,
+			Total:      pagination.Total,
+			TotalPages: pagination.TotalPages,
+			HasNext:    pagination.Page < pagination.TotalPages,
+			HasPrev:    pagination.Page > 1,
+		},
+		Filters: map[string]interface{}{},
+	}
+
+	if req.Search != "" {
+		meta.Filters["search"] = req.Search
+	}
+	if req.Status != "" {
+		meta.Filters["status"] = req.Status
+	}
+	if req.Priority != "" {
+		meta.Filters["priority"] = req.Priority
+	}
+	if req.Type != "" {
+		meta.Filters["type"] = req.Type
+	}
+	if req.AssignedTo != "" {
+		meta.Filters["assigned_to"] = req.AssignedTo
+	}
+	if req.AccountID != "" {
+		meta.Filters["account_id"] = req.AccountID
+	}
+	if req.ContactID != "" {
+		meta.Filters["contact_id"] = req.ContactID
+	}
+	if req.DealID != "" {
+		meta.Filters["deal_id"] = req.DealID
+	}
+
+	response.SuccessResponse(c, tasks, meta)
+}
+
+// GetByID handles get task by ID request
+func (h *TaskHandler) GetByID(c *gin.Context) {
+	id := c.Param("id")
+
+	t, err := h.taskService.GetTaskByID(id)
+	if err != nil {
+		if err == taskservice.ErrTaskNotFound {
+			errors.ErrorResponse(c, "NOT_FOUND", map[string]interface{}{
+				"resource":    "task",
+				"resource_id": id,
+			}, nil)
+			return
+		}
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	response.SuccessResponse(c, t, nil)
+}
+
+// Create handles create task request
+func (h *TaskHandler) Create(c *gin.Context) {
+	var req task.CreateTaskRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			errors.HandleValidationError(c, validationErrors)
+			return
+		}
+		errors.InvalidRequestBodyResponse(c)
+		return
+	}
+
+	// Get user ID from context
+	userID := ""
+	if userIDVal, exists := c.Get("user_id"); exists {
+		if id, ok := userIDVal.(string); ok {
+			userID = id
+		}
+	}
+
+	createdTask, err := h.taskService.CreateTask(&req, userID)
+	if err != nil {
+		if err == taskservice.ErrUserNotFound {
+			errors.ErrorResponse(c, "USER_NOT_FOUND", map[string]interface{}{
+				"user_id": req.AssignedTo,
+			}, nil)
+			return
+		}
+		if err == taskservice.ErrAccountNotFound {
+			errors.ErrorResponse(c, "NOT_FOUND", map[string]interface{}{
+				"resource":    "account",
+				"resource_id": req.AccountID,
+			}, nil)
+			return
+		}
+		if err == taskservice.ErrContactNotFound {
+			errors.ErrorResponse(c, "NOT_FOUND", map[string]interface{}{
+				"resource":    "contact",
+				"resource_id": req.ContactID,
+			}, nil)
+			return
+		}
+		if err == taskservice.ErrDealNotFound {
+			errors.ErrorResponse(c, "NOT_FOUND", map[string]interface{}{
+				"resource":    "deal",
+				"resource_id": req.DealID,
+			}, nil)
+			return
+		}
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	meta := &response.Meta{}
+	if userID != "" {
+		meta.CreatedBy = userID
+	}
+
+	response.SuccessResponseCreated(c, createdTask, meta)
+}
+
+// Update handles update task request
+func (h *TaskHandler) Update(c *gin.Context) {
+	id := c.Param("id")
+	var req task.UpdateTaskRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			errors.HandleValidationError(c, validationErrors)
+			return
+		}
+		errors.InvalidRequestBodyResponse(c)
+		return
+	}
+
+	updatedTask, err := h.taskService.UpdateTask(id, &req)
+	if err != nil {
+		if err == taskservice.ErrTaskNotFound {
+			errors.ErrorResponse(c, "NOT_FOUND", map[string]interface{}{
+				"resource":    "task",
+				"resource_id": id,
+			}, nil)
+			return
+		}
+		if err == taskservice.ErrUserNotFound {
+			errors.ErrorResponse(c, "USER_NOT_FOUND", map[string]interface{}{
+				"user_id": req.AssignedTo,
+			}, nil)
+			return
+		}
+		if err == taskservice.ErrAccountNotFound {
+			errors.ErrorResponse(c, "NOT_FOUND", map[string]interface{}{
+				"resource":    "account",
+				"resource_id": req.AccountID,
+			}, nil)
+			return
+		}
+		if err == taskservice.ErrContactNotFound {
+			errors.ErrorResponse(c, "NOT_FOUND", map[string]interface{}{
+				"resource":    "contact",
+				"resource_id": req.ContactID,
+			}, nil)
+			return
+		}
+		if err == taskservice.ErrDealNotFound {
+			errors.ErrorResponse(c, "NOT_FOUND", map[string]interface{}{
+				"resource":    "deal",
+				"resource_id": req.DealID,
+			}, nil)
+			return
+		}
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	meta := &response.Meta{}
+	if userID, exists := c.Get("user_id"); exists {
+		if id, ok := userID.(string); ok {
+			meta.UpdatedBy = id
+		}
+	}
+
+	response.SuccessResponse(c, updatedTask, meta)
+}
+
+// Delete handles delete task request
+func (h *TaskHandler) Delete(c *gin.Context) {
+	id := c.Param("id")
+
+	err := h.taskService.DeleteTask(id)
+	if err != nil {
+		if err == taskservice.ErrTaskNotFound {
+			errors.ErrorResponse(c, "NOT_FOUND", map[string]interface{}{
+				"resource":    "task",
+				"resource_id": id,
+			}, nil)
+			return
+		}
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	response.SuccessResponseNoContent(c)
+}
+
+// Assign handles assign task request
+func (h *TaskHandler) Assign(c *gin.Context) {
+	id := c.Param("id")
+	var req task.AssignTaskRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			errors.HandleValidationError(c, validationErrors)
+			return
+		}
+		errors.InvalidRequestBodyResponse(c)
+		return
+	}
+
+	assignedTask, err := h.taskService.AssignTask(id, &req)
+	if err != nil {
+		if err == taskservice.ErrTaskNotFound {
+			errors.ErrorResponse(c, "NOT_FOUND", map[string]interface{}{
+				"resource":    "task",
+				"resource_id": id,
+			}, nil)
+			return
+		}
+		if err == taskservice.ErrUserNotFound {
+			errors.ErrorResponse(c, "USER_NOT_FOUND", map[string]interface{}{
+				"user_id": req.AssignedTo,
+			}, nil)
+			return
+		}
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	meta := &response.Meta{}
+	if userID, exists := c.Get("user_id"); exists {
+		if id, ok := userID.(string); ok {
+			meta.UpdatedBy = id
+		}
+	}
+
+	response.SuccessResponse(c, assignedTask, meta)
+}
+
+// Complete handles complete task request
+func (h *TaskHandler) Complete(c *gin.Context) {
+	id := c.Param("id")
+
+	completedTask, err := h.taskService.CompleteTask(id)
+	if err != nil {
+		if err == taskservice.ErrTaskNotFound {
+			errors.ErrorResponse(c, "NOT_FOUND", map[string]interface{}{
+				"resource":    "task",
+				"resource_id": id,
+			}, nil)
+			return
+		}
+		if err == taskservice.ErrTaskAlreadyCompleted {
+			errors.ErrorResponse(c, "CONFLICT", map[string]interface{}{
+				"message": "Task is already completed",
+			}, nil)
+			return
+		}
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	meta := &response.Meta{}
+	if userID, exists := c.Get("user_id"); exists {
+		if id, ok := userID.(string); ok {
+			meta.UpdatedBy = id
+		}
+	}
+
+	response.SuccessResponse(c, completedTask, meta)
+}
+
+// ListReminders handles list reminders request
+func (h *TaskHandler) ListReminders(c *gin.Context) {
+	var req reminder.ListRemindersRequest
+
+	if err := c.ShouldBindQuery(&req); err != nil {
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			errors.HandleValidationError(c, validationErrors)
+			return
+		}
+		errors.InvalidQueryParamResponse(c)
+		return
+	}
+
+	reminders, pagination, err := h.taskService.ListReminders(&req)
+	if err != nil {
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	meta := &response.Meta{
+		Pagination: &response.PaginationMeta{
+			Page:       pagination.Page,
+			PerPage:    pagination.PerPage,
+			Total:      pagination.Total,
+			TotalPages: pagination.TotalPages,
+			HasNext:    pagination.Page < pagination.TotalPages,
+			HasPrev:    pagination.Page > 1,
+		},
+		Filters: map[string]interface{}{},
+	}
+
+	if req.TaskID != "" {
+		meta.Filters["task_id"] = req.TaskID
+	}
+	if req.ReminderType != "" {
+		meta.Filters["reminder_type"] = req.ReminderType
+	}
+	if req.IsSent != nil {
+		meta.Filters["is_sent"] = *req.IsSent
+	}
+
+	response.SuccessResponse(c, reminders, meta)
+}
+
+// GetReminderByID handles get reminder by ID request
+func (h *TaskHandler) GetReminderByID(c *gin.Context) {
+	id := c.Param("id")
+
+	rem, err := h.taskService.GetReminderByID(id)
+	if err != nil {
+		if err == taskservice.ErrReminderNotFound {
+			errors.ErrorResponse(c, "NOT_FOUND", map[string]interface{}{
+				"resource":    "reminder",
+				"resource_id": id,
+			}, nil)
+			return
+		}
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	response.SuccessResponse(c, rem, nil)
+}
+
+// CreateReminder handles create reminder request
+func (h *TaskHandler) CreateReminder(c *gin.Context) {
+	var req reminder.CreateReminderRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			errors.HandleValidationError(c, validationErrors)
+			return
+		}
+		errors.InvalidRequestBodyResponse(c)
+		return
+	}
+
+	// Get user ID from context
+	userID := ""
+	if userIDVal, exists := c.Get("user_id"); exists {
+		if id, ok := userIDVal.(string); ok {
+			userID = id
+		}
+	}
+
+	createdReminder, err := h.taskService.CreateReminder(&req, userID)
+	if err != nil {
+		if err == taskservice.ErrTaskNotFound {
+			errors.ErrorResponse(c, "NOT_FOUND", map[string]interface{}{
+				"resource":    "task",
+				"resource_id": req.TaskID,
+			}, nil)
+			return
+		}
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	meta := &response.Meta{}
+	if userID != "" {
+		meta.CreatedBy = userID
+	}
+
+	response.SuccessResponseCreated(c, createdReminder, meta)
+}
+
+// UpdateReminder handles update reminder request
+func (h *TaskHandler) UpdateReminder(c *gin.Context) {
+	id := c.Param("id")
+	var req reminder.UpdateReminderRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			errors.HandleValidationError(c, validationErrors)
+			return
+		}
+		errors.InvalidRequestBodyResponse(c)
+		return
+	}
+
+	updatedReminder, err := h.taskService.UpdateReminder(id, &req)
+	if err != nil {
+		if err == taskservice.ErrReminderNotFound {
+			errors.ErrorResponse(c, "NOT_FOUND", map[string]interface{}{
+				"resource":    "reminder",
+				"resource_id": id,
+			}, nil)
+			return
+		}
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	meta := &response.Meta{}
+	if userID, exists := c.Get("user_id"); exists {
+		if id, ok := userID.(string); ok {
+			meta.UpdatedBy = id
+		}
+	}
+
+	response.SuccessResponse(c, updatedReminder, meta)
+}
+
+// DeleteReminder handles delete reminder request
+func (h *TaskHandler) DeleteReminder(c *gin.Context) {
+	id := c.Param("id")
+
+	err := h.taskService.DeleteReminder(id)
+	if err != nil {
+		if err == taskservice.ErrReminderNotFound {
+			errors.ErrorResponse(c, "NOT_FOUND", map[string]interface{}{
+				"resource":    "reminder",
+				"resource_id": id,
+			}, nil)
+			return
+		}
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	response.SuccessResponseNoContent(c)
+}
+
+
+
