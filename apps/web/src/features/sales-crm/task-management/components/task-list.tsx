@@ -352,6 +352,17 @@ export function TaskList() {
         onPerPageChange={setPerPage}
         itemName={t("table.itemName")}
         perPageOptions={[10, 20, 50, 100]}
+        onResetFilters={() => {
+          setSearch("");
+          setStatus("");
+          setPriority("");
+          setType("");
+          setAssignedTo("");
+          setAccountId("");
+          setStartDueDate("");
+          setEndDueDate("");
+          setPage(1);
+        }}
       />
 
       {/* Create Task Dialog */}

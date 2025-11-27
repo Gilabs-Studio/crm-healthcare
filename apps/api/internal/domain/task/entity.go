@@ -244,27 +244,18 @@ type AssignTaskRequest struct {
 
 // ListTasksRequest represents list tasks query parameters
 type ListTasksRequest struct {
-	Page       int    `form:"page" binding:"omitempty,min=1"`
-	PerPage    int    `form:"per_page" binding:"omitempty,min=1,max=100"`
-	Search     string `form:"search" binding:"omitempty"`
-	Status     string `form:"status" binding:"omitempty,oneof=pending in_progress completed cancelled"`
-	Priority   string `form:"priority" binding:"omitempty,oneof=low medium high urgent"`
-	Type       string `form:"type" binding:"omitempty,oneof=general call email meeting follow_up"`
-	AssignedTo string `form:"assigned_to" binding:"omitempty,uuid"`
-	AccountID  string `form:"account_id" binding:"omitempty,uuid"`
-	ContactID  string `form:"contact_id" binding:"omitempty,uuid"`
-	DealID     string `form:"deal_id" binding:"omitempty,uuid"`
-	DueDateFrom *time.Time `form:"due_date_from" binding:"omitempty"`
-	DueDateTo   *time.Time `form:"due_date_to" binding:"omitempty"`
-}
-
-// formatCurrency formats integer (sen) to formatted currency string
-func formatCurrency(amount int64) string {
-	// Convert to Rupiah (divide by 100 if stored in sen)
-	rupiah := float64(amount) / 100.0
-	// Format with thousand separator
-	formatted := formatNumber(rupiah)
-	return "Rp " + formatted
+	Page        int        `form:"page" binding:"omitempty,min=1"`
+	PerPage     int        `form:"per_page" binding:"omitempty,min=1,max=100"`
+	Search      string     `form:"search" binding:"omitempty"`
+	Status      string     `form:"status" binding:"omitempty,oneof=pending in_progress completed cancelled"`
+	Priority    string     `form:"priority" binding:"omitempty,oneof=low medium high urgent"`
+	Type        string     `form:"type" binding:"omitempty,oneof=general call email meeting follow_up"`
+	AssignedTo  string     `form:"assigned_to" binding:"omitempty,uuid"`
+	AccountID   string     `form:"account_id" binding:"omitempty,uuid"`
+	ContactID   string     `form:"contact_id" binding:"omitempty,uuid"`
+	DealID      string     `form:"deal_id" binding:"omitempty,uuid"`
+	DueDateFrom *time.Time `form:"due_date_from" time_format:"2006-01-02" binding:"omitempty"`
+	DueDateTo   *time.Time `form:"due_date_to" time_format:"2006-01-02" binding:"omitempty"`
 }
 
 // formatNumber formats number with thousand separator

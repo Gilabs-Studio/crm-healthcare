@@ -75,6 +75,12 @@ func (h *TaskHandler) List(c *gin.Context) {
 	if req.DealID != "" {
 		meta.Filters["deal_id"] = req.DealID
 	}
+	if req.DueDateFrom != nil {
+		meta.Filters["due_date_from"] = req.DueDateFrom.Format("2006-01-02")
+	}
+	if req.DueDateTo != nil {
+		meta.Filters["due_date_to"] = req.DueDateTo.Format("2006-01-02")
+	}
 
 	response.SuccessResponse(c, tasks, meta)
 }

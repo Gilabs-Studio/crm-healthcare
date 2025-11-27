@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Columns2, Plus, Search } from "lucide-react";
+import { Columns2, Plus, Search, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -26,10 +26,7 @@ export function TaskBoard() {
   const tBoard = useTranslations("taskManagement.board");
 
   const {
-    page,
     setPage,
-    perPage,
-    setPerPage,
     search,
     setSearch,
     status,
@@ -40,7 +37,6 @@ export function TaskBoard() {
     setType,
     assignedTo,
     setAssignedTo,
-    accountId,
     setAccountId,
     startDueDate,
     setStartDueDate,
@@ -69,8 +65,7 @@ export function TaskBoard() {
   const { data: usersData } = useUsers({ status: "active", per_page: 100 });
   const users = usersData?.data ?? [];
 
-  const { data: accountsData } = useAccounts({ status: "active", per_page: 100 });
-  const accounts = accountsData?.data ?? [];
+  useAccounts({ status: "active", per_page: 100 });
 
   const [viewingTaskId, setViewingTaskId] = useState<string | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -230,6 +225,26 @@ export function TaskBoard() {
               </span>
             </div>
           )}
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            className="h-8 w-8 text-muted-foreground hover:text-primary"
+            title="Reset filter"
+            onClick={() => {
+              setSearch("");
+              setStatus("");
+              setPriority("");
+              setType("");
+              setAssignedTo("");
+              setAccountId("");
+              setStartDueDate("");
+              setEndDueDate("");
+              setPage(1);
+            }}
+          >
+            <RotateCcw className="h-4 w-4" />
+          </Button>
           <Button type="button" onClick={() => setIsCreateDialogOpen(true)} size="sm">
             <Plus className="h-4 w-4 mr-2" />
             {tList("buttons.addTask")}

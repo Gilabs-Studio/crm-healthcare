@@ -228,6 +228,12 @@ export function UserList() {
         onPerPageChange={setPerPage}
         itemName="user"
         perPageOptions={[10, 20, 50, 100]}
+        onResetFilters={() => {
+          setSearch("");
+          setStatus("");
+          setRoleId("");
+          setPage(1);
+        }}
       />
 
       {/* Create Dialog */}

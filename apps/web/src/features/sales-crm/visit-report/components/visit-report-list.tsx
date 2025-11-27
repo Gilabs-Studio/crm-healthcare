@@ -310,6 +310,14 @@ export function VisitReportList() {
         onPerPageChange={setPerPage}
         itemName={t("dialogs.itemName")}
         perPageOptions={[10, 20, 50, 100]}
+        onResetFilters={() => {
+          setSearch("");
+          setStatus("");
+          setAccountId("");
+          setStartDate("");
+          setEndDate("");
+          setPage(1);
+        }}
       />
 
       {/* Create Dialog */}

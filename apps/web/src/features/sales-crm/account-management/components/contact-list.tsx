@@ -210,6 +210,12 @@ export function ContactList() {
         onPerPageChange={setPerPage}
         itemName="contact"
         perPageOptions={[10, 20, 50, 100]}
+        onResetFilters={() => {
+          setSearch("");
+          setAccountId("");
+          setRole("");
+          setPage(1);
+        }}
       />
 
       {/* Create Dialog */}
