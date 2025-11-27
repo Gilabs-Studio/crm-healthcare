@@ -2,6 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 import { createUserSchema, updateUserSchema, type CreateUserFormData, type UpdateUserFormData } from "../schemas/user.schema";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -27,6 +28,7 @@ export function UserForm({ user, onSubmit, onCancel, isLoading }: UserFormProps)
   const isEdit = !!user;
   const { data: rolesData } = useRoles();
   const roles = rolesData?.data || [];
+  const t = useTranslations("userManagement.form");
 
   const {
     register,
@@ -57,45 +59,45 @@ export function UserForm({ user, onSubmit, onCancel, isLoading }: UserFormProps)
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
       <Field orientation="vertical">
-        <FieldLabel>Email</FieldLabel>
+        <FieldLabel>{t("emailLabel")}</FieldLabel>
         <Input
           type="email"
           {...register("email")}
           disabled={isEdit}
-          placeholder="user@example.com"
+          placeholder={t("emailPlaceholder")}
         />
         {errors.email && <FieldError>{errors.email.message}</FieldError>}
       </Field>
 
       {!isEdit && (
         <Field orientation="vertical">
-          <FieldLabel>Password</FieldLabel>
+          <FieldLabel>{t("passwordLabel")}</FieldLabel>
           <Input
             type="password"
             {...register("password")}
-            placeholder="••••••••"
+            placeholder={t("passwordPlaceholder")}
           />
           {errors.password && <FieldError>{errors.password.message}</FieldError>}
         </Field>
       )}
 
       <Field orientation="vertical">
-        <FieldLabel>Name</FieldLabel>
+        <FieldLabel>{t("nameLabel")}</FieldLabel>
         <Input
           {...register("name")}
-          placeholder="Full Name"
+          placeholder={t("namePlaceholder")}
         />
         {errors.name && <FieldError>{errors.name.message}</FieldError>}
       </Field>
 
       <Field orientation="vertical">
-        <FieldLabel>Role</FieldLabel>
+        <FieldLabel>{t("roleLabel")}</FieldLabel>
         <Select
           value={selectedRoleId || ""}
           onValueChange={(value) => setValue("role_id", value)}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select a role" />
+            <SelectValue placeholder={t("rolePlaceholder")} />
           </SelectTrigger>
           <SelectContent>
             {roles.map((role) => (
@@ -109,7 +111,7 @@ export function UserForm({ user, onSubmit, onCancel, isLoading }: UserFormProps)
       </Field>
 
       <Field orientation="vertical">
-        <FieldLabel>Status</FieldLabel>
+        <FieldLabel>{t("statusLabel")}</FieldLabel>
         <Select
           value={watch("status") || "active"}
           onValueChange={(value) => setValue("status", value as "active" | "inactive")}
@@ -118,8 +120,8 @@ export function UserForm({ user, onSubmit, onCancel, isLoading }: UserFormProps)
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="inactive">Inactive</SelectItem>
+            <SelectItem value="active">{t("statusActive")}</SelectItem>
+            <SelectItem value="inactive">{t("statusInactive")}</SelectItem>
           </SelectContent>
         </Select>
         {errors.status && <FieldError>{errors.status.message}</FieldError>}
@@ -127,10 +129,14 @@ export function UserForm({ user, onSubmit, onCancel, isLoading }: UserFormProps)
 
       <div className="flex justify-end gap-2 pt-4">
         <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
-          Cancel
+          {t("cancel")}
         </Button>
         <Button type="submit" disabled={isLoading}>
-          {isLoading ? "Saving..." : (isEdit ? "Update" : "Create")}
+          {isLoading
+            ? t("submitting")
+            : isEdit
+              ? t("submitUpdate")
+              : t("submitCreate")}
         </Button>
       </div>
     </form>

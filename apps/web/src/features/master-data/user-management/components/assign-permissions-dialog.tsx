@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -28,6 +29,7 @@ export function AssignPermissionsDialog({ roleId, onClose }: AssignPermissionsDi
   const assignPermissions = useAssignPermissionsToRole();
 
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
+  const t = useTranslations("userManagement.assignPermissions");
 
   const permissions = permissionsData?.data || [];
   const role = roleData;
@@ -55,7 +57,7 @@ export function AssignPermissionsDialog({ roleId, onClose }: AssignPermissionsDi
         roleId,
         permissionIds: selectedPermissions,
       });
-      toast.success("Permissions assigned successfully");
+      toast.success(t("save"));
       onClose();
     } catch (error) {
       // Error already handled in api-client interceptor
@@ -64,7 +66,7 @@ export function AssignPermissionsDialog({ roleId, onClose }: AssignPermissionsDi
 
   // Group permissions by menu/action
   const groupedPermissions = permissions.reduce((acc, perm) => {
-    const key = perm.menu?.name || "Other";
+    const key = perm.menu?.name || t("otherGroup");
     if (!acc[key]) {
       acc[key] = [];
     }
@@ -76,9 +78,11 @@ export function AssignPermissionsDialog({ roleId, onClose }: AssignPermissionsDi
     <Dialog open={!!roleId} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Assign Permissions to {role?.name}</DialogTitle>
+          <DialogTitle>
+            {t("title", { roleName: role?.name ?? "" })}
+          </DialogTitle>
           <DialogDescription>
-            Select the permissions that should be assigned to this role.
+            {t("description")}
           </DialogDescription>
         </DialogHeader>
 
@@ -124,10 +128,10 @@ export function AssignPermissionsDialog({ roleId, onClose }: AssignPermissionsDi
 
         <div className="flex justify-end gap-2 pt-4 border-t">
           <Button variant="outline" onClick={onClose} disabled={assignPermissions.isPending}>
-            Cancel
+            {t("cancel")}
           </Button>
           <Button onClick={handleSubmit} disabled={assignPermissions.isPending}>
-            {assignPermissions.isPending ? "Saving..." : "Save Permissions"}
+            {assignPermissions.isPending ? t("saving") : t("save")}
           </Button>
         </div>
       </DialogContent>

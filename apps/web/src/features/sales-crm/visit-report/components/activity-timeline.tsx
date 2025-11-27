@@ -5,6 +5,7 @@ import { DataTable, type Column } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Activity as ActivityType } from "../types/activity";
+import { useTranslations } from "next-intl";
 
 interface ActivityTimelineProps {
   readonly activities: ActivityType[];
@@ -31,10 +32,12 @@ const activityColors: Record<string, "default" | "secondary" | "destructive" | "
 };
 
 export function ActivityTimeline({ activities, isLoading, accountId }: ActivityTimelineProps) {
+  const t = useTranslations("visitReportActivityTimeline");
+
   const columns: Column<ActivityType>[] = [
     {
       id: "type",
-      header: "Type",
+      header: t("table.type"),
       accessor: (row) => (
         <div className="flex items-center gap-2">
           <div className="text-muted-foreground">
@@ -49,25 +52,39 @@ export function ActivityTimeline({ activities, isLoading, accountId }: ActivityT
     },
     {
       id: "description",
-      header: "Description",
+      header: t("table.description"),
       accessor: (row) => {
         // Format metadata nicely instead of raw JSON
         const formatMetadata = (metadata: Record<string, unknown> | undefined): string => {
           if (!metadata || Object.keys(metadata).length === 0) return "";
           
           const parts: string[] = [];
-          if (metadata.status && typeof metadata.status === "string") parts.push(`Status: ${metadata.status}`);
-          if (metadata.action && typeof metadata.action === "string") parts.push(`Action: ${metadata.action}`);
-          if (metadata.visit_date && typeof metadata.visit_date === "string") parts.push(`Date: ${metadata.visit_date}`);
-          if (metadata.duration && typeof metadata.duration === "string") parts.push(`Duration: ${metadata.duration}`);
-          if (metadata.outcome && typeof metadata.outcome === "string") parts.push(`Outcome: ${metadata.outcome}`);
-          if (metadata.subject && typeof metadata.subject === "string") parts.push(`Subject: ${metadata.subject}`);
-          if (metadata.priority && typeof metadata.priority === "string") parts.push(`Priority: ${metadata.priority}`);
+          if (metadata.status && typeof metadata.status === "string") {
+            parts.push(`${t("meta.statusLabel")}: ${metadata.status}`);
+          }
+          if (metadata.action && typeof metadata.action === "string") {
+            parts.push(`${t("meta.actionLabel")}: ${metadata.action}`);
+          }
+          if (metadata.visit_date && typeof metadata.visit_date === "string") {
+            parts.push(`${t("meta.visitDateLabel")}: ${metadata.visit_date}`);
+          }
+          if (metadata.duration && typeof metadata.duration === "string") {
+            parts.push(`${t("meta.durationLabel")}: ${metadata.duration}`);
+          }
+          if (metadata.outcome && typeof metadata.outcome === "string") {
+            parts.push(`${t("meta.outcomeLabel")}: ${metadata.outcome}`);
+          }
+          if (metadata.subject && typeof metadata.subject === "string") {
+            parts.push(`${t("meta.subjectLabel")}: ${metadata.subject}`);
+          }
+          if (metadata.priority && typeof metadata.priority === "string") {
+            parts.push(`${t("meta.priorityLabel")}: ${metadata.priority}`);
+          }
           if (metadata.value) {
             const valueStr = typeof metadata.value === "number" 
               ? metadata.value.toLocaleString("id-ID")
               : String(metadata.value);
-            parts.push(`Value: ${valueStr}`);
+            parts.push(`${t("meta.valueLabel")}: ${valueStr}`);
           }
           
           return parts.length > 0 ? parts.join(" • ") : "";
@@ -90,7 +107,7 @@ export function ActivityTimeline({ activities, isLoading, accountId }: ActivityT
     },
     {
       id: "account",
-      header: "Account",
+      header: t("table.account"),
       accessor: (row) => (
         row.account ? (
           <div className="flex items-center gap-2">
@@ -109,7 +126,7 @@ export function ActivityTimeline({ activities, isLoading, accountId }: ActivityT
     },
     {
       id: "contact",
-      header: "Contact",
+      header: t("table.contact"),
       accessor: (row) => (
         row.contact ? (
           <div className="flex items-center gap-2">
@@ -128,7 +145,7 @@ export function ActivityTimeline({ activities, isLoading, accountId }: ActivityT
     },
     {
       id: "user",
-      header: "User",
+      header: t("table.user"),
       accessor: (row) => (
         <div className="flex items-center gap-2">
           <User className="h-3 w-3 text-muted-foreground" />
@@ -143,7 +160,7 @@ export function ActivityTimeline({ activities, isLoading, accountId }: ActivityT
     },
     {
       id: "timestamp",
-      header: "Timestamp",
+      header: t("table.timestamp"),
       accessor: (row) => {
         const date = new Date(row.timestamp);
         const formatted = date.toLocaleString("id-ID", {
@@ -177,7 +194,7 @@ export function ActivityTimeline({ activities, isLoading, accountId }: ActivityT
   if (activities.length === 0) {
     return (
       <div className="text-center text-muted-foreground py-8">
-        No activities found
+        {t("empty")}
       </div>
     );
   }
@@ -187,7 +204,7 @@ export function ActivityTimeline({ activities, isLoading, accountId }: ActivityT
       columns={columns}
       data={activities}
       isLoading={isLoading}
-      emptyMessage="No activities found"
+      emptyMessage={t("empty")}
       itemName="activity"
     />
   );

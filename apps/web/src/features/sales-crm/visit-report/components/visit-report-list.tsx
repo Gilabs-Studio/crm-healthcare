@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/dialog";
 import { useAccounts } from "../../account-management/hooks/useAccounts";
 import type { VisitReport } from "../types";
+import { useTranslations } from "next-intl";
 
 const statusColors: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   draft: "outline",
@@ -36,6 +37,7 @@ const statusColors: Record<string, "default" | "secondary" | "destructive" | "ou
 };
 
 export function VisitReportList() {
+  const t = useTranslations("visitReportList");
   const {
     page,
     setPage,
@@ -92,7 +94,7 @@ export function VisitReportList() {
   const columns: Column<VisitReport>[] = [
     {
       id: "visit_date",
-      header: "Visit Date",
+      header: t("table.visitDate"),
       accessor: (row) => (
         <div className="flex items-center gap-2">
           <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -103,7 +105,7 @@ export function VisitReportList() {
     },
     {
       id: "account",
-      header: "Account",
+      header: t("table.account"),
       accessor: (row) => (
         <button
           onClick={() => handleViewVisitReport(row.id)}
@@ -116,14 +118,14 @@ export function VisitReportList() {
     },
     {
       id: "purpose",
-      header: "Purpose",
+      header: t("table.purpose"),
       accessor: (row) => (
         <span className="text-muted-foreground line-clamp-1">{row.purpose}</span>
       ),
     },
     {
       id: "status",
-      header: "Status",
+      header: t("table.status"),
       accessor: (row) => (
         <Badge variant={statusColors[row.status] || "outline"}>
           {row.status}
@@ -133,7 +135,7 @@ export function VisitReportList() {
     },
     {
       id: "check_in",
-      header: "Check In",
+      header: t("table.checkIn"),
       accessor: (row) => (
         <div className="flex items-center gap-1 text-sm text-muted-foreground">
           {row.check_in_time ? (
@@ -150,7 +152,7 @@ export function VisitReportList() {
     },
     {
       id: "actions",
-      header: "Actions",
+      header: t("table.actions"),
       accessor: (row) => (
         <div className="flex items-center justify-end gap-1">
           <Button
@@ -195,7 +197,7 @@ export function VisitReportList() {
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search visit reports..."
+              placeholder={t("filters.searchPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10 h-9"
@@ -206,14 +208,14 @@ export function VisitReportList() {
             onValueChange={(value) => setStatus(value === "all" ? "" : value)}
           >
             <SelectTrigger className="w-[140px] h-9">
-              <SelectValue placeholder="All Status" />
+              <SelectValue placeholder={t("filters.allStatus")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="draft">Draft</SelectItem>
-              <SelectItem value="submitted">Submitted</SelectItem>
-              <SelectItem value="approved">Approved</SelectItem>
-              <SelectItem value="rejected">Rejected</SelectItem>
+              <SelectItem value="all">{t("filters.allStatus")}</SelectItem>
+              <SelectItem value="draft">draft</SelectItem>
+              <SelectItem value="submitted">submitted</SelectItem>
+              <SelectItem value="approved">approved</SelectItem>
+              <SelectItem value="rejected">rejected</SelectItem>
             </SelectContent>
           </Select>
           <Select 
@@ -221,10 +223,10 @@ export function VisitReportList() {
             onValueChange={(value) => setAccountId(value === "all" ? "" : value)}
           >
             <SelectTrigger className="w-[180px] h-9">
-              <SelectValue placeholder="All Accounts" />
+              <SelectValue placeholder={t("filters.allAccounts")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Accounts</SelectItem>
+              <SelectItem value="all">{t("filters.allAccounts")}</SelectItem>
               {accounts.map((account) => (
                 <SelectItem key={account.id} value={account.id}>
                   {account.name}
@@ -282,7 +284,7 @@ export function VisitReportList() {
         </div>
         <Button onClick={() => setIsCreateDialogOpen(true)} size="sm">
           <Plus className="h-4 w-4 mr-2" />
-          Add Visit Report
+          {t("buttons.addVisitReport")}
         </Button>
       </div>
 
@@ -291,7 +293,7 @@ export function VisitReportList() {
         columns={columns}
         data={visitReports}
         isLoading={isLoading}
-        emptyMessage="No visit reports found"
+        emptyMessage={t("empty.table")}
         pagination={
           pagination
             ? {
@@ -306,7 +308,7 @@ export function VisitReportList() {
         }
         onPageChange={setPage}
         onPerPageChange={setPerPage}
-        itemName="visit report"
+        itemName={t("dialogs.itemName")}
         perPageOptions={[10, 20, 50, 100]}
       />
 
@@ -314,7 +316,7 @@ export function VisitReportList() {
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>Create Visit Report</DialogTitle>
+            <DialogTitle>{t("dialogs.createTitle")}</DialogTitle>
           </DialogHeader>
           <VisitReportForm
             onSubmit={handleCreate}
@@ -329,7 +331,7 @@ export function VisitReportList() {
         <Dialog open={!!editingVisitReport} onOpenChange={(open) => !open && setEditingVisitReport(null)}>
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
-              <DialogTitle>Edit Visit Report</DialogTitle>
+            <DialogTitle>{t("dialogs.editTitle")}</DialogTitle>
             </DialogHeader>
             <VisitReportForm
               visitReport={editingVisitReportData.data}
@@ -365,13 +367,9 @@ export function VisitReportList() {
           }
         }}
         onConfirm={handleDeleteConfirm}
-        title="Delete Visit Report?"
-        description={
-          deletingVisitReportId
-            ? `Are you sure you want to delete this visit report? This action cannot be undone.`
-            : "Are you sure you want to delete this visit report? This action cannot be undone."
-        }
-        itemName="visit report"
+        title={t("dialogs.deleteTitle")}
+        description={t("dialogs.deleteDescription")}
+        itemName={t("dialogs.itemName")}
         isLoading={deleteVisitReport.isPending}
       />
     </div>

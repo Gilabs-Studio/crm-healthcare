@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BarChart3, Building2, Users, Calendar } from "lucide-react";
 import type { VisitReportReport } from "../types";
+import { useTranslations } from "next-intl";
 
 interface VisitReportViewerProps {
   data?: VisitReportReport;
@@ -11,6 +12,8 @@ interface VisitReportViewerProps {
 }
 
 export function VisitReportViewer({ data, isLoading }: VisitReportViewerProps) {
+  const t = useTranslations("reportsFeature.visitReportViewer");
+  const tCommon = useTranslations("reportsFeature.common");
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -23,7 +26,7 @@ export function VisitReportViewer({ data, isLoading }: VisitReportViewerProps) {
   if (!data) {
     return (
       <div className="text-center py-8 text-muted-foreground">
-        <p className="text-sm">No data available. Please generate a report.</p>
+        <p className="text-sm">{tCommon("noData")}</p>
       </div>
     );
   }
@@ -34,7 +37,9 @@ export function VisitReportViewer({ data, isLoading }: VisitReportViewerProps) {
       <div className="grid gap-4 md:grid-cols-5">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              {t("summary.total")}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{data.summary.total}</div>
@@ -42,7 +47,9 @@ export function VisitReportViewer({ data, isLoading }: VisitReportViewerProps) {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Completed</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              {t("summary.completed")}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{data.summary.completed}</div>
@@ -50,7 +57,9 @@ export function VisitReportViewer({ data, isLoading }: VisitReportViewerProps) {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Pending</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              {t("summary.pending")}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{data.summary.pending}</div>
@@ -58,7 +67,9 @@ export function VisitReportViewer({ data, isLoading }: VisitReportViewerProps) {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Approved</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              {t("summary.approved")}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{data.summary.approved}</div>
@@ -66,7 +77,9 @@ export function VisitReportViewer({ data, isLoading }: VisitReportViewerProps) {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Rejected</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              {t("summary.rejected")}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{data.summary.rejected}</div>
@@ -80,7 +93,7 @@ export function VisitReportViewer({ data, isLoading }: VisitReportViewerProps) {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Building2 className="h-5 w-5" />
-              <CardTitle>By Account</CardTitle>
+              <CardTitle>{t("byAccountTitle")}</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
@@ -105,7 +118,7 @@ export function VisitReportViewer({ data, isLoading }: VisitReportViewerProps) {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Users className="h-5 w-5" />
-              <CardTitle>By Sales Rep</CardTitle>
+              <CardTitle>{t("bySalesRepTitle")}</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
@@ -130,7 +143,7 @@ export function VisitReportViewer({ data, isLoading }: VisitReportViewerProps) {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Calendar className="h-5 w-5" />
-              <CardTitle>By Date</CardTitle>
+              <CardTitle>{t("byDateTitle")}</CardTitle>
             </div>
           </CardHeader>
           <CardContent>

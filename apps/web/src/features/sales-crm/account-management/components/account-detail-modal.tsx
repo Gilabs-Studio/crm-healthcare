@@ -1,6 +1,6 @@
 "use client";
 
-import { Edit, Trash2, Mail, Building2, MapPin, Phone, Calendar, X } from "lucide-react";
+import { Edit, Trash2, Mail, Building2, MapPin, Phone, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,7 +16,7 @@ import { useAccount, useDeleteAccount, useUpdateAccount } from "../hooks/useAcco
 import { toast } from "sonner";
 import { useState } from "react";
 import { AccountForm } from "./account-form";
-import type { Account } from "../types";
+import { useTranslations } from "next-intl";
 
 interface AccountDetailModalProps {
   readonly accountId: string | null;
@@ -31,6 +31,7 @@ export function AccountDetailModal({ accountId, open, onOpenChange, onAccountUpd
   const updateAccount = useUpdateAccount();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const t = useTranslations("accountManagement.accountDetail");
 
   const account = data?.data;
 
@@ -38,10 +39,10 @@ export function AccountDetailModal({ accountId, open, onOpenChange, onAccountUpd
     if (!account || !accountId) return;
     try {
       await deleteAccount.mutateAsync(accountId);
-      toast.success("Account deleted successfully");
+      toast.success(t("toastDeleted"));
       onOpenChange(false);
       onAccountUpdated?.();
-    } catch (error) {
+    } catch {
       // Error already handled in api-client interceptor
     }
   };
@@ -52,7 +53,7 @@ export function AccountDetailModal({ accountId, open, onOpenChange, onAccountUpd
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Account Details</DialogTitle>
+            <DialogTitle>{t("title")}</DialogTitle>
           </DialogHeader>
 
           {isLoading && (
@@ -82,7 +83,7 @@ export function AccountDetailModal({ accountId, open, onOpenChange, onAccountUpd
 
           {error && (
             <div className="text-center text-muted-foreground py-8">
-              Failed to load account details
+              {t("loadError")}
             </div>
           )}
 
@@ -115,7 +116,7 @@ export function AccountDetailModal({ accountId, open, onOpenChange, onAccountUpd
                     onClick={() => setIsEditDialogOpen(true)}
                   >
                     <Edit className="h-4 w-4 mr-2" />
-                    Edit
+                    {t("header.edit")}
                   </Button>
                   <Button
                     variant="destructive"
@@ -124,7 +125,7 @@ export function AccountDetailModal({ accountId, open, onOpenChange, onAccountUpd
                     disabled={deleteAccount.isPending}
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
-                    Delete
+                    {t("header.delete")}
                   </Button>
                 </div>
               </div>
@@ -132,22 +133,22 @@ export function AccountDetailModal({ accountId, open, onOpenChange, onAccountUpd
               {/* Account Info Card */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Account Information</CardTitle>
-                  <CardDescription>Basic account details and contact information</CardDescription>
+                  <CardTitle>{t("infoCard.title")}</CardTitle>
+                  <CardDescription>{t("infoCard.description")}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Building2 className="h-4 w-4" />
-                        <span>Name</span>
+                        <span>{t("infoCard.name")}</span>
                       </div>
                       <div className="text-base font-medium">{account.name}</div>
                     </div>
 
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <span>Category</span>
+                        <span>{t("infoCard.category")}</span>
                       </div>
                       <div>
                         {account.category ? (
@@ -155,7 +156,7 @@ export function AccountDetailModal({ accountId, open, onOpenChange, onAccountUpd
                             {account.category.name}
                           </Badge>
                         ) : (
-                          <span className="text-muted-foreground">-</span>
+                          <span className="text-muted-foreground">{t("infoCard.notAvailable")}</span>
                         )}
                       </div>
                     </div>
@@ -164,7 +165,7 @@ export function AccountDetailModal({ accountId, open, onOpenChange, onAccountUpd
                       <div className="space-y-2 md:col-span-2">
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <MapPin className="h-4 w-4" />
-                          <span>Address</span>
+                          <span>{t("infoCard.address")}</span>
                         </div>
                         <div className="text-base font-medium">{account.address}</div>
                       </div>
@@ -174,7 +175,7 @@ export function AccountDetailModal({ accountId, open, onOpenChange, onAccountUpd
                       <div className="space-y-2">
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <MapPin className="h-4 w-4" />
-                          <span>City</span>
+                          <span>{t("infoCard.city")}</span>
                         </div>
                         <div className="text-base font-medium">{account.city}</div>
                       </div>
@@ -184,7 +185,7 @@ export function AccountDetailModal({ accountId, open, onOpenChange, onAccountUpd
                       <div className="space-y-2">
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <MapPin className="h-4 w-4" />
-                          <span>Province</span>
+                          <span>{t("infoCard.province")}</span>
                         </div>
                         <div className="text-base font-medium">{account.province}</div>
                       </div>
@@ -194,7 +195,7 @@ export function AccountDetailModal({ accountId, open, onOpenChange, onAccountUpd
                       <div className="space-y-2">
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Phone className="h-4 w-4" />
-                          <span>Phone</span>
+                          <span>{t("infoCard.phone")}</span>
                         </div>
                         <div className="text-base font-medium">{account.phone}</div>
                       </div>
@@ -204,7 +205,7 @@ export function AccountDetailModal({ accountId, open, onOpenChange, onAccountUpd
                       <div className="space-y-2">
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Mail className="h-4 w-4" />
-                          <span>Email</span>
+                          <span>{t("infoCard.email")}</span>
                         </div>
                         <div className="text-base font-medium">{account.email}</div>
                       </div>
@@ -212,7 +213,7 @@ export function AccountDetailModal({ accountId, open, onOpenChange, onAccountUpd
 
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <span>Status</span>
+                        <span>{t("infoCard.status")}</span>
                       </div>
                       <div>
                         <Badge variant={account.status === "active" ? "active" : "inactive"}>
@@ -224,20 +225,24 @@ export function AccountDetailModal({ accountId, open, onOpenChange, onAccountUpd
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Calendar className="h-4 w-4" />
-                        <span>Created At</span>
+                        <span>{t("infoCard.createdAt")}</span>
                       </div>
                       <div className="text-base font-medium">
-                        {account.created_at ? new Date(account.created_at).toLocaleDateString() : "N/A"}
+                        {account.created_at
+                          ? new Date(account.created_at).toLocaleDateString()
+                          : t("infoCard.notAvailable")}
                       </div>
                     </div>
 
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Calendar className="h-4 w-4" />
-                        <span>Updated At</span>
+                        <span>{t("infoCard.updatedAt")}</span>
                       </div>
                       <div className="text-base font-medium">
-                        {account.updated_at ? new Date(account.updated_at).toLocaleDateString() : "N/A"}
+                        {account.updated_at
+                          ? new Date(account.updated_at).toLocaleDateString()
+                          : t("infoCard.notAvailable")}
                       </div>
                     </div>
                   </div>
@@ -253,7 +258,7 @@ export function AccountDetailModal({ accountId, open, onOpenChange, onAccountUpd
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
-              <DialogTitle>Edit Account</DialogTitle>
+              <DialogTitle>{t("editDialogTitle")}</DialogTitle>
             </DialogHeader>
             <AccountForm
               account={account}
@@ -261,9 +266,9 @@ export function AccountDetailModal({ accountId, open, onOpenChange, onAccountUpd
                 try {
                   await updateAccount.mutateAsync({ id: accountId!, data: formData });
                   setIsEditDialogOpen(false);
-                  toast.success("Account updated successfully");
+                  toast.success(t("toastUpdated"));
                   onAccountUpdated?.();
-                } catch (error) {
+                } catch {
                   // Error already handled in api-client interceptor
                 }
               }}
@@ -279,13 +284,13 @@ export function AccountDetailModal({ accountId, open, onOpenChange, onAccountUpd
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
         onConfirm={handleDeleteConfirm}
-        title="Delete Account?"
+        title={t("deleteDialogTitle")}
         description={
           account
-            ? `Are you sure you want to delete account "${account.name}"? This action cannot be undone.`
-            : "Are you sure you want to delete this account? This action cannot be undone."
+            ? t("deleteDialogDescriptionWithName", { name: account.name })
+            : t("deleteDialogDescription")
         }
-        itemName="account"
+        itemName={t("deleteDialogItemName")}
         isLoading={deleteAccount.isPending}
       />
     </>

@@ -1,0 +1,71 @@
+export type ProductStatus = "active" | "inactive";
+
+export interface ProductCategory {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  status: ProductStatus;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Product {
+  id: string;
+  name: string;
+  sku: string;
+  barcode: string;
+  price: number;
+  price_formatted: string;
+  cost: number;
+  stock: number;
+  category_id: string;
+  category?: ProductCategory;
+  status: ProductStatus;
+  taxable: boolean;
+  description: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ListProductsResponse {
+  success: boolean;
+  data: Product[];
+  meta: {
+    pagination: {
+      page: number;
+      per_page: number;
+      total: number;
+      total_pages: number;
+      has_next: boolean;
+      has_prev: boolean;
+    };
+    filters?: Record<string, unknown>;
+  };
+  timestamp: string;
+  request_id: string;
+}
+
+export interface ProductResponse {
+  success: boolean;
+  data: Product;
+  timestamp: string;
+  request_id: string;
+}
+
+export interface ListProductCategoriesResponse {
+  success: boolean;
+  data: ProductCategory[];
+  timestamp: string;
+  request_id: string;
+}
+
+export interface ProductListParams {
+  page?: number;
+  per_page?: number;
+  search?: string;
+  status?: ProductStatus;
+  category_id?: string;
+}
+
+

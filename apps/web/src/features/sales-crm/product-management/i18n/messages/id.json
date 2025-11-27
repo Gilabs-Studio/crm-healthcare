@@ -1,0 +1,114 @@
+{
+  "productManagement": {
+    "tabs": {
+      "products": "Produk",
+      "categories": "Kategori Produk"
+    },
+    "list": {
+      "title": "Produk",
+      "description": "Kelola katalog produk untuk penjualan healthcare dan farmasi.",
+      "searchPlaceholder": "Cari berdasarkan nama, SKU, atau barcode",
+      "filters": {
+        "statusAll": "Semua status",
+        "statusActive": "Aktif",
+        "statusInactive": "Tidak aktif"
+      },
+      "table": {
+        "name": "Nama",
+        "skuBarcode": "SKU / Barcode",
+        "category": "Kategori",
+        "price": "Harga",
+        "stock": "Stok",
+        "status": "Status",
+        "actions": "Aksi"
+      },
+      "loading": "Memuat produk...",
+      "empty": "Tidak ada produk. Coba ubah filter atau tambah produk baru.",
+      "pagination": {
+        "pageOf": "Halaman {page} dari {totalPages}",
+        "total": "Total {total} produk",
+        "previous": "Sebelumnya",
+        "next": "Berikutnya"
+      },
+      "buttons": {
+        "addProduct": "Tambah Produk",
+        "createTitle": "Tambah Produk",
+        "editTitle": "Edit Produk"
+      }
+    },
+    "form": {
+      "nameLabel": "Nama",
+      "namePlaceholder": "Nama produk",
+      "skuLabel": "SKU",
+      "skuPlaceholder": "Kode SKU",
+      "barcodeLabel": "Barcode",
+      "barcodePlaceholder": "Barcode (opsional)",
+      "priceLabel": "Harga (Rp)",
+      "pricePlaceholder": "0",
+      "costLabel": "Biaya (Rp)",
+      "costPlaceholder": "0",
+      "stockLabel": "Stok",
+      "stockPlaceholder": "0",
+      "categoryLabel": "Kategori",
+      "categoryPlaceholder": "Pilih kategori",
+      "taxableLabel": "Kena Pajak",
+      "statusLabel": "Status",
+      "statusPlaceholder": "Pilih status",
+      "statusActive": "Aktif",
+      "statusInactive": "Tidak aktif",
+      "descriptionLabel": "Deskripsi",
+      "descriptionPlaceholder": "Deskripsi produk",
+      "cancel": "Batal",
+      "submitCreate": "Buat",
+      "submitUpdate": "Perbarui",
+      "submitting": "Menyimpan..."
+    },
+    "selector": {
+      "label": "Produk",
+      "buttonPlaceholder": "Pilih produk",
+      "dialogTitle": "Pilih Produk",
+      "searchPlaceholder": "Cari produk...",
+      "loading": "Memuat produk...",
+      "empty": "Tidak ada produk.",
+      "skuPrefix": "SKU",
+      "stockPrefix": "Stok",
+      "clearSelection": "Bersihkan pilihan"
+    },
+    "categoryList": {
+      "title": "Kategori Produk",
+      "description": "Kelola kategori produk untuk mengelompokkan produk (misalnya: Resep, OTC, Alat Kesehatan).",
+      "addCategory": "Tambah Kategori",
+      "table": {
+        "name": "Nama",
+        "slug": "Slug",
+        "description": "Deskripsi",
+        "status": "Status",
+        "actions": "Aksi"
+      },
+      "empty": "Tidak ada kategori produk",
+      "createTitle": "Buat Kategori Produk",
+      "editTitle": "Edit Kategori Produk",
+      "deleteTitle": "Hapus Kategori Produk?",
+      "deleteDescriptionWithName": "Apakah Anda yakin ingin menghapus kategori produk \"{name}\"? Tindakan ini tidak dapat dibatalkan.",
+      "deleteDescription": "Apakah Anda yakin ingin menghapus kategori produk ini? Tindakan ini tidak dapat dibatalkan.",
+      "deleteItemName": "kategori produk"
+    },
+    "categoryForm": {
+      "nameLabel": "Nama",
+      "namePlaceholder": "Nama kategori (misalnya: Obat Resep)",
+      "slugLabel": "Slug",
+      "slugPlaceholder": "Slug (opsional, akan dibuat otomatis jika kosong)",
+      "descriptionLabel": "Deskripsi",
+      "descriptionPlaceholder": "Deskripsi (opsional)",
+      "statusLabel": "Status",
+      "statusActive": "Aktif",
+      "statusInactive": "Tidak aktif",
+      "cancel": "Batal",
+      "submitCreate": "Buat",
+      "submitUpdate": "Perbarui",
+      "submitting": "Menyimpan..."
+    }
+  }
+}
+
+

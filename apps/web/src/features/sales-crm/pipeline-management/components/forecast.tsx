@@ -19,9 +19,11 @@ import {
   Building2,
   Circle
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export function Forecast() {
   const { forecast, isLoading, period, setPeriod, formattedPeriod } = useForecast();
+  const t = useTranslations("pipelineManagement.forecast");
 
   if (isLoading) {
     return (
@@ -47,14 +49,14 @@ export function Forecast() {
     return (
       <div className="space-y-6">
         <div>
-          <h3 className="text-2xl font-bold tracking-tight">Revenue Forecast</h3>
+          <h3 className="text-2xl font-bold tracking-tight">{t("title")}</h3>
           <p className="text-sm text-muted-foreground mt-1">
-            Projected revenue based on pipeline deals
+            {t("description")}
           </p>
         </div>
         <Card className="p-6 border-border">
           <div className="text-center py-12">
-            <p className="text-muted-foreground">No forecast data available</p>
+            <p className="text-muted-foreground">{t("noData")}</p>
           </div>
         </Card>
       </div>
@@ -65,9 +67,9 @@ export function Forecast() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h3 className="text-2xl font-bold tracking-tight">Revenue Forecast</h3>
+          <h3 className="text-2xl font-bold tracking-tight">{t("title")}</h3>
           <p className="text-sm text-muted-foreground mt-1">
-            Projected revenue based on pipeline deals
+            {t("description")}
           </p>
         </div>
         <Select value={period} onValueChange={(value) => setPeriod(value as "month" | "quarter" | "year")}>
@@ -76,9 +78,9 @@ export function Forecast() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="month">This Month</SelectItem>
-            <SelectItem value="quarter">This Quarter</SelectItem>
-            <SelectItem value="year">This Year</SelectItem>
+            <SelectItem value="month">{t("periodMonth")}</SelectItem>
+            <SelectItem value="quarter">{t("periodQuarter")}</SelectItem>
+            <SelectItem value="year">{t("periodYear")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -89,7 +91,7 @@ export function Forecast() {
           <div className="flex items-center gap-2 pb-4 border-b border-border">
             <Calendar className="h-5 w-5 text-muted-foreground" />
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Forecast Period</p>
+              <p className="text-sm font-medium text-muted-foreground">{t("periodLabel")}</p>
               <p className="text-lg font-semibold text-foreground">{formattedPeriod}</p>
             </div>
           </div>
@@ -103,12 +105,12 @@ export function Forecast() {
                     <DollarSign className="h-5 w-5 text-blue-600" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-muted-foreground">Expected Revenue</p>
+                    <p className="text-sm font-medium text-muted-foreground">{t("expectedRevenueLabel")}</p>
                     <p className="text-2xl font-bold text-foreground mt-1">
                       {forecast.expected_revenue_formatted || formatCurrency(forecast.expected_revenue)}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Based on deal values
+                      {t("expectedRevenueHint")}
                     </p>
                   </div>
                 </div>
@@ -122,12 +124,12 @@ export function Forecast() {
                     <Target className="h-5 w-5 text-primary" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-muted-foreground">Weighted Revenue</p>
+                    <p className="text-sm font-medium text-muted-foreground">{t("weightedRevenueLabel")}</p>
                     <p className="text-2xl font-bold text-primary mt-1">
                       {forecast.weighted_revenue_formatted || formatCurrency(forecast.weighted_revenue)}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Based on probability
+                      {t("weightedRevenueHint")}
                     </p>
                   </div>
                 </div>
@@ -140,9 +142,10 @@ export function Forecast() {
             <div className="pt-4 border-t border-border">
               <div className="flex items-center gap-2 mb-4">
                 <TrendingUp className="h-5 w-5 text-muted-foreground" />
-                <h4 className="text-lg font-semibold">Deals in Forecast</h4>
+                <h4 className="text-lg font-semibold">{t("dealsInForecastTitle")}</h4>
                 <Badge variant="secondary" className="ml-auto">
-                  {forecast.deals.length} {forecast.deals.length === 1 ? "deal" : "deals"}
+                  {forecast.deals.length}{" "}
+                  {forecast.deals.length === 1 ? t("dealsSingular") : t("dealsPlural")}
                 </Badge>
               </div>
               <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
@@ -177,7 +180,8 @@ export function Forecast() {
                           {deal.weighted_value_formatted || formatCurrency(deal.weighted_value)}
                         </p>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          Deal value: {deal.value_formatted || formatCurrency(deal.value)}
+                          {t("dealValuePrefix")}{" "}
+                          {deal.value_formatted || formatCurrency(deal.value)}
                         </p>
                       </div>
                     </div>

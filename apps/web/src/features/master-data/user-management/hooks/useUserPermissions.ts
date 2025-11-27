@@ -1,7 +1,7 @@
-"use client";
+ "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import { useEffect } from "react";
 import { userService } from "../services/userService";
 import { useAuthStore } from "@/features/auth/stores/useAuthStore";
@@ -37,9 +37,9 @@ export function useUserPermissions() {
         error.response?.status === 404 ||
         error.response?.data?.error?.code === "USER_NOT_FOUND"
       ) {
-        // Clear auth state and redirect to login
+        // Clear auth state and redirect to locale-scoped login
         logout();
-        router.push("/");
+        router.push("/login");
       }
     }
   }, [query.error, logout, router]);

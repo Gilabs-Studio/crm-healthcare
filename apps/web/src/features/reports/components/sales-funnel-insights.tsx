@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/chart";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info, TrendingUp, DollarSign, Target, AlertCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { PipelineReport } from "../types";
 
 interface SalesFunnelInsightsProps {
@@ -31,6 +32,8 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export function SalesFunnelInsights({ data }: SalesFunnelInsightsProps) {
+  const t = useTranslations("reportsFeature.salesFunnelInsights");
+
   // Prepare chart data from by_stage
   const stageChartData = React.useMemo(() => {
     if (!data.by_stage || Object.keys(data.by_stage).length === 0) {
@@ -68,21 +71,25 @@ export function SalesFunnelInsights({ data }: SalesFunnelInsightsProps) {
         <Info className="h-4 w-4" />
         <AlertDescription>
           <p className="text-sm">
-            <strong>Note:</strong> Some insights are calculated from available data. Additional metrics will be available
-            after Sales Pipeline Management module is implemented (Sprint 2 - Dev2):
+            <strong>{t("noteTitle")}</strong>{" "}
+            {t("noteIntro")}
           </p>
           <ul className="text-sm mt-2 list-disc list-inside space-y-1">
             <li>
-              <strong>Deal value by stage:</strong> Will show actual deal values per stage
+              <strong>{t("noteDealValue").split(":")[0]}:</strong>{" "}
+              {t("noteDealValue").split(":")[1] ?? ""}
             </li>
             <li>
-              <strong>Conversion rates:</strong> Stage-to-stage conversion percentages
+              <strong>{t("noteConversion").split(":")[0]}:</strong>{" "}
+              {t("noteConversion").split(":")[1] ?? ""}
             </li>
             <li>
-              <strong>Time in stage:</strong> Average time deals spend in each stage
+              <strong>{t("noteTimeInStage").split(":")[0]}:</strong>{" "}
+              {t("noteTimeInStage").split(":")[1] ?? ""}
             </li>
             <li>
-              <strong>Forecast accuracy:</strong> Comparison of expected vs actual close dates
+              <strong>{t("noteForecastAccuracy").split(":")[0]}:</strong>{" "}
+              {t("noteForecastAccuracy").split(":")[1] ?? ""}
             </li>
           </ul>
         </AlertDescription>
@@ -92,47 +99,64 @@ export function SalesFunnelInsights({ data }: SalesFunnelInsightsProps) {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Win Rate</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("metricWinRate")}
+            </CardTitle>
             <Target className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{winRate}%</div>
             <p className="text-xs text-muted-foreground">
-              {data.summary.won_deals} won / {data.summary.total_deals} total
+              {t("metricWinRateDetail", {
+                won: data.summary.won_deals,
+                total: data.summary.total_deals,
+              })}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Average Deal Value</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("metricAvgDealValue")}
+            </CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(averageDealValue)}</div>
-            <p className="text-xs text-muted-foreground">Per deal</p>
+            <p className="text-xs text-muted-foreground">
+              {t("metricAvgDealValueDetail")}
+            </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Pipeline Value</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("metricTotalPipelineValue")}
+            </CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(data.summary.total_value)}</div>
-            <p className="text-xs text-muted-foreground">All stages</p>
+            <p className="text-xs text-muted-foreground">
+              {t("metricTotalPipelineValueDetail")}
+            </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Lost Deals</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t("metricLostDeals")}
+            </CardTitle>
             <AlertCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">{data.summary.lost_deals}</div>
-            <p className="text-xs text-muted-foreground">Requires attention</p>
+            <p className="text-xs text-muted-foreground">
+              {t("metricLostDealsDetail")}
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -141,8 +165,10 @@ export function SalesFunnelInsights({ data }: SalesFunnelInsightsProps) {
       {stageChartData.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Deals by Stage</CardTitle>
-            <CardDescription>Distribution of deals across pipeline stages</CardDescription>
+            <CardTitle>{t("chartDealsByStageTitle")}</CardTitle>
+            <CardDescription>
+              {t("chartDealsByStageDescription")}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <ChartContainer config={chartConfig} className="aspect-auto h-[300px] w-full">
@@ -179,8 +205,10 @@ export function SalesFunnelInsights({ data }: SalesFunnelInsightsProps) {
       {data.by_stage && Object.keys(data.by_stage).length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Stage Breakdown</CardTitle>
-            <CardDescription>Detailed view of deals in each stage</CardDescription>
+            <CardTitle>{t("stageBreakdownTitle")}</CardTitle>
+            <CardDescription>
+              {t("stageBreakdownDescription")}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -198,7 +226,7 @@ export function SalesFunnelInsights({ data }: SalesFunnelInsightsProps) {
                           {stage.replace(/_/g, " ")}
                         </span>
                         <span className="text-muted-foreground">
-                          {count} deals ({percentage}%)
+                          {t("stageBreakdownItem", { count, percentage })}
                         </span>
                       </div>
                       <div className="h-2 w-full rounded-full bg-muted">
@@ -219,7 +247,9 @@ export function SalesFunnelInsights({ data }: SalesFunnelInsightsProps) {
       {(!data.by_stage || Object.keys(data.by_stage).length === 0) && (
         <Card>
           <CardContent className="py-8 text-center text-muted-foreground">
-            <p className="text-sm">No stage data available. Stage breakdown will be available after Sales Pipeline module is implemented.</p>
+            <p className="text-sm">
+              {t("emptyStageTitle")}
+            </p>
           </CardContent>
         </Card>
       )}

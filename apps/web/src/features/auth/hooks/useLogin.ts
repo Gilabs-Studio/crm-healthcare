@@ -1,4 +1,4 @@
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import { useAuthStore } from "../stores/useAuthStore";
 import type { LoginFormData } from "../schemas/login.schema";
 import type { AuthError } from "../types/errors";
@@ -10,6 +10,7 @@ export function useLogin() {
   const handleLogin = async (data: LoginFormData) => {
     try {
       await login(data.email, data.password);
+      // Redirect ke dashboard dengan locale aktif, mis. "/en/dashboard"
       router.push("/dashboard");
     } catch (err) {
       // Error is already handled by store, re-throw for component handling

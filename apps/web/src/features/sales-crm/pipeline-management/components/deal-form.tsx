@@ -25,6 +25,7 @@ import { useContacts } from "@/features/sales-crm/account-management/hooks/useCo
 import { useUsers } from "@/features/master-data/user-management/hooks/useUsers";
 import type { Deal } from "../types";
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 interface DealFormProps {
   readonly deal?: Deal;
@@ -34,6 +35,8 @@ interface DealFormProps {
 }
 
 export function DealForm({ deal, onSubmit, onCancel, isLoading }: DealFormProps) {
+  const t = useTranslations("pipelineManagement.dealForm");
+
   const isEdit = !!deal;
   const { data: pipelinesData } = usePipelines({ is_active: true });
   const { data: accountsData } = useAccounts({ status: "active", per_page: 100 });
@@ -184,25 +187,29 @@ export function DealForm({ deal, onSubmit, onCancel, isLoading }: DealFormProps)
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
       <Field orientation="vertical">
-        <FieldLabel>Title *</FieldLabel>
-        <Input {...register("title")} placeholder="Deal Title" />
+        <FieldLabel>{t("titleRequired")}</FieldLabel>
+        <Input {...register("title")} placeholder={t("titlePlaceholder")} />
         {errors.title && <FieldError>{errors.title.message}</FieldError>}
       </Field>
 
       <Field orientation="vertical">
-        <FieldLabel>Description</FieldLabel>
-        <Textarea {...register("description")} placeholder="Deal description" rows={3} />
+        <FieldLabel>{t("descriptionLabel")}</FieldLabel>
+        <Textarea
+          {...register("description")}
+          placeholder={t("descriptionPlaceholder")}
+          rows={3}
+        />
         {errors.description && <FieldError>{errors.description.message}</FieldError>}
       </Field>
 
       <Field orientation="vertical">
-        <FieldLabel>Account *</FieldLabel>
+        <FieldLabel>{t("accountRequired")}</FieldLabel>
         <Select
           value={watch("account_id") || ""}
           onValueChange={(value) => setValue("account_id", value)}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select account" />
+            <SelectValue placeholder={t("accountPlaceholder")} />
           </SelectTrigger>
           <SelectContent>
             {accounts.map((account) => (
@@ -216,17 +223,17 @@ export function DealForm({ deal, onSubmit, onCancel, isLoading }: DealFormProps)
       </Field>
 
       <Field orientation="vertical">
-        <FieldLabel>Contact</FieldLabel>
+        <FieldLabel>{t("contactLabel")}</FieldLabel>
         <Select
           value={watch("contact_id") || undefined}
           onValueChange={(value) => setValue("contact_id", value === "none" ? "" : value)}
           disabled={!watch("account_id") && !deal?.account_id}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select contact (optional)" />
+            <SelectValue placeholder={t("contactPlaceholder")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="none">None</SelectItem>
+            <SelectItem value="none">{t("contactNone")}</SelectItem>
             {contacts.map((contact) => (
               <SelectItem key={contact.id} value={contact.id}>
                 {contact.name}
@@ -238,13 +245,13 @@ export function DealForm({ deal, onSubmit, onCancel, isLoading }: DealFormProps)
       </Field>
 
       <Field orientation="vertical">
-        <FieldLabel>Stage *</FieldLabel>
+        <FieldLabel>{t("stageRequired")}</FieldLabel>
         <Select
           value={watch("stage_id") || ""}
           onValueChange={(value) => setValue("stage_id", value)}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select stage" />
+            <SelectValue placeholder={t("stagePlaceholder")} />
           </SelectTrigger>
           <SelectContent>
             {pipelines
@@ -262,11 +269,11 @@ export function DealForm({ deal, onSubmit, onCancel, isLoading }: DealFormProps)
 
       <div className="grid grid-cols-2 gap-4">
         <Field orientation="vertical">
-          <FieldLabel>Value (Rp) *</FieldLabel>
+          <FieldLabel>{t("valueRequired")}</FieldLabel>
           <Input
             type="number"
             {...register("value", { valueAsNumber: true })}
-            placeholder="0"
+            placeholder={t("valuePlaceholder")}
             min={0}
             step="0.01"
           />
@@ -274,11 +281,11 @@ export function DealForm({ deal, onSubmit, onCancel, isLoading }: DealFormProps)
         </Field>
 
         <Field orientation="vertical">
-          <FieldLabel>Probability (%)</FieldLabel>
+          <FieldLabel>{t("probabilityLabel")}</FieldLabel>
           <Input
             type="number"
             {...register("probability", { valueAsNumber: true })}
-            placeholder="0"
+            placeholder={t("probabilityPlaceholder")}
             min={0}
             max={100}
           />
@@ -287,22 +294,22 @@ export function DealForm({ deal, onSubmit, onCancel, isLoading }: DealFormProps)
       </div>
 
       <Field orientation="vertical">
-        <FieldLabel>Expected Close Date</FieldLabel>
+        <FieldLabel>{t("expectedCloseDateLabel")}</FieldLabel>
         <Input type="date" {...register("expected_close_date")} />
         {errors.expected_close_date && <FieldError>{errors.expected_close_date.message}</FieldError>}
       </Field>
 
       <Field orientation="vertical">
-        <FieldLabel>Assigned To</FieldLabel>
+        <FieldLabel>{t("assignedToLabel")}</FieldLabel>
         <Select
           value={watch("assigned_to") || undefined}
           onValueChange={(value) => setValue("assigned_to", value === "none" ? "" : value)}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select user (optional)" />
+            <SelectValue placeholder={t("assignedToPlaceholder")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="none">None</SelectItem>
+            <SelectItem value="none">{t("assignedToNone")}</SelectItem>
             {users.map((user) => (
               <SelectItem key={user.id} value={user.id}>
                 {user.name}
@@ -314,23 +321,27 @@ export function DealForm({ deal, onSubmit, onCancel, isLoading }: DealFormProps)
       </Field>
 
       <Field orientation="vertical">
-        <FieldLabel>Source</FieldLabel>
-        <Input {...register("source")} placeholder="e.g., website, referral, cold_call" />
+        <FieldLabel>{t("sourceLabel")}</FieldLabel>
+        <Input {...register("source")} placeholder={t("sourcePlaceholder")} />
         {errors.source && <FieldError>{errors.source.message}</FieldError>}
       </Field>
 
       <Field orientation="vertical">
-        <FieldLabel>Notes</FieldLabel>
-        <Textarea {...register("notes")} placeholder="Additional notes" rows={3} />
+        <FieldLabel>{t("notesLabel")}</FieldLabel>
+        <Textarea
+          {...register("notes")}
+          placeholder={t("notesPlaceholder")}
+          rows={3}
+        />
         {errors.notes && <FieldError>{errors.notes.message}</FieldError>}
       </Field>
 
       <div className="flex justify-end gap-2 pt-4">
         <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
-          Cancel
+          {t("cancel")}
         </Button>
         <Button type="submit" disabled={isLoading}>
-          {isLoading ? "Saving..." : isEdit ? "Update" : "Create"}
+          {isLoading ? t("submitting") : isEdit ? t("submitUpdate") : t("submitCreate")}
         </Button>
       </div>
     </form>

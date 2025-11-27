@@ -1,45 +1,26 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import { SidebarWrapper } from "./sidebar-wrapper";
-import { Breadcrumb } from "@/components/navigation/breadcrumb";
-import { useAuthStore } from "@/features/auth/stores/useAuthStore";
-import { useSidebar } from "@/contexts/sidebar-context";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { cn } from "@/lib/utils";
+import type React from "react";
+import { usePathname } from "@/i18n/routing";
+import { DashboardLayout } from "@/components/layouts/dashboard-layout";
 
 interface AppLayoutProps {
   readonly children: React.ReactNode;
 }
 
-// Routes that should NOT show sidebar
-const NO_SIDEBAR_ROUTES = new Set(["/", "/login", "/forgot-password", "/reset-password"]);
-
+// AppLayout wraps only authenticated pages with the main DashboardLayout (sidebar + header).
+// Public routes (locale-scoped login page at "/[locale]/login") are rendered without the dashboard chrome.
 export function AppLayout({ children }: AppLayoutProps) {
+  // Locale-agnostic pathname from next-intl (e.g. "/login", "/dashboard")
   const pathname = usePathname();
-  const { isAuthenticated } = useAuthStore();
-  const { collapsed } = useSidebar();
-  const isMobile = useIsMobile();
-  
-  // Determine if sidebar should be shown
-  const hasSidebar = !NO_SIDEBAR_ROUTES.has(pathname) && isAuthenticated;
 
-  return (
-    <div className="flex min-h-screen bg-background w-full max-w-full overflow-x-hidden">
-      <SidebarWrapper />
-      <main
-        className={cn(
-          "flex-1 transition-[margin-left] duration-200 ease-in-out will-change-[margin-left] w-full max-w-full overflow-x-hidden",
-          // On mobile, no margin. On desktop, use sidebar width
-          hasSidebar && !isMobile && (collapsed ? "ml-16" : "ml-64")
-        )}
-      >
-        <Breadcrumb />
-        <div className="p-4 md:p-6 w-full max-w-full overflow-x-hidden">
-          {children}
-        </div>
-      </main>
-    </div>
-  );
+  const publicRoutes: readonly string[] = ["/login"];
+  const isPublicRoute = publicRoutes.includes(pathname);
+
+  if (isPublicRoute) {
+    return <>{children}</>;
+  }
+
+  return <DashboardLayout>{children}</DashboardLayout>;
 }
 

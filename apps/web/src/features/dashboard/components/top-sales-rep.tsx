@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTopSalesRep } from "../hooks/useDashboard";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -8,13 +9,14 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 
 export function TopSalesRep() {
+  const t = useTranslations("topSalesReps");
   const { data, isLoading } = useTopSalesRep({ limit: 5 });
 
   if (isLoading) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Top Sales Reps</CardTitle>
+          <CardTitle>{t("title")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -33,11 +35,11 @@ export function TopSalesRep() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Top Sales Reps</CardTitle>
+          <CardTitle>{t("title")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8 text-muted-foreground">
-            <p className="text-sm">No sales reps found</p>
+            <p className="text-sm">{t("empty")}</p>
           </div>
         </CardContent>
       </Card>
@@ -53,7 +55,7 @@ export function TopSalesRep() {
       <CardHeader>
         <div className="flex items-center gap-2">
           <Users className="h-5 w-5" />
-          <CardTitle>Top Sales Reps</CardTitle>
+          <CardTitle>{t("title")}</CardTitle>
         </div>
       </CardHeader>
       <CardContent>
@@ -75,15 +77,15 @@ export function TopSalesRep() {
                   <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <MapPin className="h-3 w-3" />
-                      <span>{salesRep.visit_count} visits</span>
+                      <span>{t("visits", { count: salesRep.visit_count })}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Building2 className="h-3 w-3" />
-                      <span>{salesRep.account_count} accounts</span>
+                      <span>{t("accounts", { count: salesRep.account_count })}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Activity className="h-3 w-3" />
-                      <span>{salesRep.activity_count} activities</span>
+                      <span>{t("activities", { count: salesRep.activity_count })}</span>
                     </div>
                   </div>
                 </div>

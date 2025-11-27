@@ -1,6 +1,7 @@
 "use client";
 
 import { Edit, Trash2, Plus, Settings } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
   Table,
   TableBody,
@@ -39,6 +40,7 @@ export function RoleList() {
     createRole,
     updateRole,
   } = useRoleList();
+  const t = useTranslations("userManagement.roleList");
 
   return (
     <div className="space-y-4">
@@ -46,7 +48,7 @@ export function RoleList() {
       <div className="flex items-center justify-end">
         <Button onClick={() => setIsCreateDialogOpen(true)} size="sm">
           <Plus className="h-4 w-4 mr-2" />
-          Add Role
+          {t("addRole")}
         </Button>
       </div>
 
@@ -62,19 +64,21 @@ export function RoleList() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[200px]">Name</TableHead>
-                <TableHead>Code</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead className="w-[100px]">Status</TableHead>
-                <TableHead className="w-[120px]">Permissions</TableHead>
-                <TableHead className="w-[120px] text-right">Actions</TableHead>
+                <TableHead className="w-[200px]">{t("name")}</TableHead>
+                <TableHead>{t("code")}</TableHead>
+                <TableHead>{t("description")}</TableHead>
+                <TableHead className="w-[100px]">{t("status")}</TableHead>
+                <TableHead className="w-[120px]">{t("permissions")}</TableHead>
+                <TableHead className="w-[120px] text-right">
+                  {t("actions")}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {roles.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                    No roles found
+                      {t("empty")}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -114,6 +118,7 @@ export function RoleList() {
                           size="icon-sm"
                           onClick={() => setAssigningPermissions(role.id)}
                           className="h-8 w-8"
+                          aria-label={t("assignPermissionsTitle")}
                           title="Assign Permissions"
                         >
                           <Settings className="h-3.5 w-3.5" />

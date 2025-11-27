@@ -17,11 +17,15 @@ func SeedMenus() error {
 		return nil
 	}
 
+	// Base path for frontend routes (for i18n support, keep URLs locale-agnostic).
+	// Frontend akan menambahkan prefix locale sendiri (mis. "/en" atau "/id").
+	basePath := ""
+
 	// Create Dashboard menu (root level)
 	dashboardMenu := permission.Menu{
 		Name:   "Dashboard",
 		Icon:   "layout-dashboard",
-		URL:    "/dashboard",
+		URL:    basePath + "/dashboard",
 		Order:  1,
 		Status: "active",
 	}
@@ -34,7 +38,7 @@ func SeedMenus() error {
 	dataMasterMenu := permission.Menu{
 		Name:   "Data Master",
 		Icon:   "database",
-		URL:    "/data-master",
+		URL:    basePath + "/data-master",
 		Order:  2,
 		Status: "active",
 	}
@@ -47,7 +51,7 @@ func SeedMenus() error {
 	userPageMenu := permission.Menu{
 		Name:     "Users",
 		Icon:     "users",
-		URL:      "/master-data/users",
+		URL:      basePath + "/master-data/users",
 		ParentID: &dataMasterMenu.ID,
 		Order:    1,
 		Status:   "active",
@@ -61,7 +65,7 @@ func SeedMenus() error {
 	salesCRMMenu := permission.Menu{
 		Name:   "Sales CRM",
 		Icon:   "briefcase",
-		URL:    "/sales-crm",
+		URL:    basePath + "/sales-crm",
 		Order:  3,
 		Status: "active",
 	}
@@ -74,7 +78,7 @@ func SeedMenus() error {
 	accountsMenu := permission.Menu{
 		Name:     "Accounts",
 		Icon:     "building-2",
-		URL:      "/accounts",
+		URL:      basePath + "/accounts",
 		ParentID: &salesCRMMenu.ID,
 		Order:    1,
 		Status:   "active",
@@ -88,7 +92,7 @@ func SeedMenus() error {
 	pipelineMenu := permission.Menu{
 		Name:     "Pipeline",
 		Icon:     "trending-up",
-		URL:      "/pipeline",
+		URL:      basePath + "/pipeline",
 		ParentID: &salesCRMMenu.ID,
 		Order:    2,
 		Status:   "active",
@@ -102,9 +106,9 @@ func SeedMenus() error {
 	visitReportsMenu := permission.Menu{
 		Name:     "Visit Reports",
 		Icon:     "map-pin",
-		URL:      "/visit-reports",
+		URL:      basePath + "/visit-reports",
 		ParentID: &salesCRMMenu.ID,
-		Order:    2,
+		Order:    3,
 		Status:   "active",
 	}
 	if err := database.DB.Create(&visitReportsMenu).Error; err != nil {
@@ -112,11 +116,39 @@ func SeedMenus() error {
 	}
 	log.Printf("Created menu: %s", visitReportsMenu.Name)
 
+	// Create Tasks menu under Sales CRM
+	tasksMenu := permission.Menu{
+		Name:     "Tasks",
+		Icon:     "clipboard-list",
+		URL:      basePath + "/tasks",
+		ParentID: &salesCRMMenu.ID,
+		Order:    4,
+		Status:   "active",
+	}
+	if err := database.DB.Create(&tasksMenu).Error; err != nil {
+		return err
+	}
+	log.Printf("Created menu: %s", tasksMenu.Name)
+
+	// Create Products menu under Data Master (single entry, internal tabs handle sub-sections)
+	productsMenu := permission.Menu{
+		Name:     "Products",
+		Icon:     "package",
+		URL:      basePath + "/products",
+		ParentID: &dataMasterMenu.ID,
+		Order:    2,
+		Status:   "active",
+	}
+	if err := database.DB.Create(&productsMenu).Error; err != nil {
+		return err
+	}
+	log.Printf("Created menu: %s", productsMenu.Name)
+
 	// Create Reports menu (root level)
 	reportsMenu := permission.Menu{
 		Name:   "Reports",
 		Icon:   "file-text",
-		URL:    "/reports",
+		URL:    basePath + "/reports",
 		Order:  4,
 		Status: "active",
 	}
@@ -129,7 +161,7 @@ func SeedMenus() error {
 	settingsMenu := permission.Menu{
 		Name:   "Settings",
 		Icon:   "settings",
-		URL:    "/settings",
+		URL:    basePath + "/settings",
 		Order:  5,
 		Status: "active",
 	}
@@ -167,7 +199,7 @@ func UpdateMenuStructure() error {
 	} else if err := database.DB.Where("url = ?", "/users").First(&userPageMenu).Error; err == nil {
 		// Users menu exists with old URL, need to migrate
 		log.Printf("Migrating Users menu from /users to /master-data/users")
-		
+
 		// Update Users menu URL and parent to Data Master
 		userPageMenu.URL = "/master-data/users"
 		userPageMenu.ParentID = &dataMasterMenu.ID
@@ -184,7 +216,7 @@ func UpdateMenuStructure() error {
 		// Check if Healthcare menu has any children
 		var childCount int64
 		database.DB.Model(&permission.Menu{}).Where("parent_id = ?", healthcareMenu.ID).Count(&childCount)
-		
+
 		if childCount == 0 {
 			// Delete Healthcare menu if it has no children
 			if err := database.DB.Delete(&healthcareMenu).Error; err != nil {
@@ -208,7 +240,7 @@ func UpdateMenuStructure() error {
 				log.Printf("Deleted menu: %s", child.Name)
 			}
 		}
-		
+
 		// Delete Company Management menu
 		if err := database.DB.Delete(&companyMgmtMenu).Error; err != nil {
 			log.Printf("Warning: Failed to delete Company Management menu: %v", err)
@@ -223,7 +255,7 @@ func UpdateMenuStructure() error {
 		// Check if System menu has any children
 		var childCount int64
 		database.DB.Model(&permission.Menu{}).Where("parent_id = ?", systemMenu.ID).Count(&childCount)
-		
+
 		if childCount == 0 {
 			// Delete System menu if it has no children
 			if err := database.DB.Delete(&systemMenu).Error; err != nil {
@@ -256,7 +288,84 @@ func UpdateMenuStructure() error {
 		}
 	}
 
+	// Add Tasks menu if it doesn't exist
+	var tasksMenu permission.Menu
+	if err := database.DB.Where("url = ?", "/tasks").First(&tasksMenu).Error; err != nil {
+		var salesCRMMenu permission.Menu
+		if err := database.DB.Where("url = ?", "/sales-crm").First(&salesCRMMenu).Error; err == nil {
+			tasksMenu = permission.Menu{
+				Name:     "Tasks",
+				Icon:     "clipboard-list",
+				URL:      "/tasks",
+				ParentID: &salesCRMMenu.ID,
+				Order:    4,
+				Status:   "active",
+			}
+			if err := database.DB.Create(&tasksMenu).Error; err != nil {
+				log.Printf("Warning: Failed to create Tasks menu: %v", err)
+			} else {
+				log.Printf("Created Tasks menu")
+			}
+		}
+	}
+
+	// Add Products menu if it doesn't exist
+	var productsMenu permission.Menu
+	if err := database.DB.Where("url = ?", "/products").First(&productsMenu).Error; err != nil {
+		// Products menu doesn't exist at all: create under Data Master
+		var dataMaster permission.Menu
+		if err := database.DB.Where("url = ?", "/data-master").First(&dataMaster).Error; err == nil {
+			productsMenu = permission.Menu{
+				Name:     "Products",
+				Icon:     "package",
+				URL:      "/products",
+				ParentID: &dataMaster.ID,
+				Order:    2,
+				Status:   "active",
+			}
+			if err := database.DB.Create(&productsMenu).Error; err != nil {
+				log.Printf("Warning: Failed to create Products menu: %v", err)
+			} else {
+				log.Printf("Created Products menu under Data Master")
+			}
+		}
+	} else {
+		// Products menu exists (mungkin masih di bawah Sales CRM) -> pastikan parent-nya Data Master
+		var dataMaster permission.Menu
+		if err := database.DB.Where("url = ?", "/data-master").First(&dataMaster).Error; err == nil {
+			if productsMenu.ParentID == nil || *productsMenu.ParentID != dataMaster.ID {
+				productsMenu.ParentID = &dataMaster.ID
+				productsMenu.Order = 2
+				if err := database.DB.Save(&productsMenu).Error; err != nil {
+					log.Printf("Warning: Failed to move Products menu under Data Master: %v", err)
+				} else {
+					log.Printf("Moved Products menu under Data Master")
+				}
+			}
+		}
+	}
+
+	// Remove Product Categories menu from navigation if it exists
+	var productCategoriesMenu permission.Menu
+	if err := database.DB.Where("url = ?", "/product-categories").First(&productCategoriesMenu).Error; err == nil {
+		if err := database.DB.Delete(&productCategoriesMenu).Error; err != nil {
+			log.Printf("Warning: Failed to delete Product Categories menu: %v", err)
+		} else {
+			log.Printf("Deleted Product Categories menu from navigation")
+		}
+	}
+
+	// Remove legacy Products child menu (/products/list) if it exists,
+	// so sidebar only shows a single 'Products' entry that internally uses tabs.
+	var productsListMenu permission.Menu
+	if err := database.DB.Where("url = ?", "/products/list").First(&productsListMenu).Error; err == nil {
+		if err := database.DB.Delete(&productsListMenu).Error; err != nil {
+			log.Printf("Warning: Failed to delete Products list child menu: %v", err)
+		} else {
+			log.Printf("Deleted legacy Products list child menu from navigation")
+		}
+	}
+
 	log.Println("Menu structure updated successfully")
 	return nil
 }
-

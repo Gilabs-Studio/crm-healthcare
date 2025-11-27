@@ -1,0 +1,158 @@
+{
+  "visitReportManagement": {
+    "page": {
+      "title": "Laporan Kunjungan",
+      "description": "Pantau dan kelola kunjungan sales dengan check-in/out, GPS, dan dokumentasi"
+    }
+  },
+  "visitReportForm": {
+    "fields": {
+      "accountLabel": "Akun",
+      "accountPlaceholder": "Pilih akun",
+      "contactLabel": "Kontak",
+      "contactPlaceholder": "Pilih kontak (opsional)",
+      "visitDateTimeLabel": "Tanggal & Waktu Kunjungan",
+      "purposeLabel": "Tujuan",
+      "purposePlaceholder": "Jelaskan tujuan kunjungan ini",
+      "notesLabel": "Catatan",
+      "notesPlaceholder": "Catatan tambahan tentang kunjungan"
+    },
+    "buttons": {
+      "cancel": "Batal",
+      "submitCreate": "Buat",
+      "submitUpdate": "Perbarui",
+      "submitting": "Menyimpan..."
+    }
+  },
+  "visitReportDetail": {
+    "drawerTitle": "Detail Laporan Kunjungan",
+    "header": {
+      "statusBadge": "Status",
+      "visitDate": "Tanggal Kunjungan"
+    },
+    "actions": {
+      "reject": "Tolak",
+      "approve": "Setujui",
+      "checkIn": "Check In",
+      "checkOut": "Check Out",
+      "gettingLocation": "Mengambil lokasi Anda...",
+      "checkInSuccess": "Berhasil check-in",
+      "checkInGetLocationFailed": "Gagal mengambil lokasi",
+      "checkInFailed": "Gagal check-in",
+      "checkOutSuccess": "Berhasil check-out",
+      "checkOutGetLocationFailed": "Gagal mengambil lokasi",
+      "checkOutFailed": "Gagal check-out",
+      "approveSuccess": "Laporan kunjungan disetujui",
+      "rejectSuccess": "Laporan kunjungan ditolak",
+      "uploadPhotoSuccess": "Foto berhasil diunggah"
+    },
+    "sections": {
+      "visitInformationTitle": "Informasi Kunjungan",
+      "accountLabel": "Akun",
+      "contactLabel": "Kontak",
+      "purposeLabel": "Tujuan",
+      "notesLabel": "Catatan",
+      "checkInOutTitle": "Check In/Out",
+      "checkInLabel": "Check In",
+      "checkOutLabel": "Check Out",
+      "notCheckedIn": "Belum check-in",
+      "notCheckedOut": "Belum check-out",
+      "photosTitle": "Foto",
+      "noPhotos": "Belum ada foto yang diunggah",
+      "viewPhoto": "Lihat",
+      "approvalTitle": "Persetujuan",
+      "approvedAtLabel": "Disetujui pada",
+      "rejectionTitle": "Penolakan",
+      "rejectionReasonLabel": "Alasan",
+      "activityTimelineTitle": "Activity Timeline",
+      "addActivity": "Tambah Aktivitas"
+    },
+    "rejectDialog": {
+      "title": "Tolak Laporan Kunjungan",
+      "reasonLabel": "Alasan",
+      "reasonPlaceholder": "Masukkan alasan penolakan",
+      "cancel": "Batal",
+      "submit": "Tolak",
+      "submitting": "Menolak..."
+    },
+    "errors": {
+      "geolocationUnsupported": "Geolocation tidak didukung oleh browser Anda"
+    },
+    "loadError": "Gagal memuat detail laporan kunjungan"
+  },
+  "photoUploadDialog": {
+    "title": "Upload Foto",
+    "description": "Upload foto untuk laporan kunjungan ini. Anda dapat memilih file atau memasukkan URL foto.",
+    "fields": {
+      "selectPhotoLabel": "Pilih Foto",
+      "photoUrlLabel": "URL Foto",
+      "photoUrlPlaceholder": "https://example.com/photo.jpg"
+    },
+    "errors": {
+      "selectImageFile": "Silakan pilih file gambar",
+      "fileTooLarge": "Ukuran file harus kurang dari 5MB",
+      "missingPhoto": "Silakan pilih foto atau masukkan URL foto"
+    },
+    "previewNote": "Catatan: Di production, foto akan diunggah ke layanan penyimpanan file",
+    "dividerOr": "Atau",
+    "buttons": {
+      "cancel": "Batal",
+      "upload": "Upload Foto",
+      "uploading": "Mengunggah..."
+    }
+  },
+  "visitReportList": {
+    "table": {
+      "visitDate": "Tanggal Kunjungan",
+      "account": "Akun",
+      "purpose": "Tujuan",
+      "status": "Status",
+      "checkIn": "Check In",
+      "actions": "Aksi"
+    },
+    "filters": {
+      "searchPlaceholder": "Cari laporan kunjungan...",
+      "allStatus": "Semua Status",
+      "allAccounts": "Semua Akun"
+    },
+    "buttons": {
+      "addVisitReport": "Tambah Laporan Kunjungan",
+      "viewDetails": "Lihat Detail",
+      "edit": "Ubah",
+      "delete": "Hapus"
+    },
+    "empty": {
+      "table": "Tidak ada laporan kunjungan"
+    },
+    "dialogs": {
+      "createTitle": "Buat Laporan Kunjungan",
+      "editTitle": "Ubah Laporan Kunjungan",
+      "deleteTitle": "Hapus Laporan Kunjungan?",
+      "deleteDescription": "Apakah Anda yakin ingin menghapus laporan kunjungan ini? Tindakan ini tidak dapat dibatalkan.",
+      "itemName": "laporan kunjungan"
+    }
+  },
+  "visitReportActivityTimeline": {
+    "table": {
+      "type": "Tipe",
+      "description": "Deskripsi",
+      "account": "Akun",
+      "contact": "Kontak",
+      "user": "User",
+      "timestamp": "Waktu"
+    },
+    "meta": {
+      "statusLabel": "Status",
+      "actionLabel": "Aksi",
+      "visitDateLabel": "Tanggal",
+      "durationLabel": "Durasi",
+      "outcomeLabel": "Hasil",
+      "subjectLabel": "Subjek",
+      "priorityLabel": "Prioritas",
+      "valueLabel": "Nilai"
+    },
+    "empty": "Tidak ada aktivitas"
+  }
+}
+
+

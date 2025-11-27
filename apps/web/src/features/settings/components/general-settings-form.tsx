@@ -10,10 +10,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSettings, useUpdateSettings } from "../hooks/useSettings";
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 export function GeneralSettingsForm() {
   const { data, isLoading } = useSettings();
   const updateSettings = useUpdateSettings();
+  const t = useTranslations("settings.general");
 
   const {
     register,
@@ -54,7 +56,7 @@ export function GeneralSettingsForm() {
       await updateSettings.mutateAsync({
         general: formData as Record<string, string>,
       });
-      toast.success("General settings updated successfully");
+      toast.success(t("toast.success"));
     } catch (error) {
       // Error already handled in api-client interceptor
     }
@@ -64,8 +66,8 @@ export function GeneralSettingsForm() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>General Settings</CardTitle>
-          <CardDescription>Manage your company information and preferences</CardDescription>
+          <CardTitle>{t("loading.title")}</CardTitle>
+          <CardDescription>{t("loading.description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -81,16 +83,16 @@ export function GeneralSettingsForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>General Settings</CardTitle>
-        <CardDescription>Manage your company information and preferences</CardDescription>
+        <CardTitle>{t("title")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <Field orientation="vertical">
-            <FieldLabel>Company Name</FieldLabel>
+            <FieldLabel>{t("fields.companyName")}</FieldLabel>
             <Input
               {...register("company_name")}
-              placeholder="Your Company Name"
+              placeholder={t("placeholders.companyName")}
             />
             {errors.company_name && (
               <FieldError>{errors.company_name.message}</FieldError>
@@ -98,11 +100,11 @@ export function GeneralSettingsForm() {
           </Field>
 
           <Field orientation="vertical">
-            <FieldLabel>Company Email</FieldLabel>
+            <FieldLabel>{t("fields.companyEmail")}</FieldLabel>
             <Input
               type="email"
               {...register("company_email")}
-              placeholder="company@example.com"
+              placeholder={t("placeholders.companyEmail")}
             />
             {errors.company_email && (
               <FieldError>{errors.company_email.message}</FieldError>
@@ -110,10 +112,10 @@ export function GeneralSettingsForm() {
           </Field>
 
           <Field orientation="vertical">
-            <FieldLabel>Company Phone</FieldLabel>
+            <FieldLabel>{t("fields.companyPhone")}</FieldLabel>
             <Input
               {...register("company_phone")}
-              placeholder="+62 123 456 7890"
+              placeholder={t("placeholders.companyPhone")}
             />
             {errors.company_phone && (
               <FieldError>{errors.company_phone.message}</FieldError>
@@ -121,10 +123,10 @@ export function GeneralSettingsForm() {
           </Field>
 
           <Field orientation="vertical">
-            <FieldLabel>Company Address</FieldLabel>
+            <FieldLabel>{t("fields.companyAddress")}</FieldLabel>
             <Input
               {...register("company_address")}
-              placeholder="Street Address, City, Country"
+              placeholder={t("placeholders.companyAddress")}
             />
             {errors.company_address && (
               <FieldError>{errors.company_address.message}</FieldError>
@@ -132,10 +134,10 @@ export function GeneralSettingsForm() {
           </Field>
 
           <Field orientation="vertical">
-            <FieldLabel>Company Logo URL</FieldLabel>
+            <FieldLabel>{t("fields.companyLogo")}</FieldLabel>
             <Input
               {...register("company_logo")}
-              placeholder="https://example.com/logo.png"
+              placeholder={t("placeholders.companyLogo")}
             />
             {errors.company_logo && (
               <FieldError>{errors.company_logo.message}</FieldError>
@@ -143,10 +145,10 @@ export function GeneralSettingsForm() {
           </Field>
 
           <Field orientation="vertical">
-            <FieldLabel>Timezone</FieldLabel>
+            <FieldLabel>{t("fields.timezone")}</FieldLabel>
             <Input
               {...register("timezone")}
-              placeholder="Asia/Jakarta"
+              placeholder={t("placeholders.timezone")}
             />
             {errors.timezone && (
               <FieldError>{errors.timezone.message}</FieldError>
@@ -154,10 +156,10 @@ export function GeneralSettingsForm() {
           </Field>
 
           <Field orientation="vertical">
-            <FieldLabel>Date Format</FieldLabel>
+            <FieldLabel>{t("fields.dateFormat")}</FieldLabel>
             <Input
               {...register("date_format")}
-              placeholder="DD/MM/YYYY"
+              placeholder={t("placeholders.dateFormat")}
             />
             {errors.date_format && (
               <FieldError>{errors.date_format.message}</FieldError>
@@ -165,10 +167,10 @@ export function GeneralSettingsForm() {
           </Field>
 
           <Field orientation="vertical">
-            <FieldLabel>Currency</FieldLabel>
+            <FieldLabel>{t("fields.currency")}</FieldLabel>
             <Input
               {...register("currency")}
-              placeholder="IDR"
+              placeholder={t("placeholders.currency")}
             />
             {errors.currency && (
               <FieldError>{errors.currency.message}</FieldError>
@@ -180,7 +182,7 @@ export function GeneralSettingsForm() {
               type="submit"
               disabled={updateSettings.isPending}
             >
-              {updateSettings.isPending ? "Saving..." : "Save Changes"}
+              {updateSettings.isPending ? t("buttons.saving") : t("buttons.saveChanges")}
             </Button>
           </div>
         </form>

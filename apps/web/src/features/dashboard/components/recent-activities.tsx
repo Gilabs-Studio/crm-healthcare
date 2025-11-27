@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations, useLocale } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRecentActivities } from "../hooks/useDashboard";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -15,13 +16,15 @@ const activityIcons: Record<string, React.ReactNode> = {
 };
 
 export function RecentActivities() {
+  const t = useTranslations("recentActivities");
+  const locale = useLocale();
   const { data, isLoading } = useRecentActivities({ limit: 10 });
 
   if (isLoading) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Recent Activities</CardTitle>
+          <CardTitle>{t("title")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -40,11 +43,11 @@ export function RecentActivities() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Recent Activities</CardTitle>
+          <CardTitle>{t("title")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8 text-muted-foreground">
-            <p className="text-sm">No recent activities</p>
+            <p className="text-sm">{t("empty")}</p>
           </div>
         </CardContent>
       </Card>
@@ -59,11 +62,11 @@ export function RecentActivities() {
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
 
-    if (minutes < 1) return "Just now";
-    if (minutes < 60) return `${minutes}m ago`;
-    if (hours < 24) return `${hours}h ago`;
-    if (days < 7) return `${days}d ago`;
-    return date.toLocaleDateString("id-ID", { month: "short", day: "numeric" });
+    if (minutes < 1) return t("justNow");
+    if (minutes < 60) return t("minutesAgo", { count: minutes });
+    if (hours < 24) return t("hoursAgo", { count: hours });
+    if (days < 7) return t("daysAgo", { count: days });
+    return date.toLocaleDateString(locale, { month: "short", day: "numeric" });
   };
 
   return (
@@ -71,7 +74,7 @@ export function RecentActivities() {
       <CardHeader>
         <div className="flex items-center gap-2">
           <Activity className="h-5 w-5" />
-          <CardTitle>Recent Activities</CardTitle>
+          <CardTitle>{t("title")}</CardTitle>
         </div>
       </CardHeader>
       <CardContent>

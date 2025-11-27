@@ -75,6 +75,7 @@ func (s *Service) Login(req *auth.LoginRequest) (*auth.LoginResponse, error) {
 		ID:        userResp.ID,
 		Email:     userResp.Email,
 		Name:      userResp.Name,
+		AvatarURL: userResp.AvatarURL,
 		Role:      roleCode,
 		Status:    userResp.Status,
 		CreatedAt: userResp.CreatedAt,

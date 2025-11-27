@@ -1,0 +1,87 @@
+{
+  "pipelineManagement": {
+    "dealCard": {
+      "unknownAccount": "Unknown Account",
+      "unknownStage": "Unknown Stage",
+      "accountLabel": "Account:",
+      "contactLabel": "Contact:",
+      "valueLabel": "Value:",
+      "probabilityLabel": "Probability:",
+      "expectedCloseLabel": "Expected Close:"
+    },
+    "dealForm": {
+      "titleLabel": "Title",
+      "titleRequired": "Title *",
+      "titlePlaceholder": "Deal Title",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Deal description",
+      "accountLabel": "Account",
+      "accountRequired": "Account *",
+      "accountPlaceholder": "Select account",
+      "contactLabel": "Contact",
+      "contactPlaceholder": "Select contact (optional)",
+      "contactNone": "None",
+      "stageLabel": "Stage",
+      "stageRequired": "Stage *",
+      "stagePlaceholder": "Select stage",
+      "valueLabel": "Value (Rp)",
+      "valueRequired": "Value (Rp) *",
+      "valuePlaceholder": "0",
+      "probabilityLabel": "Probability (%)",
+      "probabilityPlaceholder": "0",
+      "expectedCloseDateLabel": "Expected Close Date",
+      "assignedToLabel": "Assigned To",
+      "assignedToPlaceholder": "Select user (optional)",
+      "assignedToNone": "None",
+      "sourceLabel": "Source",
+      "sourcePlaceholder": "e.g., website, referral, cold_call",
+      "notesLabel": "Notes",
+      "notesPlaceholder": "Additional notes",
+      "cancel": "Cancel",
+      "submitCreate": "Create",
+      "submitUpdate": "Update",
+      "submitting": "Saving..."
+    },
+    "forecast": {
+      "title": "Revenue Forecast",
+      "description": "Projected revenue based on pipeline deals",
+      "noData": "No forecast data available",
+      "periodLabel": "Forecast Period",
+      "periodMonth": "This Month",
+      "periodQuarter": "This Quarter",
+      "periodYear": "This Year",
+      "expectedRevenueLabel": "Expected Revenue",
+      "expectedRevenueHint": "Based on deal values",
+      "weightedRevenueLabel": "Weighted Revenue",
+      "weightedRevenueHint": "Based on probability",
+      "dealsInForecastTitle": "Deals in Forecast",
+      "dealsSingular": "deal",
+      "dealsPlural": "deals",
+      "dealValuePrefix": "Deal value:"
+    },
+    "kanban": {
+      "title": "Sales Pipeline",
+      "description": "Manage and track your sales opportunities",
+      "newDeal": "New Deal",
+      "noDeals": "No deals",
+      "noDealsHint": "Drag deals here or create new",
+      "createDialogTitle": "Create Deal",
+      "editDialogTitle": "Edit Deal"
+    },
+    "pipelineSummary": {
+      "title": "Pipeline Summary",
+      "description": "Overview of your sales pipeline performance",
+      "noData": "No summary data available",
+      "totalDeals": "Total Deals",
+      "openDeals": "Open Deals",
+      "wonDeals": "Won Deals",
+      "lostDeals": "Lost Deals",
+      "performanceByStageTitle": "Performance by Stage",
+      "stageDealsSingular": "deal",
+      "stageDealsPlural": "deals"
+    }
+  }
+}
+
+
+
