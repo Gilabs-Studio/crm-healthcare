@@ -36,6 +36,7 @@
   --font-sans: Montserrat, sans-serif;
   --font-serif: Merriweather, serif;
   --font-mono: Source Code Pro, monospace;
+  --font-heading: var(--font-heading, system-ui);
   --radius: 0.5rem;
   --shadow-x: 0;
   --shadow-y: 1px;
@@ -80,7 +81,8 @@
   --chart-3: oklch(0.6731 0.1624 144.2083);
   --chart-4: oklch(0.6291 0.1543 144.2031);
   --chart-5: oklch(0.5752 0.1446 144.1813);
-  --sidebar: oklch(0.2683 0.0120 144.1672);
+  /* Slightly darker than background to keep clear contrast with content */
+  --sidebar: oklch(0.2383 0.0120 144.1672);
   --sidebar-foreground: oklch(0.9423 0.0097 72.6595);
   --sidebar-primary: oklch(0.6731 0.1624 144.2083);
   --sidebar-primary-foreground: oklch(0.2157 0.0453 145.7256);
@@ -91,6 +93,7 @@
   --font-sans: Montserrat, sans-serif;
   --font-serif: Merriweather, serif;
   --font-mono: Source Code Pro, monospace;
+  --font-heading: var(--font-heading, system-ui);
   --radius: 0.5rem;
   --shadow-x: 0;
   --shadow-y: 1px;
@@ -144,6 +147,7 @@
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
   --font-serif: var(--font-serif);
+  --font-heading: var(--font-heading);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -176,6 +180,18 @@ body {
   width: 100%;
   max-width: 100%;
   position: relative;
+  @apply bg-sidebar text-foreground;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+[data-slot="card-title"] {
+  font-family: var(--font-heading), system-ui, sans-serif;
+  letter-spacing: -0.02em;
 }
 
 /* View Transition API support */

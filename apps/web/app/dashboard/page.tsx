@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { DashboardLayout } from "@/components/layouts/dashboard-layout";
 import { AuthGuard } from "@/features/auth/components/auth-guard";
 import { useAuthStore } from "@/features/auth/stores/useAuthStore";
 import { DashboardOverview } from "@/features/dashboard/components/dashboard-overview";
@@ -35,50 +34,48 @@ function DashboardContent() {
   const { user } = useAuthStore();
 
   return (
-    <DashboardLayout>
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="space-y-6 p-8"
-      >
-        <motion.div variants={itemVariants}>
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-              <p className="text-muted-foreground mt-1">
-                Welcome back, {user?.name}
-              </p>
-            </div>
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="space-y-6 p-8"
+    >
+      <motion.div variants={itemVariants}>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+            <p className="text-muted-foreground mt-1">
+              Welcome back, {user?.name}
+            </p>
           </div>
-        </motion.div>
-
-        <motion.div variants={itemVariants}>
-          <DashboardOverview />
-        </motion.div>
-
-        <motion.div variants={itemVariants}>
-          <VisitStatistics />
-        </motion.div>
-
-        <motion.div variants={itemVariants}>
-          <ActivityTrends />
-        </motion.div>
-
-        <motion.div variants={itemVariants}>
-          <PipelineSummary />
-        </motion.div>
-
-        <motion.div variants={itemVariants} className="grid gap-6 md:grid-cols-2">
-          <TopAccounts />
-          <TopSalesRep />
-        </motion.div>
-
-        <motion.div variants={itemVariants}>
-          <RecentActivities />
-        </motion.div>
+        </div>
       </motion.div>
-    </DashboardLayout>
+
+      <motion.div variants={itemVariants}>
+        <DashboardOverview />
+      </motion.div>
+
+      <motion.div variants={itemVariants}>
+        <VisitStatistics />
+      </motion.div>
+
+      <motion.div variants={itemVariants}>
+        <ActivityTrends />
+      </motion.div>
+
+      <motion.div variants={itemVariants}>
+        <PipelineSummary />
+      </motion.div>
+
+      <motion.div variants={itemVariants} className="grid gap-6 md:grid-cols-2">
+        <TopAccounts />
+        <TopSalesRep />
+      </motion.div>
+
+      <motion.div variants={itemVariants}>
+        <RecentActivities />
+      </motion.div>
+    </motion.div>
   );
 }
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { DashboardLayout } from "@/components/layouts/dashboard-layout";
 import { AuthGuard } from "@/features/auth/components/auth-guard";
 import { ReportGenerator } from "@/features/reports/components/report-generator";
 
@@ -26,29 +25,27 @@ const itemVariants = {
 
 function ReportsPageContent() {
   return (
-    <DashboardLayout>
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="space-y-6 p-8"
-      >
-        <motion.div variants={itemVariants}>
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Reports</h1>
-              <p className="text-muted-foreground mt-1">
-                Generate and view system reports
-              </p>
-            </div>
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="space-y-6 p-8"
+    >
+      <motion.div variants={itemVariants}>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Reports</h1>
+            <p className="text-muted-foreground mt-1">
+              Generate and view system reports
+            </p>
           </div>
-        </motion.div>
-
-        <motion.div variants={itemVariants}>
-          <ReportGenerator />
-        </motion.div>
+        </div>
       </motion.div>
-    </DashboardLayout>
+
+      <motion.div variants={itemVariants}>
+        <ReportGenerator />
+      </motion.div>
+    </motion.div>
   );
 }
 
