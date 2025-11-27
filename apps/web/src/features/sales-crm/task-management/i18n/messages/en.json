@@ -2,7 +2,9 @@
   "taskManagement": {
     "page": {
       "title": "Task & Reminder Management",
-      "description": "Manage your tasks, follow-ups, and reminders across accounts and deals"
+      "description": "Manage your tasks, follow-ups, and reminders across accounts and deals",
+      "viewList": "List view",
+      "viewBoard": "Board view"
     },
     "list": {
       "searchPlaceholder": "Search tasks...",
@@ -34,17 +36,69 @@
       "buttons": {
         "addTask": "Add Task",
         "createTitle": "Create Task",
-        "editTitle": "Edit Task"
+        "editTitle": "Edit Task",
+        "markComplete": "Complete"
       },
       "table": {
         "columnTask": "Task",
+        "columnType": "Type",
+        "columnStatus": "Status",
+        "columnPriority": "Priority",
+        "columnAssignee": "Assignee",
         "columnDueDate": "Due Date",
+        "columnActions": "Actions",
         "empty": "No tasks found",
         "itemName": "task"
       },
       "deleteDialog": {
         "title": "Delete Task?",
         "description": "Are you sure you want to delete this task? This action cannot be undone."
+      }
+    },
+    "board": {
+      "columns": {
+        "todo": "To Do",
+        "inProgress": "In Progress",
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+      },
+      "emptyColumn": "No tasks in this column yet.",
+      "moreFilters": "More filters",
+      "filtersTitle": "Filter tasks",
+      "dueDateRange": "Due date range",
+      "resetFilters": "Reset",
+      "applyFilters": "Apply"
+    },
+    "detail": {
+      "drawerTitle": "Task Details",
+      "loadError": "Failed to load task details",
+      "actions": {
+        "markComplete": "Mark Complete",
+        "edit": "Edit",
+        "delete": "Delete",
+        "editTitle": "Edit Task",
+        "completeSuccess": "Task marked as completed",
+        "updateSuccess": "Task updated successfully",
+        "deleteSuccess": "Task deleted successfully"
+      },
+      "sections": {
+        "taskInformationTitle": "Task Information",
+        "typeLabel": "Type",
+        "dueDateLabel": "Due Date",
+        "completedAtLabel": "Completed At",
+        "assignmentTitle": "Assignment & Relations",
+        "assignedToLabel": "Assigned To",
+        "accountLabel": "Account",
+        "contactLabel": "Contact",
+        "remindersTitle": "Reminders",
+        "metadataTitle": "Metadata",
+        "createdAtLabel": "Created",
+        "updatedAtLabel": "Last Updated"
+      },
+      "deleteDialog": {
+        "title": "Delete Task?",
+        "description": "Are you sure you want to delete this task? This action cannot be undone.",
+        "itemName": "task"
       }
     },
     "card": {

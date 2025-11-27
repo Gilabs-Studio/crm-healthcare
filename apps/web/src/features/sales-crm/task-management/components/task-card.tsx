@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, CheckCircle2, Edit2, Trash2, User } from "lucide-react";
+import { Calendar, Contact, Factory, CheckCircle2, Edit2, Trash2 } from "lucide-react";
 import type { Task } from "../types";
 import { useTranslations } from "next-intl";
 
@@ -14,21 +14,12 @@ interface TaskCardProps {
   readonly onClickTitle?: () => void;
 }
 
-const statusVariantMap: Record<Task["status"], "default" | "secondary" | "outline" | "destructive"> =
-  {
-    pending: "outline",
-    in_progress: "secondary",
-    completed: "default",
-    cancelled: "destructive",
-  };
-
-const priorityVariantMap: Record<Task["priority"], "default" | "secondary" | "outline" | "destructive"> =
-  {
-    low: "outline",
-    medium: "secondary",
-    high: "default",
-    urgent: "destructive",
-  };
+const statusColorMap: Record<Task["status"], string> = {
+  pending: "bg-amber-400",
+  in_progress: "bg-sky-400",
+  completed: "bg-emerald-400",
+  cancelled: "bg-rose-400",
+};
 
 export function TaskCard({ task, onEdit, onDelete, onComplete, onClickTitle }: TaskCardProps) {
   const t = useTranslations("taskManagement.card");
@@ -42,71 +33,69 @@ export function TaskCard({ task, onEdit, onDelete, onComplete, onClickTitle }: T
     });
 
   return (
-    <div className="group relative flex items-start gap-4 rounded-lg border bg-card p-4 hover:border-border/80 hover:shadow-sm transition-all cursor-default">
-      <div className="flex-1 min-w-0 space-y-2">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <button
-              type="button"
-              onClick={onClickTitle}
-              className="text-left font-medium text-sm text-foreground hover:text-primary hover:underline"
-            >
-              {task.title}
-            </button>
-            {task.description && (
-              <p className="mt-1 text-xs text-muted-foreground line-clamp-2">
-                {task.description}
-              </p>
-            )}
-          </div>
-          <div className="flex flex-col items-end gap-1 shrink-0">
-            <Badge variant={statusVariantMap[task.status]} className="text-[11px] font-normal">
-              {task.status.replace("_", " ")}
-            </Badge>
-            <Badge
-              variant={priorityVariantMap[task.priority]}
-              className="text-[11px] font-normal"
-            >
-              {task.priority}
-            </Badge>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">
-          {task.account && (
-            <span className="truncate max-w-[180px]">
-              {t("accountLabel")}{" "}
-              <span className="text-foreground font-medium">{task.account.name}</span>
-            </span>
-          )}
-          {task.contact && (
-            <span className="truncate max-w-[180px]">
-              {t("contactLabel")}{" "}
-              <span className="text-foreground font-medium">{task.contact.name}</span>
-            </span>
-          )}
-          {task.assigned_user && (
-            <span className="inline-flex items-center gap-1 truncate max-w-[180px]">
-              <User className="h-3 w-3" />
-              <span>{task.assigned_user.name}</span>
-            </span>
-          )}
-          {dueLabel && (
-            <span className="inline-flex items-center gap-1">
-              <Calendar className="h-3 w-3" />
-              <span>{t("duePrefix", { date: dueLabel })}</span>
-            </span>
+    <div className="group relative flex flex-col gap-2 rounded-xl border border-border/60 bg-card/80 p-3 hover:border-primary/40 hover:bg-card transition-colors">
+      {/* Status dot + title */}
+      <div className="flex items-start gap-2">
+        <span
+          className={`mt-1 h-2 w-2 flex-shrink-0 rounded-full ${statusColorMap[task.status]}`}
+          aria-hidden="true"
+        />
+        <div className="min-w-0 flex-1 space-y-1">
+          <button
+            type="button"
+            onClick={onClickTitle}
+            className="text-left text-sm font-medium text-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-xs"
+          >
+            {task.title}
+          </button>
+          {task.description && (
+            <p className="text-xs text-muted-foreground line-clamp-2">
+              {task.description}
+            </p>
           )}
         </div>
       </div>
 
-      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
+      {/* Meta row */}
+      <div className="flex flex-wrap items-center gap-2 pl-4 text-[11px] text-muted-foreground">
+        <Badge
+          variant="outline"
+          className="border-none bg-primary/5 text-primary px-2 py-0 text-[11px] font-medium rounded-full"
+        >
+          {task.priority}
+        </Badge>
+        {dueLabel && (
+          <span className="inline-flex items-center gap-1">
+            <Calendar className="h-3 w-3" />
+            <span>{t("duePrefix", { date: dueLabel })}</span>
+          </span>
+        )}
+        {task.account && (
+          <span className="inline-flex items-center gap-1 truncate max-w-[160px]">
+            <Factory className="h-3 w-3" />
+            <span className="truncate">
+              {t("accountLabel")} {task.account.name}
+            </span>
+          </span>
+        )}
+        {task.contact && (
+          <span className="inline-flex items-center gap-1 truncate max-w-[160px]">
+            <Contact className="h-3 w-3" />
+            <span className="truncate">
+              {t("contactLabel")} {task.contact.name}
+            </span>
+          </span>
+        )}
+      </div>
+
+      {/* Actions */}
+      <div className="flex items-center justify-end gap-1 pt-1 opacity-0 group-hover:opacity-100 transition-opacity">
         {onComplete && task.status !== "completed" && task.status !== "cancelled" && (
           <Button
             type="button"
             size="icon-sm"
             variant="ghost"
-            className="h-8 w-8 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+            className="h-7 w-7 text-primary hover:text-primary hover:bg-primary/10"
             onClick={onComplete}
             title={t("markCompletedTooltip")}
           >
@@ -117,7 +106,7 @@ export function TaskCard({ task, onEdit, onDelete, onComplete, onClickTitle }: T
           type="button"
           size="icon-sm"
           variant="ghost"
-          className="h-8 w-8"
+          className="h-7 w-7"
           onClick={onEdit}
           title={t("editTooltip")}
         >
@@ -127,7 +116,7 @@ export function TaskCard({ task, onEdit, onDelete, onComplete, onClickTitle }: T
           type="button"
           size="icon-sm"
           variant="ghost"
-          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+          className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
           onClick={onDelete}
           title={t("deleteTooltip")}
         >

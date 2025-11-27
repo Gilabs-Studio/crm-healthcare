@@ -158,13 +158,15 @@ export function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFormProps)
   };
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+      {/* Title */}
       <Field orientation="vertical">
         <FieldLabel>{t("titleLabel")} *</FieldLabel>
         <Input {...register("title")} placeholder={t("titlePlaceholder")} />
         {errors.title && <FieldError>{errors.title.message}</FieldError>}
       </Field>
 
+      {/* Description */}
       <Field orientation="vertical">
         <FieldLabel>{t("descriptionLabel")}</FieldLabel>
         <Textarea
@@ -175,6 +177,7 @@ export function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFormProps)
         {errors.description && <FieldError>{errors.description.message}</FieldError>}
       </Field>
 
+      {/* Type, Priority, Status */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Field orientation="vertical">
           <FieldLabel>{t("typeLabel")}</FieldLabel>
@@ -182,7 +185,7 @@ export function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFormProps)
             value={(watch("type") as string | undefined) ?? "general"}
             onValueChange={(value) => setValue("type", value as (typeof taskTypeValues)[number])}
           >
-            <SelectTrigger>
+            <SelectTrigger className="h-9">
               <SelectValue placeholder={t("typePlaceholder")} />
             </SelectTrigger>
             <SelectContent>
@@ -204,7 +207,7 @@ export function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFormProps)
               setValue("priority", value as (typeof taskPriorityValues)[number])
             }
           >
-            <SelectTrigger>
+            <SelectTrigger className="h-9">
               <SelectValue placeholder={t("priorityPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
@@ -227,7 +230,7 @@ export function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFormProps)
                 setValue("status", value as (typeof taskStatusValues)[number])
               }
             >
-              <SelectTrigger>
+              <SelectTrigger className="h-9">
                 <SelectValue placeholder={t("statusPlaceholder")} />
               </SelectTrigger>
               <SelectContent>
@@ -243,10 +246,11 @@ export function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFormProps)
         )}
       </div>
 
+      {/* Due Date, Assigned To */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field orientation="vertical">
           <FieldLabel>{t("dueDateLabel")}</FieldLabel>
-          <Input type="date" {...register("due_date")} />
+          <Input type="date" {...register("due_date")} className="h-9" />
           {errors.due_date && <FieldError>{errors.due_date.message}</FieldError>}
         </Field>
 
@@ -256,7 +260,7 @@ export function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFormProps)
             value={(watch("assigned_to") as string | undefined) ?? ""}
             onValueChange={(value) => setValue("assigned_to", value === "none" ? "" : value)}
           >
-            <SelectTrigger>
+            <SelectTrigger className="h-9">
               <SelectValue placeholder={t("assignedToPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
@@ -272,50 +276,54 @@ export function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFormProps)
         </Field>
       </div>
 
-      <Field orientation="vertical">
-        <FieldLabel>{t("accountLabel")}</FieldLabel>
-        <Select
-          value={(watch("account_id") as string | undefined) ?? ""}
-          onValueChange={(value) => setValue("account_id", value === "none" ? "" : value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder={t("accountPlaceholder")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="none">{t("accountNone")}</SelectItem>
-            {accounts.map((account) => (
-              <SelectItem key={account.id} value={account.id}>
-                {account.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {errors.account_id && <FieldError>{errors.account_id.message}</FieldError>}
-      </Field>
+      {/* Account & Contact */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Field orientation="vertical">
+          <FieldLabel>{t("accountLabel")}</FieldLabel>
+          <Select
+            value={(watch("account_id") as string | undefined) ?? ""}
+            onValueChange={(value) => setValue("account_id", value === "none" ? "" : value)}
+          >
+            <SelectTrigger className="h-9">
+              <SelectValue placeholder={t("accountPlaceholder")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">{t("accountNone")}</SelectItem>
+              {accounts.map((account) => (
+                <SelectItem key={account.id} value={account.id}>
+                  {account.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.account_id && <FieldError>{errors.account_id.message}</FieldError>}
+        </Field>
 
-      <Field orientation="vertical">
-        <FieldLabel>{t("contactLabel")}</FieldLabel>
-        <Select
-          value={(watch("contact_id") as string | undefined) ?? ""}
-          onValueChange={(value) => setValue("contact_id", value === "none" ? "" : value)}
-          disabled={!watch("account_id") && !task?.account_id}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder={t("contactPlaceholder")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="none">{t("contactNone")}</SelectItem>
-            {contacts.map((contact) => (
-              <SelectItem key={contact.id} value={contact.id}>
-                {contact.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {errors.contact_id && <FieldError>{errors.contact_id.message}</FieldError>}
-      </Field>
+        <Field orientation="vertical">
+          <FieldLabel>{t("contactLabel")}</FieldLabel>
+          <Select
+            value={(watch("contact_id") as string | undefined) ?? ""}
+            onValueChange={(value) => setValue("contact_id", value === "none" ? "" : value)}
+            disabled={!watch("account_id") && !task?.account_id}
+          >
+            <SelectTrigger className="h-9">
+              <SelectValue placeholder={t("contactPlaceholder")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">{t("contactNone")}</SelectItem>
+              {contacts.map((contact) => (
+                <SelectItem key={contact.id} value={contact.id}>
+                  {contact.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.contact_id && <FieldError>{errors.contact_id.message}</FieldError>}
+        </Field>
+      </div>
 
-      <div className="flex justify-end gap-2 pt-4">
+      {/* Actions */}
+      <div className="flex justify-end gap-3 pt-4 border-t">
         <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
           {t("cancel")}
         </Button>
