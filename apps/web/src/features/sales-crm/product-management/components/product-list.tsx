@@ -19,6 +19,7 @@ import { useTranslations } from "next-intl";
 
 export function ProductList() {
   const t = useTranslations("productManagement.list");
+  const tForm = useTranslations("productManagement.form");
 
   const [search, setSearch] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<ProductStatus | "all">("all");
@@ -205,7 +206,9 @@ export function ProductList() {
                         variant={product.status === "active" ? "success" : "secondary"}
                         className="text-xs"
                       >
-                        {product.status === "active" ? t("form.statusActive") : t("form.statusInactive")}
+                        {product.status === "active"
+                          ? tForm("statusActive")
+                          : tForm("statusInactive")}
                       </Badge>
                     </td>
                     <td className="px-4 py-2 align-middle text-right">
