@@ -17,6 +17,7 @@ import { useUsers } from "@/features/master-data/user-management/hooks/useUsers"
 import { useAccounts } from "@/features/sales-crm/account-management/hooks/useAccounts";
 import { TaskCard } from "./task-card";
 import { useTranslations } from "next-intl";
+import { ContactDetailModal } from "@/features/sales-crm/account-management/components/contact-detail-modal";
 
 const BOARD_STATUSES: TaskStatus[] = ["pending", "in_progress", "completed", "cancelled"];
 
@@ -73,10 +74,17 @@ export function TaskBoard() {
 
   const [viewingTaskId, setViewingTaskId] = useState<string | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [viewingContactId, setViewingContactId] = useState<string | null>(null);
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
   const handleViewTask = (taskId: string) => {
     setViewingTaskId(taskId);
     setIsDetailModalOpen(true);
+  };
+
+  const handleViewContact = (contactId: string) => {
+    setViewingContactId(contactId);
+    setIsContactModalOpen(true);
   };
 
   const currentRange: DateRange | undefined =
@@ -278,6 +286,7 @@ export function TaskBoard() {
                       onEdit={() => setEditingTaskId(task.id)}
                       onDelete={() => handleDeleteClick(task.id)}
                       onComplete={() => handleComplete(task.id)}
+                      onClickContact={task.contact ? handleViewContact : undefined}
                     />
                   ))}
                 </div>
@@ -330,6 +339,18 @@ export function TaskBoard() {
         }}
         onTaskUpdated={() => {
           // Refresh handled by query invalidation
+        }}
+      />
+
+      {/* Contact Detail Modal */}
+      <ContactDetailModal
+        contactId={viewingContactId}
+        open={isContactModalOpen}
+        onOpenChange={(open) => {
+          setIsContactModalOpen(open);
+          if (!open) {
+            setViewingContactId(null);
+          }
         }}
       />
 

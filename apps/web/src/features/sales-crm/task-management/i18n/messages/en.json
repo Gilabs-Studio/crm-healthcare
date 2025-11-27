@@ -44,6 +44,7 @@
         "columnType": "Type",
         "columnStatus": "Status",
         "columnPriority": "Priority",
+        "columnContact": "Contact",
         "columnAssignee": "Assignee",
         "columnDueDate": "Due Date",
         "columnActions": "Actions",

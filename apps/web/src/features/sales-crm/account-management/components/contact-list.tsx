@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { useAccounts } from "../hooks/useAccounts";
 import type { Contact } from "../types";
+import { ContactDetailModal } from "./contact-detail-modal";
 
 export function ContactList() {
   const {
@@ -243,21 +244,16 @@ export function ContactList() {
         </Dialog>
       )}
 
-      {/* Contact Detail Modal - Placeholder for now */}
-      {viewingContactId && (
-        <Dialog open={isDetailModalOpen} onOpenChange={setIsDetailModalOpen}>
-          <DialogContent className="sm:max-w-[600px]">
-            <DialogHeader>
-              <DialogTitle>Contact Details</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Contact detail view will be implemented here
-              </p>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
+      <ContactDetailModal
+        contactId={viewingContactId}
+        open={isDetailModalOpen}
+        onOpenChange={(open) => {
+          setIsDetailModalOpen(open);
+          if (!open) {
+            setViewingContactId(null);
+          }
+        }}
+      />
     </div>
   );
 }

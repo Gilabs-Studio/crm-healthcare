@@ -114,6 +114,23 @@ export function TaskList() {
       className: "w-[250px]",
     },
     {
+      id: "contact",
+      header: t("table.columnContact"),
+      accessor: (row) =>
+        row.contact ? (
+          <button
+            type="button"
+            className="text-sm text-primary hover:underline"
+            // detail modal contact akan di-handle di level yang lebih tinggi bila diperlukan
+          >
+            {row.contact.name}
+          </button>
+        ) : (
+          <span className="text-sm text-muted-foreground">-</span>
+        ),
+      className: "w-[160px]",
+    },
+    {
       id: "type",
       header: t("table.columnType"),
       accessor: (row) => (

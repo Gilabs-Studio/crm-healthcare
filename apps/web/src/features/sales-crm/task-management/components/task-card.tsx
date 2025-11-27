@@ -12,6 +12,7 @@ interface TaskCardProps {
   readonly onDelete: () => void;
   readonly onComplete?: () => void;
   readonly onClickTitle?: () => void;
+  readonly onClickContact?: (contactId: string) => void;
 }
 
 const statusColorMap: Record<Task["status"], string> = {
@@ -21,7 +22,7 @@ const statusColorMap: Record<Task["status"], string> = {
   cancelled: "bg-rose-400",
 };
 
-export function TaskCard({ task, onEdit, onDelete, onComplete, onClickTitle }: TaskCardProps) {
+export function TaskCard({ task, onEdit, onDelete, onComplete, onClickTitle, onClickContact }: TaskCardProps) {
   const t = useTranslations("taskManagement.card");
 
   const dueLabel =
@@ -79,12 +80,16 @@ export function TaskCard({ task, onEdit, onDelete, onComplete, onClickTitle }: T
           </span>
         )}
         {task.contact && (
-          <span className="inline-flex items-center gap-1 truncate max-w-[160px]">
+          <button
+            type="button"
+            onClick={onClickContact ? () => onClickContact(task.contact!.id) : undefined}
+            className="inline-flex items-center gap-1 truncate max-w-[160px] text-left hover:text-primary"
+          >
             <Contact className="h-3 w-3" />
             <span className="truncate">
               {t("contactLabel")} {task.contact.name}
             </span>
-          </span>
+          </button>
         )}
       </div>
 

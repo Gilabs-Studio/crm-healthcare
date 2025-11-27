@@ -16,6 +16,7 @@ import { ReminderSettings } from "./reminder-settings";
 import type { Task } from "../types";
 import type { UpdateTaskFormData } from "../schemas/task.schema";
 import { useTranslations } from "next-intl";
+import { ContactDetailModal } from "@/features/sales-crm/account-management/components/contact-detail-modal";
 
 const statusVariantMap: Record<Task["status"], "default" | "secondary" | "outline" | "destructive"> = {
   pending: "outline",
@@ -50,6 +51,8 @@ export function TaskDetailModal({
   const updateTask = useUpdateTask();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [viewingContactId, setViewingContactId] = useState<string | null>(null);
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
   const task = data?.data;
   const t = useTranslations("taskManagement.detail");
@@ -282,10 +285,17 @@ export function TaskDetailModal({
                     <div className="text-sm text-muted-foreground mb-1">
                       {t("sections.contactLabel")}
                     </div>
-                    <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      className="flex items-center gap-2 text-left hover:text-primary"
+                      onClick={() => {
+                        setViewingContactId(task.contact!.id);
+                        setIsContactModalOpen(true);
+                      }}
+                    >
                       <Contact className="h-4 w-4 text-muted-foreground" />
                       <span className="font-medium">{task.contact.name}</span>
-                    </div>
+                    </button>
                     {task.contact.email && (
                       <span className="text-xs text-muted-foreground">{task.contact.email}</span>
                     )}
@@ -359,6 +369,18 @@ export function TaskDetailModal({
         description={t("deleteDialog.description")}
         itemName={t("deleteDialog.itemName")}
         isLoading={deleteTask.isPending}
+      />
+
+      {/* Contact Detail Modal */}
+      <ContactDetailModal
+        contactId={viewingContactId}
+        open={isContactModalOpen}
+        onOpenChange={(open) => {
+          setIsContactModalOpen(open);
+          if (!open) {
+            setViewingContactId(null);
+          }
+        }}
       />
     </>
   );
