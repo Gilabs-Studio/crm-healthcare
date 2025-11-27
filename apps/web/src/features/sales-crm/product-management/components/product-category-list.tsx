@@ -33,6 +33,7 @@ import type {
   CreateProductCategoryFormData,
   UpdateProductCategoryFormData,
 } from "../schemas/category.schema";
+import { useTranslations } from "next-intl";
 
 export function ProductCategoryList() {
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
@@ -41,6 +42,7 @@ export function ProductCategoryList() {
 
   const { data, isLoading } = useProductCategories();
   const categories = data?.data ?? [];
+  const t = useTranslations("productManagement.categoryList");
 
   const { data: editingCategory } = useProductCategory(editingCategoryId || "");
   const createMutation = useCreateProductCategory();
@@ -83,14 +85,12 @@ export function ProductCategoryList() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold">Product Categories</h2>
-          <p className="text-xs text-muted-foreground mt-1">
-            Manage product categories for grouping products (e.g., Prescription, OTC, Devices).
-          </p>
+          <h2 className="text-lg font-semibold">{t("title")}</h2>
+          <p className="text-xs text-muted-foreground mt-1">{t("description")}</p>
         </div>
         <Button size="sm" onClick={() => setIsCreateDialogOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
-          Add Category
+          {t("addCategory")}
         </Button>
       </div>
 
@@ -105,18 +105,20 @@ export function ProductCategoryList() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[220px]">Name</TableHead>
-                <TableHead>Slug</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead className="w-[100px]">Status</TableHead>
-                <TableHead className="w-[120px] text-right">Actions</TableHead>
+                <TableHead className="w-[220px]">{t("table.name")}</TableHead>
+                <TableHead>{t("table.slug")}</TableHead>
+                <TableHead>{t("table.description")}</TableHead>
+                <TableHead className="w-[100px]">{t("table.status")}</TableHead>
+                <TableHead className="w-[120px] text-right">
+                  {t("table.actions")}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {categories.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                    No product categories found
+                      {t("empty")}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -168,7 +170,7 @@ export function ProductCategoryList() {
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="sm:max-w-[480px]">
           <DialogHeader>
-            <DialogTitle>Create Product Category</DialogTitle>
+            <DialogTitle>{t("createTitle")}</DialogTitle>
           </DialogHeader>
           <ProductCategoryForm
             onSubmit={handleCreate}
@@ -188,7 +190,7 @@ export function ProductCategoryList() {
         >
           <DialogContent className="sm:max-w-[480px]">
             <DialogHeader>
-              <DialogTitle>Edit Product Category</DialogTitle>
+              <DialogTitle>{t("editTitle")}</DialogTitle>
             </DialogHeader>
             <ProductCategoryForm
               category={editingCategory}
@@ -209,15 +211,15 @@ export function ProductCategoryList() {
           }
         }}
         onConfirm={handleDeleteConfirm}
-        title="Delete Product Category?"
+        title={t("deleteTitle")}
         description={
           deletingCategoryId
-            ? `Are you sure you want to delete product category "${
-                categories.find((c) => c.id === deletingCategoryId)?.name || "this category"
-              }"? This action cannot be undone.`
-            : "Are you sure you want to delete this product category? This action cannot be undone."
+            ? t("deleteDescriptionWithName", {
+                name: categories.find((c) => c.id === deletingCategoryId)?.name || "this category",
+              })
+            : t("deleteDescription")
         }
-        itemName="product category"
+        itemName={t("deleteItemName")}
         isLoading={deleteMutation.isPending}
       />
     </div>

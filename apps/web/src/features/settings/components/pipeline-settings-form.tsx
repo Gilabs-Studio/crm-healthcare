@@ -12,10 +12,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useSettings, useUpdateSettings } from "../hooks/useSettings";
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 export function PipelineSettingsForm() {
   const { data, isLoading } = useSettings();
   const updateSettings = useUpdateSettings();
+  const t = useTranslations("settings.pipeline");
 
   const {
     register,
@@ -64,7 +66,7 @@ export function PipelineSettingsForm() {
       await updateSettings.mutateAsync({
         pipeline: formData as Record<string, string>,
       });
-      toast.success("Pipeline settings updated successfully");
+      toast.success(t("toast.success"));
     } catch (error) {
       // Error already handled in api-client interceptor
     }
@@ -74,8 +76,8 @@ export function PipelineSettingsForm() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Pipeline Settings</CardTitle>
-          <CardDescription>Configure your sales pipeline stages and behavior</CardDescription>
+          <CardTitle>{t("loading.title")}</CardTitle>
+          <CardDescription>{t("loading.description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -91,16 +93,16 @@ export function PipelineSettingsForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Pipeline Settings</CardTitle>
-        <CardDescription>Configure your sales pipeline stages and behavior</CardDescription>
+        <CardTitle>{t("title")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <Field orientation="vertical">
-            <FieldLabel>Pipeline Stages (JSON)</FieldLabel>
+            <FieldLabel>{t("fields.stagesLabel")}</FieldLabel>
             <Textarea
               {...register("stages")}
-              placeholder='[{"id":"1","name":"Lead","order":1},...]'
+              placeholder={t("fields.stagesPlaceholder")}
               rows={8}
               className="font-mono text-sm"
             />
@@ -108,29 +110,29 @@ export function PipelineSettingsForm() {
               <FieldError>{errors.stages.message}</FieldError>
             )}
             <p className="text-sm text-muted-foreground">
-              Define pipeline stages as JSON array. Each stage should have id, name, and order.
+              {t("fields.stagesHelp")}
             </p>
           </Field>
 
           <Field orientation="vertical">
-            <FieldLabel>Default Stage</FieldLabel>
+            <FieldLabel>{t("fields.defaultStageLabel")}</FieldLabel>
             <Input
               {...register("default_stage")}
-              placeholder="1"
+              placeholder={t("fields.defaultStagePlaceholder")}
             />
             {errors.default_stage && (
               <FieldError>{errors.default_stage.message}</FieldError>
             )}
             <p className="text-sm text-muted-foreground">
-              The default stage ID for new deals
+              {t("fields.defaultStageHelp")}
             </p>
           </Field>
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <FieldLabel>Auto Advance</FieldLabel>
+              <FieldLabel>{t("fields.autoAdvanceLabel")}</FieldLabel>
               <p className="text-sm text-muted-foreground">
-                Automatically advance deals to next stage when criteria are met
+                {t("fields.autoAdvanceDescription")}
               </p>
             </div>
             <Switch
@@ -144,7 +146,7 @@ export function PipelineSettingsForm() {
               type="submit"
               disabled={updateSettings.isPending}
             >
-              {updateSettings.isPending ? "Saving..." : "Save Changes"}
+              {updateSettings.isPending ? t("buttons.saving") : t("buttons.saveChanges")}
             </Button>
           </div>
         </form>

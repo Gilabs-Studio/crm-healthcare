@@ -16,6 +16,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { UserForm } from "./user-form";
+import { useTranslations } from "next-intl";
 
 interface UserDetailProps {
   readonly userId: string;
@@ -29,16 +30,17 @@ export function UserDetail({ userId }: UserDetailProps) {
   const { data: permissionsData } = useUserPermissions(userId);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isPermissionsDialogOpen, setIsPermissionsDialogOpen] = useState(false);
+  const t = useTranslations("userManagement.detailPage");
 
   const user = data?.data;
   const userPermissions = permissionsData?.data?.permissions || [];
 
   const handleDelete = async () => {
     if (!user) return;
-    if (confirm(`Are you sure you want to delete user "${user.name}"?`)) {
+    if (confirm(t("list.deleteDescriptionWithName", { name: user.name }))) {
       try {
         await deleteUser.mutateAsync(userId);
-        toast.success("User deleted successfully");
+        toast.success(t("toastDeleted"));
         router.push("/master-data/users");
       } catch (error) {
         // Error already handled in api-client interceptor
@@ -75,12 +77,12 @@ export function UserDetail({ userId }: UserDetailProps) {
       <div className="space-y-4">
         <Button variant="ghost" onClick={() => router.back()}>
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
+          {t("back")}
         </Button>
         <Card>
           <CardContent className="pt-6">
             <div className="text-center text-muted-foreground">
-              User not found
+              {t("notFound")}
             </div>
           </CardContent>
         </Card>
@@ -98,7 +100,9 @@ export function UserDetail({ userId }: UserDetailProps) {
           </Button>
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">{user.name}</h1>
-            <p className="text-sm text-muted-foreground mt-1">User Details</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              {t("headerSubtitle")}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -107,14 +111,14 @@ export function UserDetail({ userId }: UserDetailProps) {
             onClick={() => setIsEditDialogOpen(true)}
           >
             <Edit className="h-4 w-4 mr-2" />
-            Edit
+            {t("actions.edit")}
           </Button>
           <Button
             variant="outline"
             onClick={() => setIsPermissionsDialogOpen(true)}
           >
             <Shield className="h-4 w-4 mr-2" />
-            Permissions
+            {t("actions.permissions")}
           </Button>
           <Button
             variant="destructive"
@@ -122,7 +126,7 @@ export function UserDetail({ userId }: UserDetailProps) {
             disabled={deleteUser.isPending}
           >
             <Trash2 className="h-4 w-4 mr-2" />
-            Delete
+            {t("actions.delete")}
           </Button>
         </div>
       </div>
@@ -130,15 +134,15 @@ export function UserDetail({ userId }: UserDetailProps) {
       {/* User Info Card */}
       <Card>
         <CardHeader>
-          <CardTitle>User Information</CardTitle>
-          <CardDescription>Basic user details and account information</CardDescription>
+          <CardTitle>{t("userInfo.title")}</CardTitle>
+          <CardDescription>{t("userInfo.description")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <User className="h-4 w-4" />
-                <span>Name</span>
+                <span>{t("userInfo.name")}</span>
               </div>
               <div className="text-base font-medium">{user.name}</div>
             </div>
@@ -146,7 +150,7 @@ export function UserDetail({ userId }: UserDetailProps) {
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Mail className="h-4 w-4" />
-                <span>Email</span>
+                <span>{t("userInfo.email")}</span>
               </div>
               <div className="text-base font-medium">{user.email}</div>
             </div>
@@ -154,7 +158,7 @@ export function UserDetail({ userId }: UserDetailProps) {
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Shield className="h-4 w-4" />
-                <span>Role</span>
+                <span>{t("userInfo.role")}</span>
               </div>
               <div>
                 <Badge variant="outline" className="font-normal">
@@ -165,7 +169,7 @@ export function UserDetail({ userId }: UserDetailProps) {
 
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span>Status</span>
+                <span>{t("userInfo.status")}</span>
               </div>
               <div>
                 <Badge variant={user.status === "active" ? "active" : "inactive"}>
@@ -177,20 +181,24 @@ export function UserDetail({ userId }: UserDetailProps) {
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Calendar className="h-4 w-4" />
-                <span>Created At</span>
+                <span>{t("userInfo.createdAt")}</span>
               </div>
               <div className="text-base font-medium">
-                {user.created_at ? new Date(user.created_at).toLocaleDateString() : "N/A"}
+                {user.created_at
+                  ? new Date(user.created_at).toLocaleDateString()
+                  : t("userInfo.notAvailable")}
               </div>
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Calendar className="h-4 w-4" />
-                <span>Updated At</span>
+                <span>{t("userInfo.updatedAt")}</span>
               </div>
               <div className="text-base font-medium">
-                {user.updated_at ? new Date(user.updated_at).toLocaleDateString() : "N/A"}
+                {user.updated_at
+                  ? new Date(user.updated_at).toLocaleDateString()
+                  : t("userInfo.notAvailable")}
               </div>
             </div>
           </div>
@@ -201,8 +209,10 @@ export function UserDetail({ userId }: UserDetailProps) {
       {userPermissions.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Permissions</CardTitle>
-            <CardDescription>User permissions and access rights</CardDescription>
+            <CardTitle>{t("permissionsCard.title")}</CardTitle>
+            <CardDescription>
+              {t("permissionsCard.description")}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
@@ -221,7 +231,7 @@ export function UserDetail({ userId }: UserDetailProps) {
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
-              <DialogTitle>Edit User</DialogTitle>
+              <DialogTitle>{t("actions.edit")}</DialogTitle>
             </DialogHeader>
             <UserForm
               user={user}
@@ -229,7 +239,7 @@ export function UserDetail({ userId }: UserDetailProps) {
                 try {
                   await updateUser.mutateAsync({ id: userId, data: formData });
                   setIsEditDialogOpen(false);
-                  toast.success("User updated successfully");
+                  toast.success(t("toastUpdated"));
                   // Refresh the page to show updated data
                   window.location.reload();
                 } catch (error) {
@@ -248,10 +258,10 @@ export function UserDetail({ userId }: UserDetailProps) {
         <Dialog open={isPermissionsDialogOpen} onOpenChange={setIsPermissionsDialogOpen}>
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
-              <DialogTitle>User Permissions</DialogTitle>
+              <DialogTitle>{t("permissionsDialog.title")}</DialogTitle>
             </DialogHeader>
             <div className="text-sm text-muted-foreground">
-              Permissions are managed through roles. To change user permissions, assign a different role.
+              {t("permissionsDialog.description")}
             </div>
           </DialogContent>
         </Dialog>

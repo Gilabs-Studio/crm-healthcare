@@ -14,12 +14,14 @@ import {
 } from "@/components/ui/dialog";
 import { DealForm } from "./deal-form";
 import { useKanbanBoard } from "../hooks/useKanbanBoard";
+import { useTranslations } from "next-intl";
 
 interface KanbanBoardProps {
   readonly onDealClick?: (deal: Deal) => void;
 }
 
 export function KanbanBoard({ onDealClick }: KanbanBoardProps) {
+  const t = useTranslations("pipelineManagement.kanban");
   const {
     pipelines,
     dealsByStage,
@@ -68,14 +70,14 @@ export function KanbanBoard({ onDealClick }: KanbanBoardProps) {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Sales Pipeline</h2>
+          <h2 className="text-2xl font-bold tracking-tight">{t("title")}</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Manage and track your sales opportunities
+            {t("description")}
           </p>
         </div>
         <Button onClick={openCreateDialog} className="w-full sm:w-auto" size="default">
           <Plus className="h-4 w-4 mr-2" />
-          New Deal
+          {t("newDeal")}
         </Button>
       </div>
 
@@ -110,8 +112,12 @@ export function KanbanBoard({ onDealClick }: KanbanBoardProps) {
                     <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-3">
                       <Plus className="h-5 w-5 text-muted-foreground" />
                     </div>
-                    <p className="text-sm text-muted-foreground font-medium">No deals</p>
-                    <p className="text-xs text-muted-foreground mt-1">Drag deals here or create new</p>
+                    <p className="text-sm text-muted-foreground font-medium">
+                      {t("noDeals")}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {t("noDealsHint")}
+                    </p>
                   </div>
                 ) : (
                   stageDeals.map((deal) => (
@@ -144,7 +150,7 @@ export function KanbanBoard({ onDealClick }: KanbanBoardProps) {
       <Dialog open={isCreateDialogOpen} onOpenChange={closeCreateDialog}>
         <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Create Deal</DialogTitle>
+            <DialogTitle>{t("createDialogTitle")}</DialogTitle>
           </DialogHeader>
           <DealForm
             onSubmit={handleCreateDeal}
@@ -159,7 +165,7 @@ export function KanbanBoard({ onDealClick }: KanbanBoardProps) {
         <Dialog open={!!editingDeal} onOpenChange={closeEditDialog}>
           <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Edit Deal</DialogTitle>
+              <DialogTitle>{t("editDialogTitle")}</DialogTitle>
             </DialogHeader>
             <DealForm
               deal={editingDeal}

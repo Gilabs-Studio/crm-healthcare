@@ -9,12 +9,38 @@ export default getRequestConfig(async ({ requestLocale }) => {
     locale = routing.defaultLocale;
   }
 
-  const [dashboardMessages] = await Promise.all([
+  const [
+    dashboardMessages,
+    userManagementMessages,
+    reportsMessages,
+    accountManagementMessages,
+    pipelineManagementMessages,
+    productManagementMessages,
+    taskManagementMessages,
+    visitReportMessages,
+    settingsMessages,
+  ] = await Promise.all([
     import(`@/features/dashboard/i18n/messages/${locale}.json`),
+    import(`@/features/master-data/user-management/i18n/messages/${locale}.json`),
+    import(`@/features/reports/i18n/messages/${locale}.json`),
+    import(`@/features/sales-crm/account-management/i18n/messages/${locale}.json`),
+    import(`@/features/sales-crm/pipeline-management/i18n/messages/${locale}.json`),
+    import(`@/features/sales-crm/product-management/i18n/messages/${locale}.json`),
+    import(`@/features/sales-crm/task-management/i18n/messages/${locale}.json`),
+    import(`@/features/sales-crm/visit-report/i18n/messages/${locale}.json`),
+    import(`@/features/settings/i18n/messages/${locale}.json`),
   ]);
 
   const messages = {
     ...dashboardMessages.default,
+    ...userManagementMessages.default,
+    ...reportsMessages.default,
+    ...accountManagementMessages.default,
+    ...pipelineManagementMessages.default,
+    ...productManagementMessages.default,
+    ...taskManagementMessages.default,
+    ...visitReportMessages.default,
+    ...settingsMessages.default,
   };
 
   return {

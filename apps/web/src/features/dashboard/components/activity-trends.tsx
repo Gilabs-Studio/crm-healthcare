@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations, useLocale } from "next-intl";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -38,6 +39,8 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export function ActivityTrends() {
+  const t = useTranslations("activityTrends");
+  const locale = useLocale();
   const [timeRange, setTimeRange] = React.useState<"7d" | "30d" | "90d">("30d");
   const { data: overviewData } = useDashboardOverview({ period: "month" });
   
@@ -92,7 +95,7 @@ export function ActivityTrends() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Activity Trends</CardTitle>
+          <CardTitle>{t("title")}</CardTitle>
         </CardHeader>
         <CardContent>
           <Skeleton className="h-64 w-full" />
@@ -111,18 +114,18 @@ export function ActivityTrends() {
         <div className="grid flex-1 gap-1">
           <div className="flex items-center gap-2">
             <Activity className="h-5 w-5" />
-            <CardTitle>Activity Trends</CardTitle>
+            <CardTitle>{t("title")}</CardTitle>
           </div>
-          <CardDescription>Showing activity trends over time</CardDescription>
+          <CardDescription>{t("description")}</CardDescription>
         </div>
         <Select value={timeRange} onValueChange={(v) => setTimeRange(v as typeof timeRange)}>
           <SelectTrigger className="w-[160px] rounded-lg sm:ml-auto">
-            <SelectValue placeholder="Last 30 days" />
+            <SelectValue placeholder={t("timeRange.30d")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="7d">Last 7 days</SelectItem>
-            <SelectItem value="30d">Last 30 days</SelectItem>
-            <SelectItem value="90d">Last 90 days</SelectItem>
+            <SelectItem value="7d">{t("timeRange.7d")}</SelectItem>
+            <SelectItem value="30d">{t("timeRange.30d")}</SelectItem>
+            <SelectItem value="90d">{t("timeRange.90d")}</SelectItem>
           </SelectContent>
         </Select>
       </CardHeader>
@@ -130,15 +133,15 @@ export function ActivityTrends() {
         <div className="space-y-4">
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <div className="text-sm text-muted-foreground">Total Visits</div>
+              <div className="text-sm text-muted-foreground">{t("totalVisits")}</div>
               <div className="text-2xl font-bold">{overview.activity_stats.visits}</div>
             </div>
             <div>
-              <div className="text-sm text-muted-foreground">Total Calls</div>
+              <div className="text-sm text-muted-foreground">{t("totalCalls")}</div>
               <div className="text-2xl font-bold">{overview.activity_stats.calls}</div>
             </div>
             <div>
-              <div className="text-sm text-muted-foreground">Total Emails</div>
+              <div className="text-sm text-muted-foreground">{t("totalEmails")}</div>
               <div className="text-2xl font-bold">{overview.activity_stats.emails}</div>
             </div>
           </div>
@@ -169,7 +172,7 @@ export function ActivityTrends() {
                   minTickGap={32}
                   tickFormatter={(value) => {
                     const date = new Date(value);
-                    return date.toLocaleDateString("id-ID", {
+                    return date.toLocaleDateString(locale, {
                       month: "short",
                       day: "numeric",
                     });
@@ -180,7 +183,7 @@ export function ActivityTrends() {
                   content={
                     <ChartTooltipContent
                       labelFormatter={(value) => {
-                        return new Date(value).toLocaleDateString("id-ID", {
+                        return new Date(value).toLocaleDateString(locale, {
                           month: "short",
                           day: "numeric",
                           year: "numeric",

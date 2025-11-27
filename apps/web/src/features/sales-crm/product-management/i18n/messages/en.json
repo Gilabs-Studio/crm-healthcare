@@ -1,0 +1,114 @@
+{
+  "productManagement": {
+    "tabs": {
+      "products": "Products",
+      "categories": "Product Categories"
+    },
+    "list": {
+      "title": "Products",
+      "description": "Manage your product catalog for healthcare and pharmaceutical sales.",
+      "searchPlaceholder": "Search by name, SKU, or barcode",
+      "filters": {
+        "statusAll": "All status",
+        "statusActive": "Active",
+        "statusInactive": "Inactive"
+      },
+      "table": {
+        "name": "Name",
+        "skuBarcode": "SKU / Barcode",
+        "category": "Category",
+        "price": "Price",
+        "stock": "Stock",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "loading": "Loading products...",
+      "empty": "No products found. Try adjusting your filters or add a new product.",
+      "pagination": {
+        "pageOf": "Page {page} of {totalPages}",
+        "total": "Total {total} products",
+        "previous": "Previous",
+        "next": "Next"
+      },
+      "buttons": {
+        "addProduct": "Add Product",
+        "createTitle": "Add Product",
+        "editTitle": "Edit Product"
+      }
+    },
+    "form": {
+      "nameLabel": "Name",
+      "namePlaceholder": "Product name",
+      "skuLabel": "SKU",
+      "skuPlaceholder": "SKU code",
+      "barcodeLabel": "Barcode",
+      "barcodePlaceholder": "Barcode (optional)",
+      "priceLabel": "Price (Rp)",
+      "pricePlaceholder": "0",
+      "costLabel": "Cost (Rp)",
+      "costPlaceholder": "0",
+      "stockLabel": "Stock",
+      "stockPlaceholder": "0",
+      "categoryLabel": "Category",
+      "categoryPlaceholder": "Select category",
+      "taxableLabel": "Taxable",
+      "statusLabel": "Status",
+      "statusPlaceholder": "Select status",
+      "statusActive": "Active",
+      "statusInactive": "Inactive",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Product description",
+      "cancel": "Cancel",
+      "submitCreate": "Create",
+      "submitUpdate": "Update",
+      "submitting": "Saving..."
+    },
+    "selector": {
+      "label": "Product",
+      "buttonPlaceholder": "Select product",
+      "dialogTitle": "Select Product",
+      "searchPlaceholder": "Search products...",
+      "loading": "Loading products...",
+      "empty": "No products found.",
+      "skuPrefix": "SKU",
+      "stockPrefix": "Stock",
+      "clearSelection": "Clear selection"
+    },
+    "categoryList": {
+      "title": "Product Categories",
+      "description": "Manage product categories for grouping products (e.g., Prescription, OTC, Devices).",
+      "addCategory": "Add Category",
+      "table": {
+        "name": "Name",
+        "slug": "Slug",
+        "description": "Description",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "empty": "No product categories found",
+      "createTitle": "Create Product Category",
+      "editTitle": "Edit Product Category",
+      "deleteTitle": "Delete Product Category?",
+      "deleteDescriptionWithName": "Are you sure you want to delete product category \"{name}\"? This action cannot be undone.",
+      "deleteDescription": "Are you sure you want to delete this product category? This action cannot be undone.",
+      "deleteItemName": "product category"
+    },
+    "categoryForm": {
+      "nameLabel": "Name",
+      "namePlaceholder": "Category name (e.g., Prescription Drug)",
+      "slugLabel": "Slug",
+      "slugPlaceholder": "Slug (optional, auto-generated if empty)",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Description (optional)",
+      "statusLabel": "Status",
+      "statusActive": "Active",
+      "statusInactive": "Inactive",
+      "cancel": "Cancel",
+      "submitCreate": "Create",
+      "submitUpdate": "Update",
+      "submitting": "Saving..."
+    }
+  }
+}
+
+

@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 interface PhotoUploadDialogProps {
   readonly open: boolean;
@@ -31,6 +32,7 @@ export function PhotoUploadDialog({
   const [photoUrl, setPhotoUrl] = useState("");
   const [preview, setPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const t = useTranslations("photoUploadDialog");
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -38,13 +40,13 @@ export function PhotoUploadDialog({
 
     // Validate file type
     if (!file.type.startsWith("image/")) {
-      toast.error("Please select an image file");
+      toast.error(t("errors.selectImageFile"));
       return;
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      toast.error("File size must be less than 5MB");
+      toast.error(t("errors.fileTooLarge"));
       return;
     }
 
@@ -60,7 +62,7 @@ export function PhotoUploadDialog({
 
   const handleUpload = async () => {
     if (!photoUrl.trim()) {
-      toast.error("Please select a photo or enter a photo URL");
+      toast.error(t("errors.missingPhoto"));
       return;
     }
 
@@ -90,16 +92,14 @@ export function PhotoUploadDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Upload Photo</DialogTitle>
-          <DialogDescription>
-            Upload a photo for this visit report. You can either select a file or enter a photo URL.
-          </DialogDescription>
+          <DialogTitle>{t("title")}</DialogTitle>
+          <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           {/* File Upload */}
           <Field orientation="vertical">
-            <FieldLabel>Select Photo</FieldLabel>
+            <FieldLabel>{t("fields.selectPhotoLabel")}</FieldLabel>
             <div className="flex items-center gap-2">
               <Input
                 ref={fileInputRef}
@@ -142,7 +142,7 @@ export function PhotoUploadDialog({
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                Note: In production, this will be uploaded to a file storage service
+                {t("previewNote")}
               </p>
             </div>
           )}
@@ -153,16 +153,18 @@ export function PhotoUploadDialog({
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">Or</span>
+              <span className="bg-background px-2 text-muted-foreground">
+                {t("dividerOr")}
+              </span>
             </div>
           </div>
 
           {/* URL Input */}
           <Field orientation="vertical">
-            <FieldLabel>Photo URL</FieldLabel>
+            <FieldLabel>{t("fields.photoUrlLabel")}</FieldLabel>
             <Input
               type="url"
-              placeholder="https://example.com/photo.jpg"
+              placeholder={t("fields.photoUrlPlaceholder")}
               value={photoUrl}
               onChange={(e) => {
                 setPhotoUrl(e.target.value);
@@ -188,14 +190,14 @@ export function PhotoUploadDialog({
               }}
               disabled={isLoading}
             >
-              Cancel
+              {t("buttons.cancel")}
             </Button>
             <Button
               type="button"
               onClick={handleUpload}
               disabled={isLoading || !photoUrl.trim()}
             >
-              {isLoading ? "Uploading..." : "Upload Photo"}
+              {isLoading ? t("buttons.uploading") : t("buttons.upload")}
             </Button>
           </div>
         </div>

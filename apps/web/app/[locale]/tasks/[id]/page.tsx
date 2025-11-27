@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { DashboardLayout } from "@/components/layouts/dashboard-layout";
+import { useTranslations } from "next-intl";
 import { AuthGuard } from "@/features/auth/components/auth-guard";
 import { useTask, useUpdateTask, useDeleteTask, useCompleteTask } from "@/features/sales-crm/task-management/hooks/useTasks";
 import { TaskForm } from "@/features/sales-crm/task-management/components/task-form";
@@ -18,6 +18,8 @@ function TaskDetailPageContent() {
   const params = useParams();
   const router = useRouter();
   const taskId = params.id as string;
+  const t = useTranslations("tasks.detail");
+  const tCommon = useTranslations("common");
 
   const { data, isLoading } = useTask(taskId);
   const updateTask = useUpdateTask();
@@ -33,7 +35,7 @@ function TaskDetailPageContent() {
     try {
       await updateTask.mutateAsync({ id: taskId, data: formData });
       setIsEditDialogOpen(false);
-      toast.success("Task updated successfully");
+      toast.success(t("toast.updated"));
     } catch {
       // Error already handled in api-client interceptor
     }
@@ -43,7 +45,7 @@ function TaskDetailPageContent() {
     try {
       await deleteTask.mutateAsync(taskId);
       setIsDeleteDialogOpen(false);
-      toast.success("Task deleted successfully");
+      toast.success(t("toast.deleted"));
       router.push("/tasks");
     } catch {
       // Error already handled
@@ -53,7 +55,7 @@ function TaskDetailPageContent() {
   const handleCompleteTask = async () => {
     try {
       await completeTask.mutateAsync(taskId);
-      toast.success("Task marked as completed");
+      toast.success(t("toast.completed"));
     } catch {
       // Error already handled
     }
@@ -61,27 +63,25 @@ function TaskDetailPageContent() {
 
   if (isLoading) {
     return (
-      <DashboardLayout>
         <div className="container mx-auto py-6 px-4">
-          <div className="text-center py-12 text-muted-foreground">Loading task...</div>
+          <div className="text-center py-12 text-muted-foreground">
+            {t("loading")}
+          </div>
         </div>
-      </DashboardLayout>
     );
   }
 
   if (!task) {
     return (
-      <DashboardLayout>
         <div className="container mx-auto py-6 px-4">
           <div className="text-center py-12">
-            <p className="text-muted-foreground">Task not found</p>
+            <p className="text-muted-foreground">{t("notFound")}</p>
             <Button type="button" onClick={() => router.push("/tasks")} className="mt-4">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Tasks
+              {t("backToList")}
             </Button>
           </div>
         </div>
-      </DashboardLayout>
     );
   }
 
@@ -94,13 +94,12 @@ function TaskDetailPageContent() {
     });
 
   return (
-    <DashboardLayout>
       <div className="container mx-auto py-6 px-4 max-w-4xl">
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <Button type="button" variant="ghost" onClick={() => router.push("/tasks")}>
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
+              {t("back")}
             </Button>
             <div className="flex items-center gap-2">
               {task.status !== "completed" && task.status !== "cancelled" && (
@@ -111,11 +110,13 @@ function TaskDetailPageContent() {
                   disabled={completeTask.isPending}
                 >
                   <CheckCircle2 className="h-4 w-4 mr-2" />
-                  {completeTask.isPending ? "Completing..." : "Mark as Completed"}
+                  {completeTask.isPending
+                    ? t("actions.markCompletedLoading")
+                    : t("actions.markCompleted")}
                 </Button>
               )}
               <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(true)}>
-                Edit
+                {tCommon("edit")}
               </Button>
               <Button
                 type="button"
@@ -123,7 +124,7 @@ function TaskDetailPageContent() {
                 onClick={() => setIsDeleteDialogOpen(true)}
               >
                 <Trash2 className="h-4 w-4 mr-2" />
-                Delete
+                {tCommon("delete")}
               </Button>
             </div>
           </div>
@@ -153,7 +154,9 @@ function TaskDetailPageContent() {
             <CardContent className="space-y-6">
               {task.description && (
                 <div>
-                  <h3 className="font-semibold mb-2 text-sm">Description</h3>
+                  <h3 className="font-semibold mb-2 text-sm">
+                    {t("sections.description")}
+                  </h3>
                   <p className="text-sm text-muted-foreground whitespace-pre-wrap">
                     {task.description}
                   </p>
@@ -163,21 +166,27 @@ function TaskDetailPageContent() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {task.account && (
                   <div>
-                    <h3 className="font-semibold mb-1 text-sm">Account</h3>
+                    <h3 className="font-semibold mb-1 text-sm">
+                      {t("sections.account")}
+                    </h3>
                     <p className="text-sm text-muted-foreground">{task.account.name}</p>
                   </div>
                 )}
 
                 {task.contact && (
                   <div>
-                    <h3 className="font-semibold mb-1 text-sm">Contact</h3>
+                    <h3 className="font-semibold mb-1 text-sm">
+                      {t("sections.contact")}
+                    </h3>
                     <p className="text-sm text-muted-foreground">{task.contact.name}</p>
                   </div>
                 )}
 
                 {task.assigned_user && (
                   <div>
-                    <h3 className="font-semibold mb-1 text-sm">Assigned To</h3>
+                    <h3 className="font-semibold mb-1 text-sm">
+                      {t("sections.assignedTo")}
+                    </h3>
                     <p className="text-sm text-muted-foreground">{task.assigned_user.name}</p>
                   </div>
                 )}
@@ -185,10 +194,12 @@ function TaskDetailPageContent() {
 
               <div className="space-y-2 pt-2 border-t">
                 <p className="text-xs text-muted-foreground">
-                  Created at: {new Date(task.created_at).toLocaleString("id-ID")}
+                  {t("sections.createdAt")}{" "}
+                  {new Date(task.created_at).toLocaleString("id-ID")}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Last updated: {new Date(task.updated_at).toLocaleString("id-ID")}
+                  {t("sections.updatedAt")}{" "}
+                  {new Date(task.updated_at).toLocaleString("id-ID")}
                 </p>
               </div>
 
@@ -202,7 +213,7 @@ function TaskDetailPageContent() {
           <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
             <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Edit Task</DialogTitle>
+                <DialogTitle>{tCommon("edit")}</DialogTitle>
               </DialogHeader>
               <TaskForm
                 task={task}
@@ -217,9 +228,9 @@ function TaskDetailPageContent() {
           <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Delete Task</DialogTitle>
+                <DialogTitle>{t("deleteDialog.title")}</DialogTitle>
                 <DialogDescription>
-                  Are you sure you want to delete this task? This action cannot be undone.
+                  {t("deleteDialog.description")}
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter>
@@ -228,7 +239,7 @@ function TaskDetailPageContent() {
                   variant="outline"
                   onClick={() => setIsDeleteDialogOpen(false)}
                 >
-                  Cancel
+                  {t("deleteDialog.cancel")}
                 </Button>
                 <Button
                   type="button"
@@ -236,14 +247,15 @@ function TaskDetailPageContent() {
                   onClick={handleDelete}
                   disabled={deleteTask.isPending}
                 >
-                  {deleteTask.isPending ? "Deleting..." : "Delete"}
+                  {deleteTask.isPending
+                    ? t("deleteDialog.confirmLoading")
+                    : t("deleteDialog.confirm")}
                 </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
         </div>
       </div>
-    </DashboardLayout>
   );
 }
 

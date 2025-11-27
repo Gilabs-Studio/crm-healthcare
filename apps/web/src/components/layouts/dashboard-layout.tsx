@@ -1,6 +1,7 @@
- "use client";
+"use client";
 
 import React, { memo, useMemo, useEffect } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/routing";
 import { HelpCircle } from "lucide-react";
 
@@ -49,6 +50,8 @@ const Header = memo(function Header({
   avatarUrl?: string;
   fallbackAvatarUrl: string;
 }) {
+  const locale = useLocale();
+  const tSidebar = useTranslations("sidebar");
   const pathname = usePathname();
 
   const [currentSrc, setCurrentSrc] = React.useState<string | undefined>(
@@ -67,17 +70,17 @@ const Header = memo(function Header({
   const breadcrumbItems = React.useMemo(() => {
     const segmentToLabel = (segment: string) => {
       const map: Record<string, string> = {
-        dashboard: "Dashboard",
-        "visit-reports": "Visit Reports",
-        accounts: "Accounts",
-        deals: "Deals",
-        pipeline: "Pipeline",
-        products: "Products",
-        "product-categories": "Product Categories",
-        reports: "Reports",
-        tasks: "Tasks",
-        settings: "Settings",
-        "master-data": "Master Data",
+        dashboard: tSidebar("dashboard"),
+        "visit-reports": tSidebar("visitReports"),
+        accounts: tSidebar("accounts"),
+        deals: tSidebar("deals"),
+        pipeline: tSidebar("pipeline"),
+        products: tSidebar("products"),
+        "product-categories": tSidebar("productCategories"),
+        reports: tSidebar("reports"),
+        tasks: tSidebar("tasks"),
+        settings: tSidebar("settings"),
+        "master-data": tSidebar("masterData"),
       };
 
       if (map[segment]) return map[segment];
@@ -127,6 +130,19 @@ const Header = memo(function Header({
       </nav>
 
       <div className="ml-auto flex items-center gap-4 pr-4">
+        {/* Locale toggle */}
+        <Link
+          href={pathname || "/dashboard"}
+          locale={locale === "en" ? "id" : "en"}
+          scroll={false}
+        >
+          <Button
+            variant="outline"
+            className="h-8 w-10 text-xs font-medium"
+          >
+            {locale === "en" ? "ID" : "EN"}
+          </Button>
+        </Link>
         <ThemeToggle className="size-8" />
         <Button
           variant="ghost"

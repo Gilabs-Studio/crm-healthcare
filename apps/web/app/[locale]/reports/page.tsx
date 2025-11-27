@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { AuthGuard } from "@/features/auth/components/auth-guard";
 import { ReportGenerator } from "@/features/reports/components/report-generator";
 
@@ -24,6 +25,8 @@ const itemVariants = {
 };
 
 function ReportsPageContent() {
+  const t = useTranslations("reports");
+
   return (
     <motion.div
       variants={containerVariants}
@@ -34,9 +37,11 @@ function ReportsPageContent() {
       <motion.div variants={itemVariants}>
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Reports</h1>
+            <h1 className="text-3xl font-bold tracking-tight">
+              {t("title")}
+            </h1>
             <p className="text-muted-foreground mt-1">
-              Generate and view system reports
+              {t("description")}
             </p>
           </div>
         </div>
@@ -57,10 +62,5 @@ export default function ReportsPage() {
   );
 }
 
-"use client";
-
-import ReportsPage from "@/app/reports/page";
-
-export default ReportsPage;
 
 

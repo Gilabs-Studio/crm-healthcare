@@ -25,6 +25,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { User } from "../types";
+import { useTranslations } from "next-intl";
 
 export function UserList() {
   const {
@@ -59,6 +60,7 @@ export function UserList() {
 
   const [viewingUserId, setViewingUserId] = useState<string | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const t = useTranslations("userManagement.list");
 
   const getAvatarUrl = (user: User) => {
     if (user.avatar_url) {
@@ -76,7 +78,7 @@ export function UserList() {
   const columns: Column<User>[] = [
     {
       id: "name",
-      header: "Name",
+      header: t("name"),
       accessor: (row) => (
         <button
           onClick={() => handleViewUser(row.id)}
@@ -92,14 +94,14 @@ export function UserList() {
     },
     {
       id: "email",
-      header: "Email",
+      header: t("email"),
       accessor: (row) => (
         <span className="text-muted-foreground">{row.email}</span>
       ),
     },
     {
       id: "role",
-      header: "Role",
+      header: t("role"),
       accessor: (row) => (
         <Badge variant="outline" className="font-normal">
           {row.role?.name || "N/A"}
@@ -108,7 +110,7 @@ export function UserList() {
     },
     {
       id: "status",
-      header: "Status",
+      header: t("status"),
       accessor: (row) => (
         <Badge variant={row.status === "active" ? "active" : "inactive"}>
           {row.status}
@@ -118,7 +120,7 @@ export function UserList() {
     },
     {
       id: "actions",
-      header: "Actions",
+      header: t("actions"),
       accessor: (row) => (
         <div className="flex items-center justify-end gap-1">
           <Button
@@ -162,7 +164,7 @@ export function UserList() {
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search users..."
+              placeholder={t("searchPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10 h-9"
@@ -173,10 +175,10 @@ export function UserList() {
             onValueChange={(value) => setStatus(value === "all" ? "" : value)}
           >
             <SelectTrigger className="w-[140px] h-9">
-              <SelectValue placeholder="All Status" />
+              <SelectValue placeholder={t("allStatus")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="all">{t("allStatus")}</SelectItem>
               <SelectItem value="active">Active</SelectItem>
               <SelectItem value="inactive">Inactive</SelectItem>
             </SelectContent>
@@ -186,10 +188,10 @@ export function UserList() {
             onValueChange={(value) => setRoleId(value === "all" ? "" : value)}
           >
             <SelectTrigger className="w-[140px] h-9">
-              <SelectValue placeholder="All Roles" />
+              <SelectValue placeholder={t("allRoles")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Roles</SelectItem>
+              <SelectItem value="all">{t("allRoles")}</SelectItem>
             {roles.map((role) => (
                 <SelectItem key={role.id} value={role.id}>
                 {role.name}
@@ -200,7 +202,7 @@ export function UserList() {
         </div>
         <Button onClick={() => setIsCreateDialogOpen(true)} size="sm">
           <Plus className="h-4 w-4 mr-2" />
-          Add User
+          {t("addUser")}
         </Button>
       </div>
 
@@ -209,7 +211,7 @@ export function UserList() {
         columns={columns}
         data={users}
         isLoading={isLoading}
-        emptyMessage="No users found"
+        emptyMessage={t("empty")}
         pagination={
           pagination
             ? {
@@ -283,11 +285,15 @@ export function UserList() {
           }
         }}
         onConfirm={handleDeleteConfirm}
-        title="Delete User?"
+        title={t("deleteTitle")}
         description={
           deletingUserId
-            ? `Are you sure you want to delete user "${users.find((u) => u.id === deletingUserId)?.name || "this user"}"? This action cannot be undone.`
-            : "Are you sure you want to delete this user? This action cannot be undone."
+            ? t("deleteDescriptionWithName", {
+                name:
+                  users.find((u) => u.id === deletingUserId)?.name ??
+                  t("deleteDescription"),
+              })
+            : t("deleteDescription")
         }
         itemName="user"
         isLoading={deleteUser.isPending}

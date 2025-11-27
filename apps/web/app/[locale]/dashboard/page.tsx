@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { AuthGuard } from "@/features/auth/components/auth-guard";
 import { useAuthStore } from "@/features/auth/stores/useAuthStore";
 import { DashboardOverview } from "@/features/dashboard/components/dashboard-overview";
@@ -31,6 +32,7 @@ const itemVariants = {
 };
 
 function DashboardContent() {
+  const t = useTranslations("dashboard");
   const { user } = useAuthStore();
 
   return (
@@ -43,9 +45,9 @@ function DashboardContent() {
       <motion.div variants={itemVariants}>
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
             <p className="text-muted-foreground mt-1">
-              Welcome back, {user?.name}
+              {t("welcomeBack", { name: user?.name ?? "" })}
             </p>
           </div>
         </div>

@@ -29,8 +29,10 @@ import { SalesFunnelViewer } from "./sales-funnel-viewer";
 import { reportService } from "../services/reportService";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 export function ReportGenerator() {
+  const t = useTranslations("reportsFeature.generator");
   const [reportType, setReportType] = useState<"visit" | "pipeline" | "sales-performance">("visit");
   const [startDate, setStartDate] = useState<string>(
     new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().split("T")[0]
@@ -106,10 +108,10 @@ export function ReportGenerator() {
       window.URL.revokeObjectURL(url);
     },
     onSuccess: () => {
-      toast.success("Report exported successfully");
+      toast.success(t("exportSuccess"));
     },
     onError: (error) => {
-      toast.error("Failed to export report");
+      toast.error(t("exportError"));
       console.error("Export error:", error);
     },
   });
@@ -124,13 +126,13 @@ export function ReportGenerator() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
-            Report Generator
+            {t("title")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="start-date">Start Date</Label>
+              <Label htmlFor="start-date">{t("startDateLabel")}</Label>
               <Input
                 id="start-date"
                 type="date"
@@ -139,7 +141,7 @@ export function ReportGenerator() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="end-date">End Date</Label>
+              <Label htmlFor="end-date">{t("endDateLabel")}</Label>
               <Input
                 id="end-date"
                 type="date"
@@ -151,19 +153,19 @@ export function ReportGenerator() {
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="account-id">Account ID (Optional)</Label>
+              <Label htmlFor="account-id">{t("accountIdLabel")}</Label>
               <Input
                 id="account-id"
-                placeholder="Filter by account"
+                placeholder={t("accountIdPlaceholder")}
                 value={accountId}
                 onChange={(e) => setAccountId(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="sales-rep-id">Sales Rep ID (Optional)</Label>
+              <Label htmlFor="sales-rep-id">{t("salesRepIdLabel")}</Label>
               <Input
                 id="sales-rep-id"
-                placeholder="Filter by sales rep"
+                placeholder={t("salesRepIdPlaceholder")}
                 value={salesRepId}
                 onChange={(e) => setSalesRepId(e.target.value)}
               />
@@ -172,17 +174,17 @@ export function ReportGenerator() {
 
           {reportType === "visit" && (
             <div className="space-y-2">
-              <Label htmlFor="status">Status (Optional)</Label>
+              <Label htmlFor="status">{t("statusLabel")}</Label>
               <Select value={status} onValueChange={setStatus}>
                 <SelectTrigger id="status">
-                  <SelectValue placeholder="All Status" />
+                  <SelectValue placeholder={t("statusAll")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="approved">Approved</SelectItem>
-                  <SelectItem value="rejected">Rejected</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="all">{t("statusAll")}</SelectItem>
+                  <SelectItem value="pending">{t("statusPending")}</SelectItem>
+                  <SelectItem value="approved">{t("statusApproved")}</SelectItem>
+                  <SelectItem value="rejected">{t("statusRejected")}</SelectItem>
+                  <SelectItem value="completed">{t("statusCompleted")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -197,7 +199,7 @@ export function ReportGenerator() {
                   className="gap-2"
                 >
                   <Download className="h-4 w-4" />
-                  {exportMutation.isPending ? "Exporting..." : "Export Report"}
+                  {exportMutation.isPending ? t("exportingButton") : t("exportButton")}
                   <ChevronDown className="h-4 w-4" />
                 </Button>
               </PopoverTrigger>
@@ -212,7 +214,7 @@ export function ReportGenerator() {
                     className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <FileTextIcon className="h-4 w-4" />
-                    Export as CSV
+                    {t("exportCsv")}
                   </button>
                   <button
                     onClick={() => {
@@ -223,7 +225,7 @@ export function ReportGenerator() {
                     className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <FileSpreadsheet className="h-4 w-4" />
-                    Export as Excel
+                    {t("exportExcel")}
                   </button>
                 </div>
               </PopoverContent>
@@ -234,14 +236,14 @@ export function ReportGenerator() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Report Viewer</CardTitle>
+          <CardTitle>{t("viewerTitle")}</CardTitle>
         </CardHeader>
         <CardContent>
           <Tabs value={reportType} onValueChange={(v) => setReportType(v as typeof reportType)}>
             <TabsList>
-              <TabsTrigger value="visit">Visit Reports</TabsTrigger>
-              <TabsTrigger value="pipeline">Pipeline</TabsTrigger>
-              <TabsTrigger value="sales-performance">Sales Performance</TabsTrigger>
+              <TabsTrigger value="visit">{t("tabVisit")}</TabsTrigger>
+              <TabsTrigger value="pipeline">{t("tabPipeline")}</TabsTrigger>
+              <TabsTrigger value="sales-performance">{t("tabSalesPerformance")}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="visit" className="mt-6">

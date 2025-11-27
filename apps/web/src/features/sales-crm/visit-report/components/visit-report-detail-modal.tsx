@@ -26,6 +26,7 @@ import { useState } from "react";
 import { PhotoUploadDialog } from "./photo-upload-dialog";
 import { ActivityTimeline } from "./activity-timeline";
 import { CreateActivityDialog } from "./create-activity-dialog";
+import { useTranslations } from "next-intl";
 
 const statusColors: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   draft: "outline",
@@ -65,6 +66,8 @@ export function VisitReportDetailModal({
     limit: 10,
   });
   const activities = timelineData?.data || [];
+  const t = useTranslations("visitReportDetail");
+  const tPhoto = useTranslations("photoUploadDialog");
 
   const formatDateTime = (dateString?: string) => {
     if (!dateString) return "-";
@@ -90,7 +93,7 @@ export function VisitReportDetailModal({
   const getCurrentLocation = (): Promise<{ latitude: number; longitude: number; address: string }> => {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
-        reject(new Error("Geolocation is not supported by your browser"));
+        reject(new Error(t("errors.geolocationUnsupported")));
         return;
       }
 
@@ -132,7 +135,7 @@ export function VisitReportDetailModal({
   const handleCheckIn = async () => {
     if (!visitReportId || !visitReport) return;
     try {
-      toast.loading("Getting your location...", { id: "checkin-location" });
+      toast.loading(t("actions.gettingLocation"), { id: "checkin-location" });
       const location = await getCurrentLocation();
       toast.dismiss("checkin-location");
       
@@ -142,14 +145,14 @@ export function VisitReportDetailModal({
           location,
         },
       });
-      toast.success("Checked in successfully");
+      toast.success(t("actions.checkInSuccess"));
       onVisitReportUpdated?.();
     } catch (error) {
       toast.dismiss("checkin-location");
       if (error instanceof Error) {
-        toast.error("Failed to get location", { description: error.message });
+        toast.error(t("actions.checkInGetLocationFailed"), { description: error.message });
       } else {
-        toast.error("Failed to check in");
+        toast.error(t("actions.checkInFailed"));
       }
     }
   };
@@ -157,7 +160,7 @@ export function VisitReportDetailModal({
   const handleCheckOut = async () => {
     if (!visitReportId || !visitReport) return;
     try {
-      toast.loading("Getting your location...", { id: "checkout-location" });
+      toast.loading(t("actions.gettingLocation"), { id: "checkout-location" });
       const location = await getCurrentLocation();
       toast.dismiss("checkout-location");
       
@@ -167,14 +170,14 @@ export function VisitReportDetailModal({
           location,
         },
       });
-      toast.success("Checked out successfully");
+      toast.success(t("actions.checkOutSuccess"));
       onVisitReportUpdated?.();
     } catch (error) {
       toast.dismiss("checkout-location");
       if (error instanceof Error) {
-        toast.error("Failed to get location", { description: error.message });
+        toast.error(t("actions.checkOutGetLocationFailed"), { description: error.message });
       } else {
-        toast.error("Failed to check out");
+        toast.error(t("actions.checkOutFailed"));
       }
     }
   };
@@ -183,7 +186,7 @@ export function VisitReportDetailModal({
     if (!visitReportId) return;
     try {
       await approve.mutateAsync(visitReportId);
-      toast.success("Visit report approved");
+      toast.success(t("actions.approveSuccess"));
       onVisitReportUpdated?.();
     } catch (error) {
       // Error already handled
@@ -197,7 +200,7 @@ export function VisitReportDetailModal({
         id: visitReportId,
         data: { reason: rejectReason },
       });
-      toast.success("Visit report rejected");
+      toast.success(t("actions.rejectSuccess"));
       setIsRejectDialogOpen(false);
       setRejectReason("");
       onVisitReportUpdated?.();
@@ -213,7 +216,7 @@ export function VisitReportDetailModal({
         id: visitReportId,
         data: { photo_url: photoUrl },
       });
-      toast.success("Photo uploaded successfully");
+      toast.success(t("actions.uploadPhotoSuccess"));
       onVisitReportUpdated?.();
     } catch (error) {
       // Error already handled
@@ -225,7 +228,7 @@ export function VisitReportDetailModal({
       <Drawer
         open={open}
         onOpenChange={onOpenChange}
-        title="Visit Report Details"
+        title={t("drawerTitle")}
         side="right"
         className="max-w-3xl"
       >
@@ -249,7 +252,7 @@ export function VisitReportDetailModal({
 
           {error && (
             <div className="text-center text-muted-foreground py-8">
-              Failed to load visit report details
+              {t("loadError")}
             </div>
           )}
 
@@ -275,7 +278,7 @@ export function VisitReportDetailModal({
                         disabled={reject.isPending}
                       >
                         <XCircle className="h-4 w-4 mr-2" />
-                        Reject
+                        {t("actions.reject")}
                       </Button>
                       <Button
                         size="sm"
@@ -283,7 +286,7 @@ export function VisitReportDetailModal({
                         disabled={approve.isPending}
                       >
                         <CheckCircle2 className="h-4 w-4 mr-2" />
-                        Approve
+                        {t("actions.approve")}
                       </Button>
                     </>
                   )}
@@ -294,7 +297,7 @@ export function VisitReportDetailModal({
                       disabled={checkIn.isPending}
                     >
                       <MapPin className="h-4 w-4 mr-2" />
-                      Check In
+                      {t("actions.checkIn")}
                     </Button>
                   )}
                   {visitReport.check_in_time && !visitReport.check_out_time && (
@@ -305,7 +308,7 @@ export function VisitReportDetailModal({
                       disabled={checkOut.isPending}
                     >
                       <MapPin className="h-4 w-4 mr-2" />
-                      Check Out
+                      {t("actions.checkOut")}
                     </Button>
                   )}
                 </div>
@@ -316,13 +319,15 @@ export function VisitReportDetailModal({
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <FileText className="h-5 w-5" />
-                    Visit Information
+                    {t("sections.visitInformationTitle")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <div className="text-sm text-muted-foreground mb-1">Account</div>
+                      <div className="text-sm text-muted-foreground mb-1">
+                        {t("sections.accountLabel")}
+                      </div>
                       <div className="flex items-center gap-2">
                         <Building2 className="h-4 w-4 text-muted-foreground" />
                         <span className="font-medium">{visitReport.account?.name || "N/A"}</span>
@@ -330,7 +335,9 @@ export function VisitReportDetailModal({
                     </div>
                     {visitReport.contact && (
                       <div>
-                        <div className="text-sm text-muted-foreground mb-1">Contact</div>
+                        <div className="text-sm text-muted-foreground mb-1">
+                          {t("sections.contactLabel")}
+                        </div>
                         <div className="flex items-center gap-2">
                           <User className="h-4 w-4 text-muted-foreground" />
                           <span className="font-medium">{visitReport.contact.name}</span>
@@ -340,13 +347,17 @@ export function VisitReportDetailModal({
                   </div>
 
                   <div>
-                    <div className="text-sm text-muted-foreground mb-1">Purpose</div>
+                    <div className="text-sm text-muted-foreground mb-1">
+                      {t("sections.purposeLabel")}
+                    </div>
                     <p className="text-sm">{visitReport.purpose}</p>
                   </div>
 
                   {visitReport.notes && (
                     <div>
-                      <div className="text-sm text-muted-foreground mb-1">Notes</div>
+                      <div className="text-sm text-muted-foreground mb-1">
+                        {t("sections.notesLabel")}
+                      </div>
                       <p className="text-sm whitespace-pre-wrap">{visitReport.notes}</p>
                     </div>
                   )}
@@ -358,13 +369,15 @@ export function VisitReportDetailModal({
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Clock className="h-5 w-5" />
-                    Check In/Out
+                    {t("sections.checkInOutTitle")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <div className="text-sm text-muted-foreground mb-1">Check In</div>
+                      <div className="text-sm text-muted-foreground mb-1">
+                        {t("sections.checkInLabel")}
+                      </div>
                       <div className="flex items-center gap-2">
                         {visitReport.check_in_time ? (
                           <>
@@ -372,7 +385,9 @@ export function VisitReportDetailModal({
                             <span className="text-sm">{formatDateTime(visitReport.check_in_time)}</span>
                           </>
                         ) : (
-                          <span className="text-sm text-muted-foreground">Not checked in</span>
+                          <span className="text-sm text-muted-foreground">
+                            {t("sections.notCheckedIn")}
+                          </span>
                         )}
                       </div>
                       {visitReport.check_in_location && (
@@ -383,7 +398,9 @@ export function VisitReportDetailModal({
                       )}
                     </div>
                     <div>
-                      <div className="text-sm text-muted-foreground mb-1">Check Out</div>
+                      <div className="text-sm text-muted-foreground mb-1">
+                        {t("sections.checkOutLabel")}
+                      </div>
                       <div className="flex items-center gap-2">
                         {visitReport.check_out_time ? (
                           <>
@@ -391,7 +408,9 @@ export function VisitReportDetailModal({
                             <span className="text-sm">{formatDateTime(visitReport.check_out_time)}</span>
                           </>
                         ) : (
-                          <span className="text-sm text-muted-foreground">Not checked out</span>
+                          <span className="text-sm text-muted-foreground">
+                            {t("sections.notCheckedOut")}
+                          </span>
                         )}
                       </div>
                       {visitReport.check_out_location && (
@@ -409,7 +428,7 @@ export function VisitReportDetailModal({
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle>Photos</CardTitle>
+                    <CardTitle>{t("sections.photosTitle")}</CardTitle>
                     {(visitReport.status === "draft" || visitReport.status === "submitted") && (
                       <Button
                         size="sm"
@@ -418,7 +437,7 @@ export function VisitReportDetailModal({
                         disabled={uploadPhoto.isPending}
                       >
                         <Upload className="h-4 w-4 mr-2" />
-                        Upload Photo
+                        {tPhoto("buttons.upload")}
                       </Button>
                     )}
                   </div>
@@ -439,14 +458,16 @@ export function VisitReportDetailModal({
                             rel="noopener noreferrer"
                             className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-md"
                           >
-                            <span className="text-white text-xs">View</span>
+                            <span className="text-white text-xs">
+                              {t("sections.viewPhoto")}
+                            </span>
                           </a>
                         </div>
                       ))}
                     </div>
                   ) : (
                     <div className="text-center text-muted-foreground py-8">
-                      No photos uploaded yet
+                      {t("sections.noPhotos")}
                     </div>
                   )}
                 </CardContent>
@@ -456,11 +477,13 @@ export function VisitReportDetailModal({
               {visitReport.approved_at && (
                 <Card>
                   <CardHeader>
-                    <CardTitle>Approval</CardTitle>
+                    <CardTitle>{t("sections.approvalTitle")}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-sm">
-                      <div className="text-muted-foreground mb-1">Approved at</div>
+                      <div className="text-muted-foreground mb-1">
+                        {t("sections.approvedAtLabel")}
+                      </div>
                       <div>{formatDateTime(visitReport.approved_at)}</div>
                     </div>
                   </CardContent>
@@ -470,11 +493,13 @@ export function VisitReportDetailModal({
               {visitReport.rejection_reason && (
                 <Card>
                   <CardHeader>
-                    <CardTitle>Rejection</CardTitle>
+                    <CardTitle>{t("sections.rejectionTitle")}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-sm">
-                      <div className="text-muted-foreground mb-1">Reason</div>
+                      <div className="text-muted-foreground mb-1">
+                        {t("sections.rejectionReasonLabel")}
+                      </div>
                       <div>{visitReport.rejection_reason}</div>
                     </div>
                   </CardContent>
@@ -485,14 +510,14 @@ export function VisitReportDetailModal({
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle>Activity Timeline</CardTitle>
+                    <CardTitle>{t("sections.activityTimelineTitle")}</CardTitle>
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => setIsCreateActivityDialogOpen(true)}
                     >
                       <Plus className="h-4 w-4 mr-2" />
-                      Add Activity
+                      {t("sections.addActivity")}
                     </Button>
                   </div>
                 </CardHeader>
@@ -512,15 +537,17 @@ export function VisitReportDetailModal({
       <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Reject Visit Report</DialogTitle>
+            <DialogTitle>{t("rejectDialog.title")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium mb-2 block">Reason *</label>
+              <label className="text-sm font-medium mb-2 block">
+                {t("rejectDialog.reasonLabel")} *
+              </label>
               <textarea
                 value={rejectReason}
                 onChange={(e) => setRejectReason(e.target.value)}
-                placeholder="Enter rejection reason"
+                placeholder={t("rejectDialog.reasonPlaceholder")}
                 className="w-full min-h-[100px] rounded-md border border-input bg-background px-3 py-2 text-sm"
                 rows={4}
               />
@@ -534,14 +561,14 @@ export function VisitReportDetailModal({
                 }}
                 disabled={reject.isPending}
               >
-                Cancel
+                {t("rejectDialog.cancel")}
               </Button>
               <Button
                 onClick={handleReject}
                 disabled={reject.isPending || !rejectReason.trim()}
                 variant="destructive"
               >
-                {reject.isPending ? "Rejecting..." : "Reject"}
+                {reject.isPending ? t("rejectDialog.submitting") : t("rejectDialog.submit")}
               </Button>
             </div>
           </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations, useLocale } from "next-intl";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -42,6 +43,8 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export function VisitStatistics() {
+  const t = useTranslations("visitStatistics");
+  const locale = useLocale();
   const [timeRange, setTimeRange] = React.useState<"7d" | "30d" | "90d">("30d");
   const { data, isLoading } = useVisitStatistics({ period: "month" });
 
@@ -82,7 +85,7 @@ export function VisitStatistics() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Visit Statistics</CardTitle>
+          <CardTitle>{t("title")}</CardTitle>
         </CardHeader>
         <CardContent>
           <Skeleton className="h-64 w-full" />
@@ -101,18 +104,18 @@ export function VisitStatistics() {
         <div className="grid flex-1 gap-1">
           <div className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5" />
-            <CardTitle>Visit Statistics</CardTitle>
+            <CardTitle>{t("title")}</CardTitle>
           </div>
-          <CardDescription>Showing visit trends over time</CardDescription>
+          <CardDescription>{t("description")}</CardDescription>
         </div>
         <Select value={timeRange} onValueChange={(v) => setTimeRange(v as typeof timeRange)}>
           <SelectTrigger className="w-[160px] rounded-lg sm:ml-auto">
-            <SelectValue placeholder="Last 30 days" />
+            <SelectValue placeholder={t("timeRange.30d")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="7d">Last 7 days</SelectItem>
-            <SelectItem value="30d">Last 30 days</SelectItem>
-            <SelectItem value="90d">Last 90 days</SelectItem>
+            <SelectItem value="7d">{t("timeRange.7d")}</SelectItem>
+            <SelectItem value="30d">{t("timeRange.30d")}</SelectItem>
+            <SelectItem value="90d">{t("timeRange.90d")}</SelectItem>
           </SelectContent>
         </Select>
       </CardHeader>
@@ -120,19 +123,19 @@ export function VisitStatistics() {
         <div className="space-y-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
-              <div className="text-sm text-muted-foreground">Total</div>
+              <div className="text-sm text-muted-foreground">{t("total")}</div>
               <div className="text-2xl font-bold">{stats.total}</div>
             </div>
             <div>
-              <div className="text-sm text-muted-foreground">Completed</div>
+              <div className="text-sm text-muted-foreground">{t("completed")}</div>
               <div className="text-2xl font-bold">{stats.completed}</div>
             </div>
             <div>
-              <div className="text-sm text-muted-foreground">Pending</div>
+              <div className="text-sm text-muted-foreground">{t("pending")}</div>
               <div className="text-2xl font-bold">{stats.pending}</div>
             </div>
             <div>
-              <div className="text-sm text-muted-foreground">Approved</div>
+              <div className="text-sm text-muted-foreground">{t("approved")}</div>
               <div className="text-2xl font-bold">{stats.approved}</div>
             </div>
           </div>
@@ -163,7 +166,7 @@ export function VisitStatistics() {
                   minTickGap={32}
                   tickFormatter={(value) => {
                     const date = new Date(value);
-                    return date.toLocaleDateString("id-ID", {
+                    return date.toLocaleDateString(locale, {
                       month: "short",
                       day: "numeric",
                     });
@@ -174,7 +177,7 @@ export function VisitStatistics() {
                   content={
                     <ChartTooltipContent
                       labelFormatter={(value) => {
-                        return new Date(value).toLocaleDateString("id-ID", {
+                        return new Date(value).toLocaleDateString(locale, {
                           month: "short",
                           day: "numeric",
                           year: "numeric",

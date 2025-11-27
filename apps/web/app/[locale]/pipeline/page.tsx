@@ -1,6 +1,7 @@
 "use client";
 
 import { LayoutDashboard, BarChart3, TrendingUp } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { AuthGuard } from "@/features/auth/components/auth-guard";
 import { KanbanBoard } from "@/features/sales-crm/pipeline-management/components/kanban-board";
 import { PipelineSummary } from "@/features/sales-crm/pipeline-management/components/pipeline-summary";
@@ -10,6 +11,7 @@ import { useRouter } from "next/navigation";
 
 function PipelinePageContent() {
   const router = useRouter();
+  const t = useTranslations("pipelinePage");
 
   const handleDealClick = (deal: { id: string }) => {
     router.push(`/deals/${deal.id}`);
@@ -18,9 +20,11 @@ function PipelinePageContent() {
   return (
     <div className="container mx-auto py-6 sm:py-8 px-4 sm:px-6 max-w-7xl">
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Sales Pipeline</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">
+          {t("title")}
+        </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Manage your sales opportunities and track performance
+          {t("description")}
         </p>
       </div>
       
@@ -28,15 +32,15 @@ function PipelinePageContent() {
         <TabsList>
           <TabsTrigger value="kanban" className="gap-2">
             <LayoutDashboard className="h-4 w-4" />
-            Kanban Board
+            {t("tabs.kanban")}
           </TabsTrigger>
           <TabsTrigger value="summary" className="gap-2">
             <BarChart3 className="h-4 w-4" />
-            Summary
+            {t("tabs.summary")}
           </TabsTrigger>
           <TabsTrigger value="forecast" className="gap-2">
             <TrendingUp className="h-4 w-4" />
-            Forecast
+            {t("tabs.forecast")}
           </TabsTrigger>
         </TabsList>
 

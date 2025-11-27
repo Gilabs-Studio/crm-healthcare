@@ -1,18 +1,19 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useDashboardOverview } from "../hooks/useDashboard";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TrendingUp, TrendingDown, Users, MapPin, Activity } from "lucide-react";
 
 export function DashboardOverview() {
+  const t = useTranslations("dashboardOverview");
   const { data, isLoading } = useDashboardOverview({ period: "today" });
 
   if (isLoading) {
     return (
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {[...Array(4)].map((_, i) => (
-          <Card key={i}>
+        {["a", "b", "c", "d"].map((key) => (
+          <Card key={`dashboard-overview-skeleton-${key}`}>
             <CardHeader className="pb-2">
               <Skeleton className="h-4 w-24" />
             </CardHeader>
@@ -37,13 +38,16 @@ export function DashboardOverview() {
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">
-            Total Visits
+            {t("totalVisits.title")}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{overview.visit_stats.total}</div>
           <p className="text-xs text-muted-foreground mt-1">
-            {overview.visit_stats.completed} completed, {overview.visit_stats.pending} pending
+            {t("totalVisits.description", {
+              completed: overview.visit_stats.completed,
+              pending: overview.visit_stats.pending,
+            })}
           </p>
         </CardContent>
       </Card>
@@ -51,13 +55,16 @@ export function DashboardOverview() {
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">
-            Total Accounts
+            {t("totalAccounts.title")}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{overview.account_stats.total}</div>
           <p className="text-xs text-muted-foreground mt-1">
-            {overview.account_stats.active} active, {overview.account_stats.inactive} inactive
+            {t("totalAccounts.description", {
+              active: overview.account_stats.active,
+              inactive: overview.account_stats.inactive,
+            })}
           </p>
         </CardContent>
       </Card>
@@ -65,13 +72,17 @@ export function DashboardOverview() {
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">
-            Total Activities
+            {t("totalActivities.title")}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{overview.activity_stats.total}</div>
           <p className="text-xs text-muted-foreground mt-1">
-            {overview.activity_stats.visits} visits, {overview.activity_stats.calls} calls, {overview.activity_stats.emails} emails
+            {t("totalActivities.description", {
+              visits: overview.activity_stats.visits,
+              calls: overview.activity_stats.calls,
+              emails: overview.activity_stats.emails,
+            })}
           </p>
         </CardContent>
       </Card>
@@ -79,13 +90,15 @@ export function DashboardOverview() {
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">
-            Approved Visits
+            {t("approvedVisits.title")}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{overview.visit_stats.approved}</div>
           <p className="text-xs text-muted-foreground mt-1">
-            {overview.visit_stats.rejected} rejected
+            {t("approvedVisits.description", {
+              rejected: overview.visit_stats.rejected,
+            })}
           </p>
         </CardContent>
       </Card>

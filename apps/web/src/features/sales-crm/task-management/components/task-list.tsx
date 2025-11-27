@@ -16,8 +16,11 @@ import { TaskForm } from "./task-form";
 import { TaskCard } from "./task-card";
 import { useUsers } from "@/features/master-data/user-management/hooks/useUsers";
 import { useAccounts } from "@/features/sales-crm/account-management/hooks/useAccounts";
+import { useTranslations } from "next-intl";
 
 export function TaskList() {
+  const t = useTranslations("taskManagement.list");
+
   const {
     page,
     setPage,
@@ -86,7 +89,7 @@ export function TaskList() {
   const columns: Column<Task>[] = [
     {
       id: "title",
-      header: "Task",
+      header: t("table.columnTask"),
       accessor: (row) => (
         <TaskCard
           task={row}
@@ -99,7 +102,7 @@ export function TaskList() {
     },
     {
       id: "due_date",
-      header: "Due Date",
+      header: t("table.columnDueDate"),
       accessor: (row) => (
         <span className="text-xs text-muted-foreground">{formatDate(row.due_date)}</span>
       ),
@@ -127,7 +130,7 @@ export function TaskList() {
           <div className="relative flex-1 min-w-[200px] max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search tasks..."
+              placeholder={t("searchPlaceholder")}
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               className="pl-10 h-9"
@@ -139,14 +142,14 @@ export function TaskList() {
             onValueChange={(value) => setStatus(value === "all" ? "" : value)}
           >
             <SelectTrigger className="w-[140px] h-9">
-              <SelectValue placeholder="Status" />
+              <SelectValue placeholder={t("filters.statusPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="in_progress">In Progress</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="cancelled">Cancelled</SelectItem>
+              <SelectItem value="all">{t("filters.statusAll")}</SelectItem>
+              <SelectItem value="pending">{t("filters.statusPending")}</SelectItem>
+              <SelectItem value="in_progress">{t("filters.statusInProgress")}</SelectItem>
+              <SelectItem value="completed">{t("filters.statusCompleted")}</SelectItem>
+              <SelectItem value="cancelled">{t("filters.statusCancelled")}</SelectItem>
             </SelectContent>
           </Select>
 
@@ -155,28 +158,28 @@ export function TaskList() {
             onValueChange={(value) => setPriority(value === "all" ? "" : value)}
           >
             <SelectTrigger className="w-[140px] h-9">
-              <SelectValue placeholder="Priority" />
+              <SelectValue placeholder={t("filters.priorityPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Priority</SelectItem>
-              <SelectItem value="low">Low</SelectItem>
-              <SelectItem value="medium">Medium</SelectItem>
-              <SelectItem value="high">High</SelectItem>
-              <SelectItem value="urgent">Urgent</SelectItem>
+              <SelectItem value="all">{t("filters.priorityAll")}</SelectItem>
+              <SelectItem value="low">{t("filters.priorityLow")}</SelectItem>
+              <SelectItem value="medium">{t("filters.priorityMedium")}</SelectItem>
+              <SelectItem value="high">{t("filters.priorityHigh")}</SelectItem>
+              <SelectItem value="urgent">{t("filters.priorityUrgent")}</SelectItem>
             </SelectContent>
           </Select>
 
           <Select value={type || "all"} onValueChange={(value) => setType(value === "all" ? "" : value)}>
             <SelectTrigger className="w-[140px] h-9">
-              <SelectValue placeholder="Type" />
+              <SelectValue placeholder={t("filters.typePlaceholder")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="general">General</SelectItem>
-              <SelectItem value="call">Call</SelectItem>
-              <SelectItem value="email">Email</SelectItem>
-              <SelectItem value="meeting">Meeting</SelectItem>
-              <SelectItem value="follow_up">Follow Up</SelectItem>
+              <SelectItem value="all">{t("filters.typeAll")}</SelectItem>
+              <SelectItem value="general">{t("filters.typeGeneral")}</SelectItem>
+              <SelectItem value="call">{t("filters.typeCall")}</SelectItem>
+              <SelectItem value="email">{t("filters.typeEmail")}</SelectItem>
+              <SelectItem value="meeting">{t("filters.typeMeeting")}</SelectItem>
+              <SelectItem value="follow_up">{t("filters.typeFollowUp")}</SelectItem>
             </SelectContent>
           </Select>
 
@@ -185,10 +188,10 @@ export function TaskList() {
             onValueChange={(value) => setAssignedTo(value === "all" ? "" : value)}
           >
             <SelectTrigger className="w-[180px] h-9">
-              <SelectValue placeholder="Assignee" />
+              <SelectValue placeholder={t("filters.assigneePlaceholder")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Assignees</SelectItem>
+              <SelectItem value="all">{t("filters.assigneeAll")}</SelectItem>
               {users.map((user) => (
                 <SelectItem key={user.id} value={user.id}>
                   {user.name}
@@ -202,10 +205,10 @@ export function TaskList() {
             onValueChange={(value) => setAccountId(value === "all" ? "" : value)}
           >
             <SelectTrigger className="w-[180px] h-9">
-              <SelectValue placeholder="Account" />
+              <SelectValue placeholder={t("filters.accountPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Accounts</SelectItem>
+              <SelectItem value="all">{t("filters.accountAll")}</SelectItem>
               {accounts.map((account) => (
                 <SelectItem key={account.id} value={account.id}>
                   {account.name}
@@ -250,7 +253,7 @@ export function TaskList() {
 
         <Button type="button" onClick={() => setIsCreateDialogOpen(true)} size="sm">
           <Plus className="h-4 w-4 mr-2" />
-          Add Task
+          {t("buttons.addTask")}
         </Button>
       </div>
 
@@ -258,7 +261,7 @@ export function TaskList() {
         columns={columns}
         data={tasks}
         isLoading={isLoading}
-        emptyMessage="No tasks found"
+        emptyMessage={t("table.empty")}
         pagination={
           pagination
             ? {
@@ -273,7 +276,7 @@ export function TaskList() {
         }
         onPageChange={setPage}
         onPerPageChange={setPerPage}
-        itemName="task"
+        itemName={t("table.itemName")}
         perPageOptions={[10, 20, 50, 100]}
       />
 
@@ -281,7 +284,7 @@ export function TaskList() {
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Create Task</DialogTitle>
+            <DialogTitle>{t("buttons.createTitle")}</DialogTitle>
           </DialogHeader>
           <TaskForm
             onSubmit={handleCreate}
@@ -296,7 +299,7 @@ export function TaskList() {
         <Dialog open={!!editingTaskId} onOpenChange={(open) => !open && setEditingTaskId(null)}>
           <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Edit Task</DialogTitle>
+              <DialogTitle>{t("buttons.editTitle")}</DialogTitle>
             </DialogHeader>
             <TaskForm
               task={editingTaskData.data}
@@ -317,9 +320,9 @@ export function TaskList() {
           }
         }}
         onConfirm={handleDeleteConfirm}
-        title="Delete Task?"
-        description="Are you sure you want to delete this task? This action cannot be undone."
-        itemName="task"
+        title={t("deleteDialog.title")}
+        description={t("deleteDialog.description")}
+        itemName={t("table.itemName")}
         isLoading={deleteTask.isPending}
       />
     </div>

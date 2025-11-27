@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { PipelineReport } from "../types";
 
 interface SalesFunnelTableProps {
@@ -39,6 +40,7 @@ interface DealRow {
 }
 
 export function SalesFunnelTable({ data }: SalesFunnelTableProps) {
+  const t = useTranslations("reportsFeature.salesFunnelTable");
   // Calculate expected revenue from summary (placeholder until deals API is available)
   const grandTotalValue = data.summary.total_value;
   const grandTotalExpected = data.summary.total_value * 0.5; // Placeholder calculation
@@ -117,18 +119,21 @@ export function SalesFunnelTable({ data }: SalesFunnelTableProps) {
         <Info className="h-4 w-4" />
         <AlertDescription>
           <p className="text-sm">
-            <strong>Note:</strong> This table shows placeholder data. Actual deal data will be available after Sales
-            Pipeline Management module is implemented (Sprint 2 - Dev2). The following fields need to be added:
+            <strong>{t("noteTitle")}</strong>{" "}
+            {t("noteIntro")}
           </p>
           <ul className="text-sm mt-2 list-disc list-inside space-y-1">
             <li>
-              <strong>Deal API endpoint:</strong> GET /api/v1/deals (to fetch individual deals)
+              <strong>{t("noteEndpoint").split(":")[0]}:</strong>{" "}
+              {t("noteEndpoint").split(":")[1] ?? ""}
             </li>
             <li>
-              <strong>Deal fields:</strong> next_step, last_interacted_on (from Activity module)
+              <strong>{t("noteFields").split(":")[0]}:</strong>{" "}
+              {t("noteFields").split(":")[1] ?? ""}
             </li>
             <li>
-              <strong>Progress calculation:</strong> Based on stage order and probability
+              <strong>{t("noteProgress").split(":")[0]}:</strong>{" "}
+              {t("noteProgress").split(":")[1] ?? ""}
             </li>
           </ul>
         </AlertDescription>
@@ -136,32 +141,38 @@ export function SalesFunnelTable({ data }: SalesFunnelTableProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Sales Funnel</CardTitle>
+          <CardTitle>{t("title")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Company Name</TableHead>
-                  <TableHead>Contact Name</TableHead>
-                  <TableHead>Contact Email</TableHead>
-                  <TableHead>Stage</TableHead>
-                  <TableHead className="text-right">Value</TableHead>
-                  <TableHead className="text-right">Probability</TableHead>
-                  <TableHead className="text-right">Expected Revenue</TableHead>
-                  <TableHead>Creation Date</TableHead>
-                  <TableHead>Expected Close Date</TableHead>
-                  <TableHead>Team Member</TableHead>
-                  <TableHead>Progress to Won</TableHead>
-                  <TableHead>Last Interacted On</TableHead>
-                  <TableHead>Next Step</TableHead>
+                  <TableHead>{t("columns.companyName")}</TableHead>
+                  <TableHead>{t("columns.contactName")}</TableHead>
+                  <TableHead>{t("columns.contactEmail")}</TableHead>
+                  <TableHead>{t("columns.stage")}</TableHead>
+                  <TableHead className="text-right">
+                    {t("columns.value")}
+                  </TableHead>
+                  <TableHead className="text-right">
+                    {t("columns.probability")}
+                  </TableHead>
+                  <TableHead className="text-right">
+                    {t("columns.expectedRevenue")}
+                  </TableHead>
+                  <TableHead>{t("columns.creationDate")}</TableHead>
+                  <TableHead>{t("columns.expectedCloseDate")}</TableHead>
+                  <TableHead>{t("columns.teamMember")}</TableHead>
+                  <TableHead>{t("columns.progressToWon")}</TableHead>
+                  <TableHead>{t("columns.lastInteractedOn")}</TableHead>
+                  <TableHead>{t("columns.nextStep")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {/* Grand Total Row */}
                 <TableRow className="bg-red-50 font-bold">
-                  <TableCell colSpan={4}>GRAND TOTAL</TableCell>
+                  <TableCell colSpan={4}>{t("grandTotal")}</TableCell>
                   <TableCell className="text-right">{formatCurrency(grandTotalValue)}</TableCell>
                   <TableCell className="text-right">-</TableCell>
                   <TableCell className="text-right">{formatCurrency(grandTotalExpected)}</TableCell>
@@ -199,7 +210,9 @@ export function SalesFunnelTable({ data }: SalesFunnelTableProps) {
                     </TableCell>
                     <TableCell>
                       <span className={deal.status === "placeholder" ? "text-muted-foreground italic" : ""}>
-                        {deal.status === "placeholder" ? "N/A (Sprint 2)" : formatDate(deal.last_interacted_on)}
+                        {deal.status === "placeholder"
+                          ? "N/A (Sprint 2)"
+                          : formatDate(deal.last_interacted_on)}
                       </span>
                     </TableCell>
                     <TableCell>
@@ -214,7 +227,7 @@ export function SalesFunnelTable({ data }: SalesFunnelTableProps) {
                 {mockDeals.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={13} className="text-center py-8 text-muted-foreground">
-                      No deals available. Deals will be displayed here once the Sales Pipeline module is implemented.
+                      {t("emptyDeals")}
                     </TableCell>
                   </TableRow>
                 )}

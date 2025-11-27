@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import type { ProductCategory } from "../types/category";
+import { useTranslations } from "next-intl";
 
 interface ProductCategoryFormProps {
   readonly category?: ProductCategory;
@@ -30,6 +31,7 @@ export function ProductCategoryForm({
   isLoading,
 }: ProductCategoryFormProps) {
   const isEdit = !!category;
+  const t = useTranslations("productManagement.categoryForm");
 
   const {
     register,
@@ -58,45 +60,51 @@ export function ProductCategoryForm({
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
       <Field orientation="vertical">
-        <FieldLabel>Name *</FieldLabel>
-        <Input {...register("name")} placeholder="Category name (e.g., Prescription Drug)" />
+        <FieldLabel>{t("nameLabel")} *</FieldLabel>
+        <Input
+          {...register("name")}
+          placeholder={t("namePlaceholder")}
+        />
         {errors.name && <FieldError>{errors.name.message}</FieldError>}
       </Field>
 
       <Field orientation="vertical">
-        <FieldLabel>Slug</FieldLabel>
-        <Input {...register("slug")} placeholder="Slug (optional, auto-generated if empty)" />
+        <FieldLabel>{t("slugLabel")}</FieldLabel>
+        <Input
+          {...register("slug")}
+          placeholder={t("slugPlaceholder")}
+        />
         {errors.slug && <FieldError>{errors.slug.message}</FieldError>}
       </Field>
 
       <Field orientation="vertical">
-        <FieldLabel>Description</FieldLabel>
+        <FieldLabel>{t("descriptionLabel")}</FieldLabel>
         <Textarea
           {...register("description")}
-          placeholder="Description (optional)"
+          placeholder={t("descriptionPlaceholder")}
           rows={3}
         />
         {errors.description && <FieldError>{errors.description.message}</FieldError>}
       </Field>
 
       <Field orientation="vertical">
-        <FieldLabel>Status</FieldLabel>
+        <FieldLabel>{t("statusLabel")}</FieldLabel>
         <select
           {...register("status")}
           className="h-9 rounded-md border border-input bg-background px-2 text-sm"
         >
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
+          <option value="active">{t("statusActive")}</option>
+          <option value="inactive">{t("statusInactive")}</option>
         </select>
         {errors.status && <FieldError>{errors.status.message}</FieldError>}
       </Field>
 
       <div className="flex justify-end gap-2 pt-2">
         <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
-          Cancel
+          {t("cancel")}
         </Button>
         <Button type="submit" disabled={isLoading}>
-          {isLoading ? "Saving..." : isEdit ? "Update" : "Create"}
+          {isLoading ? t("submitting") : isEdit ? t("submitUpdate") : t("submitCreate")}
         </Button>
       </div>
     </form>

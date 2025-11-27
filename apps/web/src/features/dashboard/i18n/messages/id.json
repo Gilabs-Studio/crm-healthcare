@@ -21,11 +21,201 @@
     "customers": "Pelanggan"
   },
   "dashboard": {
-    "title": "Dashboard",
+    "title": "Beranda",
     "overview": "Ringkasan",
-    "totalSales": "Total Penjualan",
-    "totalOrders": "Total Pesanan",
-    "totalCustomers": "Total Pelanggan"
+    "welcomeBack": "Selamat datang kembali, {name}"
+  },
+  "dashboardOverview": {
+    "totalVisits": {
+      "title": "Total Kunjungan",
+      "description": "{completed} selesai, {pending} tertunda"
+    },
+    "totalAccounts": {
+      "title": "Total Akun",
+      "description": "{active} aktif, {inactive} tidak aktif"
+    },
+    "totalActivities": {
+      "title": "Total Aktivitas",
+      "description": "{visits} kunjungan, {calls} panggilan, {emails} email"
+    },
+    "approvedVisits": {
+      "title": "Kunjungan Disetujui",
+      "description": "{rejected} ditolak"
+    }
+  },
+  "activityTrends": {
+    "title": "Tren Aktivitas",
+    "description": "Menampilkan tren aktivitas dari waktu ke waktu",
+    "totalVisits": "Total Kunjungan",
+    "totalCalls": "Total Panggilan",
+    "totalEmails": "Total Email",
+    "timeRange": {
+      "7d": "7 hari terakhir",
+      "30d": "30 hari terakhir",
+      "90d": "90 hari terakhir"
+    }
+  },
+  "visitStatistics": {
+    "title": "Statistik Kunjungan",
+    "description": "Menampilkan tren kunjungan dari waktu ke waktu",
+    "total": "Total",
+    "completed": "Selesai",
+    "pending": "Tertunda",
+    "approved": "Disetujui",
+    "timeRange": {
+      "7d": "7 hari terakhir",
+      "30d": "30 hari terakhir",
+      "90d": "90 hari terakhir"
+    }
+  },
+  "pipelineSummary": {
+    "title": "Ringkasan Pipeline",
+    "totalDeals": "Total Deal",
+    "totalValue": "Total Nilai",
+    "wonDeals": "Deal Menang",
+    "lostDeals": "Deal Kalah",
+    "openDeals": "Deal Terbuka",
+    "byStage": "Per Tahap",
+    "dealsSuffix": "deal"
+  },
+  "recentActivities": {
+    "title": "Aktivitas Terbaru",
+    "empty": "Belum ada aktivitas terbaru",
+    "justNow": "Baru saja",
+    "minutesAgo": "{count}mnt lalu",
+    "hoursAgo": "{count}jam lalu",
+    "daysAgo": "{count}hr lalu",
+    "olderDate": "{date}"
+  },
+  "topAccounts": {
+    "title": "Akun Teratas",
+    "empty": "Belum ada akun",
+    "visits": "{count} kunjungan",
+    "activities": "{count} aktivitas"
+  },
+  "topSalesReps": {
+    "title": "Sales Teratas",
+    "empty": "Belum ada data sales",
+    "visits": "{count} kunjungan",
+    "accounts": "{count} akun",
+    "activities": "{count} aktivitas"
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "visitReports": "Laporan Kunjungan",
+    "accounts": "Akun",
+    "deals": "Deal",
+    "pipeline": "Pipeline",
+    "products": "Produk",
+    "productCategories": "Kategori Produk",
+    "reports": "Laporan",
+    "tasks": "Tugas",
+    "settings": "Pengaturan",
+    "masterData": "Data Master"
+  },
+  "settings": {
+    "title": "Pengaturan",
+    "description": "Kelola pengaturan dan preferensi sistem Anda"
+  },
+  "reports": {
+    "title": "Laporan",
+    "description": "Buat dan lihat laporan sistem"
+  },
+  "pipelinePage": {
+    "title": "Sales Pipeline",
+    "description": "Kelola peluang penjualan dan pantau performa",
+    "tabs": {
+      "kanban": "Kanban Board",
+      "summary": "Ringkasan",
+      "forecast": "Perkiraan"
+    }
+  },
+  "tasks": {
+    "detail": {
+      "loading": "Memuat tugas...",
+      "notFound": "Tugas tidak ditemukan",
+      "backToList": "Kembali ke daftar tugas",
+      "back": "Kembali",
+      "toast": {
+        "updated": "Tugas berhasil diperbarui",
+        "deleted": "Tugas berhasil dihapus",
+        "completed": "Tugas berhasil ditandai selesai"
+      },
+      "actions": {
+        "edit": "Edit",
+        "delete": "Hapus",
+        "markCompleted": "Tandai sebagai selesai",
+        "markCompletedLoading": "Sedang menyelesaikan..."
+      },
+      "sections": {
+        "description": "Deskripsi",
+        "account": "Akun",
+        "contact": "Kontak",
+        "assignedTo": "Ditugaskan ke",
+        "createdAt": "Dibuat pada:",
+        "updatedAt": "Terakhir diperbarui:"
+      },
+      "deleteDialog": {
+        "title": "Hapus Tugas",
+        "description": "Apakah Anda yakin ingin menghapus tugas ini? Tindakan ini tidak dapat dibatalkan.",
+        "cancel": "Batal",
+        "confirm": "Hapus",
+        "confirmLoading": "Menghapus..."
+      }
+    }
+  },
+  "deals": {
+    "detail": {
+      "loading": "Memuat deal...",
+      "notFound": "Deal tidak ditemukan",
+      "backToList": "Kembali ke Pipeline",
+      "back": "Kembali",
+      "toast": {
+        "updated": "Deal berhasil diperbarui",
+        "deleted": "Deal berhasil dihapus"
+      },
+      "actions": {
+        "edit": "Edit",
+        "delete": "Hapus"
+      },
+      "sections": {
+        "description": "Deskripsi",
+        "account": "Akun",
+        "contact": "Kontak",
+        "assignedTo": "Ditugaskan ke",
+        "expectedCloseDate": "Perkiraan tanggal selesai",
+        "actualCloseDate": "Tanggal selesai aktual",
+        "source": "Sumber",
+        "notes": "Catatan",
+        "createdAt": "Dibuat:",
+        "updatedAt": "Terakhir diperbarui:"
+      },
+      "deleteDialog": {
+        "title": "Hapus Deal",
+        "description": "Apakah Anda yakin ingin menghapus deal ini? Tindakan ini tidak dapat dibatalkan.",
+        "cancel": "Batal",
+        "confirm": "Hapus",
+        "confirmLoading": "Menghapus..."
+      },
+      "fallbacks": {
+        "unknownAccount": "Tidak diketahui"
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Selamat datang kembali",
+      "description": "Masuk ke akun CRM Healthcare Anda untuk melanjutkan",
+      "emailLabel": "Email",
+      "emailPlaceholder": "admin@example.com",
+      "passwordLabel": "Kata sandi",
+      "passwordPlaceholder": "Masukkan kata sandi",
+      "forgotPassword": "Lupa kata sandi?",
+      "rememberMe": "Ingat saya",
+      "submit": "Masuk",
+      "submitting": "Sedang masuk...",
+      "genericError": "Login gagal. Silakan coba lagi."
+    }
   },
   "notFound": {
     "label": "404",

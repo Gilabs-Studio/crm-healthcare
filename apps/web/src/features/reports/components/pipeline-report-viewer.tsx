@@ -2,7 +2,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TrendingUp, DollarSign, CheckCircle, XCircle } from "lucide-react";
+import { TrendingUp } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { PipelineReport } from "../types";
 
 interface PipelineReportViewerProps {
@@ -11,6 +12,9 @@ interface PipelineReportViewerProps {
 }
 
 export function PipelineReportViewer({ data, isLoading }: PipelineReportViewerProps) {
+  const t = useTranslations("reportsFeature.pipelineReportViewer");
+  const tCommon = useTranslations("reportsFeature.common");
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -23,7 +27,7 @@ export function PipelineReportViewer({ data, isLoading }: PipelineReportViewerPr
   if (!data) {
     return (
       <div className="text-center py-8 text-muted-foreground">
-        <p className="text-sm">No data available. Please generate a report.</p>
+        <p className="text-sm">{tCommon("noData")}</p>
       </div>
     );
   }
@@ -34,7 +38,9 @@ export function PipelineReportViewer({ data, isLoading }: PipelineReportViewerPr
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Deals</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              {t("totalDeals")}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{data.summary.total_deals}</div>
@@ -42,7 +48,9 @@ export function PipelineReportViewer({ data, isLoading }: PipelineReportViewerPr
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Value</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              {t("totalValue")}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -56,7 +64,9 @@ export function PipelineReportViewer({ data, isLoading }: PipelineReportViewerPr
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Won Deals</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              {t("wonDeals")}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{data.summary.won_deals}</div>
@@ -64,7 +74,9 @@ export function PipelineReportViewer({ data, isLoading }: PipelineReportViewerPr
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Lost Deals</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              {t("lostDeals")}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">{data.summary.lost_deals}</div>
@@ -78,7 +90,7 @@ export function PipelineReportViewer({ data, isLoading }: PipelineReportViewerPr
           <CardHeader>
             <div className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5" />
-              <CardTitle>By Stage</CardTitle>
+              <CardTitle>{t("byStageTitle")}</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
@@ -86,7 +98,9 @@ export function PipelineReportViewer({ data, isLoading }: PipelineReportViewerPr
               {Object.entries(data.by_stage).map(([stage, count]) => (
                 <div key={stage} className="flex items-center justify-between p-3 rounded-lg border">
                   <div className="font-medium capitalize">{stage.replace(/_/g, " ")}</div>
-                  <div className="text-sm text-muted-foreground">{count} deals</div>
+                  <div className="text-sm text-muted-foreground">
+                    {t("byStageItem", { count })}
+                  </div>
                 </div>
               ))}
             </div>

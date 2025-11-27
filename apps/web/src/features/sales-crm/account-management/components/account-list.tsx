@@ -38,6 +38,7 @@ import { toast } from "sonner";
 import type { Account, Contact } from "../types";
 import type { CreateContactFormData, UpdateContactFormData } from "../schemas/contact.schema";
 import type { VariantProps } from "class-variance-authority";
+import { useTranslations } from "next-intl";
 
 export function AccountList() {
   const {
@@ -110,6 +111,9 @@ export function AccountList() {
   const deleteContact = useDeleteContact();
   const createContact = useCreateContact();
   const updateContact = useUpdateContact();
+  const t = useTranslations("accountManagement.accountList");
+  const tContacts = useTranslations("accountManagement.accountList.contactsSection");
+  const tToast = useTranslations("accountManagement.accountList.toast");
 
   const handleCreateContactSubmit = async (data: CreateContactFormData) => {
     if (!createContactAccountId) return;
@@ -117,7 +121,7 @@ export function AccountList() {
       await createContact.mutateAsync({ ...data, account_id: createContactAccountId });
       setIsCreateContactDialogOpen(false);
       setCreateContactAccountId(null);
-      toast.success("Contact created successfully");
+      toast.success(tToast("contactCreated"));
     } catch {
       // Error already handled
     }
@@ -128,7 +132,7 @@ export function AccountList() {
     try {
       await updateContact.mutateAsync({ id: editingContact.contactId, data });
       setEditingContact(null);
-      toast.success("Contact updated successfully");
+      toast.success(tToast("contactUpdated"));
     } catch {
       // Error already handled
     }
@@ -139,13 +143,11 @@ export function AccountList() {
     try {
       await deleteContact.mutateAsync(deletingContactId);
       setDeletingContactId(null);
-      toast.success("Contact deleted successfully");
+      toast.success(tToast("contactDeleted"));
     } catch {
       // Error already handled
     }
   };
-
-
   return (
     <div className="space-y-4">
       {/* Header with Actions */}
@@ -154,7 +156,7 @@ export function AccountList() {
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search accounts..."
+              placeholder={t("searchPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10 h-9"
@@ -165,10 +167,10 @@ export function AccountList() {
             onValueChange={(value) => setStatus(value === "all" ? "" : value)}
           >
             <SelectTrigger className="w-[140px] h-9">
-              <SelectValue placeholder="All Status" />
+              <SelectValue placeholder={t("allStatus")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="all">{t("allStatus")}</SelectItem>
               <SelectItem value="active">Active</SelectItem>
               <SelectItem value="inactive">Inactive</SelectItem>
             </SelectContent>
@@ -178,10 +180,10 @@ export function AccountList() {
             onValueChange={(value) => setCategoryId(value === "all" ? "" : value)}
           >
             <SelectTrigger className="w-[160px] h-9">
-              <SelectValue placeholder="All Categories" />
+              <SelectValue placeholder={t("allCategories")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
+              <SelectItem value="all">{t("allCategories")}</SelectItem>
               {categories
                 .filter((cat) => cat.status === "active")
                 .map((category) => (
@@ -194,7 +196,7 @@ export function AccountList() {
         </div>
         <Button onClick={() => setIsCreateDialogOpen(true)} size="sm">
           <Plus className="h-4 w-4 mr-2" />
-          Add Account
+          {t("addAccount")}
         </Button>
       </div>
 
@@ -212,19 +214,21 @@ export function AccountList() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[50px]"></TableHead>
-                  <TableHead className="w-[250px]">Name</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead className="w-[150px]">City</TableHead>
-                  <TableHead className="w-[150px]">Phone</TableHead>
-                  <TableHead className="w-[100px]">Status</TableHead>
-                  <TableHead className="w-[140px] text-right">Actions</TableHead>
+                  <TableHead className="w-[250px]">{t("table.name")}</TableHead>
+                  <TableHead>{t("table.category")}</TableHead>
+                  <TableHead className="w-[150px]">{t("table.city")}</TableHead>
+                  <TableHead className="w-[150px]">{t("table.phone")}</TableHead>
+                  <TableHead className="w-[100px]">{t("table.status")}</TableHead>
+                  <TableHead className="w-[140px] text-right">
+                    {t("table.actions")}
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {accounts.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                      No accounts found
+                      {t("empty")}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -252,7 +256,7 @@ export function AccountList() {
                 <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
                   <div className="flex items-center gap-3 order-3 lg:order-1">
                     <label htmlFor="rows-per-page" className="text-sm whitespace-nowrap">
-                      Rows per page
+                      {t("rowsPerPage")}
                     </label>
                     <Select
                       value={String(pagination.per_page)}
@@ -282,7 +286,9 @@ export function AccountList() {
                         {(pagination.page - 1) * pagination.per_page + 1}-
                         {Math.min(pagination.page * pagination.per_page, pagination.total)}
                       </span>{" "}
-                      of <span className="text-foreground font-semibold">{pagination.total}</span>
+                      {t("paginationOf", {
+                        total: pagination.total,
+                      })}
                     </p>
                   </div>
                   {pagination.total_pages > 1 && (
@@ -293,7 +299,7 @@ export function AccountList() {
                         onClick={() => setPage(1)}
                         disabled={!pagination.has_prev}
                       >
-                        First
+                        {t("first")}
                       </Button>
                       <Button
                         variant="outline"
@@ -301,7 +307,7 @@ export function AccountList() {
                         onClick={() => setPage(Math.max(1, pagination.page - 1))}
                         disabled={!pagination.has_prev}
                       >
-                        Prev
+                        {t("prev")}
                       </Button>
                       <span className="text-sm">
                         Page {pagination.page} of {pagination.total_pages}
@@ -312,7 +318,7 @@ export function AccountList() {
                         onClick={() => setPage(pagination.page + 1)}
                         disabled={!pagination.has_next}
                       >
-                        Next
+                        {t("next")}
                       </Button>
                       <Button
                         variant="outline"
@@ -320,7 +326,7 @@ export function AccountList() {
                         onClick={() => setPage(pagination.total_pages)}
                         disabled={!pagination.has_next}
                       >
-                        Last
+                        {t("last")}
                       </Button>
                     </div>
                   )}
@@ -335,7 +341,7 @@ export function AccountList() {
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>Create Account</DialogTitle>
+            <DialogTitle>{t("createTitle")}</DialogTitle>
           </DialogHeader>
           <AccountForm
             onSubmit={handleCreate}
@@ -350,7 +356,7 @@ export function AccountList() {
         <Dialog open={!!editingAccount} onOpenChange={(open) => !open && setEditingAccount(null)}>
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
-              <DialogTitle>Edit Account</DialogTitle>
+              <DialogTitle>{t("editTitle")}</DialogTitle>
             </DialogHeader>
             <AccountForm
               account={editingAccountData.data}
@@ -417,13 +423,15 @@ export function AccountList() {
           }
         }}
         onConfirm={handleDeleteConfirm}
-        title="Delete Account?"
+        title={t("deleteTitle")}
         description={
           deletingAccountId
-            ? `Are you sure you want to delete account "${accounts.find((a) => a.id === deletingAccountId)?.name || "this account"}"? This action cannot be undone. All associated contacts will also be deleted.`
-            : "Are you sure you want to delete this account? This action cannot be undone. All associated contacts will also be deleted."
+            ? t("deleteDescriptionWithName", {
+                name: accounts.find((a) => a.id === deletingAccountId)?.name || "this account",
+              })
+            : t("deleteDescription")
         }
-        itemName="account"
+        itemName={t("deleteTitle")}
         isLoading={deleteAccount.isPending}
       />
 
@@ -474,6 +482,7 @@ function AccountRow({
     per_page: 100,
   });
   const contacts = contactsData?.data || [];
+  const tContacts = useTranslations("accountManagement.accountList.contactsSection");
 
   return (
     <>
@@ -562,7 +571,9 @@ function AccountRow({
               {/* Header */}
               <div className="flex items-center justify-between pb-3 border-b">
                 <div className="flex items-center gap-2">
-                  <h4 className="font-semibold text-sm text-foreground">Contacts</h4>
+                  <h4 className="font-semibold text-sm text-foreground">
+                    {tContacts("title")}
+                  </h4>
                   <Badge variant="secondary" className="text-xs font-normal">
                     {contacts.length}
                   </Badge>
@@ -574,7 +585,7 @@ function AccountRow({
                   className="h-8 gap-1.5"
                 >
                   <UserPlus className="h-3.5 w-3.5" />
-                  <span>Add Contact</span>
+                  <span>{tContacts("addContact")}</span>
                 </Button>
               </div>
 
@@ -595,9 +606,11 @@ function AccountRow({
                       <div className="rounded-full bg-muted p-3 mb-3">
                         <UserPlus className="h-5 w-5 text-muted-foreground" />
                       </div>
-                      <p className="text-sm font-medium text-foreground mb-1">No contacts yet</p>
+                      <p className="text-sm font-medium text-foreground mb-1">
+                        {tContacts("emptyTitle")}
+                      </p>
                       <p className="text-xs text-muted-foreground mb-4">
-                        Get started by adding your first contact
+                        {tContacts("emptyDescription")}
                       </p>
                       <Button
                         variant="outline"
@@ -606,7 +619,7 @@ function AccountRow({
                         className="h-8 gap-1.5"
                       >
                         <UserPlus className="h-3.5 w-3.5" />
-                        <span>Add Contact</span>
+                        <span>{tContacts("addContact")}</span>
                       </Button>
                     </div>
                   );
@@ -676,7 +689,7 @@ function AccountRow({
                           size="icon-sm"
                           className="h-8 w-8"
                           onClick={() => onEditContact(account.id, contact.id)}
-                          title="Edit contact"
+                          title={tContacts("editContactTooltip")}
                         >
                           <Edit className="h-3.5 w-3.5" />
                         </Button>
@@ -685,7 +698,7 @@ function AccountRow({
                           size="icon-sm"
                           className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                           onClick={() => onDeleteContact(contact.id)}
-                          title="Delete contact"
+                          title={tContacts("deleteContactTooltip")}
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>

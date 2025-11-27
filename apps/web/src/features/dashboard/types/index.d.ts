@@ -4,34 +4,18 @@ export type Locale = (typeof routing)["locales"][number];
 
 declare global {
   interface IntlMessages {
-    common: {
-      dashboard: string;
-      products: string;
-      customers: string;
-      search: string;
-      save: string;
-      cancel: string;
-      delete: string;
-      edit: string;
-      add: string;
-      back: string;
-      next: string;
-      loading: string;
-      error: string;
-      success: string;
-    };
-    nav: {
-      dashboard: string;
-      products: string;
-      customers: string;
-    };
-    dashboard: {
-      title: string;
-      overview: string;
-      totalSales: string;
-      totalOrders: string;
-      totalCustomers: string;
-    };
+    common: Record<string, string>;
+    nav: Record<string, string>;
+    dashboard: Record<string, string>;
+    dashboardOverview: Record<string, string>;
+    activityTrends: Record<string, string>;
+    visitStatistics: Record<string, string>;
+    pipelineSummary: Record<string, string>;
+    recentActivities: Record<string, string>;
+    topAccounts: Record<string, string>;
+    topSalesReps: Record<string, string>;
+    sidebar: Record<string, string>;
+    notFound: Record<string, string>;
   }
 }
 

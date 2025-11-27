@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTopAccounts } from "../hooks/useDashboard";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -7,13 +8,14 @@ import { Building2, MapPin, Activity } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 export function TopAccounts() {
+  const t = useTranslations("topAccounts");
   const { data, isLoading } = useTopAccounts({ limit: 5 });
 
   if (isLoading) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Top Accounts</CardTitle>
+          <CardTitle>{t("title")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -32,11 +34,11 @@ export function TopAccounts() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Top Accounts</CardTitle>
+          <CardTitle>{t("title")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8 text-muted-foreground">
-            <p className="text-sm">No accounts found</p>
+            <p className="text-sm">{t("empty")}</p>
           </div>
         </CardContent>
       </Card>
@@ -48,7 +50,7 @@ export function TopAccounts() {
       <CardHeader>
         <div className="flex items-center gap-2">
           <Building2 className="h-5 w-5" />
-          <CardTitle>Top Accounts</CardTitle>
+          <CardTitle>{t("title")}</CardTitle>
         </div>
       </CardHeader>
       <CardContent>
@@ -63,11 +65,11 @@ export function TopAccounts() {
                 <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <MapPin className="h-3 w-3" />
-                    <span>{account.visit_count} visits</span>
+                    <span>{t("visits", { count: account.visit_count })}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Activity className="h-3 w-3" />
-                    <span>{account.activity_count} activities</span>
+                    <span>{t("activities", { count: account.activity_count })}</span>
                   </div>
                 </div>
               </div>

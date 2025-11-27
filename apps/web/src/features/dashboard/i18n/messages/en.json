@@ -23,9 +23,199 @@
   "dashboard": {
     "title": "Dashboard",
     "overview": "Overview",
-    "totalSales": "Total Sales",
-    "totalOrders": "Total Orders",
-    "totalCustomers": "Total Customers"
+    "welcomeBack": "Welcome back, {name}"
+  },
+  "dashboardOverview": {
+    "totalVisits": {
+      "title": "Total Visits",
+      "description": "{completed} completed, {pending} pending"
+    },
+    "totalAccounts": {
+      "title": "Total Accounts",
+      "description": "{active} active, {inactive} inactive"
+    },
+    "totalActivities": {
+      "title": "Total Activities",
+      "description": "{visits} visits, {calls} calls, {emails} emails"
+    },
+    "approvedVisits": {
+      "title": "Approved Visits",
+      "description": "{rejected} rejected"
+    }
+  },
+  "activityTrends": {
+    "title": "Activity Trends",
+    "description": "Showing activity trends over time",
+    "totalVisits": "Total Visits",
+    "totalCalls": "Total Calls",
+    "totalEmails": "Total Emails",
+    "timeRange": {
+      "7d": "Last 7 days",
+      "30d": "Last 30 days",
+      "90d": "Last 90 days"
+    }
+  },
+  "visitStatistics": {
+    "title": "Visit Statistics",
+    "description": "Showing visit trends over time",
+    "total": "Total",
+    "completed": "Completed",
+    "pending": "Pending",
+    "approved": "Approved",
+    "timeRange": {
+      "7d": "Last 7 days",
+      "30d": "Last 30 days",
+      "90d": "Last 90 days"
+    }
+  },
+  "pipelineSummary": {
+    "title": "Pipeline Summary",
+    "totalDeals": "Total Deals",
+    "totalValue": "Total Value",
+    "wonDeals": "Won Deals",
+    "lostDeals": "Lost Deals",
+    "openDeals": "Open Deals",
+    "byStage": "By Stage",
+    "dealsSuffix": "deals"
+  },
+  "recentActivities": {
+    "title": "Recent Activities",
+    "empty": "No recent activities",
+    "justNow": "Just now",
+    "minutesAgo": "{count}m ago",
+    "hoursAgo": "{count}h ago",
+    "daysAgo": "{count}d ago",
+    "olderDate": "{date}"
+  },
+  "topAccounts": {
+    "title": "Top Accounts",
+    "empty": "No accounts found",
+    "visits": "{count} visits",
+    "activities": "{count} activities"
+  },
+  "topSalesReps": {
+    "title": "Top Sales Reps",
+    "empty": "No sales reps found",
+    "visits": "{count} visits",
+    "accounts": "{count} accounts",
+    "activities": "{count} activities"
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "visitReports": "Visit Reports",
+    "accounts": "Accounts",
+    "deals": "Deals",
+    "pipeline": "Pipeline",
+    "products": "Products",
+    "productCategories": "Product Categories",
+    "reports": "Reports",
+    "tasks": "Tasks",
+    "settings": "Settings",
+    "masterData": "Master Data"
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "Manage your system settings and preferences"
+  },
+  "reports": {
+    "title": "Reports",
+    "description": "Generate and view system reports"
+  },
+  "pipelinePage": {
+    "title": "Sales Pipeline",
+    "description": "Manage your sales opportunities and track performance",
+    "tabs": {
+      "kanban": "Kanban Board",
+      "summary": "Summary",
+      "forecast": "Forecast"
+    }
+  },
+  "tasks": {
+    "detail": {
+      "loading": "Loading task...",
+      "notFound": "Task not found",
+      "backToList": "Back to Tasks",
+      "back": "Back",
+      "toast": {
+        "updated": "Task updated successfully",
+        "deleted": "Task deleted successfully",
+        "completed": "Task marked as completed"
+      },
+      "actions": {
+        "edit": "Edit",
+        "delete": "Delete",
+        "markCompleted": "Mark as Completed",
+        "markCompletedLoading": "Completing..."
+      },
+      "sections": {
+        "description": "Description",
+        "account": "Account",
+        "contact": "Contact",
+        "assignedTo": "Assigned To",
+        "createdAt": "Created at:",
+        "updatedAt": "Last updated:"
+      },
+      "deleteDialog": {
+        "title": "Delete Task",
+        "description": "Are you sure you want to delete this task? This action cannot be undone.",
+        "cancel": "Cancel",
+        "confirm": "Delete",
+        "confirmLoading": "Deleting..."
+      }
+    }
+  },
+  "deals": {
+    "detail": {
+      "loading": "Loading deal...",
+      "notFound": "Deal not found",
+      "backToList": "Back to Pipeline",
+      "back": "Back",
+      "toast": {
+        "updated": "Deal updated successfully",
+        "deleted": "Deal deleted successfully"
+      },
+      "actions": {
+        "edit": "Edit",
+        "delete": "Delete"
+      },
+      "sections": {
+        "description": "Description",
+        "account": "Account",
+        "contact": "Contact",
+        "assignedTo": "Assigned To",
+        "expectedCloseDate": "Expected Close Date",
+        "actualCloseDate": "Actual Close Date",
+        "source": "Source",
+        "notes": "Notes",
+        "createdAt": "Created:",
+        "updatedAt": "Last Updated:"
+      },
+      "deleteDialog": {
+        "title": "Delete Deal",
+        "description": "Are you sure you want to delete this deal? This action cannot be undone.",
+        "cancel": "Cancel",
+        "confirm": "Delete",
+        "confirmLoading": "Deleting..."
+      },
+      "fallbacks": {
+        "unknownAccount": "Unknown"
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome back",
+      "description": "Sign in to your CRM Healthcare account to continue",
+      "emailLabel": "Email",
+      "emailPlaceholder": "admin@example.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "forgotPassword": "Forgot password?",
+      "rememberMe": "Remember me",
+      "submit": "Sign in",
+      "submitting": "Signing in...",
+      "genericError": "Login failed. Please try again."
+    }
   },
   "notFound": {
     "label": "404",
