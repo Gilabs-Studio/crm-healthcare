@@ -1,11 +1,6 @@
 import { apiClient } from "@/lib/api-client";
-import type {
-  Category,
-  ListCategoriesResponse,
-  CategoryResponse,
-  CreateCategoryFormData,
-  UpdateCategoryFormData,
-} from "../types";
+import type { Category, ListCategoriesResponse, CategoryResponse } from "../types";
+import type { CreateCategoryFormData, UpdateCategoryFormData } from "../schemas/category.schema";
 
 export const categoryService = {
   async list(): Promise<ListCategoriesResponse> {

@@ -1,7 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { Edit, Trash2, Plus, Search, Eye, ChevronDown, ChevronRight, UserPlus, Contact, Phone, Mail } from "lucide-react";
+import {
+  Edit,
+  Trash2,
+  Plus,
+  Search,
+  Eye,
+  ChevronDown,
+  ChevronRight,
+  UserPlus,
+  Contact as ContactIcon,
+  Phone,
+  Mail,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge, badgeVariants } from "@/components/ui/badge";
@@ -344,7 +356,9 @@ export function AccountList() {
             <DialogTitle>{t("createTitle")}</DialogTitle>
           </DialogHeader>
           <AccountForm
-            onSubmit={handleCreate}
+            onSubmit={async (data) => {
+              await handleCreate(data as any);
+            }}
             onCancel={() => setIsCreateDialogOpen(false)}
             isLoading={createAccount.isPending}
           />
@@ -360,7 +374,9 @@ export function AccountList() {
             </DialogHeader>
             <AccountForm
               account={editingAccountData.data}
-              onSubmit={handleUpdate}
+              onSubmit={async (data) => {
+                await handleUpdate(data as any);
+              }}
               onCancel={() => setEditingAccount(null)}
               isLoading={updateAccount.isPending}
             />
@@ -392,7 +408,9 @@ export function AccountList() {
             </DialogHeader>
             <ContactForm
               defaultAccountId={createContactAccountId}
-              onSubmit={handleCreateContactSubmit}
+              onSubmit={async (data) => {
+                await handleCreateContactSubmit(data as any);
+              }}
               onCancel={() => {
                 setIsCreateContactDialogOpen(false);
                 setCreateContactAccountId(null);
@@ -634,7 +652,7 @@ function AccountRow({
                       {/* Avatar/Icon */}
                       <div className="shrink-0">
                         <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                          <Contact className="h-5 w-5 text-primary" />
+                          <ContactIcon className="h-5 w-5 text-primary" />
                         </div>
                       </div>
 

@@ -243,7 +243,9 @@ export function UserList() {
             <DialogTitle>Create User</DialogTitle>
           </DialogHeader>
           <UserForm
-            onSubmit={handleCreate}
+            onSubmit={async (data) => {
+              await handleCreate(data as any);
+            }}
             onCancel={() => setIsCreateDialogOpen(false)}
             isLoading={createUser.isPending}
           />
@@ -259,7 +261,9 @@ export function UserList() {
             </DialogHeader>
             <UserForm
               user={editingUserData.data}
-              onSubmit={handleUpdate}
+              onSubmit={async (data) => {
+                await handleUpdate(data as any);
+              }}
               onCancel={() => setEditingUser(null)}
               isLoading={updateUser.isPending}
             />

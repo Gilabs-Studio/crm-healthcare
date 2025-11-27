@@ -148,7 +148,9 @@ export function RoleList() {
             <DialogTitle>Create Role</DialogTitle>
           </DialogHeader>
           <RoleForm
-            onSubmit={handleCreate}
+            onSubmit={async (data) => {
+              await handleCreate(data as any);
+            }}
             onCancel={() => setIsCreateDialogOpen(false)}
             isLoading={createRole.isPending}
           />
@@ -164,7 +166,9 @@ export function RoleList() {
             </DialogHeader>
             <RoleForm
               role={roleForEdit}
-              onSubmit={handleUpdate}
+              onSubmit={async (data) => {
+                await handleUpdate(data as any);
+              }}
               onCancel={() => setEditingRole(null)}
               isLoading={updateRole.isPending}
             />

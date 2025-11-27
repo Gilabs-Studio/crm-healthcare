@@ -1,11 +1,6 @@
 import apiClient from "@/lib/api-client";
-import type {
-  Account,
-  ListAccountsResponse,
-  AccountResponse,
-  CreateAccountFormData,
-  UpdateAccountFormData,
-} from "../types";
+import type { Account, ListAccountsResponse, AccountResponse } from "../types";
+import type { CreateAccountFormData, UpdateAccountFormData } from "../schemas/account.schema";
 
 export const accountService = {
   async list(params?: {

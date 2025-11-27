@@ -15,7 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useAccounts } from "../hooks/useAccounts";
-import type { Contact } from "../types";
+import type { Contact, ContactRole } from "../types";
 import { ContactDetailModal } from "./contact-detail-modal";
 
 export function ContactList() {
@@ -55,8 +55,12 @@ export function ContactList() {
     setIsDetailModalOpen(true);
   };
 
-  const getRoleBadgeVariant = (role: string) => {
-    switch (role) {
+  const getRoleBadgeVariant = (role: ContactRole | undefined) => {
+    if (!role) {
+      return "outline";
+    }
+
+    switch (role.code) {
       case "doctor":
         return "default";
       case "pic":
@@ -87,7 +91,7 @@ export function ContactList() {
       header: "Role",
       accessor: (row) => (
         <Badge variant={getRoleBadgeVariant(row.role)} className="font-normal capitalize">
-          {row.role}
+          {row.role?.name ?? "-"}
         </Badge>
       ),
     },
@@ -225,7 +229,9 @@ export function ContactList() {
             <DialogTitle>Create Contact</DialogTitle>
           </DialogHeader>
           <ContactForm
-            onSubmit={handleCreate}
+            onSubmit={async (data) => {
+              await handleCreate(data as any);
+            }}
             onCancel={() => setIsCreateDialogOpen(false)}
             isLoading={createContact.isPending}
             defaultAccountId={accountId || undefined}
@@ -242,7 +248,7 @@ export function ContactList() {
             </DialogHeader>
             <ContactForm
               contact={editingContactData.data}
-              onSubmit={handleUpdate}
+              onSubmit={(data) => handleUpdate(data)}
               onCancel={() => setEditingContact(null)}
               isLoading={updateContact.isPending}
             />

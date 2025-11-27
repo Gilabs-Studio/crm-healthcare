@@ -139,7 +139,9 @@ export function ContactRoleList() {
             <DialogTitle>{t("createTitle")}</DialogTitle>
           </DialogHeader>
           <ContactRoleForm
-            onSubmit={handleCreate}
+            onSubmit={async (data) => {
+              await handleCreate(data as any);
+            }}
             onCancel={() => setIsCreateDialogOpen(false)}
             isLoading={createContactRole.isPending}
           />
@@ -155,7 +157,7 @@ export function ContactRoleList() {
             </DialogHeader>
             <ContactRoleForm
               contactRole={contactRoleForEdit}
-              onSubmit={handleUpdate}
+              onSubmit={(data) => handleUpdate(data)}
               onCancel={() => setEditingContactRole(null)}
               isLoading={updateContactRole.isPending}
             />

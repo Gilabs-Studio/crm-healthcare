@@ -327,7 +327,9 @@ export function VisitReportList() {
             <DialogTitle>{t("dialogs.createTitle")}</DialogTitle>
           </DialogHeader>
           <VisitReportForm
-            onSubmit={handleCreate}
+            onSubmit={async (data) => {
+              await handleCreate(data as any);
+            }}
             onCancel={() => setIsCreateDialogOpen(false)}
             isLoading={createVisitReport.isPending}
           />
@@ -343,7 +345,7 @@ export function VisitReportList() {
             </DialogHeader>
             <VisitReportForm
               visitReport={editingVisitReportData.data}
-              onSubmit={handleUpdate}
+            onSubmit={(data) => handleUpdate(data)}
               onCancel={() => setEditingVisitReport(null)}
               isLoading={updateVisitReport.isPending}
             />

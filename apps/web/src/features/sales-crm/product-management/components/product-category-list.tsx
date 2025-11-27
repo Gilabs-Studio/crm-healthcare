@@ -173,7 +173,9 @@ export function ProductCategoryList() {
             <DialogTitle>{t("createTitle")}</DialogTitle>
           </DialogHeader>
           <ProductCategoryForm
-            onSubmit={handleCreate}
+            onSubmit={async (data) => {
+              await handleCreate(data as any);
+            }}
             onCancel={() => setIsCreateDialogOpen(false)}
             isLoading={createMutation.isPending}
           />
@@ -194,7 +196,7 @@ export function ProductCategoryList() {
             </DialogHeader>
             <ProductCategoryForm
               category={editingCategory}
-              onSubmit={handleUpdate}
+              onSubmit={(data) => handleUpdate(data)}
               onCancel={() => setEditingCategoryId(null)}
               isLoading={updateMutation.isPending}
             />

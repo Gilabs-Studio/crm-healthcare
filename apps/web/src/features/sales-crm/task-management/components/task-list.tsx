@@ -372,7 +372,9 @@ export function TaskList() {
             <DialogTitle>{t("buttons.createTitle")}</DialogTitle>
           </DialogHeader>
           <TaskForm
-            onSubmit={handleCreate}
+            onSubmit={async (data) => {
+              await handleCreate(data as any);
+            }}
             onCancel={() => setIsCreateDialogOpen(false)}
             isLoading={createTask.isPending}
           />
@@ -388,7 +390,9 @@ export function TaskList() {
             </DialogHeader>
             <TaskForm
               task={editingTaskData.data}
-              onSubmit={handleUpdate}
+              onSubmit={async (data) => {
+                await handleUpdate(data as any);
+              }}
               onCancel={() => setEditingTaskId(null)}
               isLoading={updateTask.isPending}
             />

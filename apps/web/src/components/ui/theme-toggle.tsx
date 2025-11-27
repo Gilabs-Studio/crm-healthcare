@@ -47,6 +47,9 @@ const generateSVG = (variant: AnimationVariant, start: AnimationStart) => {
       return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><defs><filter id="blur"><feGaussianBlur stdDeviation="2"/></filter></defs><circle cx="20" cy="20" r="18" fill="white" filter="url(%23blur)"/></svg>`;
     }
     const positionCoords = getPositionCoords(start);
+    if (!positionCoords) {
+      throw new Error(`Invalid start position: ${start}`);
+    }
     const { cx, cy } = positionCoords;
     return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><defs><filter id="blur"><feGaussianBlur stdDeviation="2"/></filter></defs><circle cx="${cx}" cy="${cy}" r="18" fill="white" filter="url(%23blur)"/></svg>`;
   }

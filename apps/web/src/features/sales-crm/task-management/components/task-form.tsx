@@ -241,7 +241,19 @@ export function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFormProps)
                 ))}
               </SelectContent>
             </Select>
-            {errors.status && <FieldError>{errors.status.message}</FieldError>}
+            {(
+              errors as {
+                status?: { message?: string };
+              }
+            ).status && (
+              <FieldError>
+                {(
+                  errors as {
+                    status?: { message?: string };
+                  }
+                ).status?.message}
+              </FieldError>
+            )}
           </Field>
         )}
       </div>
