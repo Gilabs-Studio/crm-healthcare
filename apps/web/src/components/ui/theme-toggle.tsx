@@ -351,8 +351,8 @@ export const ThemeToggleButton = ({
     <button
       type="button"
       className={cn(
-        "size-10 cursor-pointer rounded-full transition-all duration-300 active:scale-95",
-        isDark ? "bg-black text-white" : "bg-white text-black",
+        "inline-flex h-8 w-8 items-center justify-center rounded-full bg-background/80 text-muted-foreground shadow-sm transition-all duration-200 hover:bg-accent/60 active:scale-95",
+        isDark ? "text-foreground" : "",
         className
       )}
       onClick={toggleTheme}
@@ -361,6 +361,7 @@ export const ThemeToggleButton = ({
       <span className="sr-only">Toggle theme</span>
       <svg
         xmlns="http://www.w3.org/2000/svg"
+        className="h-4 w-4"
         aria-hidden="true"
         fill="currentColor"
         strokeLinecap="round"
