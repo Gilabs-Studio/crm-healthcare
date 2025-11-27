@@ -13,7 +13,9 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ThemeToggleButton as ThemeToggle } from "@/components/ui/theme-toggle";
 import { Separator } from "@/components/ui/separator";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { getMenuIcon } from "@/lib/menu-icons";
+import { useLogout } from "@/features/auth/hooks/useLogout";
 import {
   Sidebar,
   SidebarContent,
@@ -53,6 +55,7 @@ const Header = memo(function Header({
   const locale = useLocale();
   const tSidebar = useTranslations("sidebar");
   const pathname = usePathname();
+  const logout = useLogout();
 
   const [currentSrc, setCurrentSrc] = React.useState<string | undefined>(
     avatarUrl && avatarUrl.trim() !== "" ? avatarUrl : fallbackAvatarUrl
@@ -144,25 +147,53 @@ const Header = memo(function Header({
           </Button>
         </Link>
         <ThemeToggle className="size-8" />
-        <Button
-          variant="ghost"
-          className="flex h-8 w-8 items-center justify-center rounded-full p-0 hover:bg-muted transition-colors"
-        >
-          <Avatar className="h-8 w-8">
-            <AvatarImage
-              src={currentSrc}
-              alt={userName}
-              onError={() => {
-                if (currentSrc !== fallbackAvatarUrl) {
-                  setCurrentSrc(fallbackAvatarUrl);
-                }
-              }}
-            />
-            {avatarUrl && (
-              <AvatarFallback className="bg-primary/10 text-primary font-medium" />
-            )}
-          </Avatar>
-        </Button>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="ghost"
+              className="flex h-8 w-8 items-center justify-center rounded-full p-0 hover:bg-muted transition-colors"
+            >
+              <Avatar className="h-8 w-8">
+                <AvatarImage
+                  src={currentSrc}
+                  alt={userName}
+                  onError={() => {
+                    if (currentSrc !== fallbackAvatarUrl) {
+                      setCurrentSrc(fallbackAvatarUrl);
+                    }
+                  }}
+                />
+                {avatarUrl && (
+                  <AvatarFallback className="bg-primary/10 text-primary font-medium" />
+                )}
+              </Avatar>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-56 p-2" align="end">
+            <div className="px-2 py-1.5 text-xs text-muted-foreground">
+              <div className="text-foreground text-sm font-medium">
+                {userName}
+              </div>
+            </div>
+            <Separator className="my-1" />
+            <div className="flex flex-col gap-1">
+              <Link
+                href="/settings"
+                locale={locale}
+                className="flex w-full items-center rounded-md px-2 py-1.5 text-sm hover:bg-muted"
+              >
+                {tSidebar("settings")}
+              </Link>
+              <button
+                type="button"
+                onClick={logout}
+                className="flex w-full items-center rounded-md px-2 py-1.5 text-left text-sm text-destructive hover:bg-destructive/10"
+              >
+                Logout
+              </button>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
     </header>
   );
