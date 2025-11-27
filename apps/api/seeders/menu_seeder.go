@@ -126,6 +126,20 @@ func SeedMenus() error {
 	}
 	log.Printf("Created menu: %s", tasksMenu.Name)
 
+	// Create Products menu under Data Master (single entry, internal tabs handle sub-sections)
+	productsMenu := permission.Menu{
+		Name:     "Products",
+		Icon:     "package",
+		URL:      "/products",
+		ParentID: &dataMasterMenu.ID,
+		Order:    2,
+		Status:   "active",
+	}
+	if err := database.DB.Create(&productsMenu).Error; err != nil {
+		return err
+	}
+	log.Printf("Created menu: %s", productsMenu.Name)
+
 	// Create Reports menu (root level)
 	reportsMenu := permission.Menu{
 		Name:   "Reports",
@@ -181,7 +195,7 @@ func UpdateMenuStructure() error {
 	} else if err := database.DB.Where("url = ?", "/users").First(&userPageMenu).Error; err == nil {
 		// Users menu exists with old URL, need to migrate
 		log.Printf("Migrating Users menu from /users to /master-data/users")
-		
+
 		// Update Users menu URL and parent to Data Master
 		userPageMenu.URL = "/master-data/users"
 		userPageMenu.ParentID = &dataMasterMenu.ID
@@ -198,7 +212,7 @@ func UpdateMenuStructure() error {
 		// Check if Healthcare menu has any children
 		var childCount int64
 		database.DB.Model(&permission.Menu{}).Where("parent_id = ?", healthcareMenu.ID).Count(&childCount)
-		
+
 		if childCount == 0 {
 			// Delete Healthcare menu if it has no children
 			if err := database.DB.Delete(&healthcareMenu).Error; err != nil {
@@ -222,7 +236,7 @@ func UpdateMenuStructure() error {
 				log.Printf("Deleted menu: %s", child.Name)
 			}
 		}
-		
+
 		// Delete Company Management menu
 		if err := database.DB.Delete(&companyMgmtMenu).Error; err != nil {
 			log.Printf("Warning: Failed to delete Company Management menu: %v", err)
@@ -237,7 +251,7 @@ func UpdateMenuStructure() error {
 		// Check if System menu has any children
 		var childCount int64
 		database.DB.Model(&permission.Menu{}).Where("parent_id = ?", systemMenu.ID).Count(&childCount)
-		
+
 		if childCount == 0 {
 			// Delete System menu if it has no children
 			if err := database.DB.Delete(&systemMenu).Error; err != nil {
@@ -291,7 +305,63 @@ func UpdateMenuStructure() error {
 		}
 	}
 
+	// Add Products menu if it doesn't exist
+	var productsMenu permission.Menu
+	if err := database.DB.Where("url = ?", "/products").First(&productsMenu).Error; err != nil {
+		// Products menu doesn't exist at all: create under Data Master
+		var dataMaster permission.Menu
+		if err := database.DB.Where("url = ?", "/data-master").First(&dataMaster).Error; err == nil {
+			productsMenu = permission.Menu{
+				Name:     "Products",
+				Icon:     "package",
+				URL:      "/products",
+				ParentID: &dataMaster.ID,
+				Order:    2,
+				Status:   "active",
+			}
+			if err := database.DB.Create(&productsMenu).Error; err != nil {
+				log.Printf("Warning: Failed to create Products menu: %v", err)
+			} else {
+				log.Printf("Created Products menu under Data Master")
+			}
+		}
+	} else {
+		// Products menu exists (mungkin masih di bawah Sales CRM) -> pastikan parent-nya Data Master
+		var dataMaster permission.Menu
+		if err := database.DB.Where("url = ?", "/data-master").First(&dataMaster).Error; err == nil {
+			if productsMenu.ParentID == nil || *productsMenu.ParentID != dataMaster.ID {
+				productsMenu.ParentID = &dataMaster.ID
+				productsMenu.Order = 2
+				if err := database.DB.Save(&productsMenu).Error; err != nil {
+					log.Printf("Warning: Failed to move Products menu under Data Master: %v", err)
+				} else {
+					log.Printf("Moved Products menu under Data Master")
+				}
+			}
+		}
+	}
+
+	// Remove Product Categories menu from navigation if it exists
+	var productCategoriesMenu permission.Menu
+	if err := database.DB.Where("url = ?", "/product-categories").First(&productCategoriesMenu).Error; err == nil {
+		if err := database.DB.Delete(&productCategoriesMenu).Error; err != nil {
+			log.Printf("Warning: Failed to delete Product Categories menu: %v", err)
+		} else {
+			log.Printf("Deleted Product Categories menu from navigation")
+		}
+	}
+
+	// Remove legacy Products child menu (/products/list) if it exists,
+	// so sidebar only shows a single 'Products' entry that internally uses tabs.
+	var productsListMenu permission.Menu
+	if err := database.DB.Where("url = ?", "/products/list").First(&productsListMenu).Error; err == nil {
+		if err := database.DB.Delete(&productsListMenu).Error; err != nil {
+			log.Printf("Warning: Failed to delete Products list child menu: %v", err)
+		} else {
+			log.Printf("Deleted legacy Products list child menu from navigation")
+		}
+	}
+
 	log.Println("Menu structure updated successfully")
 	return nil
 }
-

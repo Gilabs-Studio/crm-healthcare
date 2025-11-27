@@ -29,6 +29,16 @@ func SeedAll() error {
 		return err
 	}
 
+	// Seed product categories (required for products)
+	if err := SeedProductCategories(); err != nil {
+		return err
+	}
+
+	// Seed products (requires product categories)
+	if err := SeedProducts(); err != nil {
+		return err
+	}
+
 	// Seed contact roles (required for contacts)
 	if err := SeedContactRoles(); err != nil {
 		return err

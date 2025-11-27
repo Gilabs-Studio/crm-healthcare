@@ -14,10 +14,11 @@ import (
 	"github.com/gilabs/crm-healthcare/api/internal/domain/contact_role"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/permission"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/pipeline"
+	"github.com/gilabs/crm-healthcare/api/internal/domain/product"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/reminder"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/role"
-	"github.com/gilabs/crm-healthcare/api/internal/domain/task"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/settings"
+	"github.com/gilabs/crm-healthcare/api/internal/domain/task"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/user"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/visit_report"
 	"gorm.io/driver/postgres"
@@ -81,6 +82,8 @@ func AutoMigrate() error {
 		&contact.Contact{},
 		&pipeline.PipelineStage{},
 		&pipeline.Deal{},
+		&product.ProductCategory{},
+		&product.Product{},
 		&task.Task{},
 		&reminder.Reminder{},
 		&visit_report.VisitReport{},
