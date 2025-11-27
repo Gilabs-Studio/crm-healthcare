@@ -11,11 +11,25 @@ import type { MenuWithActions } from "@/features/master-data/user-management/typ
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import { ThemeToggleButton as ThemeToggle } from "@/components/ui/theme-toggle";
 import { Separator } from "@/components/ui/separator";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { getMenuIcon } from "@/lib/menu-icons";
 import { useLogout } from "@/features/auth/hooks/useLogout";
+import { useDashboardCommandPalette } from "@/features/layout/hooks/useDashboardCommandPalette";
 import {
   Sidebar,
   SidebarContent,
@@ -312,6 +326,9 @@ export const DashboardLayout = memo(function DashboardLayout({
 }: DashboardLayoutProps) {
   const { user } = useAuthStore();
   const { data: permissionsData, error } = useUserPermissions();
+  const commandPalette = useDashboardCommandPalette({
+    menus: permissionsData?.data?.menus,
+  });
 
   const userName = user?.name ?? "User";
   const primaryAvatarUrl =
@@ -408,6 +425,50 @@ export const DashboardLayout = memo(function DashboardLayout({
           </div>
         </SidebarInset>
       </div>
+
+      <Dialog open={commandPalette.isOpen} onOpenChange={commandPalette.toggle}>
+        <DialogContent
+          showCloseButton={false}
+          className="p-0 shadow-2xl sm:max-w-xl"
+        >
+          <DialogTitle className="sr-only">Command palette</DialogTitle>
+          <Command>
+            <CommandInput placeholder="Type a command or search..." />
+            <CommandList>
+              <CommandEmpty>No menu found.</CommandEmpty>
+              {Object.entries(
+                commandPalette.items.reduce<Record<string, typeof commandPalette.items>>(
+                  (groups, item) => {
+                    const group = item.group || "Menus";
+                    if (!groups[group]) {
+                      groups[group] = [];
+                    }
+                    groups[group].push(item);
+                    return groups;
+                  },
+                  {}
+                )
+              ).map(([group, items]) => (
+                <CommandGroup key={group} heading={group}>
+                  {items.map((item) => (
+                    <CommandItem
+                      key={`${group}-${item.id}-${item.href}`}
+                      value={item.name}
+                      onSelect={() => commandPalette.onSelectItem(item.href)}
+                    >
+                      {getMenuIcon(item.icon)}
+                      <span className="flex-1 truncate">{item.name}</span>
+                      <span className="text-muted-foreground text-xs">
+                        {item.href}
+                      </span>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              ))}
+            </CommandList>
+          </Command>
+        </DialogContent>
+      </Dialog>
     </SidebarProvider>
   );
 });
