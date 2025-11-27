@@ -46,6 +46,49 @@ export interface DashboardOverview {
     emails: number;
     change_percent: number;
   };
+  target: {
+    target_amount: number;
+    target_amount_formatted: string;
+    achieved_amount: number;
+    achieved_amount_formatted: string;
+    progress_percent: number;
+    change_percent: number;
+  };
+  deals: {
+    total_deals: number;
+    open_deals: number;
+    won_deals: number;
+    lost_deals: number;
+    total_value: number;
+    total_value_formatted: string;
+    change_percent: number;
+  };
+  revenue: {
+    total_revenue: number;
+    total_revenue_formatted: string;
+    change_percent: number;
+  };
+  leads_by_source: {
+    total: number;
+    by_source: Array<{
+      source: string;
+      count: number;
+    }>;
+  };
+  upcoming_tasks: Array<{
+    id: string;
+    title: string;
+    priority: string;
+    status: string;
+    due_date?: string | null;
+  }>;
+  pipeline_stages: Array<{
+    stage_id: string;
+    stage_name: string;
+    stage_code: string;
+    deal_count: number;
+    percentage: number;
+  }>;
 }
 
 export interface VisitStatistics {

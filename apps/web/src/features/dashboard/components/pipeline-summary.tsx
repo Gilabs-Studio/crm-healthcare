@@ -2,100 +2,134 @@
 
 import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { usePipelineSummary } from "../hooks/useDashboard";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TrendingUp, DollarSign, CheckCircle, XCircle, Clock } from "lucide-react";
+import { usePipelineSummary } from "@/features/sales-crm/pipeline-management/hooks/usePipelines";
+import type { StageSummary } from "@/features/sales-crm/pipeline-management/types";
+
+function getStageColor(stageCode: string): string {
+  // Samakan palet warna dengan Kanban board:
+  // lihat `SeedPipelineStages` dan penggunaan `stage.color` di `kanban-board.tsx`
+  switch (stageCode) {
+    case "lead":
+      // "#94A3B8" - Slate 400
+      return "#94A3B8";
+    case "qualification":
+      // "#3B82F6" - Blue 500
+      return "#3B82F6";
+    case "proposal":
+      // "#8B5CF6" - Violet 500
+      return "#8B5CF6";
+    case "negotiation":
+      // "#F59E0B" - Amber 500
+      return "#F59E0B";
+    case "closed_won":
+      // "#10B981" - Emerald 500
+      return "#10B981";
+    case "closed_lost":
+      // "#EF4444" - Red 500
+      return "#EF4444";
+    default:
+      // Fallback ke warna netral
+      return "#CBD5F5";
+  }
+}
 
 export function PipelineSummary() {
   const t = useTranslations("pipelineSummary");
-  const { data, isLoading } = usePipelineSummary({ period: "month" });
+  const { data, isLoading } = usePipelineSummary();
+  const summary = data?.data;
+  const totalDeals = summary?.total_deals ?? 0;
 
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("title")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-5">
-            {[...Array(5)].map((_, i) => (
-              <Skeleton key={i} className="h-20 w-full" />
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  const pipeline = data?.data;
-
-  if (!pipeline) {
-    return null;
-  }
+  const stagesWithPercentages: (StageSummary & { percentage: number })[] =
+    summary?.by_stage && summary.by_stage.length > 0
+      ? summary.by_stage.map((stage) => ({
+          ...stage,
+          percentage:
+            totalDeals > 0
+              ? Math.round((stage.deal_count / totalDeals) * 100)
+              : 0,
+        }))
+      : [];
 
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center gap-2">
-          <TrendingUp className="h-5 w-5" />
-          <CardTitle>{t("title")}</CardTitle>
-        </div>
+        <CardTitle className="text-sm font-medium">{t("title")}</CardTitle>
+        <p className="text-xs text-muted-foreground">{t("description")}</p>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-4 md:grid-cols-5">
-          <div>
-            <div className="text-sm text-muted-foreground">{t("totalDeals")}</div>
-            <div className="text-2xl font-bold">{pipeline.total_deals}</div>
-          </div>
-          <div>
-            <div className="text-sm text-muted-foreground">{t("totalValue")}</div>
-            <div className="text-2xl font-bold">
-              {new Intl.NumberFormat("id-ID", {
-                style: "currency",
-                currency: "IDR",
-                minimumFractionDigits: 0,
-              }).format(pipeline.total_value)}
+        {isLoading && stagesWithPercentages.length === 0 ? (
+          <>
+            <Skeleton className="mb-4 h-6 w-40" />
+            <Skeleton className="h-3 w-full rounded-full" />
+            <div className="mt-4 space-y-2">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <Skeleton key={index} className="h-10 w-full" />
+              ))}
             </div>
-          </div>
-          <div>
-            <div className="text-sm text-muted-foreground flex items-center gap-1">
-              <CheckCircle className="h-3 w-3 text-green-600" />
-              {t("wonDeals")}
-            </div>
-            <div className="text-2xl font-bold text-green-600">{pipeline.won_deals}</div>
-          </div>
-          <div>
-            <div className="text-sm text-muted-foreground flex items-center gap-1">
-              <XCircle className="h-3 w-3 text-red-600" />
-              {t("lostDeals")}
-            </div>
-            <div className="text-2xl font-bold text-red-600">{pipeline.lost_deals}</div>
-          </div>
-          <div>
-            <div className="text-sm text-muted-foreground flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              {t("openDeals")}
-            </div>
-            <div className="text-2xl font-bold">{pipeline.open_deals}</div>
-          </div>
-        </div>
+          </>
+        ) : null}
 
-        {pipeline.by_stage && Object.keys(pipeline.by_stage).length > 0 && (
-          <div className="mt-6">
-            <div className="text-sm font-medium mb-3">{t("byStage")}</div>
-            <div className="space-y-2">
-              {Object.entries(pipeline.by_stage).map(([stage, count]) => (
-                <div key={stage} className="flex items-center justify-between">
-                  <div className="text-sm text-muted-foreground capitalize">
-                    {stage.replace(/_/g, " ")}
+        {!isLoading && stagesWithPercentages.length === 0 ? (
+          <p className="text-xs text-muted-foreground">
+            {t("noData", { default: "No pipeline data" })}
+          </p>
+        ) : null}
+
+        {stagesWithPercentages.length > 0 && (
+          <>
+            {/* Top stacked bar */}
+            <div className="mb-4 flex h-3 overflow-hidden rounded-full bg-muted">
+              {stagesWithPercentages.map((stage) => (
+                <div
+                  key={stage.stage_id}
+                  style={{
+                    width: `${stage.percentage || 0}%`,
+                    backgroundColor: getStageColor(stage.stage_code),
+                  }}
+                />
+              ))}
+            </div>
+
+            {/* Stage rows */}
+            <div className="space-y-3">
+              {stagesWithPercentages.map((stage) => (
+                <div
+                  key={stage.stage_id}
+                  className="flex items-center justify-between gap-4 text-xs"
+                >
+                  <div className="flex flex-1 items-center gap-2">
+                    <span
+                      className="inline-flex h-2 w-2 rounded-full"
+                      style={{
+                        backgroundColor: getStageColor(stage.stage_code),
+                      }}
+                    />
+                    <div className="min-w-0">
+                      <div className="truncate text-sm font-medium">
+                        {stage.stage_name}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {stage.deal_count.toLocaleString("id-ID")} deals ·{" "}
+                        {stage.total_value_formatted}
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-sm font-medium">
-                    {count} {t("dealsSuffix")}
+                  <div className="flex w-24 items-center gap-2">
+                    <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+                      <div
+                        className="h-1.5 rounded-full bg-primary"
+                        style={{ width: `${stage.percentage || 0}%` }}
+                      />
+                    </div>
+                    <span className="w-10 text-right text-xs text-muted-foreground">
+                      {stage.percentage}%
+                    </span>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
+          </>
         )}
       </CardContent>
     </Card>

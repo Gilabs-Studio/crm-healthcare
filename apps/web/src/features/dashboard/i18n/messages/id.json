@@ -26,21 +26,51 @@
     "welcomeBack": "Selamat datang kembali, {name}"
   },
   "dashboardOverview": {
-    "totalVisits": {
-      "title": "Total Kunjungan",
-      "description": "{completed} selesai, {pending} tertunda"
+    "targetProgress": {
+      "title": "Target Penjualan",
+      "description": "{progress}% dari target tercapai"
     },
     "totalAccounts": {
-      "title": "Total Akun",
+      "title": "Total Customer",
       "description": "{active} aktif, {inactive} tidak aktif"
     },
-    "totalActivities": {
-      "title": "Total Aktivitas",
-      "description": "{visits} kunjungan, {calls} panggilan, {emails} email"
+    "totalDeals": {
+      "title": "Total Deal",
+      "description": "{open} terbuka, {won} menang"
     },
-    "approvedVisits": {
-      "title": "Kunjungan Disetujui",
-      "description": "{rejected} ditolak"
+    "totalRevenue": {
+      "title": "Total Revenue",
+      "description": "Berdasarkan deal menang di periode ini"
+    },
+    "leadsBySource": {
+      "title": "Leads berdasarkan Sumber",
+      "empty": "Belum ada leads di periode ini",
+      "totalLabel": "leads",
+      "source": {
+        "social": "Sosial",
+        "email": "Email",
+        "call": "Telepon",
+        "other": "Lainnya"
+      }
+    },
+    "upcomingTasks": {
+      "title": "Tugas Mendatang",
+      "empty": "Tidak ada tugas mendatang",
+      "noDueDate": "Tanpa jatuh tempo"
+    },
+    "leadsTable": {
+      "title": "Leads",
+      "empty": "Belum ada leads",
+      "columns": {
+        "status": "Status",
+        "email": "Email / Akun",
+        "amount": "Jumlah"
+      },
+      "status": {
+        "open": "Proses",
+        "won": "Berhasil",
+        "lost": "Gagal"
+      }
     }
   },
   "activityTrends": {
@@ -69,7 +99,8 @@
     }
   },
   "pipelineSummary": {
-    "title": "Ringkasan Pipeline",
+    "title": "Sales Pipeline",
+    "description": "Deal yang sedang berjalan di pipeline penjualan.",
     "totalDeals": "Total Deal",
     "totalValue": "Total Nilai",
     "wonDeals": "Deal Menang",

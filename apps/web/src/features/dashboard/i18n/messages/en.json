@@ -26,21 +26,51 @@
     "welcomeBack": "Welcome back, {name}"
   },
   "dashboardOverview": {
-    "totalVisits": {
-      "title": "Total Visits",
-      "description": "{completed} completed, {pending} pending"
+    "targetProgress": {
+      "title": "Sales Target",
+      "description": "{progress}% of target achieved"
     },
     "totalAccounts": {
-      "title": "Total Accounts",
+      "title": "Total Customers",
       "description": "{active} active, {inactive} inactive"
     },
-    "totalActivities": {
-      "title": "Total Activities",
-      "description": "{visits} visits, {calls} calls, {emails} emails"
+    "totalDeals": {
+      "title": "Total Deals",
+      "description": "{open} open, {won} won"
     },
-    "approvedVisits": {
-      "title": "Approved Visits",
-      "description": "{rejected} rejected"
+    "totalRevenue": {
+      "title": "Total Revenue",
+      "description": "Based on won deals in this period"
+    },
+    "leadsBySource": {
+      "title": "Leads by Source",
+      "empty": "No leads for this period",
+      "totalLabel": "leads",
+      "source": {
+        "social": "Social",
+        "email": "Email",
+        "call": "Call",
+        "other": "Other"
+      }
+    },
+    "upcomingTasks": {
+      "title": "Upcoming Tasks",
+      "empty": "No upcoming tasks",
+      "noDueDate": "No due date"
+    },
+    "leadsTable": {
+      "title": "Leads",
+      "empty": "No leads found",
+      "columns": {
+        "status": "Status",
+        "email": "Email / Account",
+        "amount": "Amount"
+      },
+      "status": {
+        "open": "Processing",
+        "won": "Success",
+        "lost": "Failed"
+      }
     }
   },
   "activityTrends": {
@@ -69,7 +99,8 @@
     }
   },
   "pipelineSummary": {
-    "title": "Pipeline Summary",
+    "title": "Sales Pipeline",
+    "description": "Current deals in your sales pipeline.",
     "totalDeals": "Total Deals",
     "totalValue": "Total Value",
     "wonDeals": "Won Deals",
