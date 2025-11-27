@@ -7,9 +7,11 @@ import { PipelineSummary } from "@/features/sales-crm/pipeline-management/compon
 import { Forecast } from "@/features/sales-crm/pipeline-management/components/forecast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 function PipelinePageContent() {
   const router = useRouter();
+  const t = useTranslations("pipelineManagement.page");
 
   const handleDealClick = (deal: { id: string }) => {
     router.push(`/deals/${deal.id}`);
@@ -20,10 +22,10 @@ function PipelinePageContent() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
-            Sales Pipeline
+            {t("title")}
           </h1>
           <p className="text-muted-foreground mt-2">
-            Manage your sales opportunities and track performance
+            {t("description")}
           </p>
         </div>
 
@@ -31,15 +33,15 @@ function PipelinePageContent() {
           <TabsList>
             <TabsTrigger value="kanban" className="gap-2">
               <LayoutDashboard className="h-4 w-4" />
-              Kanban Board
+              {t("tabKanban")}
             </TabsTrigger>
             <TabsTrigger value="summary" className="gap-2">
               <BarChart3 className="h-4 w-4" />
-              Summary
+              {t("tabSummary")}
             </TabsTrigger>
             <TabsTrigger value="forecast" className="gap-2">
               <TrendingUp className="h-4 w-4" />
-              Forecast
+              {t("tabForecast")}
             </TabsTrigger>
           </TabsList>
 

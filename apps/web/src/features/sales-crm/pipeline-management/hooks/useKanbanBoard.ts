@@ -2,12 +2,14 @@
 
 import { useState, useMemo } from "react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { usePipelines } from "./usePipelines";
 import { useDeals, useMoveDeal, useCreateDeal, useUpdateDeal } from "./useDeals";
 import type { Deal, PipelineStage } from "../types";
 import type { CreateDealFormData, UpdateDealFormData } from "../schemas/deal.schema";
 
 export function useKanbanBoard() {
+  const t = useTranslations("pipelineManagement.kanban");
   const { data: pipelinesData, isLoading: isLoadingPipelines } = usePipelines({ is_active: true });
   const { data: dealsData, isLoading: isLoadingDeals } = useDeals({ per_page: 100 });
   const moveDeal = useMoveDeal();
@@ -57,7 +59,11 @@ export function useKanbanBoard() {
         id: draggedDeal.id,
         data: { stage_id: targetStage.id },
       });
-      toast.success(`Deal moved to ${targetStage.name}`);
+      toast.success(
+        t("toastDealMoved", {
+          stage: targetStage.name,
+        }),
+      );
     } catch (error) {
       // Error already handled in api-client interceptor
     } finally {
@@ -69,7 +75,7 @@ export function useKanbanBoard() {
     try {
       await createDeal.mutateAsync(data);
       setIsCreateDialogOpen(false);
-      toast.success("Deal created successfully");
+      toast.success(t("toastDealCreated"));
     } catch (error) {
       // Error already handled in api-client interceptor
     }
@@ -80,7 +86,7 @@ export function useKanbanBoard() {
       try {
         await updateDeal.mutateAsync({ id: editingDeal.id, data });
         setEditingDeal(null);
-        toast.success("Deal updated successfully");
+        toast.success(t("toastDealUpdated"));
       } catch (error) {
         // Error already handled in api-client interceptor
       }
