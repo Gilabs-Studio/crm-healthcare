@@ -7,6 +7,8 @@ import '../../features/contacts/presentation/contact_detail_screen.dart';
 import '../../features/contacts/presentation/contact_list_screen.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
 import '../../features/tasks/presentation/task_list_screen.dart';
+import '../../features/visit_reports/presentation/visit_report_detail_screen.dart';
+import '../../features/visit_reports/presentation/visit_report_form_screen.dart';
 import '../../features/visit_reports/presentation/visit_report_list_screen.dart';
 import '../widgets/auth_gate.dart';
 
@@ -67,6 +69,31 @@ class AppRouter {
         settings: settings,
         builder: (_) => AuthGate(
           child: ContactDetailScreen(contactId: pathSegments[1]),
+        ),
+      );
+    }
+
+    // Visit Report Detail: /visit-reports/:id
+    if (pathSegments.length == 2 &&
+        pathSegments[0] == 'visit-reports' &&
+        pathSegments[1].isNotEmpty &&
+        pathSegments[1] != 'create') {
+      return MaterialPageRoute(
+        settings: settings,
+        builder: (_) => AuthGate(
+          child: VisitReportDetailScreen(visitReportId: pathSegments[1]),
+        ),
+      );
+    }
+
+    // Visit Report Form: /visit-reports/create
+    if (pathSegments.length == 2 &&
+        pathSegments[0] == 'visit-reports' &&
+        pathSegments[1] == 'create') {
+      return MaterialPageRoute(
+        settings: settings,
+        builder: (_) => AuthGate(
+          child: const VisitReportFormScreen(),
         ),
       );
     }

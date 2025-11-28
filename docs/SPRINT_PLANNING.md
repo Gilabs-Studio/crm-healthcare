@@ -164,7 +164,7 @@ Setiap developer memiliki sprint planning terpisah yang detail.
 **Sprint Summary**:
 - Sprint 0: Flutter Setup (4-5 days) ✅ **Completed**
 - Sprint 1: Account & Contact Mobile (5-6 days) ✅ **Completed**
-- Sprint 2: Visit Report Mobile (7-8 days)
+- Sprint 2: Visit Report Mobile (7-8 days) ✅ **Completed**
 - Sprint 3: Task & Reminder Mobile (5-6 days)
 - Sprint 4: Dashboard Mobile (3-4 days) ⚠️ **UI Navigation selesai, menunggu APIs**
 - Sprint 5: Polish & Optimization (5-6 days)

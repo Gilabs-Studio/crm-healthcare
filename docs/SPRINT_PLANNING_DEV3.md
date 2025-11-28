@@ -118,20 +118,20 @@ Developer 3 bertanggung jawab untuk:
 - Response parsing akan mengikuti pattern yang sama dengan Sprint 1 (fleksibel untuk berbagai format).
 
 **Mobile Tasks**:
-- [ ] Create visit report service (`visit_report_service.dart`)
-- [ ] Create visit report models (`models/visit_report.dart`)
-- [ ] Create visit report list screen (`screens/visit_reports/visit_report_list.dart`)
-- [ ] Create visit report detail screen (`screens/visit_reports/visit_report_detail.dart`)
-- [ ] Create visit report form screen (`screens/visit_reports/visit_report_form.dart`)
-- [ ] Integrate GPS location (geolocator package)
-- [ ] Implement check-in dengan GPS
-- [ ] Implement check-out dengan GPS
-- [ ] Integrate camera untuk photo upload (image_picker package)
-- [ ] Implement photo upload functionality
-- [ ] Add visit report status badge
-- [ ] Add pull-to-refresh
-- [ ] Add pagination
-- [ ] Create visit report card widget
+- [x] Create visit report service (`visit_report_service.dart`)
+- [x] Create visit report models (`models/visit_report.dart`)
+- [x] Create visit report list screen (`screens/visit_reports/visit_report_list.dart`)
+- [x] Create visit report detail screen (`screens/visit_reports/visit_report_detail.dart`)
+- [x] Create visit report form screen (`screens/visit_reports/visit_report_form.dart`)
+- [x] Integrate GPS location (geolocator package)
+- [x] Implement check-in dengan GPS
+- [x] Implement check-out dengan GPS
+- [x] Integrate camera untuk photo upload (image_picker package)
+- [x] Implement photo upload functionality
+- [x] Add visit report status badge
+- [x] Add pull-to-refresh
+- [x] Add pagination
+- [x] Create visit report card widget
 
 **Acceptance Criteria**:
 - ✅ Sales rep dapat melihat list visit reports
@@ -295,7 +295,7 @@ Developer 3 bertanggung jawab untuk:
 |--------|------|----------|--------|
 | Sprint 0 | Flutter Setup | 4-5 days | ✅ Completed |
 | Sprint 1 | Account & Contact | 5-6 days | ✅ Completed |
-| Sprint 2 | Visit Report | 7-8 days | ⏳ Pending |
+| Sprint 2 | Visit Report | 7-8 days | ✅ Completed |
 | Sprint 3 | Task & Reminder | 5-6 days | ⏳ Pending |
 | Sprint 4 | Dashboard | 3-4 days | ⚠️ **UI Navigation selesai, menunggu APIs** |
 | Sprint 5 | Polish & Optimization | 5-6 days | ⏳ Pending |
