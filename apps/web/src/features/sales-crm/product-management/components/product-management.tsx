@@ -1,31 +1,48 @@
 "use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ProductList } from "./product-list";
-import { ProductCategoryList } from "./product-category-list";
+import { Package, Tag } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { ProductList } from "./product-list";
+import { CategoryList } from "./category-list";
+import { useHasPermission } from "@/features/master-data/user-management/hooks/useHasPermission";
 
 export function ProductManagement() {
+  const hasProductsPermission = useHasPermission("VIEW_PRODUCTS");
+  const hasCategoriesPermission = useHasPermission("VIEW_PRODUCT_CATEGORIES");
   const t = useTranslations("productManagement.tabs");
 
-  return (
-    <div className="space-y-4">
-      <Tabs defaultValue="products" className="w-full">
-        <TabsList>
-          <TabsTrigger value="products">{t("products")}</TabsTrigger>
-          <TabsTrigger value="categories">{t("categories")}</TabsTrigger>
-        </TabsList>
+  // Determine default tab - use first available tab
+  const defaultTab = hasProductsPermission ? "products" : "categories";
 
-        <TabsContent value="products" className="mt-4 space-y-4">
+  return (
+    <Tabs defaultValue={defaultTab} className="w-full">
+      <TabsList>
+        {hasProductsPermission && (
+          <TabsTrigger value="products" className="gap-2">
+            <Package className="h-4 w-4" />
+            {t("products")}
+          </TabsTrigger>
+        )}
+        {hasCategoriesPermission && (
+          <TabsTrigger value="categories" className="gap-2">
+            <Tag className="h-4 w-4" />
+            {t("categories")}
+          </TabsTrigger>
+        )}
+      </TabsList>
+
+      {hasProductsPermission && (
+        <TabsContent value="products" className="mt-6">
           <ProductList />
         </TabsContent>
+      )}
 
-        <TabsContent value="categories" className="mt-4 space-y-4">
-          <ProductCategoryList />
+      {hasCategoriesPermission && (
+        <TabsContent value="categories" className="mt-6">
+          <CategoryList />
         </TabsContent>
-      </Tabs>
-    </div>
+      )}
+    </Tabs>
   );
 }
-
-

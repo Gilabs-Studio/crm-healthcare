@@ -1,287 +1,356 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Search, Filter } from "lucide-react";
+import { Edit, Trash2, Plus, Search, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { DataTable, type Column } from "@/components/ui/data-table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useProductList } from "../hooks/useProductList";
+import { ProductForm } from "./product-form";
+import { ProductDetailModal } from "./product-detail-modal";
+import { DeleteDialog } from "@/components/ui/delete-dialog";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
-import { ProductForm } from "./product-form";
-import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct } from "../hooks/useProducts";
-import type { ProductStatus } from "../types/product";
+import type { Product } from "../types";
 import { useTranslations } from "next-intl";
+import { useHasPermission } from "@/features/master-data/user-management/hooks/useHasPermission";
 
 export function ProductList() {
-  const t = useTranslations("productManagement.list");
-  const tForm = useTranslations("productManagement.form");
+  const hasViewPermission = useHasPermission("VIEW_PRODUCTS");
+  const hasCreatePermission = useHasPermission("CREATE_PRODUCTS");
+  const hasEditPermission = useHasPermission("EDIT_PRODUCTS");
+  const hasDeletePermission = useHasPermission("DELETE_PRODUCTS");
 
-  const [search, setSearch] = useState<string>("");
-  const [statusFilter, setStatusFilter] = useState<ProductStatus | "all">("all");
-  const [page, setPage] = useState<number>(1);
-  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-  const { data, isLoading } = useProducts({
+  const {
     page,
-    per_page: 20,
-    search: search || undefined,
-    status: statusFilter === "all" ? undefined : statusFilter,
-  });
+    setPage,
+    setPerPage,
+    search,
+    setSearch,
+    status,
+    setStatus,
+    categoryId,
+    setCategoryId,
+    isCreateDialogOpen,
+    setIsCreateDialogOpen,
+    editingProduct,
+    setEditingProduct,
+    products,
+    pagination,
+    categories,
+    editingProductData,
+    isLoading,
+    handleCreate,
+    handleUpdate,
+    handleDeleteClick,
+    handleDeleteConfirm,
+    deletingProductId,
+    setDeletingProductId,
+    deleteProduct,
+    createProduct,
+    updateProduct,
+  } = useProductList();
 
-  const createMutation = useCreateProduct();
-  const updateMutation = useUpdateProduct();
-  const deleteMutation = useDeleteProduct();
+  const [viewingProductId, setViewingProductId] = useState<string | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const t = useTranslations("productManagement.list");
 
-  const products = data?.data ?? [];
-  const pagination = data?.meta.pagination;
+  if (!hasViewPermission) {
+    return (
+      <div className="text-center text-muted-foreground py-8">
+        You don't have permission to view products.
+      </div>
+    );
+  }
 
-  const selectedProduct = products.find((p) => p.id === selectedProductId);
-
-  const handleCreate = async (formData: Parameters<typeof createMutation.mutateAsync>[0]) => {
-    await createMutation.mutateAsync(formData);
-    setIsDialogOpen(false);
+  const handleViewProduct = (productId: string) => {
+    setViewingProductId(productId);
+    setIsDetailModalOpen(true);
   };
 
-  const handleUpdate = async (formData: Parameters<typeof updateMutation.mutateAsync>[0]["data"]) => {
-    if (!selectedProductId) return;
-    await updateMutation.mutateAsync({ id: selectedProductId, data: formData });
-    setIsDialogOpen(false);
+  const formatCurrency = (amount: number) => {
+    const rupiah = amount / 100;
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(rupiah);
   };
 
-  const handleDelete = async (id: string) => {
-    await deleteMutation.mutateAsync(id);
-  };
-
-  const resetDialogState = () => {
-    setSelectedProductId(null);
-  };
+  const columns: Column<Product>[] = [
+    {
+      id: "name",
+      header: t("name"),
+      accessor: (row) => (
+        hasViewPermission ? (
+          <button
+            onClick={() => handleViewProduct(row.id)}
+            className="flex items-center gap-3 font-medium text-primary hover:underline text-left"
+          >
+            <span>{row.name}</span>
+          </button>
+        ) : (
+          <span className="font-medium">{row.name}</span>
+        )
+      ),
+      className: "w-[200px]",
+    },
+    {
+      id: "sku",
+      header: t("sku"),
+      accessor: (row) => (
+        <span className="text-muted-foreground font-mono text-sm">{row.sku}</span>
+      ),
+    },
+    {
+      id: "category",
+      header: t("category"),
+      accessor: (row) => (
+        <Badge variant="outline" className="font-normal">
+          {row.category?.name || "N/A"}
+        </Badge>
+      ),
+    },
+    {
+      id: "price",
+      header: t("price"),
+      accessor: (row) => (
+        <span className="font-medium">{row.price_formatted || formatCurrency(row.price)}</span>
+      ),
+    },
+    {
+      id: "stock",
+      header: t("stock"),
+      accessor: (row) => (
+        <span className="text-muted-foreground">{row.stock}</span>
+      ),
+    },
+    {
+      id: "status",
+      header: t("status"),
+      accessor: (row) => (
+        <Badge variant={row.status === "active" ? "active" : "inactive"}>
+          {row.status}
+        </Badge>
+      ),
+      className: "w-[100px]",
+    },
+    {
+      id: "actions",
+      header: t("actions"),
+      accessor: (row) => (
+        <div className="flex items-center justify-end gap-1">
+          {hasViewPermission && (
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="h-8 w-8"
+              title="View Details"
+              onClick={() => handleViewProduct(row.id)}
+            >
+              <Eye className="h-3.5 w-3.5" />
+            </Button>
+          )}
+          {hasEditPermission && (
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => setEditingProduct(row.id)}
+              className="h-8 w-8"
+              title="Edit"
+            >
+              <Edit className="h-3.5 w-3.5" />
+            </Button>
+          )}
+          {hasDeletePermission && (
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => handleDeleteClick(row.id)}
+              className="h-8 w-8 text-destructive hover:text-destructive"
+              title="Delete"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
+          )}
+        </div>
+      ),
+      className: "w-[140px] text-right",
+    },
+  ];
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-          <p className="text-sm text-muted-foreground mt-1">{t("description")}</p>
-        </div>
-
-        <Dialog
-          open={isDialogOpen}
-          onOpenChange={(open) => {
-            setIsDialogOpen(open);
-            if (!open) resetDialogState();
-          }}
-        >
-          <DialogTrigger asChild>
-            <Button className="gap-2">
-              <Plus className="h-4 w-4" />
-              {t("buttons.addProduct")}
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-lg">
-            <DialogHeader>
-              <DialogTitle>
-                {selectedProduct ? t("buttons.editTitle") : t("buttons.createTitle")}
-              </DialogTitle>
-            </DialogHeader>
-            <ProductForm
-              product={selectedProduct}
-              onSubmit={
-                selectedProduct
-                  ? async (data) => {
-                      await handleUpdate(data as any);
-                    }
-                  : async (data) => {
-                      await handleCreate(data as any);
-                    }
-              }
-              onCancel={() => {
-                setIsDialogOpen(false);
-                resetDialogState();
-              }}
-              isLoading={createMutation.isPending || updateMutation.isPending}
-            />
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
-        <div className="flex flex-1 items-center gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+      {/* Header with Actions */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3 flex-1">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder={t("searchPlaceholder")}
               value={search}
-              onChange={(event) => {
-                setSearch(event.target.value);
-                setPage(1);
-              }}
-              className="pl-8"
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-10 h-9"
             />
           </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-muted-foreground" />
-          <select
-            value={statusFilter}
-            onChange={(event) => {
-              const value = event.target.value as ProductStatus | "all";
-              setStatusFilter(value);
-              setPage(1);
-            }}
-            className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+          <Select 
+            value={status || "all"} 
+            onValueChange={(value) => setStatus(value === "all" ? "" : value)}
           >
-            <option value="all">{t("filters.statusAll")}</option>
-            <option value="active">{t("filters.statusActive")}</option>
-            <option value="inactive">{t("filters.statusInactive")}</option>
-          </select>
+            <SelectTrigger className="w-[140px] h-9">
+              <SelectValue placeholder={t("allStatus")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("allStatus")}</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="inactive">Inactive</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select 
+            value={categoryId || "all"} 
+            onValueChange={(value) => setCategoryId(value === "all" ? "" : value)}
+          >
+            <SelectTrigger className="w-[180px] h-9">
+              <SelectValue placeholder={t("allCategories")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("allCategories")}</SelectItem>
+            {categories.map((category) => (
+                <SelectItem key={category.id} value={category.id}>
+                {category.name}
+                </SelectItem>
+            ))}
+            </SelectContent>
+          </Select>
         </div>
-      </div>
-
-      <div className="rounded-md border bg-card">
-        <div className="min-w-full overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead>
-              <tr className="border-b bg-muted/50 text-xs font-medium text-muted-foreground">
-                <th className="px-4 py-2 text-left">Name</th>
-                <th className="px-4 py-2 text-left">SKU / Barcode</th>
-                <th className="px-4 py-2 text-left">Category</th>
-                <th className="px-4 py-2 text-right">Price</th>
-                <th className="px-4 py-2 text-right">Stock</th>
-                <th className="px-4 py-2 text-center">Status</th>
-                <th className="px-4 py-2 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading && (
-                <tr>
-                  <td colSpan={7} className="px-4 py-6 text-center text-muted-foreground">
-                    {t("loading")}
-                  </td>
-                </tr>
-              )}
-
-              {!isLoading && products.length === 0 && (
-                <tr>
-                  <td colSpan={7} className="px-4 py-6 text-center text-muted-foreground">
-                    {t("empty")}
-                  </td>
-                </tr>
-              )}
-
-              {!isLoading &&
-                products.map((product) => (
-                  <tr key={product.id} className="border-b last:border-0">
-                    <td className="px-4 py-2 align-middle">
-                      <div className="font-medium">{product.name}</div>
-                      <div className="text-xs text-muted-foreground mt-0.5">
-                        {product.description || "-"}
-                      </div>
-                    </td>
-                    <td className="px-4 py-2 align-middle">
-                      <div className="text-xs">
-                        <span className="font-medium">SKU:</span> {product.sku}
-                      </div>
-                      {product.barcode && (
-                        <div className="text-xs text-muted-foreground mt-0.5">
-                          <span className="font-medium">Barcode:</span> {product.barcode}
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-4 py-2 align-middle">
-                      <div className="text-sm">
-                        {product.category?.name ?? (
-                          <span className="text-muted-foreground">Uncategorized</span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-4 py-2 align-middle text-right whitespace-nowrap">
-                      <div className="font-medium">
-                        {product.price_formatted || `Rp ${(product.price / 100).toLocaleString("id-ID")}`}
-                      </div>
-                    </td>
-                    <td className="px-4 py-2 align-middle text-right">
-                      <div className="font-medium">{product.stock}</div>
-                    </td>
-                    <td className="px-4 py-2 align-middle text-center">
-                      <Badge
-                        variant={product.status === "active" ? "success" : "secondary"}
-                        className="text-xs"
-                      >
-                        {product.status === "active"
-                          ? tForm("statusActive")
-                          : tForm("statusInactive")}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-2 align-middle text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setSelectedProductId(product.id);
-                            setIsDialogOpen(true);
-                          }}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => void handleDelete(product.id)}
-                        >
-                          Delete
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
-        </div>
-
-        {pagination && (
-          <div className="flex items-center justify-between px-4 py-3 border-t text-xs text-muted-foreground">
-            <div>
-              {t("pagination.pageOf", {
-                page: pagination.page,
-                totalPages: pagination.total_pages,
-              })}{" "}
-              •{" "}
-              {t("pagination.total", {
-                total: pagination.total,
-              })}
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={!pagination.has_prev}
-                onClick={() => setPage((current) => Math.max(1, current - 1))}
-              >
-                {t("pagination.previous")}
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={!pagination.has_next}
-                onClick={() => setPage((current) => current + 1)}
-              >
-                {t("pagination.next")}
-              </Button>
-            </div>
-          </div>
+        {hasCreatePermission && (
+          <Button onClick={() => setIsCreateDialogOpen(true)} size="sm">
+            <Plus className="h-4 w-4 mr-2" />
+            {t("addProduct")}
+          </Button>
         )}
       </div>
+
+      {/* Table */}
+      <DataTable
+        columns={columns}
+        data={products}
+        isLoading={isLoading}
+        emptyMessage={t("empty")}
+        pagination={
+          pagination
+            ? {
+                page: pagination.page,
+                per_page: pagination.per_page,
+                total: pagination.total,
+                total_pages: pagination.total_pages,
+                has_next: pagination.has_next,
+                has_prev: pagination.has_prev,
+              }
+            : undefined
+        }
+        onPageChange={setPage}
+        onPerPageChange={setPerPage}
+        itemName="product"
+        perPageOptions={[10, 20, 50, 100]}
+        onResetFilters={() => {
+          setSearch("");
+          setStatus("");
+          setCategoryId("");
+          setPage(1);
+        }}
+      />
+
+      {/* Create Dialog */}
+      {hasCreatePermission && (
+        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle>Create Product</DialogTitle>
+            </DialogHeader>
+            <ProductForm
+              onSubmit={async (data) => {
+                await handleCreate(data as any);
+              }}
+              onCancel={() => setIsCreateDialogOpen(false)}
+              isLoading={createProduct.isPending}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Edit Dialog */}
+      {hasEditPermission && editingProduct && editingProductData?.data && (
+        <Dialog open={!!editingProduct} onOpenChange={(open) => !open && setEditingProduct(null)}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle>Edit Product</DialogTitle>
+            </DialogHeader>
+            <ProductForm
+              product={editingProductData.data}
+              onSubmit={async (data) => {
+                await handleUpdate(data as any);
+              }}
+              onCancel={() => setEditingProduct(null)}
+              isLoading={updateProduct.isPending}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Product Detail Modal */}
+      {hasViewPermission && (
+        <ProductDetailModal
+          productId={viewingProductId}
+          open={isDetailModalOpen}
+          onOpenChange={(open) => {
+            setIsDetailModalOpen(open);
+            if (!open) {
+              setViewingProductId(null);
+            }
+          }}
+          onProductUpdated={() => {
+            // Refresh will be handled by query invalidation in hooks
+          }}
+        />
+      )}
+
+      {/* Delete Dialog */}
+      {hasDeletePermission && (
+        <DeleteDialog
+          open={!!deletingProductId}
+          onOpenChange={(open) => {
+            if (!open) {
+              setDeletingProductId(null);
+            }
+          }}
+          onConfirm={handleDeleteConfirm}
+          title={t("deleteTitle")}
+          description={
+            deletingProductId
+              ? t("deleteDescriptionWithName", {
+                  name:
+                    products.find((p) => p.id === deletingProductId)?.name ??
+                    t("deleteDescription"),
+                })
+              : t("deleteDescription")
+          }
+          itemName="product"
+          isLoading={deleteProduct.isPending}
+        />
+      )}
     </div>
   );
 }
-
-
