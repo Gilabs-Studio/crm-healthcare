@@ -16,8 +16,21 @@ class LocalStorage {
 
   String? getAuthToken() => _prefs.getString('auth_token');
 
+  Future<void> saveRefreshToken(String refreshToken) async {
+    await _prefs.setString('refresh_token', refreshToken);
+  }
+
+  String? getRefreshToken() => _prefs.getString('refresh_token');
+
+  Future<void> setRememberMe(bool remember) async {
+    await _prefs.setBool('remember_me', remember);
+  }
+
+  bool getRememberMe() => _prefs.getBool('remember_me') ?? false;
+
   Future<void> clearAuthToken() async {
     await _prefs.remove('auth_token');
+    await _prefs.remove('refresh_token');
   }
 }
 

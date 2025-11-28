@@ -28,19 +28,19 @@ Developer 3 bertanggung jawab untuk:
 **Goal**: Setup Flutter project dan foundation
 
 **Tasks**:
-- [ ] Setup Flutter project structure
-- [ ] Setup state management (Provider / Riverpod)
-- [ ] Setup HTTP client (Dio)
-- [ ] Setup local storage (Hive / SharedPreferences)
-- [ ] Setup dependency injection
-- [ ] Create API client dengan interceptors
-- [ ] Setup authentication flow
-- [ ] Create login screen
-- [ ] Create auth guard / route protection
-- [ ] Setup error handling
-- [ ] Setup loading states
-- [ ] Setup theme (light/dark)
-- [ ] Setup navigation
+- [x] Setup Flutter project structure
+- [x] Setup state management (Provider / Riverpod)
+- [x] Setup HTTP client (Dio)
+- [x] Setup local storage (Hive / SharedPreferences)
+- [x] Setup dependency injection
+- [x] Create API client dengan interceptors
+- [x] Setup authentication flow
+- [x] Create login screen
+- [x] Create auth guard / route protection
+- [x] Setup error handling
+- [x] Setup loading states
+- [x] Setup theme (light/dark)
+- [x] Setup navigation
 
 **Acceptance Criteria**:
 - ✅ Flutter project structure ready
@@ -272,7 +272,7 @@ Developer 3 bertanggung jawab untuk:
 
 | Sprint | Goal | Duration | Status |
 |--------|------|----------|--------|
-| Sprint 0 | Flutter Setup | 4-5 days | ⏳ Pending |
+| Sprint 0 | Flutter Setup | 4-5 days | ✅ Completed |
 | Sprint 1 | Account & Contact | 5-6 days | ⏳ Pending |
 | Sprint 2 | Visit Report | 7-8 days | ⏳ Pending |
 | Sprint 3 | Task & Reminder | 5-6 days | ⏳ Pending |

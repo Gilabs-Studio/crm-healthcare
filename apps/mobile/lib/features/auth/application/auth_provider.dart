@@ -1,8 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_client.dart';
+import '../../../core/storage/local_storage.dart';
 import '../data/auth_repository.dart';
 import 'auth_state.dart';
+
+final localStorageProvider = FutureProvider<LocalStorage>((ref) async {
+  return LocalStorage.create();
+});
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository(ApiClient.dio);
@@ -10,15 +15,48 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
 
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final repository = ref.read(authRepositoryProvider);
-  return AuthNotifier(repository);
+  return AuthNotifier(repository, ref);
 });
 
 class AuthNotifier extends StateNotifier<AuthState> {
-  AuthNotifier(this._repository) : super(AuthState.unauthenticated());
+  AuthNotifier(this._repository, this._ref) : super(AuthState.unknown()) {
+    // Check existing token saat app start (auto-login)
+    _checkAuthStatus();
+  }
 
   final AuthRepository _repository;
+  final Ref _ref;
 
-  Future<void> login(String email, String password) async {
+  /// Check authentication status saat app start
+  /// Jika ada token dan rememberMe = true, set state ke authenticated
+  Future<void> _checkAuthStatus() async {
+    try {
+      final storage = await _ref.read(localStorageProvider.future);
+      final token = storage.getAuthToken();
+      final rememberMe = storage.getRememberMe();
+
+      if (token != null && rememberMe) {
+        // Token ada dan rememberMe = true → auto-login
+        state = AuthState.authenticated();
+      } else if (token != null && !rememberMe) {
+        // Token ada tapi rememberMe = false → hapus token (session only)
+        await storage.clearAuthToken();
+        state = AuthState.unauthenticated();
+      } else {
+        // Tidak ada token → unauthenticated
+        state = AuthState.unauthenticated();
+      }
+    } catch (e) {
+      // Jika error, anggap unauthenticated
+      state = AuthState.unauthenticated();
+    }
+  }
+
+  Future<void> login(
+    String email,
+    String password, {
+    bool rememberMe = false,
+  }) async {
     if (email.isEmpty || password.isEmpty) {
       state = state.copyWith(
         errorMessage: 'Email dan password wajib diisi',
@@ -34,18 +72,33 @@ class AuthNotifier extends StateNotifier<AuthState> {
     );
 
     try {
-      await _repository.login(email: email, password: password);
+      final loginResponse = await _repository.login(
+        email: email,
+        password: password,
+      );
+
+      // Save tokens to local storage
+      final storage = await _ref.read(localStorageProvider.future);
+      await storage.saveAuthToken(loginResponse.token);
+      await storage.saveRefreshToken(loginResponse.refreshToken);
+      await storage.setRememberMe(rememberMe);
+
       state = AuthState.authenticated();
     } catch (error) {
+      final errorMessage = error is Exception
+          ? error.toString().replaceFirst('Exception: ', '')
+          : 'Gagal login. Coba lagi.';
       state = state.copyWith(
         isLoading: false,
         status: AuthStatus.unauthenticated,
-        errorMessage: 'Gagal login. Coba lagi.',
+        errorMessage: errorMessage,
       );
     }
   }
 
-  void logout() {
+  Future<void> logout() async {
+    final storage = await _ref.read(localStorageProvider.future);
+    await storage.clearAuthToken();
     state = AuthState.unauthenticated();
   }
 }

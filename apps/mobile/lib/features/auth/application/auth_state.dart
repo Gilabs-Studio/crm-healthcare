@@ -15,6 +15,10 @@ class AuthState {
   final bool isLoading;
   final String? errorMessage;
 
+  factory AuthState.unknown() {
+    return const AuthState(status: AuthStatus.unknown);
+  }
+
   factory AuthState.unauthenticated() {
     return const AuthState(status: AuthStatus.unauthenticated);
   }

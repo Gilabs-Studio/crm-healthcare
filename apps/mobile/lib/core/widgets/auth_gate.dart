@@ -14,6 +14,15 @@ class AuthGate extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(authProvider);
 
+    // Show loading saat check auth status (unknown)
+    if (state.status == AuthStatus.unknown) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     if (state.status == AuthStatus.authenticated) {
       return child;
     }

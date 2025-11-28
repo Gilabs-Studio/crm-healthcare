@@ -90,17 +90,20 @@ pnpm dev --filter=@repo/mobile
 ## 🔗 Koneksi ke Backend API
 
 - Base URL API diatur di `lib/core/config/env.dart` melalui `Env.apiBaseUrl`.
-- Default untuk pengembangan lokal:
+- **Default otomatis berdasarkan platform:**
+  - **Android Emulator**: `http://10.0.2.2:8080` (alias untuk host machine)
+  - **iOS Simulator**: `http://localhost:8080`
+  - **Device Fisik**: Harus set manual dengan IP address PC
 
-```dart
-static const apiBaseUrl = String.fromEnvironment(
-  'API_BASE_URL',
-  defaultValue: 'http://localhost:8080',
-);
-```
+- **Override dengan environment variable** (jika perlu):
+  ```bash
+  # Untuk device fisik Android, gunakan IP PC
+  flutter run --dart-define=API_BASE_URL=http://192.168.1.100:8080
+  ```
 
-- Sesuaikan environment saat backend sudah siap (Dev2/Fullstack):
+- **Pastikan backend API sudah running:**
   - Jalankan API dari `apps/api` sesuai `apps/api/SETUP.md`.
+  - Untuk development, bisa pakai: `pnpm run dev:web-api-docker` (dari root repo).
   - Pastikan endpoint dan skema respons sesuai standar di `docs/api-standart/`.
 
 ## 🧩 Sprint 0 – Flutter Setup (Dev 3)
