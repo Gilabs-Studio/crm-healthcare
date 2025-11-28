@@ -166,11 +166,15 @@ Setiap developer memiliki sprint planning terpisah yang detail.
 - Sprint 1: Account & Contact Mobile (5-6 days) ✅ **Completed**
 - Sprint 2: Visit Report Mobile (7-8 days)
 - Sprint 3: Task & Reminder Mobile (5-6 days)
-- Sprint 4: Dashboard Mobile (3-4 days)
+- Sprint 4: Dashboard Mobile (3-4 days) ⚠️ **UI Navigation selesai, menunggu APIs**
 - Sprint 5: Polish & Optimization (5-6 days)
 - Sprint 6: Integration & Testing (4-5 days)
 
 **Total**: 33-42 days (4.5-6 weeks)
+
+**Catatan API Integration**:
+- ⚠️ **Sprint 1**: Menggunakan endpoint API versi **Web** karena endpoint mobile belum tersedia.
+- Response parsing dibuat fleksibel untuk kompatibilitas dengan format API yang berbeda.
 
 ---
 
@@ -222,7 +226,7 @@ Setiap developer memiliki sprint planning terpisah yang detail.
 **Week 3-4**: Account & Contact
 - Developer 1: Account & Contact (Fullstack - Backend + Frontend)
 - Developer 2: Foundation Review, User Management Review
-- Developer 3: Account & Contact Mobile
+- Developer 3: Account & Contact Mobile ✅ **Completed** (menggunakan API versi Web)
 
 **Week 5-6**: Visit Report
 - Developer 1: Visit Report (Fullstack - Backend + Frontend)

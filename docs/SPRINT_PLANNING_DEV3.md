@@ -7,6 +7,11 @@
 **Status**: Active  
 **Last Updated**: 2025-01-15
 
+**⚠️ Catatan API Integration**:
+- Mobile app saat ini menggunakan endpoint API versi **Web** karena endpoint khusus untuk mobile belum tersedia.
+- Response parsing dibuat fleksibel untuk menangani berbagai format response API.
+- Endpoint mobile-specific akan digunakan ketika sudah tersedia dari Developer 2.
+
 > **📊 Visualisasi Project**: Lihat [**PROJECT_DIAGRAMS.md**](../PROJECT_DIAGRAMS.md) untuk memahami scope, fitur, dan user flow secara visual.
 
 ---
@@ -61,6 +66,10 @@ Developer 3 bertanggung jawab untuk:
 - Account APIs ready
 - Contact APIs ready
 
+**Note**: 
+- ⚠️ **API yang digunakan**: Menggunakan endpoint API versi **Web** (`/api/v1/accounts`, `/api/v1/contacts`) karena endpoint khusus untuk mobile belum tersedia.
+- Response format API di-handle secara fleksibel untuk menangani format array langsung atau object dengan `items` & `pagination`.
+
 **Mobile Tasks**:
 - [x] Create account service (`account_service.dart`)
 - [x] Create contact service (`contact_service.dart`)
@@ -104,6 +113,10 @@ Developer 3 bertanggung jawab untuk:
 - Check-in/out APIs ready
 - Photo upload API ready
 
+**Note**: 
+- ⚠️ **API yang akan digunakan**: Akan menggunakan endpoint API versi **Web** (`/api/v1/visit-reports`) jika endpoint mobile belum tersedia.
+- Response parsing akan mengikuti pattern yang sama dengan Sprint 1 (fleksibel untuk berbagai format).
+
 **Mobile Tasks**:
 - [ ] Create visit report service (`visit_report_service.dart`)
 - [ ] Create visit report models (`models/visit_report.dart`)
@@ -146,6 +159,10 @@ Developer 3 bertanggung jawab untuk:
 - Reminder APIs ready
 - Push notification service ready
 
+**Note**: 
+- ⚠️ **API yang akan digunakan**: Akan menggunakan endpoint API versi **Web** jika endpoint mobile belum tersedia.
+- Push notification service harus ready untuk implementasi reminder notifications.
+
 **Mobile Tasks**:
 - [ ] Create task service (`task_service.dart`)
 - [ ] Create task models (`models/task.dart`)
@@ -184,15 +201,19 @@ Developer 3 bertanggung jawab untuk:
 **Backend Dependencies** (Coordinate dengan Developer 2):
 - Dashboard APIs ready
 
+**Note**: 
+- ⚠️ **Status Saat Ini**: Dashboard screen sudah dibuat dengan UI sederhana untuk navigasi ke semua fitur (Accounts, Contacts, Visit Reports, Tasks).
+- UI dashboard lengkap dengan metrics & statistics akan diimplementasikan setelah Dashboard APIs ready.
+
 **Mobile Tasks**:
-- [ ] Create dashboard service (`dashboard_service.dart`)
-- [ ] Create dashboard models (`models/dashboard.dart`)
-- [ ] Create dashboard screen (`screens/dashboard/dashboard.dart`)
-- [ ] Create visit statistics widget
-- [ ] Create pipeline summary widget
-- [ ] Create recent activities widget
-- [ ] Add pull-to-refresh
-- [ ] Add date range picker (optional)
+- [x] Create dashboard screen (`screens/dashboard/dashboard.dart`) - ✅ **UI Navigation selesai**
+- [ ] Create dashboard service (`dashboard_service.dart`) - ⏳ **Menunggu Dashboard APIs**
+- [ ] Create dashboard models (`models/dashboard.dart`) - ⏳ **Menunggu Dashboard APIs**
+- [ ] Create visit statistics widget - ⏳ **Menunggu Dashboard APIs**
+- [ ] Create pipeline summary widget - ⏳ **Menunggu Dashboard APIs**
+- [ ] Create recent activities widget - ⏳ **Menunggu Dashboard APIs**
+- [ ] Add pull-to-refresh - ⏳ **Menunggu Dashboard APIs**
+- [ ] Add date range picker (optional) - ⏳ **Menunggu Dashboard APIs**
 
 **Acceptance Criteria**:
 - ✅ Sales rep dapat melihat dashboard
@@ -276,7 +297,7 @@ Developer 3 bertanggung jawab untuk:
 | Sprint 1 | Account & Contact | 5-6 days | ✅ Completed |
 | Sprint 2 | Visit Report | 7-8 days | ⏳ Pending |
 | Sprint 3 | Task & Reminder | 5-6 days | ⏳ Pending |
-| Sprint 4 | Dashboard | 3-4 days | ⏳ Pending |
+| Sprint 4 | Dashboard | 3-4 days | ⚠️ **UI Navigation selesai, menunggu APIs** |
 | Sprint 5 | Polish & Optimization | 5-6 days | ⏳ Pending |
 | Sprint 6 | Integration & Testing | 4-5 days | ⏳ Pending |
 
@@ -287,11 +308,16 @@ Developer 3 bertanggung jawab untuk:
 ## 🔗 Dependencies
 
 ### Dependencies dari Developer 2 (Backend)
-- Account & Contact APIs (Sprint 1)
+- Account & Contact APIs (Sprint 1) ✅ **Menggunakan API versi Web**
 - Visit Report APIs (Sprint 2)
 - Task APIs (Sprint 3)
-- Dashboard APIs (Sprint 4)
+- Dashboard APIs (Sprint 4) ⏳ **Belum ready - UI navigation sudah dibuat**
 - Push notification service (Sprint 3)
+
+### ⚠️ Catatan Penting: API Integration
+- **Sprint 1 (Account & Contact)**: Menggunakan endpoint API versi **Web** (`/api/v1/accounts`, `/api/v1/contacts`) karena endpoint khusus untuk mobile belum tersedia.
+- Response parsing dibuat fleksibel untuk menangani format array langsung atau object dengan `items` & `pagination`.
+- Endpoint mobile-specific akan digunakan ketika sudah tersedia dari Developer 2.
 
 ### Dependencies dari Developer 1 (Web)
 - Coordinate untuk UI/UX consistency
