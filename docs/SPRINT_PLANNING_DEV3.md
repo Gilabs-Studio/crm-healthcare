@@ -62,20 +62,20 @@ Developer 3 bertanggung jawab untuk:
 - Contact APIs ready
 
 **Mobile Tasks**:
-- [ ] Create account service (`account_service.dart`)
-- [ ] Create contact service (`contact_service.dart`)
-- [ ] Create account models (`models/account.dart`)
-- [ ] Create contact models (`models/contact.dart`)
-- [ ] Create account list screen (`screens/accounts/account_list.dart`)
-- [ ] Create account detail screen (`screens/accounts/account_detail.dart`)
-- [ ] Create contact list screen (`screens/contacts/contact_list.dart`)
-- [ ] Create contact detail screen (`screens/contacts/contact_detail.dart`)
-- [ ] Add account search functionality
-- [ ] Add contact search functionality
-- [ ] Add pull-to-refresh
-- [ ] Add pagination
-- [ ] Create account card widget
-- [ ] Create contact card widget
+- [x] Create account service (`account_service.dart`)
+- [x] Create contact service (`contact_service.dart`)
+- [x] Create account models (`models/account.dart`)
+- [x] Create contact models (`models/contact.dart`)
+- [x] Create account list screen (`screens/accounts/account_list.dart`)
+- [x] Create account detail screen (`screens/accounts/account_detail.dart`)
+- [x] Create contact list screen (`screens/contacts/contact_list.dart`)
+- [x] Create contact detail screen (`screens/contacts/contact_detail.dart`)
+- [x] Add account search functionality
+- [x] Add contact search functionality
+- [x] Add pull-to-refresh
+- [x] Add pagination
+- [x] Create account card widget
+- [x] Create contact card widget
 
 **Acceptance Criteria**:
 - ✅ Sales rep dapat melihat list accounts
@@ -273,7 +273,7 @@ Developer 3 bertanggung jawab untuk:
 | Sprint | Goal | Duration | Status |
 |--------|------|----------|--------|
 | Sprint 0 | Flutter Setup | 4-5 days | ✅ Completed |
-| Sprint 1 | Account & Contact | 5-6 days | ⏳ Pending |
+| Sprint 1 | Account & Contact | 5-6 days | ✅ Completed |
 | Sprint 2 | Visit Report | 7-8 days | ⏳ Pending |
 | Sprint 3 | Task & Reminder | 5-6 days | ⏳ Pending |
 | Sprint 4 | Dashboard | 3-4 days | ⏳ Pending |

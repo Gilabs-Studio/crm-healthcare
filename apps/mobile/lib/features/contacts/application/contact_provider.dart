@@ -1,0 +1,96 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../core/network/api_client.dart';
+import '../data/contact_repository.dart';
+import '../data/models/contact.dart';
+import 'contact_state.dart';
+
+final contactRepositoryProvider = Provider<ContactRepository>((ref) {
+  return ContactRepository(ApiClient.dio);
+});
+
+final contactListProvider =
+    StateNotifierProvider<ContactListNotifier, ContactListState>((ref) {
+  final repository = ref.read(contactRepositoryProvider);
+  return ContactListNotifier(repository);
+});
+
+final contactDetailProvider =
+    FutureProvider.family<Contact, String>((ref, id) async {
+  final repository = ref.read(contactRepositoryProvider);
+  return repository.getContactById(id);
+});
+
+class ContactListNotifier extends StateNotifier<ContactListState> {
+  ContactListNotifier(this._repository) : super(const ContactListState());
+
+  final ContactRepository _repository;
+
+  Future<void> loadContacts({
+    int page = 1,
+    bool refresh = false,
+    String? search,
+    String? accountId,
+  }) async {
+    if (refresh) {
+      state = state.copyWith(isLoading: true, errorMessage: null);
+    } else {
+      state = state.copyWith(isLoading: true);
+    }
+
+    try {
+      final searchQuery = search ?? state.searchQuery;
+      final filterAccountId = accountId ?? state.accountId;
+      final response = await _repository.getContacts(
+        page: page,
+        perPage: 20,
+        search: searchQuery.isNotEmpty ? searchQuery : null,
+        accountId: filterAccountId,
+      );
+
+      if (refresh || page == 1) {
+        state = state.copyWith(
+          contacts: response.items,
+          pagination: response.pagination,
+          searchQuery: searchQuery,
+          accountId: filterAccountId,
+          isLoading: false,
+          errorMessage: null,
+        );
+      } else {
+        state = state.copyWith(
+          contacts: [...state.contacts, ...response.items],
+          pagination: response.pagination,
+          isLoading: false,
+          errorMessage: null,
+        );
+      }
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: e.toString().replaceFirst('Exception: ', ''),
+      );
+    }
+  }
+
+  Future<void> refresh() async {
+    await loadContacts(page: 1, refresh: true);
+  }
+
+  Future<void> loadMore() async {
+    if (state.isLoading) return;
+    final pagination = state.pagination;
+    if (pagination == null || !pagination.hasNextPage) return;
+
+    await loadContacts(page: pagination.page + 1);
+  }
+
+  void updateSearchQuery(String query) {
+    state = state.copyWith(searchQuery: query);
+  }
+
+  void setAccountFilter(String? accountId) {
+    state = state.copyWith(accountId: accountId);
+  }
+}
+
