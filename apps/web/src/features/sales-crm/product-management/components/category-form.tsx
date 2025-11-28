@@ -2,48 +2,45 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  createProductCategorySchema,
-  updateProductCategorySchema,
-  type CreateProductCategoryFormData,
-  type UpdateProductCategoryFormData,
-} from "../schemas/category.schema";
+import { useTranslations } from "next-intl";
+import { createCategorySchema, updateCategorySchema, type CreateCategoryFormData, type UpdateCategoryFormData } from "../schemas/category.schema";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import type { ProductCategory } from "../types/category";
-import { useTranslations } from "next-intl";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { ProductCategory } from "../types";
 
-interface ProductCategoryFormProps {
+interface CategoryFormProps {
   readonly category?: ProductCategory;
-  readonly onSubmit: (
-    data: CreateProductCategoryFormData | UpdateProductCategoryFormData,
-  ) => Promise<void>;
+  readonly onSubmit: (data: CreateCategoryFormData | UpdateCategoryFormData) => Promise<void>;
   readonly onCancel: () => void;
   readonly isLoading?: boolean;
 }
 
-export function ProductCategoryForm({
-  category,
-  onSubmit,
-  onCancel,
-  isLoading,
-}: ProductCategoryFormProps) {
+export function CategoryForm({ category, onSubmit, onCancel, isLoading }: CategoryFormProps) {
   const isEdit = !!category;
   const t = useTranslations("productManagement.categoryForm");
 
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
-  } = useForm<CreateProductCategoryFormData | UpdateProductCategoryFormData>({
-    resolver: zodResolver(isEdit ? updateProductCategorySchema : createProductCategorySchema),
+  } = useForm<CreateCategoryFormData | UpdateCategoryFormData>({
+    resolver: zodResolver(isEdit ? updateCategorySchema : createCategorySchema),
     defaultValues: category
       ? {
           name: category.name,
-          slug: category.slug,
-          description: category.description,
+          slug: category.slug || "",
+          description: category.description || "",
           status: category.status,
         }
       : {
@@ -51,16 +48,16 @@ export function ProductCategoryForm({
         },
   });
 
-  const handleFormSubmit = async (
-    data: CreateProductCategoryFormData | UpdateProductCategoryFormData,
-  ) => {
+  const selectedStatus = watch("status");
+
+  const handleFormSubmit = async (data: CreateCategoryFormData | UpdateCategoryFormData) => {
     await onSubmit(data);
   };
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
       <Field orientation="vertical">
-        <FieldLabel>{t("nameLabel")} *</FieldLabel>
+        <FieldLabel>{t("nameLabel")}</FieldLabel>
         <Input
           {...register("name")}
           placeholder={t("namePlaceholder")}
@@ -74,6 +71,9 @@ export function ProductCategoryForm({
           {...register("slug")}
           placeholder={t("slugPlaceholder")}
         />
+        <p className="text-xs text-muted-foreground mt-1">
+          {t("slugHint")}
+        </p>
         {errors.slug && <FieldError>{errors.slug.message}</FieldError>}
       </Field>
 
@@ -89,26 +89,34 @@ export function ProductCategoryForm({
 
       <Field orientation="vertical">
         <FieldLabel>{t("statusLabel")}</FieldLabel>
-        <select
-          {...register("status")}
-          className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+        <Select
+          value={selectedStatus || "active"}
+          onValueChange={(value) => setValue("status", value as "active" | "inactive")}
         >
-          <option value="active">{t("statusActive")}</option>
-          <option value="inactive">{t("statusInactive")}</option>
-        </select>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="active">{t("statusActive")}</SelectItem>
+            <SelectItem value="inactive">{t("statusInactive")}</SelectItem>
+          </SelectContent>
+        </Select>
         {errors.status && <FieldError>{errors.status.message}</FieldError>}
       </Field>
 
-      <div className="flex justify-end gap-2 pt-2">
+      <div className="flex justify-end gap-2 pt-4">
         <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
           {t("cancel")}
         </Button>
         <Button type="submit" disabled={isLoading}>
-          {isLoading ? t("submitting") : isEdit ? t("submitUpdate") : t("submitCreate")}
+          {isLoading
+            ? t("submitting")
+            : isEdit
+              ? t("submitUpdate")
+              : t("submitCreate")}
         </Button>
       </div>
     </form>
   );
 }
-
 
