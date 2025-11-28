@@ -6,6 +6,8 @@ import '../../features/auth/presentation/login_screen.dart';
 import '../../features/contacts/presentation/contact_detail_screen.dart';
 import '../../features/contacts/presentation/contact_list_screen.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
+import '../../features/tasks/presentation/task_detail_screen.dart';
+import '../../features/tasks/presentation/task_form_screen.dart';
 import '../../features/tasks/presentation/task_list_screen.dart';
 import '../../features/visit_reports/presentation/visit_report_detail_screen.dart';
 import '../../features/visit_reports/presentation/visit_report_form_screen.dart';
@@ -20,7 +22,10 @@ class AppRoutes {
   static const accounts = '/accounts';
   static const contacts = '/contacts';
   static const visitReports = '/visit-reports';
+  static const visitReportsCreate = '/visit-reports/create';
   static const tasks = '/tasks';
+  static const tasksCreate = '/tasks/create';
+  static const tasksEdit = '/tasks/edit';
 }
 
 class AppRouter {
@@ -41,8 +46,17 @@ class AppRouter {
         },
         AppRoutes.visitReports: (_) =>
             const AuthGate(child: VisitReportListScreen()),
+        AppRoutes.visitReportsCreate: (_) =>
+            const AuthGate(child: VisitReportFormScreen()),
         AppRoutes.tasks: (_) =>
             const AuthGate(child: TaskListScreen()),
+        AppRoutes.tasksCreate: (_) =>
+            const AuthGate(child: TaskFormScreen()),
+        AppRoutes.tasksEdit: (context) {
+          final args = ModalRoute.of(context)!.settings.arguments;
+          final taskId = args is Map ? args['taskId'] as String? : null;
+          return AuthGate(child: TaskFormScreen(taskId: taskId));
+        },
       };
 
   static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
@@ -94,6 +108,32 @@ class AppRouter {
         settings: settings,
         builder: (_) => AuthGate(
           child: const VisitReportFormScreen(),
+        ),
+      );
+    }
+
+    // Task Detail: /tasks/:id
+    if (pathSegments.length == 2 &&
+        pathSegments[0] == 'tasks' &&
+        pathSegments[1].isNotEmpty &&
+        pathSegments[1] != 'create' &&
+        pathSegments[1] != 'edit') {
+      return MaterialPageRoute(
+        settings: settings,
+        builder: (_) => AuthGate(
+          child: TaskDetailScreen(taskId: pathSegments[1]),
+        ),
+      );
+    }
+
+    // Task Form: /tasks/create
+    if (pathSegments.length == 2 &&
+        pathSegments[0] == 'tasks' &&
+        pathSegments[1] == 'create') {
+      return MaterialPageRoute(
+        settings: settings,
+        builder: (_) => AuthGate(
+          child: const TaskFormScreen(),
         ),
       );
     }

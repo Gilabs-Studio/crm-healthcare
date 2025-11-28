@@ -165,7 +165,7 @@ Setiap developer memiliki sprint planning terpisah yang detail.
 - Sprint 0: Flutter Setup (4-5 days) ✅ **Completed**
 - Sprint 1: Account & Contact Mobile (5-6 days) ✅ **Completed**
 - Sprint 2: Visit Report Mobile (7-8 days) ✅ **Completed**
-- Sprint 3: Task & Reminder Mobile (5-6 days)
+- Sprint 3: Task & Reminder Mobile (5-6 days) ✅ **Completed** (menggunakan API versi Web, push notification menunggu backend)
 - Sprint 4: Dashboard Mobile (3-4 days) ⚠️ **UI Navigation selesai, menunggu APIs**
 - Sprint 5: Polish & Optimization (5-6 days)
 - Sprint 6: Integration & Testing (4-5 days)
@@ -174,6 +174,8 @@ Setiap developer memiliki sprint planning terpisah yang detail.
 
 **Catatan API Integration**:
 - ⚠️ **Sprint 1**: Menggunakan endpoint API versi **Web** karena endpoint mobile belum tersedia.
+- ⚠️ **Sprint 2**: Menggunakan endpoint API versi **Web** karena endpoint mobile belum tersedia.
+- ⚠️ **Sprint 3**: Menggunakan endpoint API versi **Web** karena endpoint mobile belum tersedia. Push notification menunggu backend service.
 - Response parsing dibuat fleksibel untuk kompatibilitas dengan format API yang berbeda.
 
 ---
@@ -236,7 +238,7 @@ Setiap developer memiliki sprint planning terpisah yang detail.
 **Week 7-8**: Pipeline
 - Developer 1: (Buffer/Polish)
 - Developer 2: Sales Pipeline (Fullstack - Backend + Frontend)
-- Developer 3: Task & Reminder Mobile
+- Developer 3: Task & Reminder Mobile ✅ **Completed**
 
 **Week 9-10**: Task & Product
 - Developer 1: (Buffer/Polish)

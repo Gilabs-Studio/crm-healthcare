@@ -164,25 +164,25 @@ Developer 3 bertanggung jawab untuk:
 - Push notification service harus ready untuk implementasi reminder notifications.
 
 **Mobile Tasks**:
-- [ ] Create task service (`task_service.dart`)
-- [ ] Create task models (`models/task.dart`)
-- [ ] Create task list screen (`screens/tasks/task_list.dart`)
-- [ ] Create task detail screen (`screens/tasks/task_detail.dart`)
-- [ ] Create task form screen (`screens/tasks/task_form.dart`)
-- [ ] Integrate push notifications (firebase_messaging package)
-- [ ] Implement task reminder notifications
-- [ ] Add task filter (status, due date)
-- [ ] Add pull-to-refresh
-- [ ] Add pagination
-- [ ] Create task card widget
-- [ ] Add task completion functionality
+- [x] Create task repository (`task_repository.dart`)
+- [x] Create task models (`models/task.dart`)
+- [x] Create task list screen (`screens/tasks/task_list.dart`)
+- [x] Create task detail screen (`screens/tasks/task_detail.dart`)
+- [x] Create task form screen (`screens/tasks/task_form.dart`)
+- [ ] Integrate push notifications (firebase_messaging package) - ⏳ **Menunggu Backend Push Notification Service**
+- [x] Implement task reminder management (create/delete reminders)
+- [x] Add task filter (status, priority)
+- [x] Add pull-to-refresh
+- [x] Add pagination
+- [x] Create task card widget
+- [x] Add task completion functionality
 
 **Acceptance Criteria**:
-- ✅ Sales rep dapat melihat list tasks
-- ✅ Sales rep dapat create task
-- ✅ Sales rep dapat complete task
-- ✅ Push notifications untuk task reminder bekerja
-- ✅ UI/UX modern dan intuitive
+- [x] Sales rep dapat melihat list tasks
+- [x] Sales rep dapat create task
+- [x] Sales rep dapat complete task
+- [ ] Push notifications untuk task reminder bekerja - ⏳ **Menunggu Backend Push Notification Service**
+- [x] UI/UX modern dan intuitive
 
 **Testing**:
 - Test task list dan detail
