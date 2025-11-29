@@ -93,6 +93,7 @@ func SeedPermissions() error {
 		{pipelineMenu.ID, "MOVE_DEALS", "Move Deals", "MOVE", &pipelineMenu},
 		{pipelineMenu.ID, "VIEW_SUMMARY", "View Summary", "SUMMARY", &pipelineMenu},
 		{pipelineMenu.ID, "VIEW_FORECAST", "View Forecast", "FORECAST", &pipelineMenu},
+		{pipelineMenu.ID, "STAGES", "Manage Pipeline Stages", "STAGES", &pipelineMenu},
 
 		// Task & Reminder actions
 		{tasksMenu.ID, "VIEW_TASKS", "View Tasks", "VIEW", &tasksMenu},

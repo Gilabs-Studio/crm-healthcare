@@ -350,6 +350,41 @@ type ListPipelineStagesRequest struct {
 	IsActive *bool `form:"is_active" binding:"omitempty"`
 }
 
+// CreateStageRequest represents create pipeline stage request DTO
+type CreateStageRequest struct {
+	Name        string `json:"name" binding:"required,min=1,max=255"`
+	Code        string `json:"code" binding:"required,min=1,max=50"`
+	Order       int    `json:"order" binding:"required,min=0"`
+	Color       string `json:"color" binding:"omitempty,max=20"`
+	IsActive    bool   `json:"is_active" binding:"omitempty"`
+	IsWon       bool   `json:"is_won" binding:"omitempty"`
+	IsLost      bool   `json:"is_lost" binding:"omitempty"`
+	Description string `json:"description" binding:"omitempty"`
+}
+
+// UpdateStageRequest represents update pipeline stage request DTO
+type UpdateStageRequest struct {
+	Name        string `json:"name" binding:"omitempty,min=1,max=255"`
+	Code        string `json:"code" binding:"omitempty,min=1,max=50"`
+	Order       *int   `json:"order" binding:"omitempty,min=0"`
+	Color       string `json:"color" binding:"omitempty,max=20"`
+	IsActive    *bool  `json:"is_active" binding:"omitempty"`
+	IsWon       *bool  `json:"is_won" binding:"omitempty"`
+	IsLost      *bool  `json:"is_lost" binding:"omitempty"`
+	Description string `json:"description" binding:"omitempty"`
+}
+
+// UpdateStagesOrderRequest represents update stages order request DTO
+type UpdateStagesOrderRequest struct {
+	Stages []StageOrderItem `json:"stages" binding:"required,min=1,dive"`
+}
+
+// StageOrderItem represents a stage order item
+type StageOrderItem struct {
+	ID    string `json:"id" binding:"required,uuid"`
+	Order int    `json:"order" binding:"required,min=0"`
+}
+
 // PipelineSummaryResponse represents pipeline summary response
 type PipelineSummaryResponse struct {
 	TotalDeals          int64          `json:"total_deals"`

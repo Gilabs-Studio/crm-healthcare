@@ -12,13 +12,17 @@ func SetupPipelineRoutes(router *gin.RouterGroup, pipelineHandler *handlers.Pipe
 	pipelines := router.Group("/pipelines")
 	pipelines.Use(middleware.AuthMiddleware(jwtManager))
 	{
-		// Pipeline stages
-		pipelines.GET("", pipelineHandler.ListStages)
-		pipelines.GET("/:id", pipelineHandler.GetStageByID)
-		
-		// Pipeline summary and forecast
-		pipelines.GET("/summary", pipelineHandler.GetSummary)
-		pipelines.GET("/forecast", pipelineHandler.GetForecast)
+	// Pipeline stages
+	pipelines.GET("", pipelineHandler.ListStages)
+	pipelines.GET("/:id", pipelineHandler.GetStageByID)
+	pipelines.POST("", pipelineHandler.CreateStage)
+	pipelines.PUT("/:id", pipelineHandler.UpdateStage)
+	pipelines.DELETE("/:id", pipelineHandler.DeleteStage)
+	pipelines.PUT("/order", pipelineHandler.UpdateStagesOrder)
+	
+	// Pipeline summary and forecast
+	pipelines.GET("/summary", pipelineHandler.GetSummary)
+	pipelines.GET("/forecast", pipelineHandler.GetForecast)
 	}
 
 	// Deals routes

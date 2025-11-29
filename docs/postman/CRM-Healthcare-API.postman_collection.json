@@ -1305,6 +1305,131 @@
                         "description": "Get forecast data for deals (expected revenue, weighted revenue)"
                       },
                       "response": []
+                    },
+                    {
+                      "name": "Create Pipeline Stage",
+                      "request": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Authorization",
+                            "value": "Bearer {{token}}",
+                            "type": "text"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"name\": \"New Stage\",\n  \"code\": \"new_stage\",\n  \"order\": 7,\n  \"color\": \"#8B5CF6\",\n  \"is_active\": true,\n  \"is_won\": false,\n  \"is_lost\": false,\n  \"description\": \"New pipeline stage\"\n}",
+                          "options": {
+                            "raw": {
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{base_url}}/api/v1/pipelines",
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "pipelines"]
+                        },
+                        "description": "Create a new pipeline stage"
+                      },
+                      "response": []
+                    },
+                    {
+                      "name": "Update Pipeline Stage",
+                      "request": {
+                        "method": "PUT",
+                        "header": [
+                          {
+                            "key": "Authorization",
+                            "value": "Bearer {{token}}",
+                            "type": "text"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"name\": \"Updated Stage\",\n  \"order\": 3,\n  \"color\": \"#10B981\",\n  \"is_active\": true\n}",
+                          "options": {
+                            "raw": {
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{base_url}}/api/v1/pipelines/:id",
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "pipelines", ":id"],
+                          "variable": [
+                            {"key": "id", "value": "pipeline_stage_id"}
+                          ]
+                        },
+                        "description": "Update a pipeline stage"
+                      },
+                      "response": []
+                    },
+                    {
+                      "name": "Delete Pipeline Stage",
+                      "request": {
+                        "method": "DELETE",
+                        "header": [
+                          {
+                            "key": "Authorization",
+                            "value": "Bearer {{token}}",
+                            "type": "text"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{base_url}}/api/v1/pipelines/:id",
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "pipelines", ":id"],
+                          "variable": [
+                            {"key": "id", "value": "pipeline_stage_id"}
+                          ]
+                        },
+                        "description": "Delete a pipeline stage"
+                      },
+                      "response": []
+                    },
+                    {
+                      "name": "Update Stages Order",
+                      "request": {
+                        "method": "PUT",
+                        "header": [
+                          {
+                            "key": "Authorization",
+                            "value": "Bearer {{token}}",
+                            "type": "text"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"stages\": [\n    {\n      \"id\": \"stage_abc123\",\n      \"order\": 1\n    },\n    {\n      \"id\": \"stage_def456\",\n      \"order\": 2\n    },\n    {\n      \"id\": \"stage_ghi789\",\n      \"order\": 3\n    }\n  ]\n}",
+                          "options": {
+                            "raw": {
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{base_url}}/api/v1/pipelines/order",
+                          "host": ["{{base_url}}"],
+                          "path": ["api", "v1", "pipelines", "order"]
+                        },
+                        "description": "Update the order of multiple pipeline stages"
+                      },
+                      "response": []
                     }
                   ],
                   "description": "Pipeline Stages endpoints untuk mengelola pipeline stages (Lead, Qualification, Proposal, Negotiation, Closed Won, Closed Lost)"
