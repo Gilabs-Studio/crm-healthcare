@@ -28,6 +28,7 @@ import (
 	visitreportrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/visit_report"
 	accountservice "github.com/gilabs/crm-healthcare/api/internal/service/account"
 	activityservice "github.com/gilabs/crm-healthcare/api/internal/service/activity"
+	aiservice "github.com/gilabs/crm-healthcare/api/internal/service/ai"
 	authservice "github.com/gilabs/crm-healthcare/api/internal/service/auth"
 	categoryservice "github.com/gilabs/crm-healthcare/api/internal/service/category"
 	contactservice "github.com/gilabs/crm-healthcare/api/internal/service/contact"
@@ -41,6 +42,7 @@ import (
 	taskservice "github.com/gilabs/crm-healthcare/api/internal/service/task"
 	userservice "github.com/gilabs/crm-healthcare/api/internal/service/user"
 	visitreportservice "github.com/gilabs/crm-healthcare/api/internal/service/visit_report"
+	"github.com/gilabs/crm-healthcare/api/pkg/cerebras"
 	"github.com/gilabs/crm-healthcare/api/pkg/jwt"
 	"github.com/gilabs/crm-healthcare/api/pkg/logger"
 	"github.com/gilabs/crm-healthcare/api/pkg/response"
@@ -110,10 +112,26 @@ func main() {
 	pipelineService := pipelineservice.NewService(pipelineRepo, dealRepo, accountRepo)
 	activityService := activityservice.NewService(activityRepo, accountRepo, contactRepo, userRepo)
 	visitReportService := visitreportservice.NewService(visitReportRepo, accountRepo, contactRepo, userRepo, activityRepo)
-	dashboardService := dashboardservice.NewService(visitReportRepo, accountRepo, activityRepo, userRepo, dealRepo, taskRepo)
+	dashboardService := dashboardservice.NewService(visitReportRepo, accountRepo, activityRepo, userRepo, dealRepo, taskRepo, pipelineRepo)
 	reportService := reportservice.NewService(visitReportRepo, accountRepo, activityRepo, userRepo, dealRepo)
 	productService := productservice.NewService(productRepo, productCategoryRepo)
 	taskService := taskservice.NewService(taskRepo, reminderRepo, userRepo, accountRepo, contactRepo, dealRepo)
+
+	// Setup Cerebras AI Client
+	cerebrasClient := cerebras.NewClient(
+		config.AppConfig.Cerebras.BaseURL,
+		config.AppConfig.Cerebras.APIKey,
+	)
+
+	// Setup AI Service
+	aiService := aiservice.NewService(
+		cerebrasClient,
+		visitReportRepo,
+		accountRepo,
+		contactRepo,
+		dealRepo,
+		activityRepo,
+	)
 
 	// Setup handlers
 	authHandler := handlers.NewAuthHandler(authService)
@@ -132,6 +150,7 @@ func main() {
 	reportHandler := handlers.NewReportHandler(reportService)
 	productHandler := handlers.NewProductHandler(productService)
 	taskHandler := handlers.NewTaskHandler(taskService)
+	aiHandler := handlers.NewAIHandler(aiService)
 
 	// Setup router
 	router := setupRouter(
@@ -152,6 +171,7 @@ func main() {
 		reportHandler,
 		productHandler,
 		taskHandler,
+		aiHandler,
 	)
 
 	// Run server
@@ -180,6 +200,7 @@ func setupRouter(
 	reportHandler *handlers.ReportHandler,
 	productHandler *handlers.ProductHandler,
 	taskHandler *handlers.TaskHandler,
+	aiHandler *handlers.AIHandler,
 ) *gin.Engine {
 	// Set Gin mode
 	if config.AppConfig.Server.Env == "production" {
@@ -264,6 +285,9 @@ func setupRouter(
 
 		// Task & Reminder routes
 		routes.SetupTaskRoutes(v1, taskHandler, jwtManager)
+
+		// AI routes
+		routes.SetupAIRoutes(v1, aiHandler, jwtManager)
 	}
 
 	return router

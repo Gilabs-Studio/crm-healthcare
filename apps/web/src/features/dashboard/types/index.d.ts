@@ -113,13 +113,24 @@ export interface VisitStatistics {
   change_percent: number;
 }
 
+export interface PipelineSummaryStage {
+  stage_id: string;
+  stage_name: string;
+  stage_code: string;
+  stage_color: string;
+  deal_count: number;
+  total_value: number;
+  total_value_formatted: string;
+  percentage: number;
+}
+
 export interface PipelineSummary {
   total_deals: number;
   total_value: number;
   won_deals: number;
   lost_deals: number;
   open_deals: number;
-  by_stage: Record<string, number>;
+  by_stage: PipelineSummaryStage[];
 }
 
 export interface TopAccount {

@@ -1,6 +1,8 @@
 package dashboard
 
 import (
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/gilabs/crm-healthcare/api/internal/domain/account"
@@ -21,6 +23,7 @@ type Service struct {
 	userRepo        interfaces.UserRepository
 	dealRepo        interfaces.DealRepository
 	taskRepo        interfaces.TaskRepository
+	pipelineRepo    interfaces.PipelineRepository
 }
 
 func NewService(
@@ -30,6 +33,7 @@ func NewService(
 	userRepo interfaces.UserRepository,
 	dealRepo interfaces.DealRepository,
 	taskRepo interfaces.TaskRepository,
+	pipelineRepo interfaces.PipelineRepository,
 ) *Service {
 	return &Service{
 		visitReportRepo: visitReportRepo,
@@ -38,6 +42,7 @@ func NewService(
 		userRepo:        userRepo,
 		dealRepo:        dealRepo,
 		taskRepo:        taskRepo,
+		pipelineRepo:    pipelineRepo,
 	}
 }
 
@@ -466,42 +471,77 @@ func (s *Service) GetVisitStatistics(req *dashboard.DashboardRequest) (*dashboar
 	return response, nil
 }
 
-// GetPipelineSummary returns pipeline summary (placeholder for future)
+// GetPipelineSummary returns pipeline summary with all stages including their colors
 func (s *Service) GetPipelineSummary(req *dashboard.DashboardRequest) (*dashboard.PipelineSummaryResponse, error) {
-	if s.dealRepo == nil {
+	if s.dealRepo == nil || s.pipelineRepo == nil {
 		return &dashboard.PipelineSummaryResponse{
 			TotalDeals: 0,
 			TotalValue: 0,
 			WonDeals:   0,
 			LostDeals:  0,
 			OpenDeals:  0,
-			ByStage:    make(map[string]int64),
+			ByStage:    []dashboard.DashboardPipelineStageSummary{},
 		}, nil
 	}
 
+	// Get deal summary
 	summary, err := s.dealRepo.GetSummary()
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return &dashboard.PipelineSummaryResponse{
+			summary = &pipelinedomain.PipelineSummaryResponse{
 				TotalDeals: 0,
 				TotalValue: 0,
 				WonDeals:   0,
 				LostDeals:  0,
 				OpenDeals:  0,
-				ByStage:    make(map[string]int64),
-			}, nil
+				ByStage:    []pipelinedomain.StageSummary{},
+			}
+		} else {
+			return nil, err
 		}
+	}
+
+	// Get all active pipeline stages
+	listReq := &pipelinedomain.ListPipelineStagesRequest{
+		IsActive: func() *bool { b := true; return &b }(),
+	}
+	allStages, err := s.pipelineRepo.ListStages(listReq)
+	if err != nil {
 		return nil, err
 	}
 
-	byStage := make(map[string]int64)
+	// Create a map of stage_id to deal stats for quick lookup
+	dealStatsByStageID := make(map[string]pipelinedomain.StageSummary)
 	for _, st := range summary.ByStage {
-		// Use stage code as key if available, otherwise name.
-		key := st.StageCode
-		if key == "" {
-			key = st.StageName
+		dealStatsByStageID[st.StageID] = st
+	}
+
+	// Build response with all stages (including those with 0 deals)
+	byStage := make([]dashboard.DashboardPipelineStageSummary, 0, len(allStages))
+	for _, stage := range allStages {
+		dealStats, hasDeals := dealStatsByStageID[stage.ID]
+		
+		stageSummary := dashboard.DashboardPipelineStageSummary{
+			StageID:             stage.ID,
+			StageName:           stage.Name,
+			StageCode:           stage.Code,
+			StageColor:          stage.Color,
+			DealCount:           0,
+			TotalValue:          0,
+			TotalValueFormatted: formatCurrency(0),
+			Percentage:          0,
 		}
-		byStage[key] = st.DealCount
+
+		if hasDeals {
+			stageSummary.DealCount = dealStats.DealCount
+			stageSummary.TotalValue = dealStats.TotalValue
+			stageSummary.TotalValueFormatted = dealStats.TotalValueFormatted
+			if summary.TotalDeals > 0 {
+				stageSummary.Percentage = float64(dealStats.DealCount) / float64(summary.TotalDeals) * 100
+			}
+		}
+
+		byStage = append(byStage, stageSummary)
 	}
 
 	response := &dashboard.PipelineSummaryResponse{
@@ -513,6 +553,54 @@ func (s *Service) GetPipelineSummary(req *dashboard.DashboardRequest) (*dashboar
 		ByStage:    byStage,
 	}
 	return response, nil
+}
+
+// formatCurrency formats integer (sen) to formatted currency string
+func formatCurrency(amount int64) string {
+	// Convert to Rupiah (divide by 100 if stored in sen)
+	rupiah := float64(amount) / 100.0
+	// Format with thousand separator
+	formatted := formatNumber(rupiah)
+	return "Rp " + formatted
+}
+
+// formatNumber formats number with thousand separator
+func formatNumber(n float64) string {
+	// Convert to int64 to remove decimal places
+	amount := int64(n)
+
+	// Handle zero case
+	if amount == 0 {
+		return "0"
+	}
+
+	// Handle negative numbers
+	negative := false
+	if amount < 0 {
+		negative = true
+		amount = -amount
+	}
+
+	// Convert to string
+	str := fmt.Sprintf("%d", amount)
+	length := len(str)
+	
+	// Add thousand separators (dot for Indonesian format)
+	var parts []string
+	for i := length; i > 0; i -= 3 {
+		start := i - 3
+		if start < 0 {
+			start = 0
+		}
+		parts = append([]string{str[start:i]}, parts...)
+	}
+	
+	result := strings.Join(parts, ".")
+	if negative {
+		result = "-" + result
+	}
+	
+	return result
 }
 
 // GetTopAccounts returns top accounts
