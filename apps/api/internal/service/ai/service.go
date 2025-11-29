@@ -128,7 +128,7 @@ func (s *Service) AnalyzeVisitReport(visitReportID string) (*ai.VisitReportInsig
 }
 
 // Chat handles chat conversation with AI
-func (s *Service) Chat(message string, contextID string, contextType string) (*ai.ChatResponse, error) {
+func (s *Service) Chat(message string, contextID string, contextType string, conversationHistory []ai.ChatMessage) (*ai.ChatResponse, error) {
 	// Validate API key
 	if err := s.validateAPIKey(); err != nil {
 		return nil, fmt.Errorf("AI service not configured: %w", err)
@@ -290,19 +290,50 @@ func (s *Service) Chat(message string, contextID string, contextType string) (*a
 	}
 	fmt.Printf("Data Access Info: %s\n", dataAccessInfo)
 	fmt.Printf("System Prompt Length: %d\n", len(systemPrompt))
+	fmt.Printf("Conversation History Length: %d messages\n", len(conversationHistory))
+	if len(conversationHistory) > 0 {
+		fmt.Printf("Conversation History Preview:\n")
+		for i, msg := range conversationHistory {
+			if i >= 3 { // Show only first 3 messages
+				fmt.Printf("  ... and %d more messages\n", len(conversationHistory)-3)
+				break
+			}
+			fmt.Printf("  [%s]: %s (first 100 chars)\n", msg.Role, msg.Content[:min(100, len(msg.Content))])
+		}
+	}
 	fmt.Printf("========================\n")
 
-	// Build messages
+	// Build messages with conversation history
 	messages := []cerebras.ChatMessage{
 		{
 			Role:    "system",
 			Content: systemPrompt,
 		},
-		{
-			Role:    "user",
-			Content: message,
-		},
 	}
+
+	// Add conversation history (limit to last 10 messages to avoid token limit)
+	historyLimit := 10
+	startIdx := 0
+	if len(conversationHistory) > historyLimit {
+		startIdx = len(conversationHistory) - historyLimit
+	}
+	
+	for i := startIdx; i < len(conversationHistory); i++ {
+		msg := conversationHistory[i]
+		// Skip system messages from history (only include user and assistant)
+		if msg.Role == "user" || msg.Role == "assistant" {
+			messages = append(messages, cerebras.ChatMessage{
+				Role:    msg.Role,
+				Content: msg.Content,
+			})
+		}
+	}
+
+	// Add current user message
+	messages = append(messages, cerebras.ChatMessage{
+		Role:    "user",
+		Content: message,
+	})
 
 	// Call Cerebras API
 	response, err := s.cerebrasClient.Chat(&cerebras.ChatRequest{

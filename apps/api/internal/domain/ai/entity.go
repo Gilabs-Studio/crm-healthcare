@@ -80,11 +80,18 @@ type AnalyzePipelineRequest struct {
 	EndDate   string `json:"end_date,omitempty"`
 }
 
+// ChatMessage represents a single chat message in conversation history
+type ChatMessage struct {
+	Role    string `json:"role"` // "user" or "assistant"
+	Content string `json:"content"`
+}
+
 // ChatRequest represents chat request
 type ChatRequest struct {
-	Message   string `json:"message" binding:"required,min=1"`
-	Context   string `json:"context,omitempty"` // Optional context (visit_report_id, deal_id, etc.)
-	ContextType string `json:"context_type,omitempty"` // visit_report, deal, contact, account
+	Message         string        `json:"message" binding:"required,min=1"`
+	Context         string        `json:"context,omitempty"` // Optional context (visit_report_id, deal_id, etc.)
+	ContextType     string        `json:"context_type,omitempty"` // visit_report, deal, contact, account
+	ConversationHistory []ChatMessage `json:"conversation_history,omitempty"` // Previous messages in the conversation
 }
 
 // ChatResponse represents chat response

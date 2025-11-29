@@ -25,10 +25,16 @@ export interface AnalyzeVisitReportResponse {
   request_id: string;
 }
 
+export interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
 export interface ChatRequest {
   message: string;
   context?: string;
   context_type?: "visit_report" | "deal" | "contact" | "account";
+  conversation_history?: ChatMessage[];
 }
 
 export interface ChatResponse {

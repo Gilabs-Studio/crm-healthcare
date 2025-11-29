@@ -61,11 +61,20 @@ export function Chatbot() {
     const currentInput = input;
     setInput("");
 
+    // Prepare conversation history (exclude the initial greeting and current message)
+    const conversationHistory = messages
+      .filter((msg) => msg.id !== "1") // Exclude initial greeting
+      .map((msg) => ({
+        role: msg.role,
+        content: msg.content,
+      }));
+
     sendMessage(
       {
         message: currentInput,
         context: contextId || undefined,
         context_type: contextType,
+        conversation_history: conversationHistory.length > 0 ? conversationHistory : undefined,
       },
       {
         onSuccess: (response) => {

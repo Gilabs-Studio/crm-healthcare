@@ -8,12 +8,18 @@ export type AnalyzeVisitReportFormData = z.infer<
   typeof analyzeVisitReportSchema
 >;
 
+export const chatMessageSchema = z.object({
+  role: z.enum(["user", "assistant"]),
+  content: z.string(),
+});
+
 export const chatSchema = z.object({
   message: z.string().min(1, "Message is required"),
   context: z.string().uuid().optional(),
   context_type: z
     .enum(["visit_report", "deal", "contact", "account"])
     .optional(),
+  conversation_history: z.array(chatMessageSchema).optional(),
 });
 
 export type ChatFormData = z.infer<typeof chatSchema>;
