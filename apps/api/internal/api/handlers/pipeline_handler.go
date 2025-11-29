@@ -69,6 +69,141 @@ func (h *PipelineHandler) GetStageByID(c *gin.Context) {
 	response.SuccessResponse(c, stage, nil)
 }
 
+// CreateStage handles create pipeline stage request
+func (h *PipelineHandler) CreateStage(c *gin.Context) {
+	var req pipeline.CreateStageRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			errors.HandleValidationError(c, validationErrors)
+			return
+		}
+		errors.InvalidRequestBodyResponse(c)
+		return
+	}
+
+	stage, err := h.pipelineService.CreateStage(&req)
+	if err != nil {
+		if err.Error() == "pipeline stage with this code already exists" {
+			errors.ErrorResponse(c, "DUPLICATE_ENTRY", map[string]interface{}{
+				"field": "code",
+				"value": req.Code,
+			}, nil)
+			return
+		}
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	meta := &response.Meta{}
+	if userID, exists := c.Get("user_id"); exists {
+		if id, ok := userID.(string); ok {
+			meta.CreatedBy = id
+		}
+	}
+
+	response.SuccessResponse(c, stage, meta)
+}
+
+// UpdateStage handles update pipeline stage request
+func (h *PipelineHandler) UpdateStage(c *gin.Context) {
+	id := c.Param("id")
+	var req pipeline.UpdateStageRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			errors.HandleValidationError(c, validationErrors)
+			return
+		}
+		errors.InvalidRequestBodyResponse(c)
+		return
+	}
+
+	stage, err := h.pipelineService.UpdateStage(id, &req)
+	if err != nil {
+		if err == pipelineservice.ErrPipelineStageNotFound {
+			errors.ErrorResponse(c, "NOT_FOUND", map[string]interface{}{
+				"resource":    "pipeline_stage",
+				"resource_id": id,
+			}, nil)
+			return
+		}
+		if err.Error() == "pipeline stage with this code already exists" {
+			errors.ErrorResponse(c, "DUPLICATE_ENTRY", map[string]interface{}{
+				"field": "code",
+				"value": req.Code,
+			}, nil)
+			return
+		}
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	meta := &response.Meta{}
+	if userID, exists := c.Get("user_id"); exists {
+		if uid, ok := userID.(string); ok {
+			meta.UpdatedBy = uid
+		}
+	}
+
+	response.SuccessResponse(c, stage, meta)
+}
+
+// DeleteStage handles delete pipeline stage request
+func (h *PipelineHandler) DeleteStage(c *gin.Context) {
+	id := c.Param("id")
+
+	err := h.pipelineService.DeleteStage(id)
+	if err != nil {
+		if err == pipelineservice.ErrPipelineStageNotFound {
+			errors.ErrorResponse(c, "NOT_FOUND", map[string]interface{}{
+				"resource":    "pipeline_stage",
+				"resource_id": id,
+			}, nil)
+			return
+		}
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	response.SuccessResponseNoContent(c)
+}
+
+// UpdateStagesOrder handles update stages order request
+func (h *PipelineHandler) UpdateStagesOrder(c *gin.Context) {
+	var req pipeline.UpdateStagesOrderRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			errors.HandleValidationError(c, validationErrors)
+			return
+		}
+		errors.InvalidRequestBodyResponse(c)
+		return
+	}
+
+	stages, err := h.pipelineService.UpdateStagesOrder(&req)
+	if err != nil {
+		if err == pipelineservice.ErrPipelineStageNotFound {
+			errors.ErrorResponse(c, "NOT_FOUND", map[string]interface{}{
+				"resource": "pipeline_stage",
+			}, nil)
+			return
+		}
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	meta := &response.Meta{}
+	if userID, exists := c.Get("user_id"); exists {
+		if uid, ok := userID.(string); ok {
+			meta.UpdatedBy = uid
+		}
+	}
+
+	response.SuccessResponse(c, stages, meta)
+}
+
 // GetSummary handles get pipeline summary request
 func (h *PipelineHandler) GetSummary(c *gin.Context) {
 	summary, err := h.pipelineService.GetSummary()
@@ -101,4 +236,203 @@ func (h *PipelineHandler) GetForecast(c *gin.Context) {
 
 	response.SuccessResponse(c, forecast, meta)
 }
+
+// Flow Rules Handlers
+// TODO: Flow Rules feature is not yet implemented. Uncomment when implementing flow rules.
+/*
+// ListFlowRules handles list flow rules request
+func (h *PipelineHandler) ListFlowRules(c *gin.Context) {
+	var req pipeline.ListFlowRulesRequest
+
+	if err := c.ShouldBindQuery(&req); err != nil {
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			errors.HandleValidationError(c, validationErrors)
+			return
+		}
+		errors.InvalidQueryParamResponse(c)
+		return
+	}
+
+	rules, pagination, err := h.pipelineService.ListFlowRules(&req)
+	if err != nil {
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	meta := &response.Meta{
+		Filters: map[string]interface{}{},
+		Pagination: &response.PaginationMeta{
+			Page:       pagination.Page,
+			PerPage:    pagination.PerPage,
+			Total:      pagination.Total,
+			TotalPages: pagination.TotalPages,
+		},
+	}
+
+	if req.FromStageID != "" {
+		meta.Filters["from_stage_id"] = req.FromStageID
+	}
+	if req.ToStageID != "" {
+		meta.Filters["to_stage_id"] = req.ToStageID
+	}
+	if req.RuleType != "" {
+		meta.Filters["rule_type"] = req.RuleType
+	}
+	if req.IsActive != nil {
+		meta.Filters["is_active"] = *req.IsActive
+	}
+
+	response.SuccessResponse(c, rules, meta)
+}
+
+// GetFlowRuleByID handles get flow rule by ID request
+func (h *PipelineHandler) GetFlowRuleByID(c *gin.Context) {
+	id := c.Param("id")
+
+	rule, err := h.pipelineService.GetFlowRuleByID(id)
+	if err != nil {
+		if err == pipelineservice.ErrFlowRuleNotFound {
+			errors.ErrorResponse(c, "NOT_FOUND", map[string]interface{}{
+				"resource":    "flow_rule",
+				"resource_id": id,
+			}, nil)
+			return
+		}
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	response.SuccessResponse(c, rule, nil)
+}
+
+// CreateFlowRule handles create flow rule request
+func (h *PipelineHandler) CreateFlowRule(c *gin.Context) {
+	var req pipeline.CreateFlowRuleRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			errors.HandleValidationError(c, validationErrors)
+			return
+		}
+		errors.InvalidRequestBodyResponse(c)
+		return
+	}
+
+	rule, err := h.pipelineService.CreateFlowRule(&req)
+	if err != nil {
+		if err == pipelineservice.ErrInvalidStage {
+			errors.ErrorResponse(c, "NOT_FOUND", map[string]interface{}{
+				"resource":    "pipeline_stage",
+				"resource_id": req.FromStageID,
+			}, nil)
+			return
+		}
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	meta := &response.Meta{}
+	if userID, exists := c.Get("user_id"); exists {
+		if id, ok := userID.(string); ok {
+			meta.CreatedBy = id
+		}
+	}
+
+	response.SuccessResponse(c, rule, meta)
+}
+
+// UpdateFlowRule handles update flow rule request
+func (h *PipelineHandler) UpdateFlowRule(c *gin.Context) {
+	id := c.Param("id")
+	var req pipeline.UpdateFlowRuleRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			errors.HandleValidationError(c, validationErrors)
+			return
+		}
+		errors.InvalidRequestBodyResponse(c)
+		return
+	}
+
+	rule, err := h.pipelineService.UpdateFlowRule(id, &req)
+	if err != nil {
+		if err == pipelineservice.ErrFlowRuleNotFound {
+			errors.ErrorResponse(c, "NOT_FOUND", map[string]interface{}{
+				"resource":    "flow_rule",
+				"resource_id": id,
+			}, nil)
+			return
+		}
+		if err == pipelineservice.ErrInvalidStage {
+			errors.ErrorResponse(c, "NOT_FOUND", map[string]interface{}{
+				"resource":    "pipeline_stage",
+			}, nil)
+			return
+		}
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	meta := &response.Meta{}
+	if userID, exists := c.Get("user_id"); exists {
+		if uid, ok := userID.(string); ok {
+			meta.UpdatedBy = uid
+		}
+	}
+
+	response.SuccessResponse(c, rule, meta)
+}
+
+// DeleteFlowRule handles delete flow rule request
+func (h *PipelineHandler) DeleteFlowRule(c *gin.Context) {
+	id := c.Param("id")
+
+	err := h.pipelineService.DeleteFlowRule(id)
+	if err != nil {
+		if err == pipelineservice.ErrFlowRuleNotFound {
+			errors.ErrorResponse(c, "NOT_FOUND", map[string]interface{}{
+				"resource":    "flow_rule",
+				"resource_id": id,
+			}, nil)
+			return
+		}
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	response.SuccessResponseNoContent(c)
+}
+
+// ValidateTransition handles validate transition request
+func (h *PipelineHandler) ValidateTransition(c *gin.Context) {
+	var req pipeline.ValidateTransitionRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			errors.HandleValidationError(c, validationErrors)
+			return
+		}
+		errors.InvalidRequestBodyResponse(c)
+		return
+	}
+
+	// Get user role from context if not provided
+	if req.UserRole == "" {
+		if role, exists := c.Get("user_role"); exists {
+			if r, ok := role.(string); ok {
+				req.UserRole = r
+			}
+		}
+	}
+
+	validation, err := h.pipelineService.ValidateTransition(&req)
+	if err != nil {
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	response.SuccessResponse(c, validation, nil)
+}
+*/
 
