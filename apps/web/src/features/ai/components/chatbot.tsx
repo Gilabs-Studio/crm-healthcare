@@ -112,10 +112,85 @@ export function Chatbot() {
 
   // Custom components for markdown rendering with explicit table styling
   const markdownComponents: Components = {
+    // Headings
+    h1: ({ children, ...props }) => (
+      <h1 className="text-lg font-bold mb-2 mt-4 first:mt-0" {...props}>
+        {children}
+      </h1>
+    ),
+    h2: ({ children, ...props }) => (
+      <h2 className="text-base font-semibold mb-2 mt-3 first:mt-0" {...props}>
+        {children}
+      </h2>
+    ),
+    h3: ({ children, ...props }) => (
+      <h3 className="text-sm font-semibold mb-1 mt-2 first:mt-0" {...props}>
+        {children}
+      </h3>
+    ),
+    // Paragraphs
+    p: ({ children, ...props }) => (
+      <p className="text-sm leading-relaxed mb-2 last:mb-0" {...props}>
+        {children}
+      </p>
+    ),
+    // Lists
+    ul: ({ children, ...props }) => (
+      <ul className="list-disc list-inside space-y-1 my-2 ml-4" {...props}>
+        {children}
+      </ul>
+    ),
+    ol: ({ children, ...props }) => (
+      <ol className="list-decimal list-inside space-y-1 my-2 ml-4" {...props}>
+        {children}
+      </ol>
+    ),
+    li: ({ children, ...props }) => (
+      <li className="text-sm leading-relaxed" {...props}>
+        {children}
+      </li>
+    ),
+    // Strong and emphasis
+    strong: ({ children, ...props }) => (
+      <strong className="font-semibold" {...props}>
+        {children}
+      </strong>
+    ),
+    em: ({ children, ...props }) => (
+      <em className="italic" {...props}>
+        {children}
+      </em>
+    ),
+    // Links
+    a: ({ children, href, ...props }) => (
+      <a 
+        href={href} 
+        className="text-primary underline hover:no-underline" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        {...props}
+      >
+        {children}
+      </a>
+    ),
+    // Code
+    code: ({ children, className, ...props }) => {
+      const isInline = !className?.includes('language-');
+      return isInline ? (
+        <code className="text-xs bg-muted/50 px-1.5 py-0.5 rounded font-mono" {...props}>
+          {children}
+        </code>
+      ) : (
+        <code className="block text-xs bg-muted/50 p-3 rounded font-mono overflow-x-auto" {...props}>
+          {children}
+        </code>
+      );
+    },
+    // Tables
     table: ({ children, ...props }) => (
       <div className="overflow-x-auto my-4 -mx-2">
         <table 
-          className="w-full text-sm" 
+          className="w-full text-sm border-collapse" 
           style={{ 
             borderCollapse: 'collapse',
             width: '100%',
@@ -171,6 +246,15 @@ export function Chatbot() {
         {children}
       </td>
     ),
+    // Blockquote
+    blockquote: ({ children, ...props }) => (
+      <blockquote 
+        className="border-l-2 border-muted-foreground/30 pl-3 italic my-2" 
+        {...props}
+      >
+        {children}
+      </blockquote>
+    ),
   };
 
   if (!settings.enabled) {
@@ -205,7 +289,7 @@ export function Chatbot() {
               }`}
             >
               {message.role === "assistant" ? (
-                <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:mt-0 prose-headings:mb-2 prose-p:my-1 prose-p:leading-relaxed prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-code:text-xs prose-code:bg-muted/50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:my-2 prose-pre:bg-muted/50 prose-pre:p-2 prose-pre:rounded prose-pre:overflow-x-auto prose-blockquote:border-l-2 prose-blockquote:border-muted-foreground/30 prose-blockquote:pl-3 prose-blockquote:italic prose-strong:font-semibold prose-a:text-primary prose-a:underline [&_table]:!border-collapse [&_table_td]:!border [&_table_th]:!border [&_table_td]:!border-border [&_table_th]:!border-border">
+                <div className="markdown-content">
                   <ReactMarkdown 
                     remarkPlugins={[remarkGfm]}
                     components={markdownComponents}
