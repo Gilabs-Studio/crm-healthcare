@@ -111,7 +111,7 @@ func main() {
 	activityService := activityservice.NewService(activityRepo, accountRepo, contactRepo, userRepo)
 	visitReportService := visitreportservice.NewService(visitReportRepo, accountRepo, contactRepo, userRepo, activityRepo)
 	dashboardService := dashboardservice.NewService(visitReportRepo, accountRepo, activityRepo, userRepo, dealRepo, taskRepo)
-	reportService := reportservice.NewService(visitReportRepo, accountRepo, activityRepo, userRepo)
+	reportService := reportservice.NewService(visitReportRepo, accountRepo, activityRepo, userRepo, dealRepo)
 	productService := productservice.NewService(productRepo, productCategoryRepo)
 	taskService := taskservice.NewService(taskRepo, reminderRepo, userRepo, accountRepo, contactRepo, dealRepo)
 

@@ -1,10 +1,7 @@
 "use client";
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
 import type { PipelineReport } from "../types";
 import { SalesFunnelTable } from "./sales-funnel-table";
 import { SalesFunnelInsights } from "./sales-funnel-insights";
@@ -37,20 +34,6 @@ export function SalesFunnelViewer({ data, isLoading }: SalesFunnelViewerProps) {
 
   return (
     <div className="space-y-6">
-      {/* Reminder Alert for Missing Data */}
-      <Alert>
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>{t("dataNoticeTitle")}</AlertTitle>
-        <AlertDescription>
-          <p className="text-sm mb-2">
-            {t("dataNoticeDescription")}
-          </p>
-          <p className="text-sm font-medium">
-            {t("dataNoticeFields")}
-          </p>
-        </AlertDescription>
-      </Alert>
-
       {/* Main Tabs */}
       <Tabs defaultValue="table" className="w-full">
         <TabsList className="grid w-full grid-cols-2">

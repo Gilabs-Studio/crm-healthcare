@@ -45,19 +45,44 @@ type DateStat struct {
 	Count int    `json:"count"`
 }
 
-// PipelineReportResponse represents pipeline report (placeholder for future)
+// PipelineReportResponse represents pipeline report
 type PipelineReportResponse struct {
 	Period struct {
 		Start time.Time `json:"start"`
 		End   time.Time `json:"end"`
 	} `json:"period"`
 	Summary struct {
-		TotalDeals int     `json:"total_deals"`
-		TotalValue float64 `json:"total_value"`
-		WonDeals   int     `json:"won_deals"`
-		LostDeals  int     `json:"lost_deals"`
+		TotalDeals        int     `json:"total_deals"`
+		TotalValue        float64 `json:"total_value"`
+		WonDeals          int     `json:"won_deals"`
+		WonValue          float64 `json:"won_value"`
+		LostDeals         int     `json:"lost_deals"`
+		LostValue         float64 `json:"lost_value"`
+		OpenDeals         int     `json:"open_deals"`
+		OpenValue         float64 `json:"open_value"`
+		ExpectedRevenue   float64 `json:"expected_revenue"`
 	} `json:"summary"`
 	ByStage map[string]int `json:"by_stage"`
+	Deals   []DealReportItem `json:"deals,omitempty"` // Individual deals for Sales Funnel table
+}
+
+// DealReportItem represents a deal in the sales funnel report
+type DealReportItem struct {
+	ID                string     `json:"id"`
+	CompanyName       string     `json:"company_name"`
+	ContactName         string     `json:"contact_name"`
+	ContactEmail      string     `json:"contact_email"`
+	Stage             string     `json:"stage"`
+	StageCode         string     `json:"stage_code"`
+	Value             float64    `json:"value"`
+	Probability       int        `json:"probability"`
+	ExpectedRevenue   float64    `json:"expected_revenue"`
+	CreationDate      time.Time  `json:"creation_date"`
+	ExpectedCloseDate *time.Time `json:"expected_close_date"`
+	TeamMember        string     `json:"team_member"`
+	ProgressToWon     int        `json:"progress_to_won"` // Calculated based on stage and probability
+	LastInteractedOn  *time.Time `json:"last_interacted_on"` // From activities
+	NextStep          string     `json:"next_step"` // From deal notes or metadata
 }
 
 // SalesPerformanceReportResponse represents sales performance report
