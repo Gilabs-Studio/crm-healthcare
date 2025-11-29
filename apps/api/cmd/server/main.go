@@ -23,7 +23,6 @@ import (
 	productcategoryrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/product_category"
 	reminderrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/reminder"
 	rolerepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/role"
-	settingsrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/settings"
 	taskrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/task"
 	userrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/user"
 	visitreportrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/visit_report"
@@ -39,7 +38,6 @@ import (
 	productservice "github.com/gilabs/crm-healthcare/api/internal/service/product"
 	reportservice "github.com/gilabs/crm-healthcare/api/internal/service/report"
 	roleservice "github.com/gilabs/crm-healthcare/api/internal/service/role"
-	settingsservice "github.com/gilabs/crm-healthcare/api/internal/service/settings"
 	taskservice "github.com/gilabs/crm-healthcare/api/internal/service/task"
 	userservice "github.com/gilabs/crm-healthcare/api/internal/service/user"
 	visitreportservice "github.com/gilabs/crm-healthcare/api/internal/service/visit_report"
@@ -95,7 +93,6 @@ func main() {
 	dealRepo := dealrepo.NewRepository(database.DB)
 	visitReportRepo := visitreportrepo.NewRepository(database.DB)
 	activityRepo := activityrepo.NewRepository(database.DB)
-	settingsRepo := settingsrepo.NewRepository(database.DB)
 	productCategoryRepo := productcategoryrepo.NewRepository(database.DB)
 	productRepo := productrepo.NewRepository(database.DB)
 	taskRepo := taskrepo.NewRepository(database.DB)
@@ -113,9 +110,8 @@ func main() {
 	pipelineService := pipelineservice.NewService(pipelineRepo, dealRepo, accountRepo)
 	activityService := activityservice.NewService(activityRepo, accountRepo, contactRepo, userRepo)
 	visitReportService := visitreportservice.NewService(visitReportRepo, accountRepo, contactRepo, userRepo, activityRepo)
-	dashboardService := dashboardservice.NewService(visitReportRepo, accountRepo, activityRepo, userRepo, dealRepo, taskRepo, settingsRepo)
+	dashboardService := dashboardservice.NewService(visitReportRepo, accountRepo, activityRepo, userRepo, dealRepo, taskRepo)
 	reportService := reportservice.NewService(visitReportRepo, accountRepo, activityRepo, userRepo)
-	settingsService := settingsservice.NewService(settingsRepo)
 	productService := productservice.NewService(productRepo, productCategoryRepo)
 	taskService := taskservice.NewService(taskRepo, reminderRepo, userRepo, accountRepo, contactRepo, dealRepo)
 
@@ -134,7 +130,6 @@ func main() {
 	visitReportHandler := handlers.NewVisitReportHandler(visitReportService)
 	dashboardHandler := handlers.NewDashboardHandler(dashboardService)
 	reportHandler := handlers.NewReportHandler(reportService)
-	settingsHandler := handlers.NewSettingsHandler(settingsService)
 	productHandler := handlers.NewProductHandler(productService)
 	taskHandler := handlers.NewTaskHandler(taskService)
 
@@ -155,7 +150,6 @@ func main() {
 		visitReportHandler,
 		dashboardHandler,
 		reportHandler,
-		settingsHandler,
 		productHandler,
 		taskHandler,
 	)
@@ -184,7 +178,6 @@ func setupRouter(
 	visitReportHandler *handlers.VisitReportHandler,
 	dashboardHandler *handlers.DashboardHandler,
 	reportHandler *handlers.ReportHandler,
-	settingsHandler *handlers.SettingsHandler,
 	productHandler *handlers.ProductHandler,
 	taskHandler *handlers.TaskHandler,
 ) *gin.Engine {
@@ -262,9 +255,6 @@ func setupRouter(
 		
 		// Report routes
 		routes.SetupReportRoutes(v1, reportHandler, jwtManager)
-		
-		// Settings routes
-		routes.SetupSettingsRoutes(v1, settingsHandler, jwtManager)
 		
 		// Master Data routes
 		routes.SetupMasterDataRoutes(v1, jwtManager)

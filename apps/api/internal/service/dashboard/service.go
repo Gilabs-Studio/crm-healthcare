@@ -1,7 +1,6 @@
 package dashboard
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/gilabs/crm-healthcare/api/internal/domain/account"
@@ -22,7 +21,6 @@ type Service struct {
 	userRepo        interfaces.UserRepository
 	dealRepo        interfaces.DealRepository
 	taskRepo        interfaces.TaskRepository
-	settingsRepo    interfaces.SettingsRepository
 }
 
 func NewService(
@@ -32,7 +30,6 @@ func NewService(
 	userRepo interfaces.UserRepository,
 	dealRepo interfaces.DealRepository,
 	taskRepo interfaces.TaskRepository,
-	settingsRepo interfaces.SettingsRepository,
 ) *Service {
 	return &Service{
 		visitReportRepo: visitReportRepo,
@@ -41,7 +38,6 @@ func NewService(
 		userRepo:        userRepo,
 		dealRepo:        dealRepo,
 		taskRepo:        taskRepo,
-		settingsRepo:    settingsRepo,
 	}
 }
 
@@ -295,36 +291,7 @@ func (s *Service) GetOverview(req *dashboard.DashboardRequest) (*dashboard.Dashb
 		}
 	}
 
-	// Read optional sales target from settings (category=pipeline, key=sales_target_amount)
-	if s.settingsRepo != nil {
-		settingsList, err := s.settingsRepo.FindByCategory("pipeline")
-		if err != nil && err != gorm.ErrRecordNotFound {
-			return nil, err
-		}
-
-		var targetAmount int64
-		for _, sSetting := range settingsList {
-			if sSetting.Key == "sales_target_amount" {
-				// Value is stored as plain integer string (smallest currency unit)
-				var parsed int64
-				_, scanErr := fmt.Sscanf(sSetting.Value, "%d", &parsed)
-				if scanErr == nil {
-					targetAmount = parsed
-				}
-			}
-		}
-
-		achieved := revenueStats.TotalRevenue
-		targetStats.TargetAmount = targetAmount
-		targetStats.AchievedAmount = achieved
-		if targetAmount > 0 {
-			targetStats.ProgressPercent = float64(achieved) * 100.0 / float64(targetAmount)
-		}
-
-		// Reuse existing formatted strings if available
-		targetStats.TargetAmountFormatted = dealsSummary.TotalValueFormatted
-		targetStats.AchievedAmountFormatted = revenueStats.TotalRevenueFormatted
-	}
+	// Sales target is currently not configurable; keep defaults (zero target).
 
 	response := &dashboard.DashboardOverviewResponse{
 		Period: struct {

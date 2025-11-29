@@ -186,13 +186,6 @@ const Header = memo(function Header({
             </div>
             <Separator className="my-1" />
             <div className="flex flex-col gap-1">
-              <Link
-                href="/settings"
-                locale={locale}
-                className="flex w-full items-center rounded-md px-2 py-1.5 text-sm hover:bg-muted"
-              >
-                {tSidebar("settings")}
-              </Link>
               <button
                 type="button"
                 onClick={logout}

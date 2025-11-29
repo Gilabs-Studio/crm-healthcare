@@ -18,7 +18,6 @@ export default getRequestConfig(async ({ requestLocale }) => {
     productManagementMessages,
     taskManagementMessages,
     visitReportMessages,
-    settingsMessages,
   ] = await Promise.all([
     import(`@/features/dashboard/i18n/messages/${locale}.json`),
     import(`@/features/master-data/user-management/i18n/messages/${locale}.json`),
@@ -28,7 +27,6 @@ export default getRequestConfig(async ({ requestLocale }) => {
     import(`@/features/sales-crm/product-management/i18n/messages/${locale}.json`),
     import(`@/features/sales-crm/task-management/i18n/messages/${locale}.json`),
     import(`@/features/sales-crm/visit-report/i18n/messages/${locale}.json`),
-    import(`@/features/settings/i18n/messages/${locale}.json`),
   ]);
 
   const messages = {
@@ -40,7 +38,6 @@ export default getRequestConfig(async ({ requestLocale }) => {
     ...productManagementMessages.default,
     ...taskManagementMessages.default,
     ...visitReportMessages.default,
-    ...settingsMessages.default,
   };
 
   return {
