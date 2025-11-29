@@ -205,20 +205,27 @@ Developer 3 bertanggung jawab untuk:
 - ⚠️ **Status Saat Ini**: Dashboard screen sudah dibuat dengan UI sederhana untuk navigasi ke semua fitur (Accounts, Contacts, Visit Reports, Tasks).
 - UI dashboard lengkap dengan metrics & statistics akan diimplementasikan setelah Dashboard APIs ready.
 
+**Note**: 
+- ⚠️ **API yang digunakan**: Menggunakan endpoint API versi **Web** (`/api/v1/dashboard/overview`, `/api/v1/dashboard/recent-activities`) karena endpoint khusus untuk mobile belum tersedia.
+- Response parsing dibuat fleksibel untuk menangani format response API.
+
 **Mobile Tasks**:
-- [x] Create dashboard screen (`screens/dashboard/dashboard.dart`) - ✅ **UI Navigation selesai**
-- [ ] Create dashboard service (`dashboard_service.dart`) - ⏳ **Menunggu Dashboard APIs**
-- [ ] Create dashboard models (`models/dashboard.dart`) - ⏳ **Menunggu Dashboard APIs**
-- [ ] Create visit statistics widget - ⏳ **Menunggu Dashboard APIs**
-- [ ] Create pipeline summary widget - ⏳ **Menunggu Dashboard APIs**
-- [ ] Create recent activities widget - ⏳ **Menunggu Dashboard APIs**
-- [ ] Add pull-to-refresh - ⏳ **Menunggu Dashboard APIs**
-- [ ] Add date range picker (optional) - ⏳ **Menunggu Dashboard APIs**
+- [x] Create dashboard screen (`screens/dashboard/dashboard.dart`) - ✅ **Selesai dengan data integration**
+- [x] Create dashboard repository (`dashboard_repository.dart`) - ✅ **Menggunakan API versi Web**
+- [x] Create dashboard models (`models/dashboard.dart`) - ✅ **Selesai**
+- [x] Create stat cards widget - ✅ **Selesai**
+- [x] Create pipeline summary widget - ✅ **Selesai**
+- [x] Create recent activities widget - ✅ **Selesai**
+- [x] Add pull-to-refresh - ✅ **Selesai**
+- [x] Add period selector (today/week/month/year) - ✅ **Selesai**
 
 **Acceptance Criteria**:
 - ✅ Sales rep dapat melihat dashboard
-- ✅ Key metrics ditampilkan
+- ✅ Key metrics ditampilkan (visits, accounts, activities, revenue)
+- ✅ Pipeline summary ditampilkan
 - ✅ Recent activities ditampilkan
+- ✅ Period selector (today/week/month/year) bekerja
+- ✅ Pull-to-refresh bekerja
 - ✅ UI/UX modern dan intuitive
 
 **Testing**:
@@ -296,8 +303,8 @@ Developer 3 bertanggung jawab untuk:
 | Sprint 0 | Flutter Setup | 4-5 days | ✅ Completed |
 | Sprint 1 | Account & Contact | 5-6 days | ✅ Completed |
 | Sprint 2 | Visit Report | 7-8 days | ✅ Completed |
-| Sprint 3 | Task & Reminder | 5-6 days | ⏳ Pending |
-| Sprint 4 | Dashboard | 3-4 days | ⚠️ **UI Navigation selesai, menunggu APIs** |
+| Sprint 3 | Task & Reminder | 5-6 days | ✅ Completed |
+| Sprint 4 | Dashboard | 3-4 days | ✅ Completed |
 | Sprint 5 | Polish & Optimization | 5-6 days | ⏳ Pending |
 | Sprint 6 | Integration & Testing | 4-5 days | ⏳ Pending |
 
@@ -309,13 +316,16 @@ Developer 3 bertanggung jawab untuk:
 
 ### Dependencies dari Developer 2 (Backend)
 - Account & Contact APIs (Sprint 1) ✅ **Menggunakan API versi Web**
-- Visit Report APIs (Sprint 2)
-- Task APIs (Sprint 3)
-- Dashboard APIs (Sprint 4) ⏳ **Belum ready - UI navigation sudah dibuat**
-- Push notification service (Sprint 3)
+- Visit Report APIs (Sprint 2) ✅ **Menggunakan API versi Web**
+- Task APIs (Sprint 3) ✅ **Menggunakan API versi Web**
+- Dashboard APIs (Sprint 4) ✅ **Menggunakan API versi Web**
+- Push notification service (Sprint 3) ⏳ **Menunggu Backend Push Notification Service**
 
 ### ⚠️ Catatan Penting: API Integration
 - **Sprint 1 (Account & Contact)**: Menggunakan endpoint API versi **Web** (`/api/v1/accounts`, `/api/v1/contacts`) karena endpoint khusus untuk mobile belum tersedia.
+- **Sprint 2 (Visit Report)**: Menggunakan endpoint API versi **Web** (`/api/v1/visit-reports`) karena endpoint khusus untuk mobile belum tersedia.
+- **Sprint 3 (Task & Reminder)**: Menggunakan endpoint API versi **Web** (`/api/v1/tasks`) karena endpoint khusus untuk mobile belum tersedia.
+- **Sprint 4 (Dashboard)**: Menggunakan endpoint API versi **Web** (`/api/v1/dashboard/overview`, `/api/v1/dashboard/recent-activities`) karena endpoint khusus untuk mobile belum tersedia.
 - Response parsing dibuat fleksibel untuk menangani format array langsung atau object dengan `items` & `pagination`.
 - Endpoint mobile-specific akan digunakan ketika sudah tersedia dari Developer 2.
 
