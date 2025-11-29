@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { Send, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import type { Components } from "react-markdown";
 import { useChat } from "../hooks/useChat";
 import { useAISettings } from "../hooks/useAISettings";
 
@@ -68,6 +69,15 @@ export function Chatbot() {
       },
       {
         onSuccess: (response) => {
+          // Log response from AI for debugging
+          console.log("=== AI RESPONSE DEBUG ===");
+          console.log("Full response:", response);
+          console.log("Message content:", response.data.message);
+          console.log("Message length:", response.data.message.length);
+          console.log("Contains table markdown:", response.data.message.includes("|"));
+          console.log("Raw message preview:", response.data.message.substring(0, 500));
+          console.log("=========================");
+
           const assistantMessage: Message = {
             id: (Date.now() + 1).toString(),
             role: "assistant",
@@ -76,7 +86,11 @@ export function Chatbot() {
           };
           setMessages((prev) => [...prev, assistantMessage]);
         },
-        onError: () => {
+        onError: (error) => {
+          console.error("=== AI ERROR DEBUG ===");
+          console.error("Error:", error);
+          console.error("======================");
+
           const errorMessage: Message = {
             id: (Date.now() + 1).toString(),
             role: "assistant",
@@ -94,6 +108,69 @@ export function Chatbot() {
       e.preventDefault();
       handleSend();
     }
+  };
+
+  // Custom components for markdown rendering with explicit table styling
+  const markdownComponents: Components = {
+    table: ({ children, ...props }) => (
+      <div className="overflow-x-auto my-4 -mx-2">
+        <table 
+          className="w-full text-sm" 
+          style={{ 
+            borderCollapse: 'collapse',
+            width: '100%',
+            border: '1px solid hsl(var(--muted-foreground) / 0.4)'
+          }}
+          {...props}
+        >
+          {children}
+        </table>
+      </div>
+    ),
+    thead: ({ children, ...props }) => (
+      <thead 
+        className="bg-muted/50" 
+        {...props}
+      >
+        {children}
+      </thead>
+    ),
+    tbody: ({ children, ...props }) => (
+      <tbody {...props}>
+        {children}
+      </tbody>
+    ),
+    tr: ({ children, ...props }) => (
+      <tr 
+        className="hover:bg-muted/30 transition-colors" 
+        {...props}
+      >
+        {children}
+      </tr>
+    ),
+    th: ({ children, ...props }) => (
+      <th 
+        className="px-4 py-2.5 text-left font-semibold text-xs bg-muted/50 align-top" 
+        style={{ 
+          border: '1px solid hsl(var(--muted-foreground) / 0.4)',
+          borderBottom: '2px solid hsl(var(--muted-foreground) / 0.5)'
+        }}
+        {...props}
+      >
+        {children}
+      </th>
+    ),
+    td: ({ children, ...props }) => (
+      <td 
+        className="px-4 py-2.5 text-sm align-top" 
+        style={{ 
+          border: '1px solid hsl(var(--muted-foreground) / 0.4)'
+        }}
+        {...props}
+      >
+        {children}
+      </td>
+    ),
   };
 
   if (!settings.enabled) {
@@ -128,8 +205,11 @@ export function Chatbot() {
               }`}
             >
               {message.role === "assistant" ? (
-                <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:mt-0 prose-headings:mb-2 prose-p:my-1 prose-p:leading-relaxed prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-code:text-xs prose-code:bg-muted/50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:my-2 prose-pre:bg-muted/50 prose-pre:p-2 prose-pre:rounded prose-pre:overflow-x-auto prose-blockquote:border-l-2 prose-blockquote:border-muted-foreground/30 prose-blockquote:pl-3 prose-blockquote:italic prose-strong:font-semibold prose-a:text-primary prose-a:underline prose-table:my-2 prose-th:border prose-th:px-2 prose-th:py-1 prose-td:border prose-td:px-2 prose-td:py-1">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                <div className="prose prose-sm dark:prose-invert max-w-none prose-headings:mt-0 prose-headings:mb-2 prose-p:my-1 prose-p:leading-relaxed prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-code:text-xs prose-code:bg-muted/50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:my-2 prose-pre:bg-muted/50 prose-pre:p-2 prose-pre:rounded prose-pre:overflow-x-auto prose-blockquote:border-l-2 prose-blockquote:border-muted-foreground/30 prose-blockquote:pl-3 prose-blockquote:italic prose-strong:font-semibold prose-a:text-primary prose-a:underline [&_table]:!border-collapse [&_table_td]:!border [&_table_th]:!border [&_table_td]:!border-border [&_table_th]:!border-border">
+                  <ReactMarkdown 
+                    remarkPlugins={[remarkGfm]}
+                    components={markdownComponents}
+                  >
                     {message.content}
                   </ReactMarkdown>
                 </div>
