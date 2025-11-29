@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Loader2 } from "lucide-react";
+import { Send, Loader2, Copy, Check } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Components } from "react-markdown";
@@ -29,6 +29,7 @@ export function Chatbot() {
   const [contextType, setContextType] = useState<
     "visit_report" | "deal" | "contact" | "account" | undefined
   >(undefined);
+  const [copied, setCopied] = useState(false);
   const { mutate: sendMessage, isPending } = useChat();
   const { settings } = useAISettings();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -278,6 +279,38 @@ export function Chatbot() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-16rem)] max-h-[800px] bg-background border rounded-lg overflow-hidden">
+      {/* Header with Copy Button */}
+      <div className="border-b bg-background px-4 py-2 flex items-center justify-between">
+        <h2 className="text-lg font-semibold">AI Assistant</h2>
+        <button
+          onClick={() => {
+            const chatText = messages
+              .map((msg) => {
+                const role = msg.role === "user" ? "User" : "Assistant";
+                return `${role}: ${msg.content}`;
+              })
+              .join("\n\n");
+            navigator.clipboard.writeText(chatText);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+          }}
+          className="flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
+          title="Copy all chat"
+        >
+          {copied ? (
+            <>
+              <Check className="h-4 w-4" />
+              <span>Copied!</span>
+            </>
+          ) : (
+            <>
+              <Copy className="h-4 w-4" />
+              <span>Copy Chat</span>
+            </>
+          )}
+        </button>
+      </div>
+
       {/* Messages Area */}
       <div
         ref={scrollRef}

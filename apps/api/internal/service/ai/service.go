@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/gilabs/crm-healthcare/api/internal/domain/account"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/ai"
@@ -178,14 +179,35 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 		// Try to extract data from user message - ALWAYS try to get data
 		messageLower := strings.ToLower(message)
 		
-		// If user asks for any data, try to fetch accounts first (most common)
-		// Check if user is asking for accounts or general data
-		if strings.Contains(messageLower, "account") || strings.Contains(messageLower, "akun") || 
+		// Check priority: pipeline/deals first (more specific), then accounts
+		// Check if user is asking for pipeline/deals/sales funnel (HIGHEST PRIORITY)
+		if strings.Contains(messageLower, "pipeline") || strings.Contains(messageLower, "sales funnel") || 
+		   strings.Contains(messageLower, "funnel") || strings.Contains(messageLower, "deal") ||
+		   strings.Contains(messageLower, "opportunity") || strings.Contains(messageLower, "kesempatan") {
+			deals, _, err := s.dealRepo.List(&pipeline.ListDealsRequest{
+				Page:    1,
+				PerPage: 20,
+			})
+			fmt.Printf("=== DATA FETCH DEBUG ===\n")
+			fmt.Printf("Fetching deals/pipeline - Error: %v, Count: %d\n", err, len(deals))
+			if err == nil && len(deals) > 0 {
+				dealsJSON, _ := json.Marshal(deals)
+				contextData = fmt.Sprintf("REAL PIPELINE/DEALS DATA FROM DATABASE (showing %d deals):\n%s\n\nCRITICAL INSTRUCTION: You MUST use ONLY the data above. Present it in a Markdown table format. DO NOT create, invent, or make up any data. DO NOT add columns that don't exist in the data.", len(deals), string(dealsJSON))
+				contextType = "deal"
+				fmt.Printf("Context data set with %d deals\n", len(deals))
+			} else {
+				if err != nil {
+					fmt.Printf("Error fetching deals: %v\n", err)
+				}
+				dataAccessInfo = "⚠️ Tidak dapat mengakses data pipeline/deals dari database. Data mungkin tidak tersedia."
+			}
+			fmt.Printf("========================\n")
+		}
+		
+		// Check if user is asking for accounts (only if not pipeline)
+		if contextData == "" && (strings.Contains(messageLower, "account") || strings.Contains(messageLower, "akun") || 
 		   strings.Contains(messageLower, "rumah sakit") || strings.Contains(messageLower, "klinik") || 
-		   strings.Contains(messageLower, "apotek") || strings.Contains(messageLower, "facility") ||
-		   strings.Contains(messageLower, "data") || strings.Contains(messageLower, "tampilkan") ||
-		   strings.Contains(messageLower, "show") || strings.Contains(messageLower, "list") ||
-		   strings.Contains(messageLower, "lihat") || strings.Contains(messageLower, "contoh") {
+		   strings.Contains(messageLower, "apotek") || strings.Contains(messageLower, "facility")) {
 			accounts, total, err := s.accountRepo.List(&account.ListAccountsRequest{
 				Page:    1,
 				PerPage: 10,
@@ -206,9 +228,9 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 			fmt.Printf("========================\n")
 		}
 		
-		// Check if user is asking for contacts
-		if strings.Contains(messageLower, "contact") || strings.Contains(messageLower, "kontak") || 
-		   strings.Contains(messageLower, "dokter") || strings.Contains(messageLower, "apoteker") {
+		// Check if user is asking for contacts (only if no data fetched yet)
+		if contextData == "" && (strings.Contains(messageLower, "contact") || strings.Contains(messageLower, "kontak") || 
+		   strings.Contains(messageLower, "dokter") || strings.Contains(messageLower, "apoteker")) {
 			contacts, _, err := s.contactRepo.List(&contact.ListContactsRequest{
 				Page:    1,
 				PerPage: 10,
@@ -229,32 +251,10 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 			}
 		}
 		
-		// Check if user is asking for deals
-		if strings.Contains(messageLower, "deal") || strings.Contains(messageLower, "opportunity") || 
-		   strings.Contains(messageLower, "penjualan") || strings.Contains(messageLower, "nilai") {
-			deals, _, err := s.dealRepo.List(&pipeline.ListDealsRequest{
-				Page:    1,
-				PerPage: 10,
-			})
-			if err == nil && len(deals) > 0 {
-				dealsJSON, _ := json.Marshal(deals)
-				if contextData != "" {
-					contextData += "\n\n"
-				}
-				contextData += fmt.Sprintf("REAL DEALS DATA FROM DATABASE (showing %d deals):\n%s\n\nIMPORTANT: You MUST use ONLY this data. DO NOT create example data.", len(deals), string(dealsJSON))
-				if contextType == "" {
-					contextType = "deal"
-				}
-			} else {
-				if dataAccessInfo == "" {
-					dataAccessInfo = "⚠️ Tidak dapat mengakses data deals dari database. Data mungkin tidak tersedia."
-				}
-			}
-		}
 		
-		// Check if user is asking for visit reports
-		if strings.Contains(messageLower, "visit") || strings.Contains(messageLower, "kunjungan") || 
-		   strings.Contains(messageLower, "laporan kunjungan") {
+		// Check if user is asking for visit reports (only if no data fetched yet)
+		if contextData == "" && (strings.Contains(messageLower, "visit") || strings.Contains(messageLower, "kunjungan") || 
+		   strings.Contains(messageLower, "laporan kunjungan")) {
 			visitReports, _, err := s.visitReportRepo.List(&visit_report.ListVisitReportsRequest{
 				Page:    1,
 				PerPage: 10,
@@ -271,6 +271,30 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 			} else {
 				if dataAccessInfo == "" {
 					dataAccessInfo = "⚠️ Tidak dapat mengakses data visit reports dari database. Data mungkin tidak tersedia."
+				}
+			}
+		}
+		
+		// Check if user is asking for forecast data (only if no data fetched yet)
+		if contextData == "" && (strings.Contains(messageLower, "forecast") || strings.Contains(messageLower, "grafik forecast") || 
+		   strings.Contains(messageLower, "prediksi") || strings.Contains(messageLower, "ramalan")) {
+			// Try to get forecast data for current month, quarter, and year
+			now := time.Now()
+			
+			// Get monthly forecast
+			monthStart := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+			monthEnd := monthStart.AddDate(0, 1, 0).Add(-time.Second)
+			monthForecast, err := s.dealRepo.GetForecast("month", monthStart, monthEnd)
+			
+			if err == nil && monthForecast != nil {
+				forecastJSON, _ := json.Marshal(monthForecast)
+				if contextData != "" {
+					contextData += "\n\n"
+				}
+				contextData += fmt.Sprintf("REAL FORECAST DATA FROM DATABASE (Current Month):\n%s\n\nCRITICAL: You MUST use ONLY this forecast data. DO NOT create, invent, or make up any forecast data. If forecast data is empty or incomplete, inform the user that forecast data is not available.", string(forecastJSON))
+			} else {
+				if dataAccessInfo == "" {
+					dataAccessInfo = "⚠️ Tidak dapat mengakses data forecast dari database. Data mungkin tidak tersedia."
 				}
 			}
 		}
