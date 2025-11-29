@@ -25,6 +25,8 @@ import {
   Heart,
   TrendingUp,
   Contact,
+  Bot,
+  Sparkles,
 } from "lucide-react";
 
 const iconMap: Record<string, React.ReactNode> = {
@@ -67,6 +69,10 @@ const iconMap: Record<string, React.ReactNode> = {
   store: <Store className="h-4 w-4" />,
   "map-pin": <MapPin className="h-4 w-4" />,
   "clipboard-list": <ClipboardList className="h-4 w-4" />,
+  bot: <Bot className="h-4 w-4" />,
+  sparkles: <Sparkles className="h-4 w-4" />,
+  "ai-chatbot": <Bot className="h-4 w-4" />,
+  "ai-settings": <Sparkles className="h-4 w-4" />,
 };
 
 export function getMenuIcon(iconName: string): React.ReactNode {

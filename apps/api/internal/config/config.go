@@ -11,6 +11,7 @@ type Config struct {
 	Server   ServerConfig
 	Database DatabaseConfig
 	JWT      JWTConfig
+	Cerebras CerebrasConfig
 }
 
 type ServerConfig struct {
@@ -31,6 +32,12 @@ type JWTConfig struct {
 	SecretKey      string
 	AccessTokenTTL int // in hours
 	RefreshTokenTTL int // in days
+}
+
+type CerebrasConfig struct {
+	BaseURL string
+	APIKey  string
+	Model   string // Default model name
 }
 
 var AppConfig *Config
@@ -56,6 +63,11 @@ func Load() error {
 			SecretKey:      getEnv("JWT_SECRET", "your-secret-key-change-in-production"),
 			AccessTokenTTL: getEnvAsInt("JWT_ACCESS_TTL", 24), // 24 hours
 			RefreshTokenTTL: getEnvAsInt("JWT_REFRESH_TTL", 7), // 7 days
+		},
+		Cerebras: CerebrasConfig{
+			BaseURL: getEnv("CEREBRAS_BASE_URL", "https://api.cerebras.ai"),
+			APIKey:  getEnv("CEREBRAS_API_KEY", ""),
+			Model:   getEnv("CEREBRAS_MODEL", "llama-3.1-8b"), // Default model
 		},
 	}
 

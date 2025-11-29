@@ -129,6 +129,20 @@ var ErrorCodeMap = map[string]ErrorInfo{
 		HTTPStatus: http.StatusBadRequest,
 		Message:    "Invalid query parameter",
 	},
+
+	// AI Service Errors
+	"AI_ANALYSIS_FAILED": {
+		HTTPStatus: http.StatusInternalServerError,
+		Message:    "Failed to analyze visit report with AI",
+	},
+	"AI_CHAT_FAILED": {
+		HTTPStatus: http.StatusInternalServerError,
+		Message:    "Failed to get AI chat response",
+	},
+	"AI_SERVICE_NOT_CONFIGURED": {
+		HTTPStatus: http.StatusServiceUnavailable,
+		Message:    "AI service is not configured. Please configure Cerebras API key",
+	},
 }
 
 // ErrorResponse creates an error response

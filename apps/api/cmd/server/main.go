@@ -121,6 +121,7 @@ func main() {
 	cerebrasClient := cerebras.NewClient(
 		config.AppConfig.Cerebras.BaseURL,
 		config.AppConfig.Cerebras.APIKey,
+		config.AppConfig.Cerebras.Model,
 	)
 
 	// Setup AI Service
@@ -131,6 +132,7 @@ func main() {
 		contactRepo,
 		dealRepo,
 		activityRepo,
+		config.AppConfig.Cerebras.APIKey,
 	)
 
 	// Setup handlers
