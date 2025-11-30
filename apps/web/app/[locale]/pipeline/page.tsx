@@ -8,7 +8,6 @@ import { Forecast } from "@/features/sales-crm/pipeline-management/components/fo
 import { StagesList } from "@/features/sales-crm/pipeline-management/components/stages-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useHasPermission } from "@/features/master-data/user-management/hooks/useHasPermission";
 import { useState } from "react";
@@ -19,18 +18,20 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { DealForm } from "@/features/sales-crm/pipeline-management/components/deal-form";
+import { DealDetailModal } from "@/features/sales-crm/pipeline-management/components/deal-detail-modal";
 import { useCreateDeal } from "@/features/sales-crm/pipeline-management/hooks/useDeals";
 
 function PipelinePageContent() {
-  const router = useRouter();
+  // All hooks must be called in the same order on every render
   const t = useTranslations("pipelineManagement.page");
   const tKanban = useTranslations("pipelineManagement.kanban");
-  const hasStagesPermission = useHasPermission("STAGES");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [viewingDealId, setViewingDealId] = useState<string | null>(null);
   const { mutate: createDeal, isPending: isCreating } = useCreateDeal();
+  const hasStagesPermission = useHasPermission("STAGES");
 
   const handleDealClick = (deal: { id: string }) => {
-    router.push(`/deals/${deal.id}`);
+    setViewingDealId(deal.id);
   };
 
   const handleCreateDeal = async (data: unknown) => {
@@ -113,6 +114,13 @@ function PipelinePageContent() {
             />
           </DialogContent>
         </Dialog>
+
+        {/* Deal Detail Modal */}
+        <DealDetailModal
+          dealId={viewingDealId}
+          open={!!viewingDealId}
+          onOpenChange={(open) => !open && setViewingDealId(null)}
+        />
       </div>
     </div>
   );

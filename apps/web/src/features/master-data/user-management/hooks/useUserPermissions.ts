@@ -8,8 +8,9 @@ import { useAuthStore } from "@/features/auth/stores/useAuthStore";
 import { AxiosError } from "axios";
 
 export function useUserPermissions() {
-  const { user, logout } = useAuthStore();
+  // Ensure hooks are called in consistent order - router first, then store
   const router = useRouter();
+  const { user, logout } = useAuthStore();
   
   const query = useQuery({
     queryKey: ["user-permissions", user?.id],
