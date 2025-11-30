@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { Send, Loader2, Copy, Check, Settings } from "lucide-react";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { Send, Loader2, Copy, Check, Settings, Plus, MoreVertical } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Components } from "react-markdown";
 import { useChat } from "../hooks/useChat";
 import { useAISettings } from "../hooks/useAISettings";
+import { useAuthStore } from "@/features/auth/stores/useAuthStore";
 import {
   Select,
   SelectContent,
@@ -14,6 +15,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 
 interface Message {
   id: string;
@@ -22,10 +30,16 @@ interface Message {
   timestamp: Date;
 }
 
+// Stable ID generator to avoid hydration errors
+let messageIdCounter = 1;
+function generateMessageId(): string {
+  return `msg-${messageIdCounter++}`;
+}
+
 export function Chatbot() {
   const [messages, setMessages] = useState<Message[]>([
     {
-      id: "1",
+      id: "initial-greeting",
       role: "assistant",
       content: "Hello! How can I help you today?",
       timestamp: new Date(),
@@ -35,12 +49,18 @@ export function Chatbot() {
   const [copied, setCopied] = useState(false);
   const { mutate: sendMessage, isPending } = useChat();
   const { settings } = useAISettings();
+  const { user } = useAuthStore();
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   
   // Use settings.model as default, but allow user to override via Select
   const [userSelectedModel, setUserSelectedModel] = useState<string | null>(null);
   const selectedModel = userSelectedModel || settings.model || "llama-3.1-8b";
+
+  // Get avatar URL from backend
+  const userAvatarUrl = useMemo(() => {
+    return user?.avatar_url || null;
+  }, [user?.avatar_url]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -59,7 +79,7 @@ export function Chatbot() {
     if (!input.trim() || isPending || !settings.enabled) return;
 
     const userMessage: Message = {
-      id: Date.now().toString(),
+      id: generateMessageId(),
       role: "user",
       content: input,
       timestamp: new Date(),
@@ -71,7 +91,7 @@ export function Chatbot() {
 
     // Prepare conversation history (exclude the initial greeting and current message)
     const conversationHistory = messages
-      .filter((msg) => msg.id !== "1") // Exclude initial greeting
+      .filter((msg) => msg.id !== "initial-greeting") // Exclude initial greeting
       .map((msg) => ({
         role: msg.role,
         content: msg.content,
@@ -106,7 +126,7 @@ export function Chatbot() {
           console.log("=========================");
 
           const assistantMessage: Message = {
-            id: (Date.now() + 1).toString(),
+            id: generateMessageId(),
             role: "assistant",
             content: response.data.message,
             timestamp: new Date(),
@@ -120,7 +140,7 @@ export function Chatbot() {
           console.error("======================");
 
           const errorMessage: Message = {
-            id: (Date.now() + 1).toString(),
+            id: generateMessageId(),
             role: "assistant",
             content: "Sorry, I encountered an error. Please try again.",
             timestamp: new Date(),
@@ -300,7 +320,7 @@ export function Chatbot() {
 
   if (!settings.enabled) {
     return (
-      <div className="flex items-center justify-center h-full min-h-[600px]">
+      <div className="flex items-center justify-center h-full w-full">
         <p className="text-muted-foreground text-sm">
           AI Assistant is disabled. Please enable it in settings.
         </p>
@@ -309,21 +329,35 @@ export function Chatbot() {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-16rem)] max-h-[800px] bg-background border rounded-lg overflow-hidden">
-      {/* Header with Model Selector, Usage Stats, and Copy Button */}
-      <div className="border-b bg-background">
-        <div className="px-4 py-2 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">AI Assistant</h2>
+    <div className="flex flex-col h-full w-full bg-background relative min-h-0 overflow-hidden">
+      {/* Top Bar - Fixed at top */}
+      <div className="sticky top-0 z-10 border-b border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 shrink-0">
+        <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
-            {/* Model Selector */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => {
+                setMessages([{
+                  id: "initial-greeting",
+                  role: "assistant",
+                  content: "Hello! How can I help you today?",
+                  timestamp: new Date(),
+                }]);
+                setInput("");
+              }}
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+            <div className="h-6 w-px bg-border" />
             <Select
               value={selectedModel || settings.model || ""}
               onValueChange={setUserSelectedModel}
               disabled={isPending}
             >
-              <SelectTrigger className="w-[180px] h-8 text-xs">
-                <Settings className="h-3 w-3 mr-2" />
-                <SelectValue placeholder="Select model" />
+              <SelectTrigger className="h-8 border-0 bg-transparent hover:bg-muted/50 px-2 text-sm font-medium">
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="llama-3.1-8b">Llama 3.1 8B</SelectItem>
@@ -334,101 +368,184 @@ export function Chatbot() {
                 <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
               </SelectContent>
             </Select>
-            
-            {/* Copy Button */}
-            <button
-              onClick={handleCopyChat}
-              className="flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
-              title="Copy all chat"
-              disabled={copied}
-            >
-              {copied ? (
-                <>
-                  <Check className="h-4 w-4 text-green-500" />
-                  <span>Copied!</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="h-4 w-4" />
-                  <span>Copy</span>
-                </>
-              )}
-            </button>
+          </div>
+          <div className="flex items-center gap-1">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-48 p-1" align="end">
+                <div className="flex flex-col">
+                  <button
+                    onClick={handleCopyChat}
+                    className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors text-left"
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="h-4 w-4 text-green-500" />
+                        Copied!
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-4 w-4" />
+                        Copy conversation
+                      </>
+                    )}
+                  </button>
+                  <button className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors text-left">
+                    <Settings className="h-4 w-4" />
+                    Settings
+                  </button>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
       </div>
 
-      {/* Messages Area */}
+      {/* Messages Area - Scrollable with proper spacing */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto px-4 py-6 space-y-3"
+        className="flex-1 overflow-y-auto w-full overscroll-contain"
+        style={{ 
+          scrollBehavior: 'smooth',
+          paddingBottom: '1rem'
+        }}
       >
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex ${
-              message.role === "user" ? "justify-end" : "justify-start"
-            }`}
-          >
-            <div
-              className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
-                message.role === "user"
-                  ? "bg-primary text-primary-foreground rounded-br-sm"
-                  : "bg-muted text-foreground rounded-bl-sm"
-              }`}
-            >
-              {message.role === "assistant" ? (
-                <div className="markdown-content">
-                  <ReactMarkdown 
-                    remarkPlugins={[remarkGfm]}
-                    components={markdownComponents}
-                  >
-                    {message.content}
-                  </ReactMarkdown>
-                </div>
-              ) : (
-                <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
-                  {message.content}
+        {messages.length === 1 && messages[0].id === "initial-greeting" ? (
+          // Empty state - centered welcome message
+          <div className="flex flex-col items-center justify-center min-h-full px-4 py-12">
+            <div className="max-w-2xl w-full space-y-8">
+              <div className="text-center space-y-3">
+                <h1 className="text-4xl font-semibold bg-linear-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                  AI Assistant
+                </h1>
+                <p className="text-muted-foreground text-lg">
+                  Chat with AI assistant to get insights and answers about your CRM data
                 </p>
-              )}
+              </div>
             </div>
           </div>
-        ))}
-        {isPending && (
-          <div className="flex justify-start">
-            <div className="bg-muted rounded-2xl rounded-bl-sm px-4 py-2.5">
-              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-            </div>
+        ) : (
+          // Messages list
+          <div className="flex flex-col w-full">
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                className={`group w-full transition-colors ${
+                  message.role === "user" ? "bg-muted/20" : "bg-background"
+                }`}
+              >
+                <div className="flex gap-4 px-4 py-6 max-w-3xl mx-auto">
+                  {/* Avatar/Icon */}
+                  <div className="shrink-0 w-8 h-8 mt-1">
+                    {message.role === "user" && userAvatarUrl && (
+                      <Avatar className="w-8 h-8">
+                        <AvatarImage src={userAvatarUrl} alt={user?.name || "User"} />
+                      </Avatar>
+                    )}
+                    {message.role === "assistant" && (
+                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                        <svg
+                          className="w-5 h-5 text-foreground"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                          />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Message Content */}
+                  <div className="flex-1 min-w-0 wrap-break-word">
+                    {message.role === "assistant" ? (
+                      <div className="markdown-content prose prose-sm dark:prose-invert max-w-none prose-headings:mt-4 prose-headings:mb-2 prose-p:my-2">
+                        <ReactMarkdown 
+                          remarkPlugins={[remarkGfm]}
+                          components={markdownComponents}
+                        >
+                          {message.content}
+                        </ReactMarkdown>
+                      </div>
+                    ) : (
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap wrap-break-word">
+                        {message.content}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+            {isPending && (
+              <div className="group w-full bg-background animate-pulse">
+                <div className="flex gap-4 px-4 py-6 max-w-3xl mx-auto">
+                  <div className="shrink-0 w-8 h-8 rounded-full bg-muted flex items-center justify-center mt-1">
+                    <svg
+                      className="w-5 h-5 text-foreground"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                      />
+                    </svg>
+                  </div>
+                  <div className="flex-1 flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                    <span className="text-sm text-muted-foreground">AI is thinking...</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
 
-      {/* Input Area */}
-      <div className="border-t bg-background px-4 py-3">
-        <div className="flex items-end gap-2">
-          <div className="flex-1 relative">
-            <textarea
-              ref={inputRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Type a message..."
-              className="w-full resize-none rounded-2xl border bg-background px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-0 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] max-h-[120px]"
-              disabled={isPending}
-              rows={1}
-            />
+      {/* Input Area - Fixed at bottom, always visible */}
+      <div className="sticky bottom-0 z-10 border-t border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 shrink-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] dark:shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)]">
+        <div className="max-w-3xl mx-auto px-4 py-4">
+          <div className="relative flex items-center gap-2">
+            <div className="flex-1 relative">
+              <textarea
+                ref={inputRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Ask anything..."
+                className="w-full resize-none rounded-2xl border border-border bg-background px-4 py-3 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 disabled:opacity-50 disabled:cursor-not-allowed min-h-[52px] max-h-[200px] leading-relaxed shadow-sm"
+                disabled={isPending || !settings.enabled}
+                rows={1}
+              />
+            </div>
+            <Button
+              onClick={handleSend}
+              disabled={!input.trim() || isPending || !settings.enabled}
+              size="icon"
+              className="h-[52px] w-[52px] rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105 active:scale-95 shrink-0 shadow-md"
+            >
+              {isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
+            </Button>
           </div>
-          <button
-            onClick={handleSend}
-            disabled={!input.trim() || isPending}
-            className="flex-shrink-0 h-11 w-11 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {isPending ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              <Send className="h-5 w-5" />
-            )}
-          </button>
+          <p className="text-xs text-muted-foreground text-center mt-2.5 px-4">
+            AI Assistant can make mistakes. Check important info.
+          </p>
         </div>
       </div>
     </div>
