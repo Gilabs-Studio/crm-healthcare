@@ -107,10 +107,22 @@ export function useAISettings() {
         current_usage: 0,
       };
 
+  // Calculate usage stats
+  const usageStats = settingsResponse
+    ? {
+        current_usage: settingsResponse.current_usage,
+        usage_limit: settingsResponse.usage_limit,
+        percentage: settingsResponse.usage_limit
+          ? (settingsResponse.current_usage / settingsResponse.usage_limit) * 100
+          : 0,
+      }
+    : undefined;
+
   return {
     settings,
     isLoading,
     error,
+    usageStats,
     updateDataPrivacy,
     toggleEnabled,
     updateProvider,

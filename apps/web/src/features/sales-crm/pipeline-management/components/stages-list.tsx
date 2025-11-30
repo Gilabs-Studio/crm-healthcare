@@ -43,9 +43,13 @@ export function StagesList() {
   const stages = data?.data || [];
   const editingStage = editingStageId ? stages.find((s) => s.id === editingStageId) : null;
 
-  const handleCreate = async (formData: CreateStageFormData) => {
+  const handleCreate = async (formData: CreateStageFormData | UpdateStageFormData) => {
     try {
-      await createStage.mutateAsync(formData);
+      // Type guard to ensure we have required fields for create
+      if (!("name" in formData) || !formData.name || !("code" in formData) || !formData.code) {
+        throw new Error("Name and code are required");
+      }
+      await createStage.mutateAsync(formData as CreateStageFormData);
       setIsCreateDialogOpen(false);
       toast.success(t("toastCreated"));
     } catch {

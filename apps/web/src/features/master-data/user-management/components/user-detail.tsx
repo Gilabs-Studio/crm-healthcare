@@ -36,6 +36,11 @@ export function UserDetail({ userId }: UserDetailProps) {
   const user = data?.data;
   const userPermissions = permissionsData?.data?.permissions || [];
 
+  // Permission checks
+  const hasEditPermission = useHasPermission("EDIT_USER");
+  const hasPermissionsPermission = useHasPermission("EDIT_USER_PERMISSIONS");
+  const hasDeletePermission = useHasPermission("DELETE_USER");
+
   const handleDelete = async () => {
     if (!user) return;
     if (confirm(t("list.deleteDescriptionWithName", { name: user.name }))) {

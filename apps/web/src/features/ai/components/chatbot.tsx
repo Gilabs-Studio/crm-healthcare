@@ -676,9 +676,6 @@ export function Chatbot() {
                             <ReactMarkdown 
                               remarkPlugins={[remarkGfm]}
                               components={componentsWithLinks}
-                              onError={(error) => {
-                                console.error('ReactMarkdown error:', error);
-                              }}
                             >
                               {message.content}
                             </ReactMarkdown>
