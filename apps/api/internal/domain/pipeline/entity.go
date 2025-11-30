@@ -433,7 +433,10 @@ type ForecastPeriod struct {
 type ForecastDeal struct {
 	ID                     string     `json:"id"`
 	Title                  string     `json:"title"`
+	AccountID              string     `json:"account_id"`              // ID for creating modal links
 	AccountName            string     `json:"account_name"`
+	ContactID              string     `json:"contact_id,omitempty"`    // ID for creating modal links (optional)
+	ContactName            string     `json:"contact_name,omitempty"`   // Name for display (optional)
 	StageName              string     `json:"stage_name"`
 	Value                  int64      `json:"value"`
 	ValueFormatted         string     `json:"value_formatted"`

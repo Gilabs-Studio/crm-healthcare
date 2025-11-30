@@ -584,20 +584,49 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 		// Check if user is asking for forecast data (only if no data fetched yet)
 		if contextData == "" && (strings.Contains(messageLower, "forecast") || strings.Contains(messageLower, "grafik forecast") || 
 		   strings.Contains(messageLower, "prediksi") || strings.Contains(messageLower, "ramalan")) {
-			// Try to get forecast data for current month, quarter, and year
 			now := time.Now()
 			
-			// Get monthly forecast
-			monthStart := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
-			monthEnd := monthStart.AddDate(0, 1, 0).Add(-time.Second)
-			monthForecast, err := s.dealRepo.GetForecast("month", monthStart, monthEnd)
+			// Check for specific forecast queries
+			isNextMonthQuery := strings.Contains(messageLower, "bulan depan") || strings.Contains(messageLower, "next month") || 
+			                    strings.Contains(messageLower, "month depan")
+			isThreeMonthsQuery := strings.Contains(messageLower, "3 bulan") || strings.Contains(messageLower, "tiga bulan") ||
+			                      strings.Contains(messageLower, "three months")
 			
-			if err == nil && monthForecast != nil {
-				forecastJSON, _ := json.Marshal(monthForecast)
+			var forecastStart, forecastEnd time.Time
+			var periodType string
+			
+			if isNextMonthQuery {
+				// Next month forecast
+				nextMonth := now.AddDate(0, 1, 0)
+				forecastStart = time.Date(nextMonth.Year(), nextMonth.Month(), 1, 0, 0, 0, 0, now.Location())
+				forecastEnd = forecastStart.AddDate(0, 1, 0).Add(-time.Second)
+				periodType = "month"
+			} else if isThreeMonthsQuery {
+				// 3 months ahead forecast
+				forecastStart = now
+				forecastEnd = now.AddDate(0, 3, 0)
+				periodType = "quarter"
+			} else {
+				// Default: current month forecast
+				forecastStart = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+				forecastEnd = forecastStart.AddDate(0, 1, 0).Add(-time.Second)
+				periodType = "month"
+			}
+			
+			forecast, err := s.dealRepo.GetForecast(periodType, forecastStart, forecastEnd)
+			
+			if err == nil && forecast != nil {
+				forecastJSON, _ := json.Marshal(forecast)
 				if contextData != "" {
 					contextData += "\n\n"
 				}
-				contextData += fmt.Sprintf("REAL FORECAST DATA FROM DATABASE (Current Month):\n%s\n\nCRITICAL: You MUST use ONLY this forecast data. DO NOT create, invent, or make up any forecast data. If forecast data is empty or incomplete, inform the user that forecast data is not available.", string(forecastJSON))
+				periodDesc := "Current Month"
+				if isNextMonthQuery {
+					periodDesc = "Next Month"
+				} else if isThreeMonthsQuery {
+					periodDesc = "Next 3 Months"
+				}
+				contextData += fmt.Sprintf("REAL FORECAST DATA FROM DATABASE (%s):\n%s\n\nCRITICAL: You MUST use ONLY this forecast data. DO NOT create, invent, or make up any forecast data. If forecast data is empty or incomplete, inform the user that forecast data is not available.", periodDesc, string(forecastJSON))
 			} else {
 				if dataAccessInfo == "" {
 					dataAccessInfo = "⚠️ Tidak dapat mengakses data forecast dari database. Data mungkin tidak tersedia."

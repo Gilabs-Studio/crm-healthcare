@@ -94,7 +94,10 @@ export interface ForecastPeriod {
 export interface ForecastDeal {
   id: string;
   title: string;
+  account_id: string;
   account_name: string;
+  contact_id?: string;
+  contact_name?: string;
   stage_name: string;
   value: number;
   value_formatted: string;
