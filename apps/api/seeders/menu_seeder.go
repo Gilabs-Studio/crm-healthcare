@@ -157,18 +157,46 @@ func SeedMenus() error {
 	}
 	log.Printf("Created menu: %s", reportsMenu.Name)
 
-	// Create Settings menu (root level)
-	settingsMenu := permission.Menu{
-		Name:   "Settings",
-		Icon:   "settings",
-		URL:    basePath + "/settings",
+	// Create AI Assistant root menu
+	aiMenu := permission.Menu{
+		Name:   "AI Assistant",
+		Icon:   "sparkles",
+		URL:    basePath + "/ai-assistant",
 		Order:  5,
 		Status: "active",
 	}
-	if err := database.DB.Create(&settingsMenu).Error; err != nil {
+	if err := database.DB.Create(&aiMenu).Error; err != nil {
 		return err
 	}
-	log.Printf("Created menu: %s", settingsMenu.Name)
+	log.Printf("Created menu: %s", aiMenu.Name)
+
+	// Create AI Chatbot menu under AI Assistant
+	aiChatbotMenu := permission.Menu{
+		Name:     "AI Chatbot",
+		Icon:     "ai-chatbot",
+		URL:      basePath + "/ai-chatbot",
+		ParentID: &aiMenu.ID,
+		Order:    1,
+		Status:   "active",
+	}
+	if err := database.DB.Create(&aiChatbotMenu).Error; err != nil {
+		return err
+	}
+	log.Printf("Created menu: %s", aiChatbotMenu.Name)
+
+	// Create AI Settings menu under AI Assistant
+	aiSettingsMenu := permission.Menu{
+		Name:     "AI Settings",
+		Icon:     "ai-settings",
+		URL:      basePath + "/ai-settings",
+		ParentID: &aiMenu.ID,
+		Order:    2,
+		Status:   "active",
+	}
+	if err := database.DB.Create(&aiSettingsMenu).Error; err != nil {
+		return err
+	}
+	log.Printf("Created menu: %s", aiSettingsMenu.Name)
 
 	log.Println("Menus seeded successfully")
 	return nil
@@ -363,6 +391,59 @@ func UpdateMenuStructure() error {
 			log.Printf("Warning: Failed to delete Products list child menu: %v", err)
 		} else {
 			log.Printf("Deleted legacy Products list child menu from navigation")
+		}
+	}
+
+	// Add AI Assistant menu if it doesn't exist
+	var aiMenu permission.Menu
+	if err := database.DB.Where("url = ?", "/ai-assistant").First(&aiMenu).Error; err != nil {
+		aiMenu = permission.Menu{
+			Name:   "AI Assistant",
+			Icon:   "sparkles",
+			URL:    "/ai-assistant",
+			Order:  5,
+			Status: "active",
+		}
+		if err := database.DB.Create(&aiMenu).Error; err != nil {
+			log.Printf("Warning: Failed to create AI Assistant menu: %v", err)
+		} else {
+			log.Printf("Created AI Assistant menu")
+		}
+	}
+
+	// Add AI Chatbot menu if it doesn't exist
+	var aiChatbotMenu permission.Menu
+	if err := database.DB.Where("url = ?", "/ai-chatbot").First(&aiChatbotMenu).Error; err != nil {
+		aiChatbotMenu = permission.Menu{
+			Name:     "AI Chatbot",
+			Icon:     "ai-chatbot",
+			URL:      "/ai-chatbot",
+			ParentID: &aiMenu.ID,
+			Order:    1,
+			Status:   "active",
+		}
+		if err := database.DB.Create(&aiChatbotMenu).Error; err != nil {
+			log.Printf("Warning: Failed to create AI Chatbot menu: %v", err)
+		} else {
+			log.Printf("Created AI Chatbot menu")
+		}
+	}
+
+	// Add AI Settings menu if it doesn't exist
+	var aiSettingsMenu permission.Menu
+	if err := database.DB.Where("url = ?", "/ai-settings").First(&aiSettingsMenu).Error; err != nil {
+		aiSettingsMenu = permission.Menu{
+			Name:     "AI Settings",
+			Icon:     "ai-settings",
+			URL:      "/ai-settings",
+			ParentID: &aiMenu.ID,
+			Order:    2,
+			Status:   "active",
+		}
+		if err := database.DB.Create(&aiSettingsMenu).Error; err != nil {
+			log.Printf("Warning: Failed to create AI Settings menu: %v", err)
+		} else {
+			log.Printf("Created AI Settings menu")
 		}
 	}
 

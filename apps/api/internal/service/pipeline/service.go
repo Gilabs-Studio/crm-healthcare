@@ -344,6 +344,147 @@ func (s *Service) GetForecast(periodType string) (*pipeline.ForecastResponse, er
 	return s.dealRepo.GetForecast(periodType, start, end)
 }
 
+// CreateStage creates a new pipeline stage
+func (s *Service) CreateStage(req *pipeline.CreateStageRequest) (*pipeline.PipelineStageResponse, error) {
+	// Check if code already exists
+	existing, err := s.pipelineRepo.FindStageByCode(req.Code)
+	if err == nil && existing != nil {
+		return nil, errors.New("pipeline stage with this code already exists")
+	}
+
+	// Set default color if not provided
+	color := req.Color
+	if color == "" {
+		color = "#3B82F6"
+	}
+
+	stage := &pipeline.PipelineStage{
+		Name:        req.Name,
+		Code:        req.Code,
+		Order:       req.Order,
+		Color:       color,
+		IsActive:    req.IsActive,
+		IsWon:       req.IsWon,
+		IsLost:      req.IsLost,
+		Description: req.Description,
+	}
+
+	if err := s.pipelineRepo.CreateStage(stage); err != nil {
+		return nil, err
+	}
+
+	// Reload to get relations
+	stage, err = s.pipelineRepo.FindStageByID(stage.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return stage.ToPipelineStageResponse(), nil
+}
+
+// UpdateStage updates a pipeline stage
+func (s *Service) UpdateStage(id string, req *pipeline.UpdateStageRequest) (*pipeline.PipelineStageResponse, error) {
+	stage, err := s.pipelineRepo.FindStageByID(id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrPipelineStageNotFound
+		}
+		return nil, err
+	}
+
+	// Update fields if provided
+	if req.Name != "" {
+		stage.Name = req.Name
+	}
+	if req.Code != "" {
+		// Check if new code already exists (excluding current stage)
+		existing, err := s.pipelineRepo.FindStageByCode(req.Code)
+		if err == nil && existing != nil && existing.ID != id {
+			return nil, errors.New("pipeline stage with this code already exists")
+		}
+		stage.Code = req.Code
+	}
+	if req.Order != nil {
+		stage.Order = *req.Order
+	}
+	if req.Color != "" {
+		stage.Color = req.Color
+	}
+	if req.IsActive != nil {
+		stage.IsActive = *req.IsActive
+	}
+	if req.IsWon != nil {
+		stage.IsWon = *req.IsWon
+	}
+	if req.IsLost != nil {
+		stage.IsLost = *req.IsLost
+	}
+	if req.Description != "" {
+		stage.Description = req.Description
+	}
+
+	if err := s.pipelineRepo.UpdateStage(stage); err != nil {
+		return nil, err
+	}
+
+	// Reload to get relations
+	stage, err = s.pipelineRepo.FindStageByID(stage.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return stage.ToPipelineStageResponse(), nil
+}
+
+// DeleteStage deletes a pipeline stage
+func (s *Service) DeleteStage(id string) error {
+	stage, err := s.pipelineRepo.FindStageByID(id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return ErrPipelineStageNotFound
+		}
+		return err
+	}
+
+	// TODO: Check if stage is being used by any deals
+	// For now, we'll allow deletion
+
+	return s.pipelineRepo.DeleteStage(stage.ID)
+}
+
+// UpdateStagesOrder updates the order of multiple stages
+func (s *Service) UpdateStagesOrder(req *pipeline.UpdateStagesOrderRequest) ([]pipeline.PipelineStageResponse, error) {
+	// Update each stage's order
+	for _, item := range req.Stages {
+		stage, err := s.pipelineRepo.FindStageByID(item.ID)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, ErrPipelineStageNotFound
+			}
+			return nil, err
+		}
+
+		stage.Order = item.Order
+		if err := s.pipelineRepo.UpdateStage(stage); err != nil {
+			return nil, err
+		}
+	}
+
+	// Return updated list of stages
+	listReq := &pipeline.ListPipelineStagesRequest{}
+	stages, err := s.pipelineRepo.ListStages(listReq)
+	if err != nil {
+		return nil, err
+	}
+
+	responses := make([]pipeline.PipelineStageResponse, len(stages))
+	for i, stage := range stages {
+		responses[i] = *stage.ToPipelineStageResponse()
+	}
+
+	return responses, nil
+}
+
 // PaginationResult represents pagination information
 type PaginationResult struct {
 	Page       int

@@ -17,7 +17,6 @@ import (
 	"github.com/gilabs/crm-healthcare/api/internal/domain/product"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/reminder"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/role"
-	"github.com/gilabs/crm-healthcare/api/internal/domain/settings"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/task"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/user"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/visit_report"
@@ -88,7 +87,6 @@ func AutoMigrate() error {
 		&reminder.Reminder{},
 		&visit_report.VisitReport{},
 		&activity.Activity{},
-		&settings.Settings{},
 	)
 	if err != nil {
 		return fmt.Errorf("failed to run migrations: %w", err)

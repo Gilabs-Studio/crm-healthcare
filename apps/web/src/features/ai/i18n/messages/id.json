@@ -1,0 +1,11 @@
+{
+  "aiChatbot": {
+    "title": "AI Chatbot",
+    "description": "Chat dengan asisten AI untuk mendapatkan wawasan dan jawaban tentang data CRM Anda"
+  },
+  "aiSettings": {
+    "title": "Pengaturan AI",
+    "description": "Konfigurasi pengaturan asisten AI dan preferensi privasi data"
+  }
+}
+

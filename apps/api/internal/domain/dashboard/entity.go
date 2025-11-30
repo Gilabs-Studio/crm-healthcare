@@ -105,11 +105,14 @@ type DashboardTaskSummary struct {
 
 // DashboardPipelineStageSummary represents simplified stage stats for dashboard.
 type DashboardPipelineStageSummary struct {
-	StageID    string  `json:"stage_id"`
-	StageName  string  `json:"stage_name"`
-	StageCode  string  `json:"stage_code"`
-	DealCount  int64   `json:"deal_count"`
-	Percentage float64 `json:"percentage"`
+	StageID             string  `json:"stage_id"`
+	StageName           string  `json:"stage_name"`
+	StageCode           string  `json:"stage_code"`
+	StageColor          string  `json:"stage_color"`
+	DealCount           int64   `json:"deal_count"`
+	TotalValue          int64   `json:"total_value"`
+	TotalValueFormatted string  `json:"total_value_formatted"`
+	Percentage          float64 `json:"percentage"`
 }
 
 // VisitStatisticsResponse represents visit statistics
@@ -140,13 +143,13 @@ type DateStat struct {
 
 // PipelineSummaryResponse represents pipeline summary (placeholder for future)
 type PipelineSummaryResponse struct {
-	TotalDeals int64             `json:"total_deals"`
-	TotalValue int64             `json:"total_value"`
-	WonDeals   int64             `json:"won_deals"`
-	LostDeals  int64             `json:"lost_deals"`
-	OpenDeals  int64             `json:"open_deals"`
-	// ByStage keeps backward‑compatible simple aggregation by stage code/name.
-	ByStage map[string]int64 `json:"by_stage"`
+	TotalDeals int64                          `json:"total_deals"`
+	TotalValue int64                          `json:"total_value"`
+	WonDeals   int64                          `json:"won_deals"`
+	LostDeals  int64                          `json:"lost_deals"`
+	OpenDeals  int64                          `json:"open_deals"`
+	// ByStage contains all stages with their stats (including stages with 0 deals)
+	ByStage []DashboardPipelineStageSummary `json:"by_stage"`
 }
 
 // TopAccountResponse represents top account data

@@ -11,8 +11,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Info, TrendingUp, DollarSign, Target, AlertCircle } from "lucide-react";
+import { TrendingUp, DollarSign, Target, AlertCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { PipelineReport } from "../types";
 
@@ -34,18 +33,29 @@ const chartConfig = {
 export function SalesFunnelInsights({ data }: SalesFunnelInsightsProps) {
   const t = useTranslations("reportsFeature.salesFunnelInsights");
 
-  // Prepare chart data from by_stage
+  // Prepare chart data from by_stage and deals
   const stageChartData = React.useMemo(() => {
     if (!data.by_stage || Object.keys(data.by_stage).length === 0) {
       return [];
     }
 
+    // Calculate value per stage from deals
+    const stageValues: Record<string, number> = {};
+    if (data.deals) {
+      data.deals.forEach((deal) => {
+        const stageKey = deal.stage_code || deal.stage;
+        if (stageKey) {
+          stageValues[stageKey] = (stageValues[stageKey] || 0) + deal.value;
+        }
+      });
+    }
+
     return Object.entries(data.by_stage).map(([stage, count]) => ({
       stage: stage.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
       deals: count,
-      value: 0, // Placeholder - will be calculated when deal details are available
+      value: stageValues[stage] || 0,
     }));
-  }, [data.by_stage]);
+  }, [data.by_stage, data.deals]);
 
   // Calculate metrics
   const winRate = data.summary.total_deals > 0
@@ -66,35 +76,6 @@ export function SalesFunnelInsights({ data }: SalesFunnelInsightsProps) {
 
   return (
     <div className="space-y-6">
-      {/* Reminder Alert */}
-      <Alert>
-        <Info className="h-4 w-4" />
-        <AlertDescription>
-          <p className="text-sm">
-            <strong>{t("noteTitle")}</strong>{" "}
-            {t("noteIntro")}
-          </p>
-          <ul className="text-sm mt-2 list-disc list-inside space-y-1">
-            <li>
-              <strong>{t("noteDealValue").split(":")[0]}:</strong>{" "}
-              {t("noteDealValue").split(":")[1] ?? ""}
-            </li>
-            <li>
-              <strong>{t("noteConversion").split(":")[0]}:</strong>{" "}
-              {t("noteConversion").split(":")[1] ?? ""}
-            </li>
-            <li>
-              <strong>{t("noteTimeInStage").split(":")[0]}:</strong>{" "}
-              {t("noteTimeInStage").split(":")[1] ?? ""}
-            </li>
-            <li>
-              <strong>{t("noteForecastAccuracy").split(":")[0]}:</strong>{" "}
-              {t("noteForecastAccuracy").split(":")[1] ?? ""}
-            </li>
-          </ul>
-        </AlertDescription>
-      </Alert>
-
       {/* Key Metrics */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
@@ -156,6 +137,69 @@ export function SalesFunnelInsights({ data }: SalesFunnelInsightsProps) {
             <div className="text-2xl font-bold text-red-600">{data.summary.lost_deals}</div>
             <p className="text-xs text-muted-foreground">
               {t("metricLostDealsDetail")}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Additional Metrics */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Won Value
+            </CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatCurrency(data.summary.won_value || 0)}</div>
+            <p className="text-xs text-muted-foreground">
+              Total value of won deals
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Expected Revenue
+            </CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatCurrency(data.summary.expected_revenue || 0)}</div>
+            <p className="text-xs text-muted-foreground">
+              Total expected revenue
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Open Deals
+            </CardTitle>
+            <Target className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{data.summary.open_deals || 0}</div>
+            <p className="text-xs text-muted-foreground">
+              Currently open opportunities
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Open Value
+            </CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatCurrency(data.summary.open_value || 0)}</div>
+            <p className="text-xs text-muted-foreground">
+              Total value of open deals
             </p>
           </CardContent>
         </Card>

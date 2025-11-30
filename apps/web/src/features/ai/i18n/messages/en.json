@@ -1,0 +1,11 @@
+{
+  "aiChatbot": {
+    "title": "AI Chatbot",
+    "description": "Chat with AI assistant to get insights and answers about your CRM data"
+  },
+  "aiSettings": {
+    "title": "AI Settings",
+    "description": "Configure AI assistant settings and data privacy preferences"
+  }
+}
+

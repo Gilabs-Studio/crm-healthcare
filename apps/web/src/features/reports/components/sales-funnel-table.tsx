@@ -11,8 +11,6 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Info } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { PipelineReport } from "../types";
 
@@ -20,68 +18,13 @@ interface SalesFunnelTableProps {
   data: PipelineReport;
 }
 
-// Mock data structure - will be replaced when Deal API is available
-interface DealRow {
-  id: string;
-  company_name: string;
-  contact_name: string;
-  contact_email: string;
-  stage: string;
-  value: number;
-  probability: number;
-  expected_revenue: number;
-  creation_date: string;
-  expected_close_date: string;
-  team_member: string;
-  progress_to_won: number;
-  last_interacted_on: string;
-  next_step: string;
-  status: "available" | "placeholder";
-}
-
 export function SalesFunnelTable({ data }: SalesFunnelTableProps) {
   const t = useTranslations("reportsFeature.salesFunnelTable");
-  // Calculate expected revenue from summary (placeholder until deals API is available)
+  
+  // Use actual data from API
+  const deals = data.deals || [];
   const grandTotalValue = data.summary.total_value;
-  const grandTotalExpected = data.summary.total_value * 0.5; // Placeholder calculation
-
-  // Mock data - will be replaced with actual API call when Deal module is ready
-  const mockDeals: DealRow[] = [
-    {
-      id: "deal_1",
-      company_name: "Rumah Sakit Umum",
-      contact_name: "Dr. John Doe",
-      contact_email: "john@rsu.example.com",
-      stage: "Proposal",
-      value: 50000000,
-      probability: 75,
-      expected_revenue: 37500000,
-      creation_date: "2025-01-15",
-      expected_close_date: "2025-02-28",
-      team_member: "Sales Rep A",
-      progress_to_won: 75,
-      last_interacted_on: "2025-01-20",
-      next_step: "Follow-up proposal",
-      status: "placeholder",
-    },
-    {
-      id: "deal_2",
-      company_name: "Klinik Sehat",
-      contact_name: "Dr. Jane Smith",
-      contact_email: "jane@klinik.example.com",
-      stage: "Qualified",
-      value: 30000000,
-      probability: 50,
-      expected_revenue: 15000000,
-      creation_date: "2025-01-10",
-      expected_close_date: "2025-03-15",
-      team_member: "Sales Rep B",
-      progress_to_won: 50,
-      last_interacted_on: "2025-01-18",
-      next_step: "Schedule meeting",
-      status: "placeholder",
-    },
-  ];
+  const grandTotalExpected = data.summary.expected_revenue || 0;
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -114,31 +57,6 @@ export function SalesFunnelTable({ data }: SalesFunnelTableProps) {
 
   return (
     <div className="space-y-4">
-      {/* Reminder for missing data */}
-      <Alert>
-        <Info className="h-4 w-4" />
-        <AlertDescription>
-          <p className="text-sm">
-            <strong>{t("noteTitle")}</strong>{" "}
-            {t("noteIntro")}
-          </p>
-          <ul className="text-sm mt-2 list-disc list-inside space-y-1">
-            <li>
-              <strong>{t("noteEndpoint").split(":")[0]}:</strong>{" "}
-              {t("noteEndpoint").split(":")[1] ?? ""}
-            </li>
-            <li>
-              <strong>{t("noteFields").split(":")[0]}:</strong>{" "}
-              {t("noteFields").split(":")[1] ?? ""}
-            </li>
-            <li>
-              <strong>{t("noteProgress").split(":")[0]}:</strong>{" "}
-              {t("noteProgress").split(":")[1] ?? ""}
-            </li>
-          </ul>
-        </AlertDescription>
-      </Alert>
-
       <Card>
         <CardHeader>
           <CardTitle>{t("title")}</CardTitle>
@@ -180,28 +98,22 @@ export function SalesFunnelTable({ data }: SalesFunnelTableProps) {
                 </TableRow>
 
                 {/* Deal Rows */}
-                {mockDeals.map((deal) => (
-                  <TableRow key={deal.id} className={deal.status === "placeholder" ? "opacity-60" : ""}>
-                    <TableCell className="font-medium">{deal.company_name}</TableCell>
+                {deals.map((deal) => (
+                  <TableRow key={deal.id}>
+                    <TableCell className="font-medium">{deal.company_name || "-"}</TableCell>
+                    <TableCell>{deal.contact_name || "-"}</TableCell>
+                    <TableCell>{deal.contact_email || "-"}</TableCell>
                     <TableCell>
-                      <span className={deal.status === "placeholder" ? "underline" : ""}>
-                        {deal.contact_name}
-                      </span>
-                    </TableCell>
-                    <TableCell>{deal.contact_email}</TableCell>
-                    <TableCell>
-                      <Badge className={getStageColor(deal.stage)}>{deal.stage}</Badge>
+                      <Badge className={getStageColor(deal.stage)}>{deal.stage || "-"}</Badge>
                     </TableCell>
                     <TableCell className="text-right">{formatCurrency(deal.value)}</TableCell>
                     <TableCell className="text-right">{deal.probability}%</TableCell>
                     <TableCell className="text-right">{formatCurrency(deal.expected_revenue)}</TableCell>
                     <TableCell>{formatDate(deal.creation_date)}</TableCell>
                     <TableCell>
-                      <span className={deal.status === "placeholder" ? "text-red-600" : ""}>
-                        {formatDate(deal.expected_close_date)}
-                      </span>
+                      {deal.expected_close_date ? formatDate(deal.expected_close_date) : "-"}
                     </TableCell>
-                    <TableCell>{deal.team_member}</TableCell>
+                    <TableCell>{deal.team_member || "-"}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2 w-24">
                         <Progress value={deal.progress_to_won} className="flex-1" />
@@ -209,22 +121,14 @@ export function SalesFunnelTable({ data }: SalesFunnelTableProps) {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <span className={deal.status === "placeholder" ? "text-muted-foreground italic" : ""}>
-                        {deal.status === "placeholder"
-                          ? "N/A (Sprint 2)"
-                          : formatDate(deal.last_interacted_on)}
-                      </span>
+                      {deal.last_interacted_on ? formatDate(deal.last_interacted_on) : "-"}
                     </TableCell>
-                    <TableCell>
-                      <span className={deal.status === "placeholder" ? "text-muted-foreground italic" : ""}>
-                        {deal.status === "placeholder" ? "N/A (Sprint 2)" : deal.next_step}
-                      </span>
-                    </TableCell>
+                    <TableCell>{deal.next_step || "-"}</TableCell>
                   </TableRow>
                 ))}
 
                 {/* Empty state if no deals */}
-                {mockDeals.length === 0 && (
+                {deals.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={13} className="text-center py-8 text-muted-foreground">
                       {t("emptyDeals")}

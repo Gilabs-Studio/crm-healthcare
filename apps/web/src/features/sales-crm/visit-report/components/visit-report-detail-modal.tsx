@@ -26,6 +26,7 @@ import { useState } from "react";
 import { PhotoUploadDialog } from "./photo-upload-dialog";
 import { ActivityTimeline } from "./activity-timeline";
 import { CreateActivityDialog } from "./create-activity-dialog";
+import { VisitReportInsightsButton } from "@/features/ai/components/visit-report-insights-button";
 import { useTranslations } from "next-intl";
 
 const statusColors: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
@@ -269,6 +270,7 @@ export function VisitReportDetailModal({
                   </span>
                 </div>
                 <div className="flex gap-2">
+                  <VisitReportInsightsButton visitReportId={visitReport.id} />
                   {visitReport.status === "submitted" && (
                     <>
                       <Button

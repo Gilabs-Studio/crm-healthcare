@@ -23,7 +23,6 @@ func SeedPermissions() error {
 	var userPageMenu permission.Menu
 	var salesCRMMenu, accountsMenu, pipelineMenu, tasksMenu, productsMenu permission.Menu
 	var reportsMenu permission.Menu
-	var settingsMenu permission.Menu
 
 	// Base path harus sama dengan yang digunakan di menu_seeder (locale-agnostic).
 	basePath := ""
@@ -53,7 +52,6 @@ func SeedPermissions() error {
 	database.DB.Where("url = ?", basePath+"/tasks").First(&tasksMenu)
 	database.DB.Where("url = ?", basePath+"/products").First(&productsMenu)
 	database.DB.Where("url = ?", basePath+"/reports").First(&reportsMenu)
-	database.DB.Where("url = ?", basePath+"/settings").First(&settingsMenu)
 
 	// Define actions for each menu
 	actions := []struct {
@@ -95,6 +93,7 @@ func SeedPermissions() error {
 		{pipelineMenu.ID, "MOVE_DEALS", "Move Deals", "MOVE", &pipelineMenu},
 		{pipelineMenu.ID, "VIEW_SUMMARY", "View Summary", "SUMMARY", &pipelineMenu},
 		{pipelineMenu.ID, "VIEW_FORECAST", "View Forecast", "FORECAST", &pipelineMenu},
+		{pipelineMenu.ID, "STAGES", "Manage Pipeline Stages", "STAGES", &pipelineMenu},
 
 		// Task & Reminder actions
 		{tasksMenu.ID, "VIEW_TASKS", "View Tasks", "VIEW", &tasksMenu},
@@ -119,10 +118,6 @@ func SeedPermissions() error {
 		{reportsMenu.ID, "VIEW_REPORTS", "View Reports", "VIEW", &reportsMenu},
 		{reportsMenu.ID, "GENERATE_REPORTS", "Generate Reports", "CREATE", &reportsMenu},
 		{reportsMenu.ID, "EXPORT_REPORTS", "Export Reports", "EXPORT", &reportsMenu},
-
-		// Settings actions
-		{settingsMenu.ID, "VIEW_SETTINGS", "View Settings", "VIEW", &settingsMenu},
-		{settingsMenu.ID, "EDIT_SETTINGS", "Edit Settings", "EDIT", &settingsMenu},
 	}
 
 	// Create permissions

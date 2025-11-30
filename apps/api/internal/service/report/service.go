@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gilabs/crm-healthcare/api/internal/domain/activity"
+	pipelinedomain "github.com/gilabs/crm-healthcare/api/internal/domain/pipeline"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/report"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/visit_report"
 	"github.com/gilabs/crm-healthcare/api/internal/repository/interfaces"
@@ -18,6 +19,7 @@ type Service struct {
 	accountRepo     interfaces.AccountRepository
 	activityRepo    interfaces.ActivityRepository
 	userRepo        interfaces.UserRepository
+	dealRepo        interfaces.DealRepository
 }
 
 func NewService(
@@ -25,12 +27,14 @@ func NewService(
 	accountRepo interfaces.AccountRepository,
 	activityRepo interfaces.ActivityRepository,
 	userRepo interfaces.UserRepository,
+	dealRepo interfaces.DealRepository,
 ) *Service {
 	return &Service{
 		visitReportRepo: visitReportRepo,
 		accountRepo:     accountRepo,
 		activityRepo:    activityRepo,
 		userRepo:        userRepo,
+		dealRepo:        dealRepo,
 	}
 }
 
@@ -188,7 +192,7 @@ func (s *Service) GetVisitReportReport(req *report.ReportRequest) (*report.Visit
 	return response, nil
 }
 
-// GetPipelineReport returns pipeline report (placeholder for future)
+// GetPipelineReport returns pipeline report with deals data
 func (s *Service) GetPipelineReport(req *report.ReportRequest) (*report.PipelineReportResponse, error) {
 	var start, end time.Time
 	if req.StartDate != "" && req.EndDate != "" {
@@ -208,7 +212,145 @@ func (s *Service) GetPipelineReport(req *report.ReportRequest) (*report.Pipeline
 		start = end.AddDate(0, 0, -30)
 	}
 
-	// Placeholder implementation
+	// Get all deals (no date filter for now, as deals are not time-bound like visits)
+	deals, _, err := s.dealRepo.List(&pipelinedomain.ListDealsRequest{
+		Page:    1,
+		PerPage: 10000,
+	})
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, err
+	}
+
+	// Calculate summary
+	var totalDeals, wonDeals, lostDeals, openDeals int
+	var totalValue, wonValue, lostValue, openValue, expectedRevenue float64
+	byStage := make(map[string]int)
+
+	// Process deals
+	dealItems := make([]report.DealReportItem, 0, len(deals))
+	for _, deal := range deals {
+		// Convert value from int64 (sen) to float64 (rupiah)
+		dealValue := float64(deal.Value) / 100.0
+		expectedRev := dealValue * (float64(deal.Probability) / 100.0)
+
+		totalDeals++
+		totalValue += dealValue
+		expectedRevenue += expectedRev
+
+		// Count by status
+		switch deal.Status {
+		case "won":
+			wonDeals++
+			wonValue += dealValue
+		case "lost":
+			lostDeals++
+			lostValue += dealValue
+		case "open":
+			openDeals++
+			openValue += dealValue
+		}
+
+		// Count by stage
+		if deal.Stage != nil {
+			stageKey := deal.Stage.Code
+			if stageKey == "" {
+				stageKey = deal.Stage.Name
+			}
+			byStage[stageKey]++
+		}
+
+		// Get last interaction date from activities for this account
+		var lastInteractedOn *time.Time
+		if deal.AccountID != "" {
+			activities, _, err := s.activityRepo.List(&activity.ListActivitiesRequest{
+				AccountID: deal.AccountID,
+				Page:      1,
+				PerPage:   1, // Only need the latest one
+			})
+			if err == nil && len(activities) > 0 {
+				lastInteractedOn = &activities[0].Timestamp
+			}
+		}
+
+		// Calculate progress to won (based on stage order and probability)
+		progressToWon := 0
+		if deal.Stage != nil {
+			// If stage is won, progress is 100%
+			if deal.Stage.IsWon {
+				progressToWon = 100
+			} else if deal.Stage.IsLost {
+				progressToWon = 0
+			} else {
+				// Calculate based on stage order and probability
+				// Assuming stages are ordered 1-6, and we use probability as weight
+				stageProgress := (deal.Stage.Order * 10) // Each stage = 10% base
+				if stageProgress > 60 {
+					stageProgress = 60 // Cap at 60% for stage
+				}
+				probabilityWeight := deal.Probability / 2 // Probability contributes up to 50%
+				progressToWon = stageProgress + probabilityWeight
+				if progressToWon > 100 {
+					progressToWon = 100
+				}
+			}
+		}
+
+		// Extract next step from notes (simple extraction - can be enhanced)
+		nextStep := ""
+		if deal.Notes != "" {
+			// Try to extract next step from notes (simple heuristic)
+			// In future, this could be a dedicated field
+			nextStep = deal.Notes
+			if len(nextStep) > 100 {
+				nextStep = nextStep[:100] + "..."
+			}
+		}
+
+		// Get company name and contact info
+		companyName := ""
+		contactName := ""
+		contactEmail := ""
+		if deal.Account != nil {
+			companyName = deal.Account.Name
+		}
+		if deal.Contact != nil {
+			contactName = deal.Contact.Name
+			contactEmail = deal.Contact.Email
+		}
+
+		// Get team member name
+		teamMember := ""
+		if deal.AssignedUser != nil {
+			teamMember = deal.AssignedUser.Name
+		}
+
+		// Get stage name
+		stageName := ""
+		stageCode := ""
+		if deal.Stage != nil {
+			stageName = deal.Stage.Name
+			stageCode = deal.Stage.Code
+		}
+
+		dealItems = append(dealItems, report.DealReportItem{
+			ID:                deal.ID,
+			CompanyName:       companyName,
+			ContactName:       contactName,
+			ContactEmail:      contactEmail,
+			Stage:             stageName,
+			StageCode:         stageCode,
+			Value:             dealValue,
+			Probability:       deal.Probability,
+			ExpectedRevenue:   expectedRev,
+			CreationDate:      deal.CreatedAt,
+			ExpectedCloseDate: deal.ExpectedCloseDate,
+			TeamMember:        teamMember,
+			ProgressToWon:     progressToWon,
+			LastInteractedOn:  lastInteractedOn,
+			NextStep:          nextStep,
+		})
+	}
+
 	response := &report.PipelineReportResponse{
 		Period: struct {
 			Start time.Time `json:"start"`
@@ -218,17 +360,28 @@ func (s *Service) GetPipelineReport(req *report.ReportRequest) (*report.Pipeline
 			End:   end,
 		},
 		Summary: struct {
-			TotalDeals int     `json:"total_deals"`
-			TotalValue float64 `json:"total_value"`
-			WonDeals   int     `json:"won_deals"`
-			LostDeals  int     `json:"lost_deals"`
+			TotalDeals      int     `json:"total_deals"`
+			TotalValue      float64 `json:"total_value"`
+			WonDeals        int     `json:"won_deals"`
+			WonValue        float64 `json:"won_value"`
+			LostDeals       int     `json:"lost_deals"`
+			LostValue       float64 `json:"lost_value"`
+			OpenDeals       int     `json:"open_deals"`
+			OpenValue       float64 `json:"open_value"`
+			ExpectedRevenue float64 `json:"expected_revenue"`
 		}{
-			TotalDeals: 0,
-			TotalValue: 0,
-			WonDeals:   0,
-			LostDeals:  0,
+			TotalDeals:      totalDeals,
+			TotalValue:      totalValue,
+			WonDeals:        wonDeals,
+			WonValue:        wonValue,
+			LostDeals:       lostDeals,
+			LostValue:       lostValue,
+			OpenDeals:       openDeals,
+			OpenValue:       openValue,
+			ExpectedRevenue: expectedRevenue,
 		},
-		ByStage: make(map[string]int),
+		ByStage: byStage,
+		Deals:   dealItems,
 	}
 
 	return response, nil
@@ -1096,9 +1249,8 @@ func (s *Service) generatePipelineReportExcel(data *report.PipelineReportRespons
 	f.SetCellValue(sheet1Name, fmt.Sprintf("F%d", row), "")
 	f.SetCellStyle(sheet1Name, fmt.Sprintf("F%d", row), fmt.Sprintf("F%d", row), grandTotalStyle)
 	
-	// Expected Revenue (placeholder - will be calculated when deals are available)
-	expectedRevenue := data.Summary.TotalValue * 0.5 // Placeholder calculation
-	f.SetCellValue(sheet1Name, fmt.Sprintf("G%d", row), expectedRevenue)
+	// Expected Revenue
+	f.SetCellValue(sheet1Name, fmt.Sprintf("G%d", row), data.Summary.ExpectedRevenue)
 	f.SetCellStyle(sheet1Name, fmt.Sprintf("G%d", row), fmt.Sprintf("G%d", row), grandTotalNumberStyle)
 	
 	// Empty cells for remaining columns
@@ -1109,12 +1261,66 @@ func (s *Service) generatePipelineReportExcel(data *report.PipelineReportRespons
 	}
 	row++
 
-	// Note: Individual deal rows will be added when Deal API is available (Sprint 2)
-	// For now, we show a placeholder message
-	f.SetCellValue(sheet1Name, fmt.Sprintf("A%d", row), "Note: Individual deal data will be available after Sales Pipeline module is implemented (Sprint 2)")
-	f.SetCellStyle(sheet1Name, fmt.Sprintf("A%d", row), fmt.Sprintf("A%d", row), dataStyle)
-	f.MergeCell(sheet1Name, fmt.Sprintf("A%d", row), fmt.Sprintf("M%d", row))
-	row++
+	// Individual Deal Rows
+	for _, deal := range data.Deals {
+		// Company Name
+		f.SetCellValue(sheet1Name, fmt.Sprintf("A%d", row), deal.CompanyName)
+		f.SetCellStyle(sheet1Name, fmt.Sprintf("A%d", row), fmt.Sprintf("A%d", row), dataStyle)
+		
+		// Contact Name
+		f.SetCellValue(sheet1Name, fmt.Sprintf("B%d", row), deal.ContactName)
+		f.SetCellStyle(sheet1Name, fmt.Sprintf("B%d", row), fmt.Sprintf("B%d", row), dataStyle)
+		
+		// Contact Email
+		f.SetCellValue(sheet1Name, fmt.Sprintf("C%d", row), deal.ContactEmail)
+		f.SetCellStyle(sheet1Name, fmt.Sprintf("C%d", row), fmt.Sprintf("C%d", row), dataStyle)
+		
+		// Stage
+		f.SetCellValue(sheet1Name, fmt.Sprintf("D%d", row), deal.Stage)
+		f.SetCellStyle(sheet1Name, fmt.Sprintf("D%d", row), fmt.Sprintf("D%d", row), dataStyle)
+		
+		// Value
+		f.SetCellValue(sheet1Name, fmt.Sprintf("E%d", row), deal.Value)
+		f.SetCellStyle(sheet1Name, fmt.Sprintf("E%d", row), fmt.Sprintf("E%d", row), numberStyle)
+		
+		// Probability
+		f.SetCellValue(sheet1Name, fmt.Sprintf("F%d", row), deal.Probability)
+		f.SetCellStyle(sheet1Name, fmt.Sprintf("F%d", row), fmt.Sprintf("F%d", row), numberStyle)
+		
+		// Expected Revenue
+		f.SetCellValue(sheet1Name, fmt.Sprintf("G%d", row), deal.ExpectedRevenue)
+		f.SetCellStyle(sheet1Name, fmt.Sprintf("G%d", row), fmt.Sprintf("G%d", row), numberStyle)
+		
+		// Creation Date
+		f.SetCellValue(sheet1Name, fmt.Sprintf("H%d", row), deal.CreationDate.Format("02-Jan-2006"))
+		f.SetCellStyle(sheet1Name, fmt.Sprintf("H%d", row), fmt.Sprintf("H%d", row), dataStyle)
+		
+		// Expected Close Date
+		if deal.ExpectedCloseDate != nil {
+			f.SetCellValue(sheet1Name, fmt.Sprintf("I%d", row), deal.ExpectedCloseDate.Format("02-Jan-2006"))
+		}
+		f.SetCellStyle(sheet1Name, fmt.Sprintf("I%d", row), fmt.Sprintf("I%d", row), dataStyle)
+		
+		// Team Member
+		f.SetCellValue(sheet1Name, fmt.Sprintf("J%d", row), deal.TeamMember)
+		f.SetCellStyle(sheet1Name, fmt.Sprintf("J%d", row), fmt.Sprintf("J%d", row), dataStyle)
+		
+		// Progress to Won (as percentage)
+		f.SetCellValue(sheet1Name, fmt.Sprintf("K%d", row), fmt.Sprintf("%d%%", deal.ProgressToWon))
+		f.SetCellStyle(sheet1Name, fmt.Sprintf("K%d", row), fmt.Sprintf("K%d", row), numberStyle)
+		
+		// Last Interacted On
+		if deal.LastInteractedOn != nil {
+			f.SetCellValue(sheet1Name, fmt.Sprintf("L%d", row), deal.LastInteractedOn.Format("1/2/2006"))
+		}
+		f.SetCellStyle(sheet1Name, fmt.Sprintf("L%d", row), fmt.Sprintf("L%d", row), dataStyle)
+		
+		// Next Step
+		f.SetCellValue(sheet1Name, fmt.Sprintf("M%d", row), deal.NextStep)
+		f.SetCellStyle(sheet1Name, fmt.Sprintf("M%d", row), fmt.Sprintf("M%d", row), dataStyle)
+		
+		row++
+	}
 
 	// Auto-fit columns for Sales Funnel tab
 	for i := 0; i < 13; i++ {
@@ -1167,13 +1373,45 @@ func (s *Service) generatePipelineReportExcel(data *report.PipelineReportRespons
 	row++
 
 	// Calculate metrics
-	winRate := 0.0
-	if data.Summary.TotalDeals > 0 {
-		winRate = (float64(data.Summary.WonDeals) / float64(data.Summary.TotalDeals)) * 100
-	}
 	avgDealValue := 0.0
 	if data.Summary.TotalDeals > 0 {
 		avgDealValue = data.Summary.TotalValue / float64(data.Summary.TotalDeals)
+	}
+
+	// Calculate team metrics (group by team member)
+	teamStats := make(map[string]struct {
+		wonValue   float64
+		expectedValue float64
+		wonCount   int
+		totalCount int
+	})
+	for _, deal := range data.Deals {
+		if deal.TeamMember != "" {
+			stat := teamStats[deal.TeamMember]
+			stat.totalCount++
+			stat.expectedValue += deal.ExpectedRevenue
+			if deal.StageCode == "won" || strings.Contains(strings.ToLower(deal.Stage), "won") {
+				stat.wonCount++
+				stat.wonValue += deal.Value
+			}
+			teamStats[deal.TeamMember] = stat
+		}
+	}
+
+	// Find most sold rep
+	mostSoldRep := ""
+	maxWonValue := 0.0
+	for rep, stat := range teamStats {
+		if stat.wonValue > maxWonValue {
+			maxWonValue = stat.wonValue
+			mostSoldRep = rep
+		}
+	}
+
+	// Calculate team closing percentage
+	teamClosingPercent := 0.0
+	if data.Summary.TotalDeals > 0 {
+		teamClosingPercent = (float64(data.Summary.WonDeals) / float64(data.Summary.TotalDeals)) * 100
 	}
 
 	// Metrics Data
@@ -1181,26 +1419,203 @@ func (s *Service) generatePipelineReportExcel(data *report.PipelineReportRespons
 		label string
 		value interface{}
 	}{
-		{"Win Rate", fmt.Sprintf("%.1f%%", winRate)},
-		{"Average Deal Value", avgDealValue},
-		{"Total Pipeline Value", data.Summary.TotalValue},
-		{"Lost Deals", data.Summary.LostDeals},
+		{"Won", data.Summary.WonValue},
+		{"Expected", data.Summary.ExpectedRevenue},
+		{"Avg value", avgDealValue},
+		{"# won opportunities", data.Summary.WonDeals},
+		{"Most sold rep", mostSoldRep},
+		{"Team closing %", fmt.Sprintf("%.0f%%", teamClosingPercent)},
+		{"Total opportunities", data.Summary.TotalDeals},
 	}
 
 	for _, metric := range metrics {
 		f.SetCellValue(sheet2Name, fmt.Sprintf("A%d", row), metric.label)
 		f.SetCellStyle(sheet2Name, fmt.Sprintf("A%d", row), fmt.Sprintf("A%d", row), dataStyle)
 		
-		if metric.label == "Average Deal Value" || metric.label == "Total Pipeline Value" {
-			f.SetCellValue(sheet2Name, fmt.Sprintf("B%d", row), metric.value)
+		// Format value based on type
+		switch v := metric.value.(type) {
+		case float64:
+			if metric.label == "Won" || metric.label == "Expected" || metric.label == "Avg value" {
+				f.SetCellValue(sheet2Name, fmt.Sprintf("B%d", row), v)
+				f.SetCellStyle(sheet2Name, fmt.Sprintf("B%d", row), fmt.Sprintf("B%d", row), numberStyle)
+			} else {
+				f.SetCellValue(sheet2Name, fmt.Sprintf("B%d", row), v)
+				f.SetCellStyle(sheet2Name, fmt.Sprintf("B%d", row), fmt.Sprintf("B%d", row), numberStyle)
+			}
+		case int:
+			f.SetCellValue(sheet2Name, fmt.Sprintf("B%d", row), v)
 			f.SetCellStyle(sheet2Name, fmt.Sprintf("B%d", row), fmt.Sprintf("B%d", row), numberStyle)
-		} else {
+		case string:
+			f.SetCellValue(sheet2Name, fmt.Sprintf("B%d", row), v)
+			f.SetCellStyle(sheet2Name, fmt.Sprintf("B%d", row), fmt.Sprintf("B%d", row), dataStyle)
+		default:
 			f.SetCellValue(sheet2Name, fmt.Sprintf("B%d", row), metric.value)
 			f.SetCellStyle(sheet2Name, fmt.Sprintf("B%d", row), fmt.Sprintf("B%d", row), dataStyle)
 		}
 		row++
 	}
 	row += 2
+
+	// Target, Won, Expected by Team Member
+	if len(teamStats) > 0 {
+		f.SetCellValue(sheet2Name, fmt.Sprintf("A%d", row), "Target, Won, Expected by Team Member")
+		f.SetCellStyle(sheet2Name, fmt.Sprintf("A%d", row), fmt.Sprintf("A%d", row), subtitleStyle)
+		f.MergeCell(sheet2Name, fmt.Sprintf("A%d", row), fmt.Sprintf("D%d", row))
+		row++
+
+		// Headers
+		teamHeaders := []string{"Team Member", "Target", "Won", "Expected"}
+		for i, header := range teamHeaders {
+			cell := fmt.Sprintf("%c%d", 'A'+i, row)
+			f.SetCellValue(sheet2Name, cell, header)
+			f.SetCellStyle(sheet2Name, cell, cell, headerStyle)
+		}
+		row++
+
+		// Team Total Row
+		f.SetCellValue(sheet2Name, fmt.Sprintf("A%d", row), "Team (Total)")
+		f.SetCellStyle(sheet2Name, fmt.Sprintf("A%d", row), fmt.Sprintf("A%d", row), dataStyle)
+		// Target (placeholder - can be configured later)
+		f.SetCellValue(sheet2Name, fmt.Sprintf("B%d", row), 0)
+		f.SetCellStyle(sheet2Name, fmt.Sprintf("B%d", row), fmt.Sprintf("B%d", row), numberStyle)
+		f.SetCellValue(sheet2Name, fmt.Sprintf("C%d", row), data.Summary.WonValue)
+		f.SetCellStyle(sheet2Name, fmt.Sprintf("C%d", row), fmt.Sprintf("C%d", row), numberStyle)
+		f.SetCellValue(sheet2Name, fmt.Sprintf("D%d", row), data.Summary.ExpectedRevenue)
+		f.SetCellStyle(sheet2Name, fmt.Sprintf("D%d", row), fmt.Sprintf("D%d", row), numberStyle)
+		row++
+
+		// Individual team members
+		for rep, stat := range teamStats {
+			f.SetCellValue(sheet2Name, fmt.Sprintf("A%d", row), rep)
+			f.SetCellStyle(sheet2Name, fmt.Sprintf("A%d", row), fmt.Sprintf("A%d", row), dataStyle)
+			// Target (placeholder)
+			f.SetCellValue(sheet2Name, fmt.Sprintf("B%d", row), 0)
+			f.SetCellStyle(sheet2Name, fmt.Sprintf("B%d", row), fmt.Sprintf("B%d", row), numberStyle)
+			f.SetCellValue(sheet2Name, fmt.Sprintf("C%d", row), stat.wonValue)
+			f.SetCellStyle(sheet2Name, fmt.Sprintf("C%d", row), fmt.Sprintf("C%d", row), numberStyle)
+			f.SetCellValue(sheet2Name, fmt.Sprintf("D%d", row), stat.expectedValue)
+			f.SetCellStyle(sheet2Name, fmt.Sprintf("D%d", row), fmt.Sprintf("D%d", row), numberStyle)
+			row++
+		}
+		row += 2
+	}
+
+	// Earnings per Account
+	accountEarnings := make(map[string]float64)
+	for _, deal := range data.Deals {
+		if deal.CompanyName != "" {
+			accountEarnings[deal.CompanyName] += deal.Value
+		}
+	}
+	if len(accountEarnings) > 0 {
+		f.SetCellValue(sheet2Name, fmt.Sprintf("A%d", row), "Earnings per Account")
+		f.SetCellStyle(sheet2Name, fmt.Sprintf("A%d", row), fmt.Sprintf("A%d", row), subtitleStyle)
+		f.MergeCell(sheet2Name, fmt.Sprintf("A%d", row), fmt.Sprintf("B%d", row))
+		row++
+
+		// Headers
+		accountHeaders := []string{"Account", "Earnings"}
+		for i, header := range accountHeaders {
+			cell := fmt.Sprintf("%c%d", 'A'+i, row)
+			f.SetCellValue(sheet2Name, cell, header)
+			f.SetCellStyle(sheet2Name, cell, cell, headerStyle)
+		}
+		row++
+
+		// Data (sorted by earnings descending)
+		type accountEarning struct {
+			name     string
+			earnings float64
+		}
+		earningsList := make([]accountEarning, 0, len(accountEarnings))
+		for name, earnings := range accountEarnings {
+			earningsList = append(earningsList, accountEarning{name: name, earnings: earnings})
+		}
+		// Simple sort (bubble sort for small lists)
+		for i := 0; i < len(earningsList)-1; i++ {
+			for j := i + 1; j < len(earningsList); j++ {
+				if earningsList[i].earnings < earningsList[j].earnings {
+					earningsList[i], earningsList[j] = earningsList[j], earningsList[i]
+				}
+			}
+		}
+
+		for _, item := range earningsList {
+			f.SetCellValue(sheet2Name, fmt.Sprintf("A%d", row), item.name)
+			f.SetCellStyle(sheet2Name, fmt.Sprintf("A%d", row), fmt.Sprintf("A%d", row), dataStyle)
+			f.SetCellValue(sheet2Name, fmt.Sprintf("B%d", row), item.earnings)
+			f.SetCellStyle(sheet2Name, fmt.Sprintf("B%d", row), fmt.Sprintf("B%d", row), numberStyle)
+			row++
+		}
+		row += 2
+	}
+
+	// Closing % by Team Member
+	if len(teamStats) > 0 {
+		f.SetCellValue(sheet2Name, fmt.Sprintf("A%d", row), "Closing % by Team Member")
+		f.SetCellStyle(sheet2Name, fmt.Sprintf("A%d", row), fmt.Sprintf("A%d", row), subtitleStyle)
+		f.MergeCell(sheet2Name, fmt.Sprintf("A%d", row), fmt.Sprintf("B%d", row))
+		row++
+
+		// Headers
+		closingHeaders := []string{"Team Member", "Closing %"}
+		for i, header := range closingHeaders {
+			cell := fmt.Sprintf("%c%d", 'A'+i, row)
+			f.SetCellValue(sheet2Name, cell, header)
+			f.SetCellStyle(sheet2Name, cell, cell, headerStyle)
+		}
+		row++
+
+		// Team Total
+		f.SetCellValue(sheet2Name, fmt.Sprintf("A%d", row), "Team (Total)")
+		f.SetCellStyle(sheet2Name, fmt.Sprintf("A%d", row), fmt.Sprintf("A%d", row), dataStyle)
+		f.SetCellValue(sheet2Name, fmt.Sprintf("B%d", row), fmt.Sprintf("%.0f%%", teamClosingPercent))
+		f.SetCellStyle(sheet2Name, fmt.Sprintf("B%d", row), fmt.Sprintf("B%d", row), numberStyle)
+		row++
+
+		// Individual team members
+		for rep, stat := range teamStats {
+			closingPct := 0.0
+			if stat.totalCount > 0 {
+				closingPct = (float64(stat.wonCount) / float64(stat.totalCount)) * 100
+			}
+			f.SetCellValue(sheet2Name, fmt.Sprintf("A%d", row), rep)
+			f.SetCellStyle(sheet2Name, fmt.Sprintf("A%d", row), fmt.Sprintf("A%d", row), dataStyle)
+			f.SetCellValue(sheet2Name, fmt.Sprintf("B%d", row), fmt.Sprintf("%.0f%%", closingPct))
+			f.SetCellStyle(sheet2Name, fmt.Sprintf("B%d", row), fmt.Sprintf("B%d", row), numberStyle)
+			row++
+		}
+		row += 2
+	}
+
+	// Stage Conversion Metrics
+	if len(data.ByStage) > 0 {
+		f.SetCellValue(sheet2Name, fmt.Sprintf("A%d", row), "Stage Conversion Metrics")
+		f.SetCellStyle(sheet2Name, fmt.Sprintf("A%d", row), fmt.Sprintf("A%d", row), subtitleStyle)
+		f.MergeCell(sheet2Name, fmt.Sprintf("A%d", row), fmt.Sprintf("C%d", row))
+		row++
+
+		// Headers
+		stageConvHeaders := []string{"Stage", "# opportunities", "Conversion to next stage"}
+		for i, header := range stageConvHeaders {
+			cell := fmt.Sprintf("%c%d", 'A'+i, row)
+			f.SetCellValue(sheet2Name, cell, header)
+			f.SetCellStyle(sheet2Name, cell, cell, headerStyle)
+		}
+		row++
+
+		// Data (simplified - conversion calculation would need stage order)
+		for stage, count := range data.ByStage {
+			f.SetCellValue(sheet2Name, fmt.Sprintf("A%d", row), strings.ReplaceAll(stage, "_", " "))
+			f.SetCellStyle(sheet2Name, fmt.Sprintf("A%d", row), fmt.Sprintf("A%d", row), dataStyle)
+			f.SetCellValue(sheet2Name, fmt.Sprintf("B%d", row), count)
+			f.SetCellStyle(sheet2Name, fmt.Sprintf("B%d", row), fmt.Sprintf("B%d", row), numberStyle)
+			// Conversion % (placeholder - would need stage order to calculate properly)
+			f.SetCellValue(sheet2Name, fmt.Sprintf("C%d", row), "N/A")
+			f.SetCellStyle(sheet2Name, fmt.Sprintf("C%d", row), fmt.Sprintf("C%d", row), dataStyle)
+			row++
+		}
+	}
 
 	// Stage Breakdown Section
 	if len(data.ByStage) > 0 {

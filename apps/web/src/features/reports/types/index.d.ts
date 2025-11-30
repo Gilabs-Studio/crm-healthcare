@@ -40,9 +40,31 @@ export interface PipelineReport {
     total_deals: number;
     total_value: number;
     won_deals: number;
+    won_value: number;
     lost_deals: number;
+    lost_value: number;
+    open_deals: number;
+    open_value: number;
+    expected_revenue: number;
   };
   by_stage: Record<string, number>;
+  deals?: Array<{
+    id: string;
+    company_name: string;
+    contact_name: string;
+    contact_email: string;
+    stage: string;
+    stage_code: string;
+    value: number;
+    probability: number;
+    expected_revenue: number;
+    creation_date: string;
+    expected_close_date?: string;
+    team_member: string;
+    progress_to_won: number;
+    last_interacted_on?: string;
+    next_step?: string;
+  }>;
 }
 
 export interface SalesPerformanceReport {
