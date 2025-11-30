@@ -72,6 +72,10 @@ export function useAISettings() {
     updateMutation.mutate({ usage_limit: limit });
   };
 
+  const updateTimezone = (timezone: string) => {
+    updateMutation.mutate({ timezone });
+  };
+
   // Convert AISettingsResponse to AISettings format for backward compatibility
   const settings = settingsResponse
     ? {
@@ -80,6 +84,7 @@ export function useAISettings() {
         provider: settingsResponse.provider,
         model: settingsResponse.model,
         base_url: settingsResponse.base_url,
+        timezone: settingsResponse.timezone || "Asia/Jakarta",
         usage_limit: settingsResponse.usage_limit,
         current_usage: settingsResponse.current_usage,
       }
@@ -97,6 +102,7 @@ export function useAISettings() {
         provider: "cerebras",
         model: "llama-3.1-8b",
         base_url: undefined,
+        timezone: "Asia/Jakarta",
         usage_limit: undefined,
         current_usage: 0,
       };
@@ -110,6 +116,7 @@ export function useAISettings() {
     updateProvider,
     updateModel,
     updateAPIKey,
+    updateTimezone,
     updateUsageLimit,
     isUpdating: updateMutation.isPending,
     refetch: refetchSettings,

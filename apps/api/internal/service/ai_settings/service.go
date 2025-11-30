@@ -75,6 +75,9 @@ func (s *Service) UpdateSettings(req *ai_settings.UpdateAISettingsRequest) (*ai_
 		}
 		settings.DataPrivacy = privacyJSON
 	}
+	if req.Timezone != "" {
+		settings.Timezone = req.Timezone
+	}
 	if req.UsageLimit != nil {
 		settings.UsageLimit = req.UsageLimit
 	}

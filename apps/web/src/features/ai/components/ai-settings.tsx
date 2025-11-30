@@ -15,8 +15,24 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAISettings } from "../hooks/useAISettings";
-import { Loader2, Shield, Database, Key, Settings } from "lucide-react";
+import { Loader2, Shield, Database, Key, Settings, Clock } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+
+// Common timezones for selection
+const TIMEZONES = [
+  { value: "Asia/Jakarta", label: "Asia/Jakarta (GMT+7)" },
+  { value: "Asia/Singapore", label: "Asia/Singapore (GMT+8)" },
+  { value: "Asia/Bangkok", label: "Asia/Bangkok (GMT+7)" },
+  { value: "Asia/Manila", label: "Asia/Manila (GMT+8)" },
+  { value: "Asia/Kuala_Lumpur", label: "Asia/Kuala Lumpur (GMT+8)" },
+  { value: "UTC", label: "UTC (GMT+0)" },
+  { value: "America/New_York", label: "America/New York (GMT-5)" },
+  { value: "America/Los_Angeles", label: "America/Los Angeles (GMT-8)" },
+  { value: "Europe/London", label: "Europe/London (GMT+0)" },
+  { value: "Europe/Paris", label: "Europe/Paris (GMT+1)" },
+  { value: "Asia/Tokyo", label: "Asia/Tokyo (GMT+9)" },
+  { value: "Asia/Shanghai", label: "Asia/Shanghai (GMT+8)" },
+];
 
 export function AISettings() {
   const {
@@ -28,6 +44,7 @@ export function AISettings() {
     updateProvider,
     updateModel,
     updateAPIKey,
+    updateTimezone,
     updateUsageLimit,
     isUpdating,
   } = useAISettings();
@@ -174,6 +191,32 @@ export function AISettings() {
             </div>
             <p className="text-xs text-muted-foreground">
               Override the default API key from environment. Leave empty to use default.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="timezone" className="flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              Timezone
+            </Label>
+            <Select
+              value={settings.timezone || "Asia/Jakarta"}
+              onValueChange={updateTimezone}
+              disabled={isUpdating || !settings.enabled}
+            >
+              <SelectTrigger id="timezone">
+                <SelectValue placeholder="Select timezone" />
+              </SelectTrigger>
+              <SelectContent>
+                {TIMEZONES.map((tz) => (
+                  <SelectItem key={tz.value} value={tz.value}>
+                    {tz.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Select timezone for AI context. AI will use this timezone to provide time-aware responses and forecasts.
             </p>
           </div>
 

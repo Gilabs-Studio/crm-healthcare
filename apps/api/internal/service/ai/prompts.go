@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/gilabs/crm-healthcare/api/internal/domain/account"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/activity"
@@ -173,7 +174,7 @@ Provide your analysis now:`, context)
 }
 
 // BuildSystemPrompt builds system prompt for chatbot
-func BuildSystemPrompt(contextID string, contextType string, contextData string, dataAccessInfo string, model string, provider string) string {
+func BuildSystemPrompt(contextID string, contextType string, contextData string, dataAccessInfo string, model string, provider string, currentTime time.Time, timezone string) string {
 	basePrompt := `You are an expert AI assistant for a Pharmaceutical and Healthcare Sales CRM system. You specialize in helping pharmaceutical sales representatives, sales supervisors, and sales managers with their daily tasks and strategic decision-making.
 
 YOUR EXPERTISE INCLUDES:
@@ -283,6 +284,60 @@ IMPORTANT GUIDELINES:
 - REMEMBER: Markdown tables require pipes (|) and a separator row with dashes (|----------|)
 - NEVER use HTML, plain text formatting, or any other table format - ONLY standard Markdown table syntax`
 
+	// Format current time
+	dateStr := currentTime.Format("2006-01-02")
+	timeStr := currentTime.Format("15:04:05")
+	weekdayStr := currentTime.Weekday().String()
+	monthStr := currentTime.Month().String()
+	yearStr := fmt.Sprintf("%d", currentTime.Year())
+	
+	// Calculate days until major holidays/events (for Indonesia context)
+	now := currentTime
+	year := now.Year()
+	
+	// Christmas (December 25)
+	christmas := time.Date(year, 12, 25, 0, 0, 0, 0, currentTime.Location())
+	daysUntilChristmas := int(christmas.Sub(now).Hours() / 24)
+	
+	// New Year (January 1, next year)
+	newYear := time.Date(year+1, 1, 1, 0, 0, 0, 0, currentTime.Location())
+	daysUntilNewYear := int(newYear.Sub(now).Hours() / 24)
+	
+	// Calculate approximate Lebaran (Idul Fitri) - typically in April/May, varies by lunar calendar
+	// For 2025, approximate Lebaran is around March 30-April 1
+	lebaran2025 := time.Date(2025, 3, 30, 0, 0, 0, 0, currentTime.Location())
+	daysUntilLebaran := int(lebaran2025.Sub(now).Hours() / 24)
+	
+	// Build time context
+	timeContext := fmt.Sprintf("\n\nCURRENT DATE AND TIME:\n- Date: %s (%s)\n- Time: %s\n- Timezone: %s\n- Year: %s\n- Month: %s\n\nTIME HORIZON CONTEXT:\n", 
+		dateStr, weekdayStr, timeStr, timezone, yearStr, monthStr)
+	
+	// Add relevant upcoming events based on current date
+	if daysUntilChristmas >= 0 && daysUntilChristmas <= 60 {
+		timeContext += fmt.Sprintf("- Christmas is in %d days (December 25, %d)\n", daysUntilChristmas, year)
+	}
+	if daysUntilNewYear >= 0 && daysUntilNewYear <= 60 {
+		timeContext += fmt.Sprintf("- New Year is in %d days (January 1, %d)\n", daysUntilNewYear, year+1)
+	}
+	if daysUntilLebaran >= 0 && daysUntilLebaran <= 90 {
+		timeContext += fmt.Sprintf("- Lebaran (Idul Fitri) is approximately in %d days (around March 30-April 1, 2025)\n", daysUntilLebaran)
+	} else if daysUntilLebaran < 0 {
+		// Lebaran already passed, mention next year
+		lebaran2026 := time.Date(2026, 3, 20, 0, 0, 0, 0, currentTime.Location())
+		daysUntilLebaran2026 := int(lebaran2026.Sub(now).Hours() / 24)
+		if daysUntilLebaran2026 <= 180 {
+			timeContext += fmt.Sprintf("- Next Lebaran (Idul Fitri) is approximately in %d days (around March 20, 2026)\n", daysUntilLebaran2026)
+		}
+	}
+	
+	timeContext += "\nCRITICAL TIME-AWARE RESPONSE RULES:\n"
+	timeContext += "- You MUST use the current date and time provided above to give contextually appropriate responses\n"
+	timeContext += "- When discussing holidays, events, or seasonal topics, consider the time horizon (how far away events are)\n"
+	timeContext += "- If an event is far away (more than 2-3 months), do NOT mention it unless specifically asked\n"
+	timeContext += "- If user asks 'tanggal berapa sekarang' or 'what date is it', respond with the exact current date and time from above\n"
+	timeContext += "- For forecast predictions, use the current date as the baseline\n"
+	timeContext += "- Consider seasonal factors in pharmaceutical sales (e.g., flu season, holiday periods, etc.) based on current month\n"
+	
 	// Add model and provider information
 	modelInfo := fmt.Sprintf("\n\nCURRENT AI CONFIGURATION:\n- Provider: %s\n- Model: %s\n\nIMPORTANT: If the user asks about your model, provider, or AI configuration, you MUST inform them about the current configuration above. For example, if asked 'llm model anda sekarang apa' or 'what model are you using', respond with: 'Saya menggunakan model %s dari provider %s.'", provider, model, model, provider)
 	
@@ -313,9 +368,9 @@ CRITICAL: You have REAL data from the database above. You MUST:
    - Offer actionable recommendations or next steps (e.g., "Berdasarkan data ini, saya bisa membantu Anda dengan strategi penjualan atau analisis lebih lanjut")
    - Be conversational and engaging - don't just dump data and stop
 
-%s%s`, basePrompt, contextData, additionalInfo, modelInfo)
+%s%s%s`, basePrompt, contextData, additionalInfo, timeContext, modelInfo)
 		}
-		return basePrompt + modelInfo + "\n\nIMPORTANT: You do NOT have access to real data from the database. If the user asks about your model, provider, or AI configuration, you MUST inform them about the current configuration. If the user asks for data (accounts, contacts, deals, visit reports), you MUST inform them that you need specific context or that data is not available. NEVER create example data or sample data.\n\nYou can help with questions about:\n- Accounts (healthcare facilities) - but you need context ID\n- Contacts (doctors, pharmacists, procurement officers) - but you need context ID\n- Visit Reports (sales visits to healthcare facilities) - but you need context ID\n- Deals/Opportunities (sales pipeline) - but you need context ID\n- Tasks and follow-ups\n- Products and product positioning\n- Sales strategies and best practices\n\nHow can I assist you today?"
+		return basePrompt + timeContext + modelInfo + "\n\nIMPORTANT: You do NOT have access to real data from the database. If the user asks about your model, provider, or AI configuration, you MUST inform them about the current configuration. If the user asks for data (accounts, contacts, deals, visit reports), you MUST inform them that you need specific context or that data is not available. NEVER create example data or sample data.\n\nYou can help with questions about:\n- Accounts (healthcare facilities) - but you need context ID\n- Contacts (doctors, pharmacists, procurement officers) - but you need context ID\n- Visit Reports (sales visits to healthcare facilities) - but you need context ID\n- Deals/Opportunities (sales pipeline) - but you need context ID\n- Tasks and follow-ups\n- Products and product positioning\n- Sales strategies and best practices\n\nHow can I assist you today?"
 	}
 
 	if contextData != "" {
@@ -361,9 +416,9 @@ Use this context to provide relevant, accurate, and actionable answers. Referenc
 	}
 
 	if dataAccessInfo != "" {
-		return basePrompt + modelInfo + "\n\n" + dataAccessInfo + "\n\nYou can help with questions about:\n- Accounts (healthcare facilities)\n- Contacts (doctors, pharmacists, procurement officers)\n- Visit Reports (sales visits to healthcare facilities)\n- Deals/Opportunities (sales pipeline)\n- Tasks and follow-ups\n- Products and product positioning\n- Sales strategies and best practices\n\nHow can I assist you today?"
+		return basePrompt + timeContext + modelInfo + "\n\n" + dataAccessInfo + "\n\nYou can help with questions about:\n- Accounts (healthcare facilities)\n- Contacts (doctors, pharmacists, procurement officers)\n- Visit Reports (sales visits to healthcare facilities)\n- Deals/Opportunities (sales pipeline)\n- Tasks and follow-ups\n- Products and product positioning\n- Sales strategies and best practices\n\nHow can I assist you today?"
 	}
 
-	return basePrompt + modelInfo
+	return basePrompt + timeContext + modelInfo
 }
 

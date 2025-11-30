@@ -18,6 +18,7 @@ type AISettings struct {
 	Model       string         `gorm:"type:varchar(100);not null;default:'llama-3.1-8b'" json:"model"`
 	BaseURL     string         `gorm:"type:text" json:"base_url,omitempty"` // Optional custom base URL
 	DataPrivacy datatypes.JSON `gorm:"type:jsonb" json:"data_privacy"`      // JSON object with data privacy settings
+	Timezone    string         `gorm:"type:varchar(50);default:'Asia/Jakarta'" json:"timezone"` // Timezone for AI context (e.g., "Asia/Jakarta", "UTC", "America/New_York")
 	UsageLimit  *int64         `gorm:"type:bigint" json:"usage_limit,omitempty"` // Monthly usage limit (tokens or requests)
 	CurrentUsage int64         `gorm:"type:bigint;not null;default:0" json:"current_usage"` // Current month usage
 	UsageResetAt *time.Time    `gorm:"type:timestamp" json:"usage_reset_at,omitempty"` // When to reset usage counter
@@ -58,9 +59,10 @@ type AISettingsResponse struct {
 	Model        string               `json:"model"`
 	BaseURL      string               `json:"base_url,omitempty"`
 	DataPrivacy  DataPrivacySettings  `json:"data_privacy"`
-	UsageLimit   *int64               `json:"usage_limit,omitempty"`
-	CurrentUsage int64                `json:"current_usage"`
-	UsageResetAt *time.Time           `json:"usage_reset_at,omitempty"`
+	Timezone     string                `json:"timezone"`
+	UsageLimit   *int64                `json:"usage_limit,omitempty"`
+	CurrentUsage int64                 `json:"current_usage"`
+	UsageResetAt *time.Time            `json:"usage_reset_at,omitempty"`
 	CreatedAt    time.Time            `json:"created_at"`
 	UpdatedAt    time.Time            `json:"updated_at"`
 }
@@ -75,6 +77,11 @@ func (a *AISettings) ToAISettingsResponse() *AISettingsResponse {
 		}
 	}
 
+	timezone := a.Timezone
+	if timezone == "" {
+		timezone = "Asia/Jakarta" // Default to Jakarta timezone
+	}
+
 	return &AISettingsResponse{
 		ID:           a.ID,
 		Enabled:      a.Enabled,
@@ -82,6 +89,7 @@ func (a *AISettings) ToAISettingsResponse() *AISettingsResponse {
 		Model:        a.Model,
 		BaseURL:      a.BaseURL,
 		DataPrivacy:  dataPrivacy,
+		Timezone:     timezone,
 		UsageLimit:   a.UsageLimit,
 		CurrentUsage: a.CurrentUsage,
 		UsageResetAt: a.UsageResetAt,
@@ -98,6 +106,7 @@ type UpdateAISettingsRequest struct {
 	Model       string              `json:"model" binding:"omitempty"`
 	BaseURL     string              `json:"base_url" binding:"omitempty"`
 	DataPrivacy *DataPrivacySettings `json:"data_privacy" binding:"omitempty"`
+	Timezone    string              `json:"timezone" binding:"omitempty"` // Timezone string (e.g., "Asia/Jakarta", "UTC")
 	UsageLimit  *int64              `json:"usage_limit" binding:"omitempty,min=0"`
 }
 

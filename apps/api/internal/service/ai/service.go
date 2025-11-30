@@ -527,8 +527,23 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 		}
 	}
 
+	// Get current time in configured timezone
+	timezone := settings.Timezone
+	if timezone == "" {
+		timezone = "Asia/Jakarta" // Default to Jakarta timezone
+	}
+	
+	loc, err := time.LoadLocation(timezone)
+	if err != nil {
+		// If timezone is invalid, use UTC
+		loc = time.UTC
+		fmt.Printf("Warning: Invalid timezone '%s', using UTC instead\n", timezone)
+	}
+	
+	currentTime := time.Now().In(loc)
+	
 	// Build system prompt based on context
-	systemPrompt := BuildSystemPrompt(contextID, contextType, contextData, dataAccessInfo, selectedModel, settings.Provider)
+	systemPrompt := BuildSystemPrompt(contextID, contextType, contextData, dataAccessInfo, selectedModel, settings.Provider, currentTime, timezone)
 
 	// Logging untuk debugging
 	fmt.Printf("=== AI CHAT DEBUG ===\n")
