@@ -73,7 +73,7 @@ func (h *AIHandler) Chat(c *gin.Context) {
 		history = []ai.ChatMessage{}
 	}
 
-	chatResponse, err := h.aiService.Chat(req.Message, req.Context, req.ContextType, history)
+	chatResponse, err := h.aiService.Chat(req.Message, req.Context, req.ContextType, history, req.Model)
 	if err != nil {
 		// Check for specific errors
 		if err.Error() == "AI service not configured: Cerebras API key is empty" {

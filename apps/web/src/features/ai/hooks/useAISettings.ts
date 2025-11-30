@@ -1,67 +1,118 @@
-import { useState, useEffect } from "react";
-import type { AISettings } from "../types";
-
-const STORAGE_KEY = "ai_settings";
-
-const defaultSettings: AISettings = {
-  enabled: true,
-  data_privacy: {
-    allow_visit_reports: true,
-    allow_accounts: true,
-    allow_contacts: true,
-    allow_deals: true,
-    allow_activities: true,
-    allow_tasks: true,
-    allow_products: true,
-  },
-};
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { aiService } from "../services/aiService";
+import type { AISettingsResponse } from "../types";
 
 export function useAISettings() {
-  const [settings, setSettings] = useState<AISettings>(defaultSettings);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    // Load from localStorage
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        setSettings(JSON.parse(stored));
-      }
-    } catch (error) {
-      console.error("Failed to load AI settings:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  // Fetch settings
+  const {
+    data: settingsResponse,
+    isLoading,
+    error,
+    refetch: refetchSettings,
+  } = useQuery({
+    queryKey: ["ai-settings"],
+    queryFn: async () => {
+      const response = await aiService.getSettings();
+      return response.data;
+    },
+    // No auto-refresh - only refresh when explicitly invalidated
+  });
 
-  const updateSettings = (newSettings: Partial<AISettings>) => {
-    const updated = { ...settings, ...newSettings };
-    setSettings(updated);
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-    } catch (error) {
-      console.error("Failed to save AI settings:", error);
-    }
-  };
+  // Update settings mutation
+  const updateMutation = useMutation({
+    mutationFn: async (data: Partial<AISettingsResponse>) => {
+      return await aiService.updateSettings(data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["ai-settings"] });
+      toast.success("AI settings updated successfully");
+    },
+    onError: (error: unknown) => {
+      const message =
+        error instanceof Error ? error.message : "Failed to update settings";
+      toast.error(message);
+    },
+  });
 
   const updateDataPrivacy = (
-    key: keyof AISettings["data_privacy"],
+    key: keyof AISettingsResponse["data_privacy"],
     value: boolean
   ) => {
-    updateSettings({
+    if (!settingsResponse) return;
+    
+    updateMutation.mutate({
       data_privacy: {
-        ...settings.data_privacy,
+        ...settingsResponse.data_privacy,
         [key]: value,
       },
     });
   };
 
+  const toggleEnabled = () => {
+    if (!settingsResponse) return;
+    updateMutation.mutate({ enabled: !settingsResponse.enabled });
+  };
+
+  const updateProvider = (provider: string) => {
+    updateMutation.mutate({ provider });
+  };
+
+  const updateModel = (model: string) => {
+    updateMutation.mutate({ model });
+  };
+
+  const updateAPIKey = (apiKey: string) => {
+    updateMutation.mutate({ api_key: apiKey } as any);
+  };
+
+  const updateUsageLimit = (limit: number | undefined) => {
+    updateMutation.mutate({ usage_limit: limit });
+  };
+
+  // Convert AISettingsResponse to AISettings format for backward compatibility
+  const settings = settingsResponse
+    ? {
+        enabled: settingsResponse.enabled,
+        data_privacy: settingsResponse.data_privacy,
+        provider: settingsResponse.provider,
+        model: settingsResponse.model,
+        base_url: settingsResponse.base_url,
+        usage_limit: settingsResponse.usage_limit,
+        current_usage: settingsResponse.current_usage,
+      }
+    : {
+        enabled: true,
+        data_privacy: {
+          allow_visit_reports: true,
+          allow_accounts: true,
+          allow_contacts: true,
+          allow_deals: true,
+          allow_activities: true,
+          allow_tasks: true,
+          allow_products: true,
+        },
+        provider: "cerebras",
+        model: "llama-3.1-8b",
+        base_url: undefined,
+        usage_limit: undefined,
+        current_usage: 0,
+      };
+
   return {
     settings,
     isLoading,
-    updateSettings,
+    error,
     updateDataPrivacy,
-    toggleEnabled: () => updateSettings({ enabled: !settings.enabled }),
+    toggleEnabled,
+    updateProvider,
+    updateModel,
+    updateAPIKey,
+    updateUsageLimit,
+    isUpdating: updateMutation.isPending,
+    refetch: refetchSettings,
   };
 }
 

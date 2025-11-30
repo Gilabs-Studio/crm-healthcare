@@ -173,7 +173,7 @@ Provide your analysis now:`, context)
 }
 
 // BuildSystemPrompt builds system prompt for chatbot
-func BuildSystemPrompt(contextID string, contextType string, contextData string, dataAccessInfo string) string {
+func BuildSystemPrompt(contextID string, contextType string, contextData string, dataAccessInfo string, model string, provider string) string {
 	basePrompt := `You are an expert AI assistant for a Pharmaceutical and Healthcare Sales CRM system. You specialize in helping pharmaceutical sales representatives, sales supervisors, and sales managers with their daily tasks and strategic decision-making.
 
 YOUR EXPERTISE INCLUDES:
@@ -283,6 +283,9 @@ IMPORTANT GUIDELINES:
 - REMEMBER: Markdown tables require pipes (|) and a separator row with dashes (|----------|)
 - NEVER use HTML, plain text formatting, or any other table format - ONLY standard Markdown table syntax`
 
+	// Add model and provider information
+	modelInfo := fmt.Sprintf("\n\nCURRENT AI CONFIGURATION:\n- Provider: %s\n- Model: %s\n\nIMPORTANT: If the user asks about your model, provider, or AI configuration, you MUST inform them about the current configuration above. For example, if asked 'llm model anda sekarang apa' or 'what model are you using', respond with: 'Saya menggunakan model %s dari provider %s.'", provider, model, model, provider)
+	
 	// Prepare additional info if available
 	var additionalInfo string
 	if dataAccessInfo != "" {
@@ -310,9 +313,9 @@ CRITICAL: You have REAL data from the database above. You MUST:
    - Offer actionable recommendations or next steps (e.g., "Berdasarkan data ini, saya bisa membantu Anda dengan strategi penjualan atau analisis lebih lanjut")
    - Be conversational and engaging - don't just dump data and stop
 
-%s`, basePrompt, contextData, additionalInfo)
+%s%s`, basePrompt, contextData, additionalInfo, modelInfo)
 		}
-		return basePrompt + "\n\nIMPORTANT: You do NOT have access to real data from the database. If the user asks for data (accounts, contacts, deals, visit reports), you MUST inform them that you need specific context or that data is not available. NEVER create example data or sample data.\n\nYou can help with questions about:\n- Accounts (healthcare facilities) - but you need context ID\n- Contacts (doctors, pharmacists, procurement officers) - but you need context ID\n- Visit Reports (sales visits to healthcare facilities) - but you need context ID\n- Deals/Opportunities (sales pipeline) - but you need context ID\n- Tasks and follow-ups\n- Products and product positioning\n- Sales strategies and best practices\n\nHow can I assist you today?"
+		return basePrompt + modelInfo + "\n\nIMPORTANT: You do NOT have access to real data from the database. If the user asks about your model, provider, or AI configuration, you MUST inform them about the current configuration. If the user asks for data (accounts, contacts, deals, visit reports), you MUST inform them that you need specific context or that data is not available. NEVER create example data or sample data.\n\nYou can help with questions about:\n- Accounts (healthcare facilities) - but you need context ID\n- Contacts (doctors, pharmacists, procurement officers) - but you need context ID\n- Visit Reports (sales visits to healthcare facilities) - but you need context ID\n- Deals/Opportunities (sales pipeline) - but you need context ID\n- Tasks and follow-ups\n- Products and product positioning\n- Sales strategies and best practices\n\nHow can I assist you today?"
 	}
 
 	if contextData != "" {
@@ -354,13 +357,13 @@ IMPORTANT: When presenting data:
    
    Saya melihat ada 8 akun dengan berbagai kategori - rumah sakit, klinik, dan apotek. Apakah ada akun tertentu yang ingin Anda ketahui lebih detail? Saya juga bisa membantu menganalisis pola atau memberikan rekomendasi strategi penjualan berdasarkan data ini."
 
-Use this context to provide relevant, accurate, and actionable answers. Reference specific details from the context when appropriate. Consider pharmaceutical sales best practices and healthcare industry standards in your responses.%s`, basePrompt, contextLabel, contextID, contextData, additionalInfo)
+Use this context to provide relevant, accurate, and actionable answers. Reference specific details from the context when appropriate. Consider pharmaceutical sales best practices and healthcare industry standards in your responses.%s%s`, basePrompt, contextLabel, contextID, contextData, additionalInfo, modelInfo)
 	}
 
 	if dataAccessInfo != "" {
-		return basePrompt + "\n\n" + dataAccessInfo + "\n\nYou can help with questions about:\n- Accounts (healthcare facilities)\n- Contacts (doctors, pharmacists, procurement officers)\n- Visit Reports (sales visits to healthcare facilities)\n- Deals/Opportunities (sales pipeline)\n- Tasks and follow-ups\n- Products and product positioning\n- Sales strategies and best practices\n\nHow can I assist you today?"
+		return basePrompt + modelInfo + "\n\n" + dataAccessInfo + "\n\nYou can help with questions about:\n- Accounts (healthcare facilities)\n- Contacts (doctors, pharmacists, procurement officers)\n- Visit Reports (sales visits to healthcare facilities)\n- Deals/Opportunities (sales pipeline)\n- Tasks and follow-ups\n- Products and product positioning\n- Sales strategies and best practices\n\nHow can I assist you today?"
 	}
 
-	return basePrompt
+	return basePrompt + modelInfo
 }
 

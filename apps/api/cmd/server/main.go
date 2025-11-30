@@ -25,10 +25,12 @@ import (
 	rolerepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/role"
 	taskrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/task"
 	userrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/user"
-	visitreportrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/visit_report"
+	visitreportrepo 	"github.com/gilabs/crm-healthcare/api/internal/repository/postgres/visit_report"
+	aisettingsrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/ai_settings"
 	accountservice "github.com/gilabs/crm-healthcare/api/internal/service/account"
 	activityservice "github.com/gilabs/crm-healthcare/api/internal/service/activity"
 	aiservice "github.com/gilabs/crm-healthcare/api/internal/service/ai"
+	aisettingsservice "github.com/gilabs/crm-healthcare/api/internal/service/ai_settings"
 	authservice "github.com/gilabs/crm-healthcare/api/internal/service/auth"
 	categoryservice "github.com/gilabs/crm-healthcare/api/internal/service/category"
 	contactservice "github.com/gilabs/crm-healthcare/api/internal/service/contact"
@@ -99,6 +101,7 @@ func main() {
 	productRepo := productrepo.NewRepository(database.DB)
 	taskRepo := taskrepo.NewRepository(database.DB)
 	reminderRepo := reminderrepo.NewRepository(database.DB)
+	aiSettingsRepo := aisettingsrepo.NewRepository(database.DB)
 
 	// Setup services
 	authService := authservice.NewService(authRepo, jwtManager)
@@ -124,6 +127,9 @@ func main() {
 		config.AppConfig.Cerebras.Model,
 	)
 
+	// Setup AI Settings Service
+	aiSettingsService := aisettingsservice.NewService(aiSettingsRepo)
+
 	// Setup AI Service
 	aiService := aiservice.NewService(
 		cerebrasClient,
@@ -132,6 +138,7 @@ func main() {
 		contactRepo,
 		dealRepo,
 		activityRepo,
+		aiSettingsRepo,
 		config.AppConfig.Cerebras.APIKey,
 	)
 
@@ -153,6 +160,7 @@ func main() {
 	productHandler := handlers.NewProductHandler(productService)
 	taskHandler := handlers.NewTaskHandler(taskService)
 	aiHandler := handlers.NewAIHandler(aiService)
+	aiSettingsHandler := handlers.NewAISettingsHandler(aiSettingsService)
 
 	// Setup router
 	router := setupRouter(
@@ -174,6 +182,7 @@ func main() {
 		productHandler,
 		taskHandler,
 		aiHandler,
+		aiSettingsHandler,
 	)
 
 	// Run server
@@ -203,6 +212,7 @@ func setupRouter(
 	productHandler *handlers.ProductHandler,
 	taskHandler *handlers.TaskHandler,
 	aiHandler *handlers.AIHandler,
+	aiSettingsHandler *handlers.AISettingsHandler,
 ) *gin.Engine {
 	// Set Gin mode
 	if config.AppConfig.Server.Env == "production" {
@@ -289,7 +299,7 @@ func setupRouter(
 		routes.SetupTaskRoutes(v1, taskHandler, jwtManager)
 
 		// AI routes
-		routes.SetupAIRoutes(v1, aiHandler, jwtManager)
+		routes.SetupAIRoutes(v1, aiHandler, aiSettingsHandler, jwtManager)
 	}
 
 	return router

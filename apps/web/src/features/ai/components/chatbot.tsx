@@ -1,12 +1,19 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Loader2, Copy, Check } from "lucide-react";
+import { Send, Loader2, Copy, Check, Settings } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Components } from "react-markdown";
 import { useChat } from "../hooks/useChat";
 import { useAISettings } from "../hooks/useAISettings";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Message {
   id: string;
@@ -25,15 +32,15 @@ export function Chatbot() {
     },
   ]);
   const [input, setInput] = useState("");
-  const [contextId, setContextId] = useState<string>("");
-  const [contextType, setContextType] = useState<
-    "visit_report" | "deal" | "contact" | "account" | undefined
-  >(undefined);
   const [copied, setCopied] = useState(false);
   const { mutate: sendMessage, isPending } = useChat();
   const { settings } = useAISettings();
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  
+  // Use settings.model as default, but allow user to override via Select
+  const [userSelectedModel, setUserSelectedModel] = useState<string | null>(null);
+  const selectedModel = userSelectedModel || settings.model || "llama-3.1-8b";
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -70,12 +77,21 @@ export function Chatbot() {
         content: msg.content,
       }));
 
+    const modelToUse = selectedModel || settings.model || undefined;
+    
+    // Log model being sent
+    console.log("=== AI REQUEST DEBUG ===");
+    console.log("Selected model from UI:", selectedModel);
+    console.log("Model from settings:", settings.model);
+    console.log("Model being sent:", modelToUse);
+    console.log("User message:", currentInput);
+    console.log("=========================");
+
     sendMessage(
       {
         message: currentInput,
-        context: contextId || undefined,
-        context_type: contextType,
         conversation_history: conversationHistory.length > 0 ? conversationHistory : undefined,
+        model: modelToUse,
       },
       {
         onSuccess: (response) => {
@@ -86,6 +102,7 @@ export function Chatbot() {
           console.log("Message length:", response.data.message.length);
           console.log("Contains table markdown:", response.data.message.includes("|"));
           console.log("Raw message preview:", response.data.message.substring(0, 500));
+          console.log("Tokens used:", response.data.tokens);
           console.log("=========================");
 
           const assistantMessage: Message = {
@@ -95,6 +112,7 @@ export function Chatbot() {
             timestamp: new Date(),
           };
           setMessages((prev) => [...prev, assistantMessage]);
+          
         },
         onError: (error) => {
           console.error("=== AI ERROR DEBUG ===");
@@ -118,6 +136,19 @@ export function Chatbot() {
       e.preventDefault();
       handleSend();
     }
+  };
+
+  const handleCopyChat = () => {
+    const chatText = messages
+      .map((msg) => {
+        const role = msg.role === "user" ? "User" : "Assistant";
+        return `${role}: ${msg.content}`;
+      })
+      .join("\n\n");
+    navigator.clipboard.writeText(chatText).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
   };
 
   // Custom components for markdown rendering with explicit table styling
@@ -146,17 +177,17 @@ export function Chatbot() {
     ),
     // Lists
     ul: ({ children, ...props }) => (
-      <ul className="list-disc list-inside space-y-1 my-2 ml-4" {...props}>
+      <ul className="list-disc list-outside space-y-1.5 my-3 ml-6" {...props}>
         {children}
       </ul>
     ),
     ol: ({ children, ...props }) => (
-      <ol className="list-decimal list-inside space-y-1 my-2 ml-4" {...props}>
+      <ol className="list-decimal list-outside space-y-1.5 my-3 ml-6" {...props}>
         {children}
       </ol>
     ),
     li: ({ children, ...props }) => (
-      <li className="text-sm leading-relaxed" {...props}>
+      <li className="text-sm leading-relaxed pl-1" {...props}>
         {children}
       </li>
     ),
@@ -279,36 +310,52 @@ export function Chatbot() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-16rem)] max-h-[800px] bg-background border rounded-lg overflow-hidden">
-      {/* Header with Copy Button */}
-      <div className="border-b bg-background px-4 py-2 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">AI Assistant</h2>
-        <button
-          onClick={() => {
-            const chatText = messages
-              .map((msg) => {
-                const role = msg.role === "user" ? "User" : "Assistant";
-                return `${role}: ${msg.content}`;
-              })
-              .join("\n\n");
-            navigator.clipboard.writeText(chatText);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
-          }}
-          className="flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
-          title="Copy all chat"
-        >
-          {copied ? (
-            <>
-              <Check className="h-4 w-4" />
-              <span>Copied!</span>
-            </>
-          ) : (
-            <>
-              <Copy className="h-4 w-4" />
-              <span>Copy Chat</span>
-            </>
-          )}
-        </button>
+      {/* Header with Model Selector, Usage Stats, and Copy Button */}
+      <div className="border-b bg-background">
+        <div className="px-4 py-2 flex items-center justify-between">
+          <h2 className="text-lg font-semibold">AI Assistant</h2>
+          <div className="flex items-center gap-2">
+            {/* Model Selector */}
+            <Select
+              value={selectedModel || settings.model || ""}
+              onValueChange={setUserSelectedModel}
+              disabled={isPending}
+            >
+              <SelectTrigger className="w-[180px] h-8 text-xs">
+                <Settings className="h-3 w-3 mr-2" />
+                <SelectValue placeholder="Select model" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="llama-3.1-8b">Llama 3.1 8B</SelectItem>
+                <SelectItem value="llama-3.1-70b">Llama 3.1 70B</SelectItem>
+                <SelectItem value="llama-3-8b">Llama 3 8B</SelectItem>
+                <SelectItem value="llama-3-70b">Llama 3 70B</SelectItem>
+                <SelectItem value="gpt-4">GPT-4</SelectItem>
+                <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            {/* Copy Button */}
+            <button
+              onClick={handleCopyChat}
+              className="flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
+              title="Copy all chat"
+              disabled={copied}
+            >
+              {copied ? (
+                <>
+                  <Check className="h-4 w-4 text-green-500" />
+                  <span>Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="h-4 w-4" />
+                  <span>Copy</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Messages Area */}

@@ -92,6 +92,7 @@ type ChatRequest struct {
 	Context         string        `json:"context,omitempty"` // Optional context (visit_report_id, deal_id, etc.)
 	ContextType     string        `json:"context_type,omitempty"` // visit_report, deal, contact, account
 	ConversationHistory []ChatMessage `json:"conversation_history,omitempty"` // Previous messages in the conversation
+	Model           string        `json:"model,omitempty"` // Optional model override
 }
 
 // ChatResponse represents chat response

@@ -4,6 +4,7 @@ import type {
   AnalyzeVisitReportResponse,
   ChatRequest,
   ChatAPIResponse,
+  AISettingsResponse,
 } from "../types";
 
 export const aiService = {
@@ -21,5 +22,23 @@ export const aiService = {
     const response = await apiClient.post<ChatAPIResponse>("/ai/chat", data);
     return response.data;
   },
+
+  async getSettings(): Promise<{ success: boolean; data: AISettingsResponse }> {
+    const response = await apiClient.get<{ success: boolean; data: AISettingsResponse }>(
+      "/ai/settings"
+    );
+    return response.data;
+  },
+
+  async updateSettings(
+    data: Partial<AISettingsResponse>
+  ): Promise<{ success: boolean; data: AISettingsResponse }> {
+    const response = await apiClient.put<{ success: boolean; data: AISettingsResponse }>(
+      "/ai/settings",
+      data
+    );
+    return response.data;
+  },
+
 };
 

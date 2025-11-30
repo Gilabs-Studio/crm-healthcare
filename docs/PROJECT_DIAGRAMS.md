@@ -73,17 +73,27 @@ graph LR
         REPORTS[Reports]
     end
     
+    subgraph "AI Assistant"
+        AI[AI Assistant<br/>& Chatbot]
+        AI_SETTINGS[AI Settings<br/>& Privacy]
+    end
+    
     AUTH --> ACCOUNT
     AUTH --> VISIT
     AUTH --> PIPELINE
+    AUTH --> AI
     USER --> ACCOUNT
     ACCOUNT --> VISIT
     ACCOUNT --> PIPELINE
     ACCOUNT --> TASK
+    ACCOUNT --> AI
     VISIT --> DASHBOARD
+    VISIT --> AI
     PIPELINE --> DASHBOARD
+    PIPELINE --> AI
     TASK --> DASHBOARD
     DASHBOARD --> REPORTS
+    AI --> AI_SETTINGS
     
     style AUTH fill:#ef4444
     style ACCOUNT fill:#3b82f6
@@ -143,6 +153,12 @@ mindmap
       Sales Reports
       Performance Reports
       Export Excel
+    AI Assistant
+      Chatbot
+      Visit Report Analysis
+      Data Insights
+      Settings & Privacy
+      Usage Tracking
 ```
 
 ### Feature Matrix by Platform & Role
@@ -589,6 +605,7 @@ graph TB
         TASK_API[Task API]
         PRODUCT_API[Product API]
         DASHBOARD_API[Dashboard API]
+        AI_API[AI API]
     end
     
     subgraph "Business Logic Layer"
@@ -600,6 +617,8 @@ graph TB
         TASK_SVC[Task Service]
         PRODUCT_SVC[Product Service]
         DASHBOARD_SVC[Dashboard Service]
+        AI_SVC[AI Service]
+        AI_SETTINGS_SVC[AI Settings Service]
     end
     
     subgraph "Data Layer"
@@ -618,6 +637,7 @@ graph TB
     API_GATEWAY --> TASK_API
     API_GATEWAY --> PRODUCT_API
     API_GATEWAY --> DASHBOARD_API
+    API_GATEWAY --> AI_API
     
     AUTH_API --> AUTH_SVC
     USER_API --> USER_SVC
@@ -627,6 +647,8 @@ graph TB
     TASK_API --> TASK_SVC
     PRODUCT_API --> PRODUCT_SVC
     DASHBOARD_API --> DASHBOARD_SVC
+    AI_API --> AI_SVC
+    AI_API --> AI_SETTINGS_SVC
     
     AUTH_SVC --> DB
     USER_SVC --> DB
@@ -637,6 +659,9 @@ graph TB
     TASK_SVC --> DB
     PRODUCT_SVC --> DB
     DASHBOARD_SVC --> DB
+    AI_SVC --> DB
+    AI_SETTINGS_SVC --> DB
+    AI_SVC --> AI_SETTINGS_SVC
     
     style WEB_APP fill:#3b82f6
     style MOBILE_APP fill:#10b981
@@ -729,6 +754,8 @@ sequenceDiagram
   - Visit Report Creation UI
   - Sales Pipeline View (Own Deals)
   - Own Reports View
+  - AI Chatbot UI
+  - AI Settings UI
 
 ### Developer 2: Backend Developer
 
@@ -745,6 +772,8 @@ sequenceDiagram
 - Database Models & Migrations
 - Authentication Service
 - File Storage Service
+- AI Service (Cerebras/OpenAI/Anthropic)
+- AI Settings & Privacy Management
 - Data Validation
 - Error Handling
 
@@ -765,6 +794,7 @@ sequenceDiagram
 - Dashboard (Basic)
 - Check-in/Check-out
 - Photo Upload
+- AI Chatbot (Future - if backend supports)
 
 ---
 
@@ -781,6 +811,7 @@ sequenceDiagram
 | Sales Pipeline | 🟡 Medium | ✅ | ✅ | ❌ |
 | Task & Reminder | 🟡 Medium | ✅ | ✅ | ✅ |
 | Dashboard | 🟡 Medium | ✅ | ✅ | ✅ |
+| AI Assistant | 🟡 Medium | ✅ | ✅ | ❌ |
 | Product Management | 🟢 Low | ✅ | ✅ | ❌ |
 
 ### Legend
@@ -795,7 +826,7 @@ sequenceDiagram
 ### Project Scope
 - **Platform**: Web (Next.js 16) + Mobile (Flutter) + Backend (Go)
 - **Users**: Sales Rep, Supervisor, Admin
-- **Core Features**: 8 modules (Auth, Users, Accounts, Visits, Pipeline, Tasks, Products, Dashboard)
+- **Core Features**: 9 modules (Auth, Users, Accounts, Visits, Pipeline, Tasks, Products, Dashboard, AI Assistant)
 
 ### Key User Flows
 
