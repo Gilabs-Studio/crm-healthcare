@@ -36,6 +36,12 @@ func SeedRoles() error {
 			Description: "Pharmacist role for pharmacy operations",
 			Status:      "active",
 		},
+		{
+			Name:        "Viewer",
+			Code:        "viewer",
+			Description: "Viewer role with read-only access",
+			Status:      "active",
+		},
 	}
 
 	for _, r := range roles {

@@ -20,7 +20,15 @@ func NewAISettingsHandler(settingsService *aisettingsservice.Service) *AISetting
 }
 
 // GetSettings handles get AI settings request
+// AI Settings is universal and only accessible by admin
 func (h *AISettingsHandler) GetSettings(c *gin.Context) {
+	// Check if user is admin
+	userRole, exists := c.Get("user_role")
+	if !exists || userRole != "admin" {
+		errors.ForbiddenResponse(c, "VIEW_AI_SETTINGS", []string{})
+		return
+	}
+
 	settings, err := h.settingsService.GetSettings()
 	if err != nil {
 		errors.InternalServerErrorResponse(c, "")
@@ -31,7 +39,15 @@ func (h *AISettingsHandler) GetSettings(c *gin.Context) {
 }
 
 // UpdateSettings handles update AI settings request
+// AI Settings is universal and only modifiable by admin
 func (h *AISettingsHandler) UpdateSettings(c *gin.Context) {
+	// Check if user is admin
+	userRole, exists := c.Get("user_role")
+	if !exists || userRole != "admin" {
+		errors.ForbiddenResponse(c, "EDIT_AI_SETTINGS", []string{})
+		return
+	}
+
 	var req ai_settings.UpdateAISettingsRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {

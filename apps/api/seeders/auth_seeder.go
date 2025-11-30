@@ -20,7 +20,7 @@ func SeedUsers() error {
 	}
 
 	// Get roles
-	var adminRole, doctorRole, pharmacistRole role.Role
+	var adminRole, doctorRole, pharmacistRole, viewerRole role.Role
 	if err := database.DB.Where("code = ?", "admin").First(&adminRole).Error; err != nil {
 		return err
 	}
@@ -28,6 +28,9 @@ func SeedUsers() error {
 		return err
 	}
 	if err := database.DB.Where("code = ?", "pharmacist").First(&pharmacistRole).Error; err != nil {
+		return err
+	}
+	if err := database.DB.Where("code = ?", "viewer").First(&viewerRole).Error; err != nil {
 		return err
 	}
 
@@ -60,6 +63,14 @@ func SeedUsers() error {
 			Name:     "Pharmacist User",
 			AvatarURL: "https://api.dicebear.com/7.x/lorelei/svg?seed=pharmacist@example.com",
 			RoleID:   pharmacistRole.ID,
+			Status:   "active",
+		},
+		{
+			Email:    "viewer@example.com",
+			Password: string(hashedPassword),
+			Name:     "Viewer User",
+			AvatarURL: "https://api.dicebear.com/7.x/lorelei/svg?seed=viewer@example.com",
+			RoleID:   viewerRole.ID,
 			Status:   "active",
 		},
 	}

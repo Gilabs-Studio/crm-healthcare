@@ -13,6 +13,7 @@ import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { TaskForm } from "./task-form";
 import { ReminderSettings } from "./reminder-settings";
+import { useHasPermission } from "@/features/master-data/user-management/hooks/useHasPermission";
 import type { Task } from "../types";
 import type { UpdateTaskFormData } from "../schemas/task.schema";
 import { useTranslations } from "next-intl";
@@ -45,6 +46,9 @@ export function TaskDetailModal({
   onOpenChange,
   onTaskUpdated,
 }: TaskDetailModalProps) {
+  // Permission checks
+  const hasEditPermission = useHasPermission("EDIT_TASKS");
+  const hasDeletePermission = useHasPermission("DELETE_TASKS");
   const { data, isLoading, error } = useTask(taskId || "");
   const completeTask = useCompleteTask();
   const deleteTask = useDeleteTask();
@@ -172,24 +176,28 @@ export function TaskDetailModal({
                     {t("actions.markComplete")}
                   </Button>
                 )}
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setIsEditDialogOpen(true)}
-                  className="gap-2"
-                >
-                  <Edit className="h-4 w-4" />
-                  {t("actions.edit")}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setIsDeleteDialogOpen(true)}
-                  className="gap-2 text-destructive hover:text-destructive"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  {t("actions.delete")}
-                </Button>
+                {hasEditPermission && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setIsEditDialogOpen(true)}
+                    className="gap-2"
+                  >
+                    <Edit className="h-4 w-4" />
+                    {t("actions.edit")}
+                  </Button>
+                )}
+                {hasDeletePermission && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setIsDeleteDialogOpen(true)}
+                    className="gap-2 text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    {t("actions.delete")}
+                  </Button>
+                )}
               </div>
             </div>
 

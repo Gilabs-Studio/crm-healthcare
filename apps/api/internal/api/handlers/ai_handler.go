@@ -73,7 +73,20 @@ func (h *AIHandler) Chat(c *gin.Context) {
 		history = []ai.ChatMessage{}
 	}
 
-	chatResponse, err := h.aiService.Chat(req.Message, req.Context, req.ContextType, history, req.Model)
+	// Get user ID from context (set by AuthMiddleware)
+	userID, exists := c.Get("user_id")
+	if !exists {
+		errors.UnauthorizedResponse(c, "user ID not found in context")
+		return
+	}
+
+	userIDStr, ok := userID.(string)
+	if !ok {
+		errors.UnauthorizedResponse(c, "invalid user ID format")
+		return
+	}
+
+	chatResponse, err := h.aiService.Chat(req.Message, req.Context, req.ContextType, history, req.Model, userIDStr)
 	if err != nil {
 		// Check for specific errors
 		if err.Error() == "AI service not configured: Cerebras API key is empty" {

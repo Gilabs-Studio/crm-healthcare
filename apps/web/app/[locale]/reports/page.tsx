@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { AuthGuard } from "@/features/auth/components/auth-guard";
+import { PermissionGuard } from "@/features/auth/components/permission-guard";
 import { ReportGenerator } from "@/features/reports/components/report-generator";
 
 const containerVariants = {
@@ -57,7 +58,9 @@ function ReportsPageContent() {
 export default function ReportsPage() {
   return (
     <AuthGuard>
-      <ReportsPageContent />
+      <PermissionGuard requiredPermission="VIEW_REPORTS">
+        <ReportsPageContent />
+      </PermissionGuard>
     </AuthGuard>
   );
 }

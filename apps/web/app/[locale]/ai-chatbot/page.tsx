@@ -1,6 +1,7 @@
 "use client";
 
 import { AuthGuard } from "@/features/auth/components/auth-guard";
+import { PermissionGuard } from "@/features/auth/components/permission-guard";
 import { Chatbot } from "@/features/ai/components/chatbot";
 
 function AIChatbotPageContent() {
@@ -14,7 +15,9 @@ function AIChatbotPageContent() {
 export default function AIChatbotPage() {
   return (
     <AuthGuard>
-      <AIChatbotPageContent />
+      <PermissionGuard requiredPermission="VIEW_AI_CHATBOT">
+        <AIChatbotPageContent />
+      </PermissionGuard>
     </AuthGuard>
   );
 }

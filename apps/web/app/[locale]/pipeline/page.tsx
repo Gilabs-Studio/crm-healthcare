@@ -126,10 +126,14 @@ function PipelinePageContent() {
   );
 }
 
+import { PermissionGuard } from "@/features/auth/components/permission-guard";
+
 export default function PipelinePage() {
   return (
     <AuthGuard>
-      <PipelinePageContent />
+      <PermissionGuard requiredPermission="VIEW_PIPELINE">
+        <PipelinePageContent />
+      </PermissionGuard>
     </AuthGuard>
   );
 }

@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useUser, useDeleteUser, useUserPermissions, useUpdateUser } from "../hooks/useUsers";
+import { useHasPermission } from "../hooks/useHasPermission";
 import { toast } from "sonner";
 import { useState } from "react";
 import {
@@ -106,28 +107,34 @@ export function UserDetail({ userId }: UserDetailProps) {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            onClick={() => setIsEditDialogOpen(true)}
-          >
-            <Edit className="h-4 w-4 mr-2" />
-            {t("actions.edit")}
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => setIsPermissionsDialogOpen(true)}
-          >
-            <Shield className="h-4 w-4 mr-2" />
-            {t("actions.permissions")}
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={handleDelete}
-            disabled={deleteUser.isPending}
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            {t("actions.delete")}
-          </Button>
+          {hasEditPermission && (
+            <Button
+              variant="outline"
+              onClick={() => setIsEditDialogOpen(true)}
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              {t("actions.edit")}
+            </Button>
+          )}
+          {hasPermissionsPermission && (
+            <Button
+              variant="outline"
+              onClick={() => setIsPermissionsDialogOpen(true)}
+            >
+              <Shield className="h-4 w-4 mr-2" />
+              {t("actions.permissions")}
+            </Button>
+          )}
+          {hasDeletePermission && (
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={deleteUser.isPending}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              {t("actions.delete")}
+            </Button>
+          )}
         </div>
       </div>
 

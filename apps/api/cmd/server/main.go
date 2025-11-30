@@ -141,6 +141,7 @@ func main() {
 		taskRepo,
 		pipelineRepo,
 		aiSettingsRepo,
+		permissionRepo,
 		config.AppConfig.Cerebras.APIKey,
 	)
 

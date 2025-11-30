@@ -15,10 +15,16 @@ import { TaskForm } from "./task-form";
 import { TaskDetailModal } from "./task-detail-modal";
 import { useUsers } from "@/features/master-data/user-management/hooks/useUsers";
 import { useAccounts } from "@/features/sales-crm/account-management/hooks/useAccounts";
+import { useHasPermission } from "@/features/master-data/user-management/hooks/useHasPermission";
 import { useTranslations } from "next-intl";
 
 export function TaskList() {
   const t = useTranslations("taskManagement.list");
+  
+  // Permission checks
+  const hasCreatePermission = useHasPermission("CREATE_TASKS");
+  const hasEditPermission = useHasPermission("EDIT_TASKS");
+  const hasDeletePermission = useHasPermission("DELETE_TASKS");
 
   const {
     page,
@@ -219,24 +225,28 @@ export function TaskList() {
               <CheckCircle2 className="h-3.5 w-3.5" />
             </Button>
           )}
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => setEditingTaskId(row.id)}
-            className="h-8 w-8"
-            title="Edit"
-          >
-            <Edit className="h-3.5 w-3.5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => handleDeleteClick(row.id)}
-            className="h-8 w-8 text-destructive hover:text-destructive"
-            title="Delete"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </Button>
+          {hasEditPermission && (
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => setEditingTaskId(row.id)}
+              className="h-8 w-8"
+              title="Edit"
+            >
+              <Edit className="h-3.5 w-3.5" />
+            </Button>
+          )}
+          {hasDeletePermission && (
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => handleDeleteClick(row.id)}
+              className="h-8 w-8 text-destructive hover:text-destructive"
+              title="Delete"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
+          )}
         </div>
       ),
       className: "w-[160px] text-right",
@@ -324,10 +334,12 @@ export function TaskList() {
           {/* account & date filters disembunyikan untuk tampilan yang lebih ringkas */}
         </div>
 
-        <Button type="button" onClick={() => setIsCreateDialogOpen(true)} size="sm">
-          <Plus className="h-4 w-4 mr-2" />
-          {t("buttons.addTask")}
-        </Button>
+        {hasCreatePermission && (
+          <Button type="button" onClick={() => setIsCreateDialogOpen(true)} size="sm">
+            <Plus className="h-4 w-4 mr-2" />
+            {t("buttons.addTask")}
+          </Button>
+        )}
       </div>
 
       {/* Table */}

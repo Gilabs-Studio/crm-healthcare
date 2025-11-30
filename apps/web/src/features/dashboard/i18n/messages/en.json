@@ -255,6 +255,13 @@
       "genericError": "Login failed. Please try again."
     }
   },
+  "block": {
+    "title": "Access Denied",
+    "description": "You don't have permission to access this page",
+    "message": "You need the appropriate permissions to view this content. Please contact your administrator if you believe this is an error.",
+    "goToDashboard": "Go to Dashboard",
+    "goBack": "Go Back"
+  },
   "notFound": {
     "label": "404",
     "title": "Page not found",

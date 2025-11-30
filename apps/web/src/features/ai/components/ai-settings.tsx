@@ -62,18 +62,11 @@ export function AISettings() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">AI Settings</h1>
-        <p className="text-muted-foreground mt-2">
-          Configure AI assistant and data privacy settings
-        </p>
-      </div>
-
       <Alert>
         <Shield className="h-4 w-4" />
         <AlertDescription>
           These settings control which data can be sent to the external AI service (Cerebras).
-          Disable data types you don't want to share with the AI.
+          Disable data types you don&apos;t want to share with the AI.
         </AlertDescription>
       </Alert>
 

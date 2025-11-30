@@ -11,6 +11,7 @@ import (
 	"github.com/gilabs/crm-healthcare/api/internal/domain/ai"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/ai_settings"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/contact"
+	"github.com/gilabs/crm-healthcare/api/internal/domain/permission"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/pipeline"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/task"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/visit_report"
@@ -25,16 +26,17 @@ var (
 
 // Service represents AI service
 type Service struct {
-	cerebrasClient  *cerebras.Client
-	visitReportRepo interfaces.VisitReportRepository
-	accountRepo     interfaces.AccountRepository
-	contactRepo     interfaces.ContactRepository
-	dealRepo        interfaces.DealRepository
-	activityRepo    interfaces.ActivityRepository
-	taskRepo        interfaces.TaskRepository
-	pipelineRepo    interfaces.PipelineRepository
-	settingsRepo    interfaces.AISettingsRepository
-	apiKey          string
+	cerebrasClient   *cerebras.Client
+	visitReportRepo  interfaces.VisitReportRepository
+	accountRepo      interfaces.AccountRepository
+	contactRepo      interfaces.ContactRepository
+	dealRepo         interfaces.DealRepository
+	activityRepo     interfaces.ActivityRepository
+	taskRepo         interfaces.TaskRepository
+	pipelineRepo     interfaces.PipelineRepository
+	settingsRepo     interfaces.AISettingsRepository
+	permissionRepo   interfaces.PermissionRepository
+	apiKey           string
 }
 
 // NewService creates a new AI service
@@ -48,10 +50,11 @@ func NewService(
 	taskRepo interfaces.TaskRepository,
 	pipelineRepo interfaces.PipelineRepository,
 	settingsRepo interfaces.AISettingsRepository,
+	permissionRepo interfaces.PermissionRepository,
 	apiKey string,
 ) *Service {
 	return &Service{
-		cerebrasClient:  cerebrasClient,
+		cerebrasClient:   cerebrasClient,
 		visitReportRepo: visitReportRepo,
 		accountRepo:     accountRepo,
 		contactRepo:     contactRepo,
@@ -60,6 +63,7 @@ func NewService(
 		taskRepo:        taskRepo,
 		pipelineRepo:    pipelineRepo,
 		settingsRepo:    settingsRepo,
+		permissionRepo:  permissionRepo,
 		apiKey:          apiKey,
 	}
 }
@@ -139,8 +143,9 @@ func (s *Service) AnalyzeVisitReport(visitReportID string) (*ai.VisitReportInsig
 	return insight, response.Tokens, nil
 }
 
-// checkDataPrivacy checks if data type is allowed based on settings
-func (s *Service) checkDataPrivacy(dataType string) (bool, error) {
+// checkDataPrivacy checks if data type is allowed based on settings AND user permissions
+// First checks data privacy settings (global), then checks user's role-based permissions
+func (s *Service) checkDataPrivacy(dataType string, userID string) (bool, error) {
 	settings, err := s.settingsRepo.GetSettings()
 	if err != nil {
 		return true, nil // Default to allow if settings not found
@@ -158,32 +163,137 @@ func (s *Service) checkDataPrivacy(dataType string) (bool, error) {
 		}
 	} else {
 		// Default: allow all
-		return true, nil
+		dataPrivacy = ai_settings.DataPrivacySettings{
+			AllowVisitReports: true,
+			AllowAccounts:     true,
+			AllowContacts:     true,
+			AllowDeals:        true,
+			AllowActivities:   true,
+			AllowTasks:        true,
+			AllowProducts:     true,
+		}
 	}
 
-	// Check based on data type
+	// Check data privacy setting first (global setting)
+	var privacyAllowed bool
 	switch dataType {
 	case "visit_report":
-		return dataPrivacy.AllowVisitReports, nil
+		privacyAllowed = dataPrivacy.AllowVisitReports
 	case "account":
-		return dataPrivacy.AllowAccounts, nil
+		privacyAllowed = dataPrivacy.AllowAccounts
 	case "contact":
-		return dataPrivacy.AllowContacts, nil
+		privacyAllowed = dataPrivacy.AllowContacts
 	case "deal":
-		return dataPrivacy.AllowDeals, nil
+		privacyAllowed = dataPrivacy.AllowDeals
 	case "activity":
-		return dataPrivacy.AllowActivities, nil
+		privacyAllowed = dataPrivacy.AllowActivities
 	case "task":
-		return dataPrivacy.AllowTasks, nil
+		privacyAllowed = dataPrivacy.AllowTasks
 	case "product":
-		return dataPrivacy.AllowProducts, nil
+		privacyAllowed = dataPrivacy.AllowProducts
 	default:
-		return true, nil // Default to allow for unknown types
+		privacyAllowed = true // Default to allow for unknown types
 	}
+
+	// If data privacy setting disallows, return false immediately
+	if !privacyAllowed {
+		return false, nil
+	}
+
+	// Now check user's role-based permissions
+	// Get user permissions
+	userPerms, err := s.permissionRepo.GetUserPermissions(userID)
+	if err != nil {
+		// If we can't get permissions, default to deny for security
+		return false, fmt.Errorf("failed to get user permissions: %w", err)
+	}
+
+	// Check if user has permission to view the specific data type
+	// Map data types to permission codes
+	var requiredPermissionCode string
+	switch dataType {
+	case "visit_report":
+		// Visit Reports might not have specific permission, check if user is admin or has Sales CRM access
+		// For now, if user is admin, allow. Otherwise, check for VIEW_SALES_CRM or VIEW_VISIT_REPORTS
+		if s.isUserAdmin(userID) {
+			return true, nil
+		}
+		// Check for Sales CRM view permission (visit reports are under Sales CRM)
+		if s.hasUserPermission(userPerms, "VIEW_SALES_CRM") {
+			return true, nil
+		}
+		// Fallback: deny if no permission
+		return false, nil
+	case "account":
+		requiredPermissionCode = "VIEW_ACCOUNTS"
+	case "contact":
+		requiredPermissionCode = "VIEW_CONTACTS"
+	case "deal":
+		requiredPermissionCode = "VIEW_PIPELINE" // Deals are part of pipeline
+	case "activity":
+		// Activities might not have specific permission, check if user is admin or has Sales CRM access
+		if s.isUserAdmin(userID) {
+			return true, nil
+		}
+		// Check for Sales CRM view permission (activities are related to Sales CRM)
+		if s.hasUserPermission(userPerms, "VIEW_SALES_CRM") {
+			return true, nil
+		}
+		// Fallback: deny if no permission
+		return false, nil
+	case "task":
+		requiredPermissionCode = "VIEW_TASKS"
+	case "product":
+		requiredPermissionCode = "VIEW_PRODUCTS"
+	default:
+		// For unknown types, if privacy allows, check if user is admin
+		return s.isUserAdmin(userID), nil
+	}
+
+	// Check if user has the required permission
+	hasPermission := s.hasUserPermission(userPerms, requiredPermissionCode)
+	return hasPermission, nil
+}
+
+// isUserAdmin checks if user is admin by checking if they have all permissions
+// Admin users have all permissions, so we check if they have a permission that only admin has
+func (s *Service) isUserAdmin(userID string) bool {
+	userPerms, err := s.permissionRepo.GetUserPermissions(userID)
+	if err != nil {
+		return false
+	}
+	
+	// Check if user has VIEW_AI_SETTINGS permission (admin only)
+	return s.hasUserPermission(userPerms, "VIEW_AI_SETTINGS")
+}
+
+// hasUserPermission checks if user has a specific permission code
+func (s *Service) hasUserPermission(userPerms *permission.GetUserPermissionsResponse, permissionCode string) bool {
+	// Helper function to search permissions recursively
+	var searchPermission func(menus []permission.MenuWithActionsResponse, code string) bool
+	searchPermission = func(menus []permission.MenuWithActionsResponse, code string) bool {
+		for _, menu := range menus {
+			for _, action := range menu.Actions {
+				if action.Code == code && action.Access {
+					return true
+				}
+			}
+			// Recursively search children
+			if len(menu.Children) > 0 {
+				if searchPermission(menu.Children, code) {
+					return true
+				}
+			}
+		}
+		return false
+	}
+	
+	return searchPermission(userPerms.Menus, permissionCode)
 }
 
 // Chat handles chat conversation with AI
-func (s *Service) Chat(message string, contextID string, contextType string, conversationHistory []ai.ChatMessage, model string) (*ai.ChatResponse, error) {
+// userID is required to check user permissions for data access
+func (s *Service) Chat(message string, contextID string, contextType string, conversationHistory []ai.ChatMessage, model string, userID string) (*ai.ChatResponse, error) {
 	// Get AI settings
 	settings, err := s.settingsRepo.GetSettings()
 	if err != nil {
@@ -358,10 +468,10 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 		if strings.Contains(messageLower, "pipeline") || strings.Contains(messageLower, "sales funnel") || 
 		   strings.Contains(messageLower, "funnel") || strings.Contains(messageLower, "deal") ||
 		   strings.Contains(messageLower, "opportunity") || strings.Contains(messageLower, "kesempatan") {
-			// Check data privacy
-			allowed, _ := s.checkDataPrivacy("deal")
+			// Check data privacy and user permissions
+			allowed, _ := s.checkDataPrivacy("deal", userID)
 			if !allowed {
-				dataAccessInfo = "⚠️ Akses ke data deals/pipeline tidak diizinkan berdasarkan pengaturan privasi data."
+				dataAccessInfo = "⚠️ Akses ke data deals/pipeline tidak diizinkan berdasarkan pengaturan privasi data atau permission yang Anda miliki."
 			} else {
 				// Build request with optional stage filter
 				req := &pipeline.ListDealsRequest{
@@ -425,10 +535,10 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 		if contextData == "" && (strings.Contains(messageLower, "account") || strings.Contains(messageLower, "akun") || 
 		   strings.Contains(messageLower, "rumah sakit") || strings.Contains(messageLower, "klinik") || 
 		   strings.Contains(messageLower, "apotek") || strings.Contains(messageLower, "facility")) {
-			// Check data privacy
-			allowed, _ := s.checkDataPrivacy("account")
+			// Check data privacy and user permissions
+			allowed, _ := s.checkDataPrivacy("account", userID)
 			if !allowed {
-				dataAccessInfo = "⚠️ Akses ke data accounts tidak diizinkan berdasarkan pengaturan privasi data."
+				dataAccessInfo = "⚠️ Akses ke data accounts tidak diizinkan berdasarkan pengaturan privasi data atau permission yang Anda miliki."
 			} else {
 				accounts, total, err := s.accountRepo.List(&account.ListAccountsRequest{
 					Page:    1,
@@ -454,11 +564,11 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 		// Check if user is asking for contacts (only if no data fetched yet)
 		if contextData == "" && (strings.Contains(messageLower, "contact") || strings.Contains(messageLower, "kontak") || 
 		   strings.Contains(messageLower, "dokter") || strings.Contains(messageLower, "apoteker")) {
-			// Check data privacy
-			allowed, _ := s.checkDataPrivacy("contact")
+			// Check data privacy and user permissions
+			allowed, _ := s.checkDataPrivacy("contact", userID)
 			if !allowed {
 				if dataAccessInfo == "" {
-					dataAccessInfo = "⚠️ Akses ke data contacts tidak diizinkan berdasarkan pengaturan privasi data."
+					dataAccessInfo = "⚠️ Akses ke data contacts tidak diizinkan berdasarkan pengaturan privasi data atau permission yang Anda miliki."
 				}
 			} else {
 				contacts, _, err := s.contactRepo.List(&contact.ListContactsRequest{
@@ -486,11 +596,11 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 		// Check if user is asking for visit reports (only if no data fetched yet)
 		if contextData == "" && (strings.Contains(messageLower, "visit") || strings.Contains(messageLower, "kunjungan") || 
 		   strings.Contains(messageLower, "laporan kunjungan")) {
-			// Check data privacy
-			allowed, _ := s.checkDataPrivacy("visit_report")
+			// Check data privacy and user permissions
+			allowed, _ := s.checkDataPrivacy("visit_report", userID)
 			if !allowed {
 				if dataAccessInfo == "" {
-					dataAccessInfo = "⚠️ Akses ke data visit reports tidak diizinkan berdasarkan pengaturan privasi data."
+					dataAccessInfo = "⚠️ Akses ke data visit reports tidak diizinkan berdasarkan pengaturan privasi data atau permission yang Anda miliki."
 				}
 			} else {
 				// Build request with optional status filter
@@ -532,11 +642,11 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 		
 		// Check if user is asking for tasks (only if no data fetched yet)
 		if contextData == "" && (strings.Contains(messageLower, "task") || strings.Contains(messageLower, "tugas")) {
-			// Check data privacy
-			allowed, _ := s.checkDataPrivacy("task")
+			// Check data privacy and user permissions
+			allowed, _ := s.checkDataPrivacy("task", userID)
 			if !allowed {
 				if dataAccessInfo == "" {
-					dataAccessInfo = "⚠️ Akses ke data tasks tidak diizinkan berdasarkan pengaturan privasi data."
+					dataAccessInfo = "⚠️ Akses ke data tasks tidak diizinkan berdasarkan pengaturan privasi data atau permission yang Anda miliki."
 				}
 			} else {
 				// Build request with optional status filter
@@ -685,10 +795,10 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 		if contextData == "" && (strings.Contains(messageLower, "data") || strings.Contains(messageLower, "paparkan") || 
 		   strings.Contains(messageLower, "tampilkan") || strings.Contains(messageLower, "lihat") ||
 		   strings.Contains(messageLower, "sistem") || strings.Contains(messageLower, "database")) {
-			// Check data privacy
-			allowed, _ := s.checkDataPrivacy("account")
+			// Check data privacy and user permissions
+			allowed, _ := s.checkDataPrivacy("account", userID)
 			if !allowed {
-				dataAccessInfo = "⚠️ Akses ke data accounts tidak diizinkan berdasarkan pengaturan privasi data."
+				dataAccessInfo = "⚠️ Akses ke data accounts tidak diizinkan berdasarkan pengaturan privasi data atau permission yang Anda miliki."
 			} else {
 				accounts, total, err := s.accountRepo.List(&account.ListAccountsRequest{
 					Page:    1,
