@@ -201,6 +201,7 @@
       "notFound": "Deal tidak ditemukan",
       "backToList": "Kembali ke Pipeline",
       "back": "Kembali",
+      "drawerTitle": "Detail Deal",
       "toast": {
         "updated": "Deal berhasil diperbarui",
         "deleted": "Deal berhasil dihapus"
@@ -210,6 +211,11 @@
         "delete": "Hapus"
       },
       "sections": {
+        "basicInfo": "Informasi Dasar",
+        "name": "Nama",
+        "value": "Nilai",
+        "status": "Status",
+        "stage": "Tahap",
         "description": "Deskripsi",
         "account": "Akun",
         "contact": "Kontak",
@@ -218,6 +224,7 @@
         "actualCloseDate": "Tanggal selesai aktual",
         "source": "Sumber",
         "notes": "Catatan",
+        "metadata": "Metadata",
         "createdAt": "Dibuat:",
         "updatedAt": "Terakhir diperbarui:"
       },
