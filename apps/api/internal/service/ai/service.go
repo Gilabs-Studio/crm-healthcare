@@ -588,9 +588,13 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 			
 			// Check for specific forecast queries
 			isNextMonthQuery := strings.Contains(messageLower, "bulan depan") || strings.Contains(messageLower, "next month") || 
-			                    strings.Contains(messageLower, "month depan")
+			                    strings.Contains(messageLower, "month depan") || strings.Contains(messageLower, "bulan berikutnya")
 			isThreeMonthsQuery := strings.Contains(messageLower, "3 bulan") || strings.Contains(messageLower, "tiga bulan") ||
-			                      strings.Contains(messageLower, "three months")
+			                      strings.Contains(messageLower, "three months") || strings.Contains(messageLower, "3 months")
+			isQuarterQuery := strings.Contains(messageLower, "kuartal") || strings.Contains(messageLower, "quarter") ||
+			                  strings.Contains(messageLower, "triwulan")
+			isYearQuery := strings.Contains(messageLower, "tahun") && (strings.Contains(messageLower, "ini") || 
+			              strings.Contains(messageLower, "depan") || strings.Contains(messageLower, "year"))
 			
 			var forecastStart, forecastEnd time.Time
 			var periodType string
@@ -606,6 +610,37 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 				forecastStart = now
 				forecastEnd = now.AddDate(0, 3, 0)
 				periodType = "quarter"
+			} else if isQuarterQuery {
+				// Quarter forecast - check if next quarter or current
+				if strings.Contains(messageLower, "depan") || strings.Contains(messageLower, "berikutnya") || strings.Contains(messageLower, "next") {
+					// Next quarter
+					quarter := (now.Month() - 1) / 3
+					nextQuarter := quarter + 1
+					if nextQuarter >= 4 {
+						nextQuarter = 0
+						forecastStart = time.Date(now.Year()+1, 1, 1, 0, 0, 0, 0, now.Location())
+					} else {
+						forecastStart = time.Date(now.Year(), nextQuarter*3+1, 1, 0, 0, 0, 0, now.Location())
+					}
+					forecastEnd = forecastStart.AddDate(0, 3, 0).Add(-time.Second)
+				} else {
+					// Current quarter
+					quarter := (now.Month() - 1) / 3
+					forecastStart = time.Date(now.Year(), quarter*3+1, 1, 0, 0, 0, 0, now.Location())
+					forecastEnd = forecastStart.AddDate(0, 3, 0).Add(-time.Second)
+				}
+				periodType = "quarter"
+			} else if isYearQuery {
+				// Year forecast
+				if strings.Contains(messageLower, "depan") || strings.Contains(messageLower, "berikutnya") || strings.Contains(messageLower, "next") {
+					// Next year
+					forecastStart = time.Date(now.Year()+1, 1, 1, 0, 0, 0, 0, now.Location())
+				} else {
+					// Current year
+					forecastStart = time.Date(now.Year(), 1, 1, 0, 0, 0, 0, now.Location())
+				}
+				forecastEnd = forecastStart.AddDate(1, 0, 0).Add(-time.Second)
+				periodType = "year"
 			} else {
 				// Default: current month forecast
 				forecastStart = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
@@ -625,6 +660,18 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 					periodDesc = "Next Month"
 				} else if isThreeMonthsQuery {
 					periodDesc = "Next 3 Months"
+				} else if isQuarterQuery {
+					if strings.Contains(messageLower, "depan") || strings.Contains(messageLower, "berikutnya") || strings.Contains(messageLower, "next") {
+						periodDesc = "Next Quarter"
+					} else {
+						periodDesc = "Current Quarter"
+					}
+				} else if isYearQuery {
+					if strings.Contains(messageLower, "depan") || strings.Contains(messageLower, "berikutnya") || strings.Contains(messageLower, "next") {
+						periodDesc = "Next Year"
+					} else {
+						periodDesc = "Current Year"
+					}
 				}
 				contextData += fmt.Sprintf("REAL FORECAST DATA FROM DATABASE (%s):\n%s\n\nCRITICAL: You MUST use ONLY this forecast data. DO NOT create, invent, or make up any forecast data. If forecast data is empty or incomplete, inform the user that forecast data is not available.", periodDesc, string(forecastJSON))
 			} else {
