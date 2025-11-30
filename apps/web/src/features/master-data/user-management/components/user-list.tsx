@@ -24,6 +24,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useHasPermission } from "../hooks/useHasPermission";
 import type { User } from "../types";
 import { useTranslations } from "next-intl";
 
@@ -61,6 +62,11 @@ export function UserList() {
   const [viewingUserId, setViewingUserId] = useState<string | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const t = useTranslations("userManagement.list");
+  
+  // Permission checks
+  const hasCreatePermission = useHasPermission("CREATE_USERS");
+  const hasEditPermission = useHasPermission("EDIT_USERS");
+  const hasDeletePermission = useHasPermission("DELETE_USERS");
 
   const getAvatarUrl = (user: User) => {
     if (user.avatar_url) {
@@ -132,24 +138,28 @@ export function UserList() {
           >
             <Eye className="h-3.5 w-3.5" />
           </Button>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => setEditingUser(row.id)}
-            className="h-8 w-8"
-            title="Edit"
-          >
-            <Edit className="h-3.5 w-3.5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => handleDeleteClick(row.id)}
-            className="h-8 w-8 text-destructive hover:text-destructive"
-            title="Delete"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </Button>
+          {hasEditPermission && (
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => setEditingUser(row.id)}
+              className="h-8 w-8"
+              title="Edit"
+            >
+              <Edit className="h-3.5 w-3.5" />
+            </Button>
+          )}
+          {hasDeletePermission && (
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => handleDeleteClick(row.id)}
+              className="h-8 w-8 text-destructive hover:text-destructive"
+              title="Delete"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
+          )}
         </div>
       ),
       className: "w-[140px] text-right",
@@ -200,10 +210,12 @@ export function UserList() {
             </SelectContent>
           </Select>
         </div>
-        <Button onClick={() => setIsCreateDialogOpen(true)} size="sm">
-          <Plus className="h-4 w-4 mr-2" />
-          {t("addUser")}
-        </Button>
+        {hasCreatePermission && (
+          <Button onClick={() => setIsCreateDialogOpen(true)} size="sm">
+            <Plus className="h-4 w-4 mr-2" />
+            {t("addUser")}
+          </Button>
+        )}
       </div>
 
       {/* Table */}

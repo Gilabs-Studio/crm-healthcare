@@ -2,7 +2,7 @@
 
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Building2, User, DollarSign, TrendingUp, Calendar, Circle } from "lucide-react";
 import type { Deal } from "../types";
 import { formatCurrency } from "../utils/format";
@@ -105,17 +105,10 @@ export function DealCard({ deal, onClick }: DealCardProps) {
             <span className="text-xs text-muted-foreground truncate font-medium">{stageName}</span>
           </div>
 
-          {assignedUserName && (
+          {assignedUserName && deal.assigned_user?.avatar_url && (
             <div className="flex items-center gap-2 shrink-0">
               <Avatar className="h-6 w-6 border border-border">
-                <AvatarFallback className="text-xs bg-muted">
-                  {assignedUserName
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")
-                    .toUpperCase()
-                    .slice(0, 2)}
-                </AvatarFallback>
+                <AvatarImage src={deal.assigned_user.avatar_url} alt={assignedUserName} />
               </Avatar>
               <span className="text-xs text-muted-foreground hidden sm:inline font-medium">
                 {assignedUserName}

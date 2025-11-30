@@ -16,6 +16,7 @@ import { TaskDetailModal } from "./task-detail-modal";
 import { useUsers } from "@/features/master-data/user-management/hooks/useUsers";
 import { useAccounts } from "@/features/sales-crm/account-management/hooks/useAccounts";
 import { TaskCard } from "./task-card";
+import { useHasPermission } from "@/features/master-data/user-management/hooks/useHasPermission";
 import { useTranslations } from "next-intl";
 import { ContactDetailModal } from "@/features/sales-crm/account-management/components/contact-detail-modal";
 
@@ -24,6 +25,11 @@ const BOARD_STATUSES: TaskStatus[] = ["pending", "in_progress", "completed", "ca
 export function TaskBoard() {
   const tList = useTranslations("taskManagement.list");
   const tBoard = useTranslations("taskManagement.board");
+  
+  // Permission checks
+  const hasCreatePermission = useHasPermission("CREATE_TASKS");
+  const hasEditPermission = useHasPermission("EDIT_TASKS");
+  const hasDeletePermission = useHasPermission("DELETE_TASKS");
 
   const {
     setPage,
@@ -245,10 +251,12 @@ export function TaskBoard() {
           >
             <RotateCcw className="h-4 w-4" />
           </Button>
-          <Button type="button" onClick={() => setIsCreateDialogOpen(true)} size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            {tList("buttons.addTask")}
-          </Button>
+          {hasCreatePermission && (
+            <Button type="button" onClick={() => setIsCreateDialogOpen(true)} size="sm">
+              <Plus className="h-4 w-4 mr-2" />
+              {tList("buttons.addTask")}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -298,8 +306,8 @@ export function TaskBoard() {
                       key={task.id}
                       task={task}
                       onClickTitle={() => handleViewTask(task.id)}
-                      onEdit={() => setEditingTaskId(task.id)}
-                      onDelete={() => handleDeleteClick(task.id)}
+                      onEdit={hasEditPermission ? () => setEditingTaskId(task.id) : undefined}
+                      onDelete={hasDeletePermission ? () => handleDeleteClick(task.id) : undefined}
                       onComplete={() => handleComplete(task.id)}
                       onClickContact={task.contact ? handleViewContact : undefined}
                     />

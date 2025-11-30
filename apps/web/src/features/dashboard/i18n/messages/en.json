@@ -201,6 +201,7 @@
       "notFound": "Deal not found",
       "backToList": "Back to Pipeline",
       "back": "Back",
+      "drawerTitle": "Deal Details",
       "toast": {
         "updated": "Deal updated successfully",
         "deleted": "Deal deleted successfully"
@@ -210,6 +211,11 @@
         "delete": "Delete"
       },
       "sections": {
+        "basicInfo": "Basic Information",
+        "name": "Name",
+        "value": "Value",
+        "status": "Status",
+        "stage": "Stage",
         "description": "Description",
         "account": "Account",
         "contact": "Contact",
@@ -218,6 +224,7 @@
         "actualCloseDate": "Actual Close Date",
         "source": "Source",
         "notes": "Notes",
+        "metadata": "Metadata",
         "createdAt": "Created:",
         "updatedAt": "Last Updated:"
       },
@@ -247,6 +254,13 @@
       "submitting": "Signing in...",
       "genericError": "Login failed. Please try again."
     }
+  },
+  "block": {
+    "title": "Access Denied",
+    "description": "You don't have permission to access this page",
+    "message": "You need the appropriate permissions to view this content. Please contact your administrator if you believe this is an error.",
+    "goToDashboard": "Go to Dashboard",
+    "goBack": "Go Back"
   },
   "notFound": {
     "label": "404",

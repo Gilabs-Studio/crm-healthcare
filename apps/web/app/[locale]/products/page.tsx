@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { AuthGuard } from "@/features/auth/components/auth-guard";
+import { PermissionGuard } from "@/features/auth/components/permission-guard";
 import { ProductManagement } from "@/features/sales-crm/product-management/components/product-management";
 
 function ProductsPageContent() {
@@ -27,7 +28,9 @@ function ProductsPageContent() {
 export default function ProductsPage() {
   return (
     <AuthGuard>
-      <ProductsPageContent />
+      <PermissionGuard requiredPermission="VIEW_PRODUCTS">
+        <ProductsPageContent />
+      </PermissionGuard>
     </AuthGuard>
   );
 }

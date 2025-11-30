@@ -1,6 +1,7 @@
 "use client";
 
 import { AuthGuard } from "@/features/auth/components/auth-guard";
+import { PermissionGuard } from "@/features/auth/components/permission-guard";
 import { TaskManagement } from "@/features/sales-crm/task-management/components/task-management";
 
 function TasksPageContent() {
@@ -14,7 +15,9 @@ function TasksPageContent() {
 export default function TasksPage() {
   return (
     <AuthGuard>
-      <TasksPageContent />
+      <PermissionGuard requiredPermission="VIEW_TASKS">
+        <TasksPageContent />
+      </PermissionGuard>
     </AuthGuard>
   );
 }

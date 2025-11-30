@@ -138,7 +138,10 @@ func main() {
 		contactRepo,
 		dealRepo,
 		activityRepo,
+		taskRepo,
+		pipelineRepo,
 		aiSettingsRepo,
+		permissionRepo,
 		config.AppConfig.Cerebras.APIKey,
 	)
 

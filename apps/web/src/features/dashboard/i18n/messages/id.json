@@ -201,6 +201,7 @@
       "notFound": "Deal tidak ditemukan",
       "backToList": "Kembali ke Pipeline",
       "back": "Kembali",
+      "drawerTitle": "Detail Deal",
       "toast": {
         "updated": "Deal berhasil diperbarui",
         "deleted": "Deal berhasil dihapus"
@@ -210,6 +211,11 @@
         "delete": "Hapus"
       },
       "sections": {
+        "basicInfo": "Informasi Dasar",
+        "name": "Nama",
+        "value": "Nilai",
+        "status": "Status",
+        "stage": "Tahap",
         "description": "Deskripsi",
         "account": "Akun",
         "contact": "Kontak",
@@ -218,6 +224,7 @@
         "actualCloseDate": "Tanggal selesai aktual",
         "source": "Sumber",
         "notes": "Catatan",
+        "metadata": "Metadata",
         "createdAt": "Dibuat:",
         "updatedAt": "Terakhir diperbarui:"
       },
@@ -247,6 +254,13 @@
       "submitting": "Sedang masuk...",
       "genericError": "Login gagal. Silakan coba lagi."
     }
+  },
+  "block": {
+    "title": "Akses Ditolak",
+    "description": "Anda tidak memiliki izin untuk mengakses halaman ini",
+    "message": "Anda memerlukan izin yang sesuai untuk melihat konten ini. Silakan hubungi administrator jika Anda yakin ini adalah kesalahan.",
+    "goToDashboard": "Kembali ke Dashboard",
+    "goBack": "Kembali"
   },
   "notFound": {
     "label": "404",

@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { AuthGuard } from "@/features/auth/components/auth-guard";
+import { PermissionGuard } from "@/features/auth/components/permission-guard";
 import { AISettings } from "@/features/ai/components/ai-settings";
 
 function AISettingsPageContent() {
@@ -27,7 +28,9 @@ function AISettingsPageContent() {
 export default function AISettingsPage() {
   return (
     <AuthGuard>
-      <AISettingsPageContent />
+      <PermissionGuard requiredPermission="VIEW_AI_SETTINGS">
+        <AISettingsPageContent />
+      </PermissionGuard>
     </AuthGuard>
   );
 }

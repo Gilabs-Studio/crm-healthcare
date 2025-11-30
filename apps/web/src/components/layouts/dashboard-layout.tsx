@@ -348,9 +348,29 @@ export const DashboardLayout = memo(function DashboardLayout({
 
     const items: NavigationItem[] = [];
 
+    // Helper function to check if user has VIEW permission for a menu
+    const hasViewPermission = (menu: MenuWithActions): boolean => {
+      // Check if menu has VIEW action with access = true
+      if (menu.actions && menu.actions.length > 0) {
+        const viewAction = menu.actions.find(
+          (action) => action.code.startsWith("VIEW_") && action.access
+        );
+        if (viewAction) {
+          return true;
+        }
+      }
+      // If no actions, check children recursively
+      if (menu.children && menu.children.length > 0) {
+        return menu.children.some((child) => hasViewPermission(child));
+      }
+      // Default: if menu has URL but no VIEW permission, don't show
+      return false;
+    };
+
     const walkChildren = (children: MenuWithActions[], group: string) => {
       children.forEach((child) => {
-        if (child.url) {
+        // Only add menu if user has VIEW permission
+        if (child.url && hasViewPermission(child)) {
           items.push({
             name: child.name,
             href: child.url,
@@ -367,26 +387,37 @@ export const DashboardLayout = memo(function DashboardLayout({
     menus.forEach((menu) => {
       // Special-case: dashboard root without children
       if (menu.url == "/dashboard") {
-        items.push({
-          name: menu.name,
-          href: menu.url,
-          icon: getMenuIcon(menu.icon),
-          group: "Main",
-        });
+        // Check if user has VIEW_DASHBOARD permission
+        if (hasViewPermission(menu)) {
+          items.push({
+            name: menu.name,
+            href: menu.url,
+            icon: getMenuIcon(menu.icon),
+            group: "Main",
+          });
+        }
         return;
       }
 
       if (menu.children && menu.children.length > 0) {
         // Use root menu name as group label (e.g., CRM, Analytics, System)
-        walkChildren(menu.children, menu.name);
+        // Only walk children if at least one child has VIEW permission
+        const hasAccessibleChild = menu.children.some((child) =>
+          hasViewPermission(child)
+        );
+        if (hasAccessibleChild) {
+          walkChildren(menu.children, menu.name);
+        }
       } else if (menu.url != "") {
-        // Orphan root item, group by its own name
-        items.push({
-          name: menu.name,
-          href: menu.url,
-          icon: getMenuIcon(menu.icon),
-          group: menu.name,
-        });
+        // Orphan root item, only show if user has VIEW permission
+        if (hasViewPermission(menu)) {
+          items.push({
+            name: menu.name,
+            href: menu.url,
+            icon: getMenuIcon(menu.icon),
+            group: menu.name,
+          });
+        }
       }
     });
 

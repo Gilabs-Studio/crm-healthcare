@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { AuthGuard } from "@/features/auth/components/auth-guard";
+import { PermissionGuard } from "@/features/auth/components/permission-guard";
 import { useAuthStore } from "@/features/auth/stores/useAuthStore";
 import { DashboardOverview } from "@/features/dashboard/components/dashboard-overview";
 import { VisitStatistics } from "@/features/dashboard/components/visit-statistics";
@@ -93,7 +94,9 @@ function DashboardContent() {
 export default function DashboardPage() {
   return (
     <AuthGuard>
-      <DashboardContent />
+      <PermissionGuard requiredPermission="VIEW_DASHBOARD">
+        <DashboardContent />
+      </PermissionGuard>
     </AuthGuard>
   );
 }

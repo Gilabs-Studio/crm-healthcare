@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { AuthGuard } from "@/features/auth/components/auth-guard";
+import { PermissionGuard } from "@/features/auth/components/permission-guard";
 import { UserManagement } from "@/features/master-data/user-management/components/user-management";
 
 function UsersPageContent() {
@@ -27,7 +28,9 @@ function UsersPageContent() {
 export default function UsersPage() {
   return (
     <AuthGuard>
-      <UsersPageContent />
+      <PermissionGuard requiredPermission="VIEW_USERS">
+        <UsersPageContent />
+      </PermissionGuard>
     </AuthGuard>
   );
 }

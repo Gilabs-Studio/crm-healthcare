@@ -219,8 +219,11 @@ function SelectItem({
       if (typeof node === "string" || typeof node === "number") {
         return String(node);
       }
-      if (React.isValidElement(node) && node.props.children) {
-        return extractText(node.props.children);
+      if (React.isValidElement(node)) {
+        const props = node.props as { children?: React.ReactNode };
+        if (props.children) {
+          return extractText(props.children);
+        }
       }
       if (Array.isArray(node)) {
         return node.map(extractText).join("");

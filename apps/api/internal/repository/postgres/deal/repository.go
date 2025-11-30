@@ -211,6 +211,7 @@ func (r *repository) GetForecast(periodType string, start, end time.Time) (*pipe
 	var deals []pipeline.Deal
 	err := r.db.
 		Preload("Account").
+		Preload("Contact").
 		Preload("Stage").
 		Where("expected_close_date >= ? AND expected_close_date <= ?", start, end).
 		Where("status = ?", "open").
@@ -232,6 +233,11 @@ func (r *repository) GetForecast(periodType string, start, end time.Time) (*pipe
 			accountName = deal.Account.Name
 		}
 
+		contactName := ""
+		if deal.Contact != nil {
+			contactName = deal.Contact.Name
+		}
+
 		stageName := ""
 		if deal.Stage != nil {
 			stageName = deal.Stage.Name
@@ -240,7 +246,10 @@ func (r *repository) GetForecast(periodType string, start, end time.Time) (*pipe
 		forecastDeals = append(forecastDeals, pipeline.ForecastDeal{
 			ID:                     deal.ID,
 			Title:                  deal.Title,
+			AccountID:              deal.AccountID,
 			AccountName:            accountName,
+			ContactID:              deal.ContactID,
+			ContactName:            contactName,
 			StageName:              stageName,
 			Value:                  deal.Value,
 			ValueFormatted:         formatCurrency(deal.Value),

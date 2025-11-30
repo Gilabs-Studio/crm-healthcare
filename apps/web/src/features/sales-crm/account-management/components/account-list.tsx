@@ -46,6 +46,7 @@ import { AccountDetailModal } from "./account-detail-modal";
 import { useAccountList } from "../hooks/useAccountList";
 import { useCategories } from "../hooks/useCategories";
 import { useContacts, useContact, useDeleteContact, useCreateContact, useUpdateContact } from "../hooks/useContacts";
+import { useHasPermission } from "@/features/master-data/user-management/hooks/useHasPermission";
 import { toast } from "sonner";
 import type { Account, Contact } from "../types";
 import type { CreateContactFormData, UpdateContactFormData } from "../schemas/contact.schema";
@@ -91,6 +92,11 @@ export function AccountList() {
   const [deletingContactId, setDeletingContactId] = useState<string | null>(null);
   const [isCreateContactDialogOpen, setIsCreateContactDialogOpen] = useState(false);
   const [createContactAccountId, setCreateContactAccountId] = useState<string | null>(null);
+  
+  // Permission checks
+  const hasCreatePermission = useHasPermission("CREATE_ACCOUNTS");
+  const hasEditPermission = useHasPermission("EDIT_ACCOUNTS");
+  const hasDeletePermission = useHasPermission("DELETE_ACCOUNTS");
 
   const toggleRow = (accountId: string) => {
     const newExpanded = new Set(expandedRows);
@@ -206,10 +212,12 @@ export function AccountList() {
             </SelectContent>
           </Select>
         </div>
-        <Button onClick={() => setIsCreateDialogOpen(true)} size="sm">
-          <Plus className="h-4 w-4 mr-2" />
-          {t("addAccount")}
-        </Button>
+        {hasCreatePermission && (
+          <Button onClick={() => setIsCreateDialogOpen(true)} size="sm">
+            <Plus className="h-4 w-4 mr-2" />
+            {t("addAccount")}
+          </Button>
+        )}
       </div>
 
       {/* Table */}
@@ -256,6 +264,8 @@ export function AccountList() {
                       onCreateContact={() => handleCreateContact(account.id)}
                       onEditContact={handleEditContact}
                       onDeleteContact={handleDeleteContactClick}
+                      hasEditPermission={hasEditPermission}
+                      hasDeletePermission={hasDeletePermission}
                     />
                   ))
                 )}
@@ -482,6 +492,8 @@ interface AccountRowProps {
   readonly onCreateContact: () => void;
   readonly onEditContact: (accountId: string, contactId: string) => void;
   readonly onDeleteContact: (contactId: string) => void;
+  readonly hasEditPermission: boolean;
+  readonly hasDeletePermission: boolean;
 }
 
 function AccountRow({
@@ -494,6 +506,8 @@ function AccountRow({
   onCreateContact,
   onEditContact,
   onDeleteContact,
+  hasEditPermission,
+  hasDeletePermission,
 }: AccountRowProps) {
   const { data: contactsData, isLoading: isLoadingContacts } = useContacts({
     account_id: account.id,
@@ -561,24 +575,28 @@ function AccountRow({
             >
               <Eye className="h-3.5 w-3.5" />
             </Button>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={onEdit}
-              className="h-8 w-8"
-              title="Edit"
-            >
-              <Edit className="h-3.5 w-3.5" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={onDelete}
-              className="h-8 w-8 text-destructive hover:text-destructive"
-              title="Delete"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </Button>
+            {hasEditPermission && (
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={onEdit}
+                className="h-8 w-8"
+                title="Edit"
+              >
+                <Edit className="h-3.5 w-3.5" />
+              </Button>
+            )}
+            {hasDeletePermission && (
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={onDelete}
+                className="h-8 w-8 text-destructive hover:text-destructive"
+                title="Delete"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            )}
           </div>
         </TableCell>
       </TableRow>

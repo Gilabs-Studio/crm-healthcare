@@ -8,8 +8,8 @@ import { useTranslations } from "next-intl";
 
 interface TaskCardProps {
   readonly task: Task;
-  readonly onEdit: () => void;
-  readonly onDelete: () => void;
+  readonly onEdit?: () => void;
+  readonly onDelete?: () => void;
   readonly onComplete?: () => void;
   readonly onClickTitle?: () => void;
   readonly onClickContact?: (contactId: string) => void;
@@ -107,26 +107,30 @@ export function TaskCard({ task, onEdit, onDelete, onComplete, onClickTitle, onC
             <CheckCircle2 className="h-3.5 w-3.5" />
           </Button>
         )}
-        <Button
-          type="button"
-          size="icon-sm"
-          variant="ghost"
-          className="h-7 w-7"
-          onClick={onEdit}
-          title={t("editTooltip")}
-        >
-          <Edit2 className="h-3.5 w-3.5" />
-        </Button>
-        <Button
-          type="button"
-          size="icon-sm"
-          variant="ghost"
-          className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
-          onClick={onDelete}
-          title={t("deleteTooltip")}
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </Button>
+        {onEdit && (
+          <Button
+            type="button"
+            size="icon-sm"
+            variant="ghost"
+            className="h-7 w-7"
+            onClick={onEdit}
+            title={t("editTooltip")}
+          >
+            <Edit2 className="h-3.5 w-3.5" />
+          </Button>
+        )}
+        {onDelete && (
+          <Button
+            type="button"
+            size="icon-sm"
+            variant="ghost"
+            className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+            onClick={onDelete}
+            title={t("deleteTooltip")}
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </Button>
+        )}
       </div>
     </div>
   );

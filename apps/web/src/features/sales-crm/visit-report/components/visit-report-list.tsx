@@ -26,6 +26,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useAccounts } from "../../account-management/hooks/useAccounts";
+import { useHasPermission } from "@/features/master-data/user-management/hooks/useHasPermission";
 import type { VisitReport } from "../types";
 import { useTranslations } from "next-intl";
 
@@ -38,6 +39,11 @@ const statusColors: Record<string, "default" | "secondary" | "destructive" | "ou
 
 export function VisitReportList() {
   const t = useTranslations("visitReportList");
+  
+  // Permission checks
+  const hasCreatePermission = useHasPermission("CREATE_VISIT_REPORTS");
+  const hasEditPermission = useHasPermission("EDIT_VISIT_REPORTS");
+  const hasDeletePermission = useHasPermission("DELETE_VISIT_REPORTS");
   const {
     page,
     setPage,
@@ -164,25 +170,29 @@ export function VisitReportList() {
           >
             <Eye className="h-3.5 w-3.5" />
           </Button>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => setEditingVisitReport(row.id)}
-            className="h-8 w-8"
-            title="Edit"
-            disabled={row.status !== "draft" && row.status !== "submitted"}
-          >
-            <Edit className="h-3.5 w-3.5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => handleDeleteClick(row.id)}
-            className="h-8 w-8 text-destructive hover:text-destructive"
-            title="Delete"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </Button>
+          {hasEditPermission && (
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => setEditingVisitReport(row.id)}
+              className="h-8 w-8"
+              title="Edit"
+              disabled={row.status !== "draft" && row.status !== "submitted"}
+            >
+              <Edit className="h-3.5 w-3.5" />
+            </Button>
+          )}
+          {hasDeletePermission && (
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => handleDeleteClick(row.id)}
+              className="h-8 w-8 text-destructive hover:text-destructive"
+              title="Delete"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
+          )}
         </div>
       ),
       className: "w-[140px] text-right",
@@ -282,10 +292,12 @@ export function VisitReportList() {
             }}
           />
         </div>
-        <Button onClick={() => setIsCreateDialogOpen(true)} size="sm">
-          <Plus className="h-4 w-4 mr-2" />
-          {t("buttons.addVisitReport")}
-        </Button>
+        {hasCreatePermission && (
+          <Button onClick={() => setIsCreateDialogOpen(true)} size="sm">
+            <Plus className="h-4 w-4 mr-2" />
+            {t("buttons.addVisitReport")}
+          </Button>
+        )}
       </div>
 
       {/* Table */}

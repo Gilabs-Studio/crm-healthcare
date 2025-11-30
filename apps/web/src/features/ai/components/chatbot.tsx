@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { Send, Loader2, Copy, Check, Settings, Plus, MoreVertical } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -22,6 +22,11 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { AccountDetailModal } from "@/features/sales-crm/account-management/components/account-detail-modal";
+import { ContactDetailModal } from "@/features/sales-crm/account-management/components/contact-detail-modal";
+import { TaskDetailModal } from "@/features/sales-crm/task-management/components/task-detail-modal";
+import { VisitReportDetailModal } from "@/features/sales-crm/visit-report/components/visit-report-detail-modal";
+import { DealDetailModal } from "@/features/sales-crm/pipeline-management/components/deal-detail-modal";
 
 interface Message {
   id: string;
@@ -34,6 +39,23 @@ interface Message {
 let messageIdCounter = 1;
 function generateMessageId(): string {
   return `msg-${messageIdCounter++}`;
+}
+
+// Extract custom links from markdown and create a map
+function extractCustomLinks(markdown: string): Map<string, string> {
+  const linkMap = new Map<string, string>();
+  // Match [text](type://uuid) format where UUID can contain hyphens
+  // UUID format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+  const customLinkRegex = /\[([^\]]+)\]\((\w+:\/\/[a-f0-9-]+)\)/gi;
+  let match;
+  
+  while ((match = customLinkRegex.exec(markdown)) !== null) {
+    const linkText = match[1];
+    const linkHref = match[2];
+    linkMap.set(linkText, linkHref);
+  }
+  
+  return linkMap;
 }
 
 export function Chatbot() {
@@ -57,16 +79,81 @@ export function Chatbot() {
   const [userSelectedModel, setUserSelectedModel] = useState<string | null>(null);
   const selectedModel = userSelectedModel || settings.model || "llama-3.1-8b";
 
+  // State for detail modals/drawers
+  const [viewingAccountId, setViewingAccountId] = useState<string | null>(null);
+  const [viewingContactId, setViewingContactId] = useState<string | null>(null);
+  const [viewingTaskId, setViewingTaskId] = useState<string | null>(null);
+  const [viewingVisitReportId, setViewingVisitReportId] = useState<string | null>(null);
+  const [viewingDealId, setViewingDealId] = useState<string | null>(null);
+
   // Get avatar URL from backend
   const userAvatarUrl = useMemo(() => {
     return user?.avatar_url || null;
   }, [user?.avatar_url]);
+
+  // Handle custom link clicks (type://ID format)
+  const handleLinkClick = useCallback((_e: React.MouseEvent<HTMLAnchorElement> | MouseEvent, href: string) => {
+    // Parse custom link format: type://ID
+    const customLinkRegex = /^(\w+):\/\/([a-f0-9-]+)$/i;
+    const match = customLinkRegex.exec(href);
+    if (!match) {
+      // Not a custom link, open in new tab
+      window.open(href, '_blank', 'noopener,noreferrer');
+      return;
+    }
+    
+    const [, type, id] = match;
+    
+    // Validate that ID is not empty
+    if (id.trim().length === 0) {
+      console.error('[AI Chatbot] Empty ID in custom link:', href);
+      return;
+    }
+    
+    // Check if ID is UUID format (for warning only)
+    const isUUID = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(id);
+    if (!isUUID) {
+      console.warn('[AI Chatbot] ID is not in UUID format (may cause API error):', id);
+    }
+    
+    // Clear all other modal states to prevent conflicts, then set the new one
+    setViewingAccountId(null);
+    setViewingContactId(null);
+    setViewingTaskId(null);
+    setViewingVisitReportId(null);
+    setViewingDealId(null);
+    
+    // Set the appropriate modal state based on type
+    switch (type) {
+      case 'account':
+        setViewingAccountId(id);
+        break;
+      case 'contact':
+        setViewingContactId(id);
+        break;
+      case 'task':
+        setViewingTaskId(id);
+        break;
+      case 'visit':
+        setViewingVisitReportId(id);
+        break;
+      case 'deal':
+        setViewingDealId(id);
+        break;
+      default:
+        // Unknown type, open in new tab
+        window.open(href, '_blank', 'noopener,noreferrer');
+    }
+  }, []);
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  // Note: Custom links are now rendered as <span> elements, so no document-level listener needed
+  // The onClick handler in the span component will handle clicks directly
 
   useEffect(() => {
     if (inputRef.current) {
@@ -222,18 +309,62 @@ export function Chatbot() {
         {children}
       </em>
     ),
-    // Links
-    a: ({ children, href, ...props }) => (
-      <a 
-        href={href} 
-        className="text-primary underline hover:no-underline" 
-        target="_blank" 
-        rel="noopener noreferrer"
-        {...props}
-      >
-        {children}
-      </a>
-    ),
+    // Links - handle custom type://ID format (fallback for non-assistant messages)
+    a: ({ children, href, node, ...props }) => {
+      const nodeHref = (node as { properties?: { href?: string } })?.properties?.href;
+      const actualHref = href || nodeHref || "";
+      
+      // Match custom link format: type://uuid (UUID with hyphens)
+      const customLinkRegex = /^\w+:\/\/[a-f0-9-]+$/i;
+      const isCustomLink = actualHref ? customLinkRegex.test(actualHref) : false;
+      
+      // For custom links, use button styled as link
+      if (isCustomLink && actualHref) {
+        return (
+          <button
+            type="button"
+            className="text-primary underline hover:no-underline cursor-pointer bg-transparent border-none p-0 font-inherit inline text-left"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleLinkClick(e as unknown as React.MouseEvent<HTMLAnchorElement>, actualHref);
+            }}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            title={actualHref}
+            data-custom-link={actualHref}
+          >
+            {children}
+          </button>
+        );
+      }
+      
+      // Regular links
+      return (
+        <a 
+          href={actualHref || "#"} 
+          className="text-primary underline hover:no-underline cursor-pointer" 
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (actualHref && !actualHref.startsWith('#') && !actualHref.startsWith('http')) {
+              window.open(actualHref, '_blank', 'noopener,noreferrer');
+            } else if (actualHref && actualHref.startsWith('http')) {
+              window.open(actualHref, '_blank', 'noopener,noreferrer');
+            }
+          }}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          {...props}
+        >
+          {children}
+        </a>
+      );
+    },
     // Code
     code: ({ children, className, ...props }) => {
       const isInline = !className?.includes('language-');
@@ -469,12 +600,87 @@ export function Chatbot() {
                   <div className="flex-1 min-w-0 wrap-break-word">
                     {message.role === "assistant" ? (
                       <div className="markdown-content prose prose-sm dark:prose-invert max-w-none prose-headings:mt-4 prose-headings:mb-2 prose-p:my-2">
-                        <ReactMarkdown 
-                          remarkPlugins={[remarkGfm]}
-                          components={markdownComponents}
-                        >
-                          {message.content}
-                        </ReactMarkdown>
+                        {(() => {
+                          // Extract custom links from markdown before rendering
+                          const customLinks = extractCustomLinks(message.content);
+                          
+                          // Create markdownComponents with access to customLinks
+                          const componentsWithLinks: Components = {
+                            ...markdownComponents,
+                            a: ({ children, href, node, ...props }) => {
+                              // Get link text from children
+                              const linkText = typeof children === 'string' 
+                                ? children 
+                                : Array.isArray(children) 
+                                  ? children.map(c => typeof c === 'string' ? c : '').join('')
+                                  : '';
+                              
+                              // Check if this link text exists in our custom links map
+                              const customHref = customLinks.get(linkText);
+                              const actualHref = customHref || href || (node as { properties?: { href?: string } })?.properties?.href || "";
+                              
+                              // Match custom link format: type://uuid (UUID with hyphens)
+                              const customLinkRegex = /^\w+:\/\/[a-f0-9-]+$/i;
+                              const isCustomLink = actualHref ? customLinkRegex.test(actualHref) : false;
+                              
+                              // For custom links, use button styled as link
+                              if (isCustomLink && actualHref) {
+                                return (
+                                  <button
+                                    type="button"
+                                    className="text-primary underline hover:no-underline cursor-pointer bg-transparent border-none p-0 font-inherit inline text-left"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      handleLinkClick(e as unknown as React.MouseEvent<HTMLAnchorElement>, actualHref);
+                                    }}
+                                    onMouseDown={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                    }}
+                                    title={actualHref}
+                                    data-custom-link={actualHref}
+                                  >
+                                    {children}
+                                  </button>
+                                );
+                              }
+                              
+                              // Regular links
+                              return (
+                                <a 
+                                  href={actualHref || "#"} 
+                                  className="text-primary underline hover:no-underline cursor-pointer" 
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    if (actualHref && !actualHref.startsWith('#') && !actualHref.startsWith('http')) {
+                                      window.open(actualHref, '_blank', 'noopener,noreferrer');
+                                    } else if (actualHref && actualHref.startsWith('http')) {
+                                      window.open(actualHref, '_blank', 'noopener,noreferrer');
+                                    }
+                                  }}
+                                  onMouseDown={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                  }}
+                                  {...props}
+                                >
+                                  {children}
+                                </a>
+                              );
+                            },
+                          };
+                          
+                          return (
+                            <ReactMarkdown 
+                              remarkPlugins={[remarkGfm]}
+                              components={componentsWithLinks}
+                            >
+                              {message.content}
+                            </ReactMarkdown>
+                          );
+                        })()}
                       </div>
                     ) : (
                       <p className="text-sm leading-relaxed whitespace-pre-wrap wrap-break-word">
@@ -548,6 +754,72 @@ export function Chatbot() {
           </p>
         </div>
       </div>
+
+      {/* Detail Modals/Drawers - Use key prop to force remount when ID changes, ensuring fresh data fetch */}
+      {viewingAccountId && (
+        <AccountDetailModal
+          key={`account-${viewingAccountId}`}
+          accountId={viewingAccountId}
+          open={!!viewingAccountId}
+          onOpenChange={(open) => {
+            if (!open) {
+              setViewingAccountId(null);
+            }
+          }}
+        />
+      )}
+
+      {viewingContactId && (
+        <ContactDetailModal
+          key={`contact-${viewingContactId}`}
+          contactId={viewingContactId}
+          open={!!viewingContactId}
+          onOpenChange={(open) => {
+            if (!open) {
+              setViewingContactId(null);
+            }
+          }}
+        />
+      )}
+
+      {viewingTaskId && (
+        <TaskDetailModal
+          key={`task-${viewingTaskId}`}
+          taskId={viewingTaskId}
+          open={!!viewingTaskId}
+          onOpenChange={(open) => {
+            if (!open) {
+              setViewingTaskId(null);
+            }
+          }}
+        />
+      )}
+
+      {viewingVisitReportId && (
+        <VisitReportDetailModal
+          key={`visit-${viewingVisitReportId}`}
+          visitReportId={viewingVisitReportId}
+          open={!!viewingVisitReportId}
+          onOpenChange={(open) => {
+            if (!open) {
+              setViewingVisitReportId(null);
+            }
+          }}
+        />
+      )}
+
+      {viewingDealId && (
+        <DealDetailModal
+          key={`deal-${viewingDealId}`}
+          dealId={viewingDealId}
+          open={!!viewingDealId}
+          onOpenChange={(open) => {
+            if (!open) {
+              setViewingDealId(null);
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

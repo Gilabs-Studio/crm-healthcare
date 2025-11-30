@@ -22,7 +22,9 @@ func SeedPermissions() error {
 	var dashboardMenu permission.Menu
 	var userPageMenu permission.Menu
 	var salesCRMMenu, accountsMenu, pipelineMenu, tasksMenu, productsMenu permission.Menu
+	var visitReportsMenu permission.Menu
 	var reportsMenu permission.Menu
+	var aiMenu, aiChatbotMenu, aiSettingsMenu permission.Menu
 
 	// Base path harus sama dengan yang digunakan di menu_seeder (locale-agnostic).
 	basePath := ""
@@ -31,6 +33,10 @@ func SeedPermissions() error {
 	database.DB.Where("url = ?", basePath+"/master-data/users").First(&userPageMenu)
 	database.DB.Where("url = ?", basePath+"/sales-crm").First(&salesCRMMenu)
 	database.DB.Where("url = ?", basePath+"/accounts").First(&accountsMenu)
+	database.DB.Where("url = ?", basePath+"/visit-reports").First(&visitReportsMenu)
+	database.DB.Where("url = ?", basePath+"/ai-assistant").First(&aiMenu)
+	database.DB.Where("url = ?", basePath+"/ai-chatbot").First(&aiChatbotMenu)
+	database.DB.Where("url = ?", basePath+"/ai-settings").First(&aiSettingsMenu)
 
 	// Get or create Pipeline menu
 	if err := database.DB.Where("url = ?", basePath+"/pipeline").First(&pipelineMenu).Error; err != nil {
@@ -102,6 +108,12 @@ func SeedPermissions() error {
 		{tasksMenu.ID, "DELETE_TASKS", "Delete Tasks", "DELETE", &tasksMenu},
 		{tasksMenu.ID, "ASSIGN_TASKS", "Assign Tasks", "ASSIGN", &tasksMenu},
 
+		// Visit Reports actions
+		{visitReportsMenu.ID, "VIEW_VISIT_REPORTS", "View Visit Reports", "VIEW", &visitReportsMenu},
+		{visitReportsMenu.ID, "CREATE_VISIT_REPORTS", "Create Visit Reports", "CREATE", &visitReportsMenu},
+		{visitReportsMenu.ID, "EDIT_VISIT_REPORTS", "Edit Visit Reports", "EDIT", &visitReportsMenu},
+		{visitReportsMenu.ID, "DELETE_VISIT_REPORTS", "Delete Visit Reports", "DELETE", &visitReportsMenu},
+
 		// Products actions
 		{productsMenu.ID, "VIEW_PRODUCTS", "View Products", "VIEW", &productsMenu},
 		{productsMenu.ID, "CREATE_PRODUCTS", "Create Products", "CREATE", &productsMenu},
@@ -118,6 +130,13 @@ func SeedPermissions() error {
 		{reportsMenu.ID, "VIEW_REPORTS", "View Reports", "VIEW", &reportsMenu},
 		{reportsMenu.ID, "GENERATE_REPORTS", "Generate Reports", "CREATE", &reportsMenu},
 		{reportsMenu.ID, "EXPORT_REPORTS", "Export Reports", "EXPORT", &reportsMenu},
+
+		// AI Chatbot actions
+		{aiChatbotMenu.ID, "VIEW_AI_CHATBOT", "View AI Chatbot", "VIEW", &aiChatbotMenu},
+
+		// AI Settings actions (admin only - universal settings)
+		{aiSettingsMenu.ID, "VIEW_AI_SETTINGS", "View AI Settings", "VIEW", &aiSettingsMenu},
+		{aiSettingsMenu.ID, "EDIT_AI_SETTINGS", "Edit AI Settings", "EDIT", &aiSettingsMenu},
 	}
 
 	// Create permissions
@@ -157,6 +176,29 @@ func SeedPermissions() error {
 	// Always sync all permissions to admin role (even if permissions already exist)
 	if err := SyncAdminPermissions(); err != nil {
 		log.Printf("Warning: Failed to sync admin permissions: %v", err)
+	}
+	
+	// Assign VIEW permissions only to viewer role (read-only access)
+	var viewerRole role.Role
+	if err := database.DB.Where("code = ?", "viewer").First(&viewerRole).Error; err == nil {
+		// Get all VIEW permissions only
+		var viewPermissions []permission.Permission
+		if err := database.DB.Where("action = ?", "VIEW").Find(&viewPermissions).Error; err == nil {
+			viewerPermissionCount := 0
+			for _, perm := range viewPermissions {
+				if err := database.DB.Exec(
+					"INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?) ON CONFLICT DO NOTHING",
+					viewerRole.ID, perm.ID,
+				).Error; err != nil {
+					log.Printf("Warning: Failed to assign permission %s to viewer: %v", perm.Code, err)
+				} else {
+					viewerPermissionCount++
+				}
+			}
+			log.Printf("Assigned %d VIEW permissions to viewer role", viewerPermissionCount)
+		}
+	} else {
+		log.Printf("Warning: Viewer role not found, skipping viewer permission assignment: %v", err)
 	}
 	
 	log.Println("Permissions seeded successfully")

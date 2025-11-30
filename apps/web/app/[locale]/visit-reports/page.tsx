@@ -1,6 +1,7 @@
 "use client";
 
 import { AuthGuard } from "@/features/auth/components/auth-guard";
+import { PermissionGuard } from "@/features/auth/components/permission-guard";
 import { VisitReportManagement } from "@/features/sales-crm/visit-report/components/visit-report-management";
 
 function VisitReportsPageContent() {
@@ -14,7 +15,9 @@ function VisitReportsPageContent() {
 export default function VisitReportsPage() {
   return (
     <AuthGuard>
-      <VisitReportsPageContent />
+      <PermissionGuard requiredPermission="VIEW_VISIT_REPORTS">
+        <VisitReportsPageContent />
+      </PermissionGuard>
     </AuthGuard>
   );
 }
