@@ -20,6 +20,7 @@ import (
 	"github.com/gilabs/crm-healthcare/api/internal/domain/task"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/user"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/visit_report"
+	"github.com/gilabs/crm-healthcare/api/internal/domain/ai_settings"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -70,7 +71,7 @@ func AutoMigrate() error {
 	}
 
 	// Use a custom migration approach that handles constraint errors gracefully
-	err := migrateWithErrorHandling(
+		err := migrateWithErrorHandling(
 		&user.User{},
 		&role.Role{},
 		&permission.Permission{},
@@ -87,6 +88,7 @@ func AutoMigrate() error {
 		&reminder.Reminder{},
 		&visit_report.VisitReport{},
 		&activity.Activity{},
+		&ai_settings.AISettings{},
 	)
 	if err != nil {
 		return fmt.Errorf("failed to run migrations: %w", err)

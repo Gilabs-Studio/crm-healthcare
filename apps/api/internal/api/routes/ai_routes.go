@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupAIRoutes(v1 *gin.RouterGroup, aiHandler *handlers.AIHandler, jwtManager *jwt.JWTManager) {
+func SetupAIRoutes(v1 *gin.RouterGroup, aiHandler *handlers.AIHandler, aiSettingsHandler *handlers.AISettingsHandler, jwtManager *jwt.JWTManager) {
 	ai := v1.Group("/ai")
 	ai.Use(middleware.AuthMiddleware(jwtManager))
 
@@ -17,6 +17,10 @@ func SetupAIRoutes(v1 *gin.RouterGroup, aiHandler *handlers.AIHandler, jwtManage
 
 		// Chat
 		ai.POST("/chat", aiHandler.Chat)
+
+		// Settings
+		ai.GET("/settings", aiSettingsHandler.GetSettings)
+		ai.PUT("/settings", aiSettingsHandler.UpdateSettings)
 	}
 }
 

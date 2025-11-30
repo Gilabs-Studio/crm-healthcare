@@ -35,6 +35,22 @@ export interface ChatRequest {
   context?: string;
   context_type?: "visit_report" | "deal" | "contact" | "account";
   conversation_history?: ChatMessage[];
+  model?: string;
+}
+
+export interface AISettingsResponse {
+  id: string;
+  enabled: boolean;
+  provider: string;
+  model: string;
+  base_url?: string;
+  data_privacy: AIDataPrivacySettings;
+  timezone: string;
+  usage_limit?: number;
+  current_usage: number;
+  usage_reset_at?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ChatResponse {
