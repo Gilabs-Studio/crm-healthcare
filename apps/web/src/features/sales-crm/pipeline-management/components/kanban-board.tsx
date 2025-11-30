@@ -1,7 +1,6 @@
 "use client";
 
 import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { DealCard } from "./deal-card";
@@ -26,18 +25,13 @@ export function KanbanBoard({ onDealClick }: KanbanBoardProps) {
     pipelines,
     dealsByStage,
     isLoading,
-    isCreateDialogOpen,
     editingDeal,
     handleDragStart,
     handleDragOver,
     handleDrop,
-    handleCreateDeal,
     handleUpdateDeal,
-    openCreateDialog,
-    closeCreateDialog,
     openEditDialog,
     closeEditDialog,
-    isCreating,
     isUpdating,
   } = useKanbanBoard();
 
@@ -68,19 +62,6 @@ export function KanbanBoard({ onDealClick }: KanbanBoardProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">{t("title")}</h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            {t("description")}
-          </p>
-        </div>
-        <Button onClick={openCreateDialog} className="w-full sm:w-auto" size="default">
-          <Plus className="h-4 w-4 mr-2" />
-          {t("newDeal")}
-        </Button>
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {pipelines.map((stage) => {
           const stageDeals = dealsByStage[stage.id] || [];
@@ -144,22 +125,6 @@ export function KanbanBoard({ onDealClick }: KanbanBoardProps) {
           );
         })}
       </div>
-
-      {/* Create Deal Dialog */}
-      <Dialog open={isCreateDialogOpen} onOpenChange={closeCreateDialog}>
-        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{t("createDialogTitle")}</DialogTitle>
-          </DialogHeader>
-          <DealForm
-            onSubmit={async (data) => {
-              await handleCreateDeal(data as any);
-            }}
-            onCancel={closeCreateDialog}
-            isLoading={isCreating}
-          />
-        </DialogContent>
-      </Dialog>
 
       {/* Edit Deal Dialog */}
       {editingDeal && (

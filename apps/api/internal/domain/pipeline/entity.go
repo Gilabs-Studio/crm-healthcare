@@ -135,9 +135,10 @@ func (ContactRef) TableName() string {
 
 // UserRef represents user reference in deal
 type UserRef struct {
-	ID    string `gorm:"type:uuid;primary_key" json:"id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
+	ID        string `gorm:"type:uuid;primary_key" json:"id"`
+	Name      string `json:"name"`
+	Email     string `json:"email"`
+	AvatarURL string `json:"avatar_url"`
 }
 
 // TableName specifies the table name for UserRef
@@ -187,9 +188,10 @@ type ContactRefResponse struct {
 
 // UserRefResponse represents user in deal response
 type UserRefResponse struct {
-	ID    string `json:"id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
+	ID        string `json:"id"`
+	Name      string `json:"name"`
+	Email     string `json:"email"`
+	AvatarURL string `json:"avatar_url"`
 }
 
 // ToDealResponse converts Deal to DealResponse
@@ -239,9 +241,10 @@ func (d *Deal) ToDealResponse() *DealResponse {
 
 	if d.AssignedUser != nil {
 		resp.AssignedUser = &UserRefResponse{
-			ID:    d.AssignedUser.ID,
-			Name:  d.AssignedUser.Name,
-			Email: d.AssignedUser.Email,
+			ID:        d.AssignedUser.ID,
+			Name:      d.AssignedUser.Name,
+			Email:     d.AssignedUser.Email,
+			AvatarURL: d.AssignedUser.AvatarURL,
 		}
 	}
 

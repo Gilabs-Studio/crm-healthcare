@@ -30,6 +30,7 @@ export interface UserRef {
   id: string;
   name: string;
   email?: string;
+  avatar_url?: string;
 }
 
 // Deal Types
