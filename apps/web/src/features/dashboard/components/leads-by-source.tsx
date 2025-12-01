@@ -27,6 +27,35 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
+// Known source keys that have translations
+const KNOWN_SOURCE_KEYS = ["social", "email", "call", "other"] as const;
+
+// Helper function to normalize source name for translation key
+function normalizeSourceKey(source: string): string {
+  return source.toLowerCase().trim().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
+}
+
+// Helper function to safely get translated source name
+function getTranslatedSourceName(
+  t: ReturnType<typeof useTranslations<"dashboardOverview">>,
+  source: string
+): string {
+  const normalizedKey = normalizeSourceKey(source);
+  
+  // Only try to translate if it's a known source key
+  if (KNOWN_SOURCE_KEYS.includes(normalizedKey as any)) {
+    try {
+      return t(`leadsBySource.source.${normalizedKey}` as any);
+    } catch {
+      // Fallback to original if translation fails
+      return source;
+    }
+  }
+  
+  // For unknown sources, return the original name
+  return source;
+}
+
 export function LeadsBySource() {
   const t = useTranslations("dashboardOverview");
   const { data, isLoading } = useDashboardOverview({ period: "month" });
@@ -126,9 +155,7 @@ export function LeadsBySource() {
                   style={{ backgroundColor: COLORS[index % COLORS.length] }}
                 />
                 <span className="capitalize">
-                  {t(`leadsBySource.source.${item.name}`, {
-                    default: item.name,
-                  })}
+                  {getTranslatedSourceName(t, item.name)}
                 </span>
               </div>
               <span className="text-muted-foreground">
