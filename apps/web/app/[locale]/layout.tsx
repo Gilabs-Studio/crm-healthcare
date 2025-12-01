@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -10,17 +9,6 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import { AppLayout } from "@/components/layouts/app-layout";
 import { Toaster } from "sonner";
 import "../globals.css";
-
-export const metadata: Metadata = {
-  title: "CRM Healthcare Platform",
-  description: "CRM Healthcare/Pharmaceutical Platform",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 5,
-    userScalable: true,
-  },
-};
 
 export default async function LocaleLayout({
   children,

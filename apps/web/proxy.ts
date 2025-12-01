@@ -20,18 +20,5 @@ export function proxy(request: NextRequest) {
   return NextResponse.next();
 }
 
-export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - mockServiceWorker.js (MSW service worker)
-     * - static files (images, js, css, etc.)
-     */
-    String.raw`/((?!api|_next/static|_next/image|favicon.ico|mockServiceWorker\.js|.*\.(?:svg|png|jpg|jpeg|gif|webp|js|css|json)$).*)`,
-  ],
-};
+// Config moved to middleware.ts if needed
 
