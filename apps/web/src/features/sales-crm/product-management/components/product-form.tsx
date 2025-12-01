@@ -69,7 +69,7 @@ export function ProductForm({ product, onSubmit, onCancel, isLoading }: ProductF
     // Convert price and cost from rupiah to sen
     const submitData: CreateProductFormData | UpdateProductFormData = {
       ...data,
-      price: Math.round(data.price * 100),
+      price: Math.round((data.price ?? 0) * 100),
       cost: data.cost ? Math.round(data.cost * 100) : undefined,
     };
     await onSubmit(submitData);

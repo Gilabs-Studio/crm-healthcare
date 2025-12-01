@@ -1,8 +1,10 @@
 import { useAuthStore } from "../stores/useAuthStore";
 import { authService } from "../services/authService";
+import { useLogout } from "./useLogout";
 
 export function useRefreshSession() {
-  const { refreshToken, setUser, setToken, logout } = useAuthStore();
+  const { refreshToken, setUser, setToken } = useAuthStore();
+  const handleLogout = useLogout();
 
   const refreshSession = async () => {
     const currentRefreshToken = refreshToken;
@@ -26,7 +28,7 @@ export function useRefreshSession() {
       }
     } catch (error) {
       // Refresh failed, logout user
-      await logout();
+      await handleLogout();
       throw error;
     }
   };

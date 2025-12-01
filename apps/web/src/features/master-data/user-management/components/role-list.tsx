@@ -22,6 +22,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { AssignPermissionsDialog } from "./assign-permissions-dialog";
+import type { CreateRoleFormData, UpdateRoleFormData } from "../schemas/role.schema";
 
 export function RoleList() {
   const {
@@ -149,7 +150,7 @@ export function RoleList() {
           </DialogHeader>
           <RoleForm
             onSubmit={async (data) => {
-              await handleCreate(data);
+              await handleCreate(data as CreateRoleFormData);
             }}
             onCancel={() => setIsCreateDialogOpen(false)}
             isLoading={createRole.isPending}
@@ -167,7 +168,7 @@ export function RoleList() {
             <RoleForm
               role={roleForEdit}
               onSubmit={async (data) => {
-                await handleUpdate(data);
+                await handleUpdate(data as UpdateRoleFormData);
               }}
               onCancel={() => setEditingRole(null)}
               isLoading={updateRole.isPending}

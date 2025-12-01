@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { useHasPermission } from "@/features/master-data/user-management/hooks/useHasPermission";
+import type { CreateCategoryFormData, UpdateCategoryFormData } from "../schemas/category.schema";
 
 export function CategoryList() {
   const hasViewPermission = useHasPermission("VIEW_PRODUCT_CATEGORIES");
@@ -166,7 +167,7 @@ export function CategoryList() {
             </DialogHeader>
             <CategoryForm
               onSubmit={async (data) => {
-                await handleCreate(data);
+                await handleCreate(data as CreateCategoryFormData);
               }}
               onCancel={() => setIsCreateDialogOpen(false)}
               isLoading={createCategory.isPending}
@@ -185,7 +186,7 @@ export function CategoryList() {
             <CategoryForm
               category={categoryForEdit}
               onSubmit={async (data) => {
-                await handleUpdate(data);
+                await handleUpdate(data as UpdateCategoryFormData);
               }}
               onCancel={() => setEditingCategory(null)}
               isLoading={updateCategory.isPending}

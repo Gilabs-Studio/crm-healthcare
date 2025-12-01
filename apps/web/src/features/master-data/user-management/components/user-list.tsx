@@ -27,6 +27,7 @@ import {
 import { useHasPermission } from "../hooks/useHasPermission";
 import type { User } from "../types";
 import { useTranslations } from "next-intl";
+import type { CreateUserFormData, UpdateUserFormData } from "../schemas/user.schema";
 
 export function UserList() {
   const {
@@ -256,7 +257,7 @@ export function UserList() {
           </DialogHeader>
           <UserForm
             onSubmit={async (data) => {
-              await handleCreate(data);
+              await handleCreate(data as CreateUserFormData);
             }}
             onCancel={() => setIsCreateDialogOpen(false)}
             isLoading={createUser.isPending}
@@ -274,7 +275,7 @@ export function UserList() {
             <UserForm
               user={editingUserData.data}
               onSubmit={async (data) => {
-                await handleUpdate(data);
+                await handleUpdate(data as UpdateUserFormData);
               }}
               onCancel={() => setEditingUser(null)}
               isLoading={updateUser.isPending}

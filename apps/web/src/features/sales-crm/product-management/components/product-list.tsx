@@ -26,6 +26,7 @@ import {
 import type { Product } from "../types";
 import { useTranslations } from "next-intl";
 import { useHasPermission } from "@/features/master-data/user-management/hooks/useHasPermission";
+import type { CreateProductFormData, UpdateProductFormData } from "../schemas/product.schema";
 
 export function ProductList() {
   const hasViewPermission = useHasPermission("VIEW_PRODUCTS");
@@ -282,7 +283,7 @@ export function ProductList() {
             </DialogHeader>
             <ProductForm
               onSubmit={async (data) => {
-                await handleCreate(data);
+                await handleCreate(data as CreateProductFormData);
               }}
               onCancel={() => setIsCreateDialogOpen(false)}
               isLoading={createProduct.isPending}
@@ -301,7 +302,7 @@ export function ProductList() {
             <ProductForm
               product={editingProductData.data}
               onSubmit={async (data) => {
-                await handleUpdate(data);
+                await handleUpdate(data as UpdateProductFormData);
               }}
               onCancel={() => setEditingProduct(null)}
               isLoading={updateProduct.isPending}

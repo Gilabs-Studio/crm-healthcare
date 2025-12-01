@@ -23,6 +23,7 @@ import {
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { useTranslations } from "next-intl";
 import { toBadgeVariant } from "@/lib/badge-variant";
+import type { CreateCategoryFormData, UpdateCategoryFormData } from "../schemas/category.schema";
 
 export function CategoryList() {
   const {
@@ -141,7 +142,7 @@ export function CategoryList() {
           </DialogHeader>
           <CategoryForm
             onSubmit={async (data) => {
-              await handleCreate(data);
+              await handleCreate(data as CreateCategoryFormData);
             }}
             onCancel={() => setIsCreateDialogOpen(false)}
             isLoading={createCategory.isPending}
@@ -158,7 +159,7 @@ export function CategoryList() {
             </DialogHeader>
             <CategoryForm
               category={categoryForEdit}
-              onSubmit={(data) => handleUpdate(data)}
+              onSubmit={(data) => handleUpdate(data as UpdateCategoryFormData)}
               onCancel={() => setEditingCategory(null)}
               isLoading={updateCategory.isPending}
             />

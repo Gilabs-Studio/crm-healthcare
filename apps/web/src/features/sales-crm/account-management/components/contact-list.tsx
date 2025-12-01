@@ -17,6 +17,7 @@ import {
 import { useAccounts } from "../hooks/useAccounts";
 import type { Contact, ContactRole } from "../types";
 import { ContactDetailModal } from "./contact-detail-modal";
+import type { CreateContactFormData, UpdateContactFormData } from "../schemas/contact.schema";
 
 export function ContactList() {
   const {
@@ -232,7 +233,7 @@ export function ContactList() {
           </DialogHeader>
           <ContactForm
             onSubmit={async (data) => {
-              await handleCreate(data);
+              await handleCreate(data as CreateContactFormData);
             }}
             onCancel={() => setIsCreateDialogOpen(false)}
             isLoading={createContact.isPending}
@@ -250,7 +251,7 @@ export function ContactList() {
             </DialogHeader>
             <ContactForm
               contact={editingContactData.data}
-              onSubmit={(data) => handleUpdate(data)}
+              onSubmit={(data) => handleUpdate(data as UpdateContactFormData)}
               onCancel={() => setEditingContact(null)}
               isLoading={updateContact.isPending}
             />

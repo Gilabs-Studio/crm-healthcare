@@ -28,6 +28,7 @@ import {
 import { useAccounts } from "../../account-management/hooks/useAccounts";
 import { useHasPermission } from "@/features/master-data/user-management/hooks/useHasPermission";
 import type { VisitReport } from "../types";
+import type { CreateVisitReportFormData, UpdateVisitReportFormData } from "../schemas/visit-report.schema";
 import { useTranslations } from "next-intl";
 
 const statusColors: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
@@ -340,7 +341,7 @@ export function VisitReportList() {
           </DialogHeader>
           <VisitReportForm
             onSubmit={async (data) => {
-              await handleCreate(data);
+              await handleCreate(data as CreateVisitReportFormData);
             }}
             onCancel={() => setIsCreateDialogOpen(false)}
             isLoading={createVisitReport.isPending}

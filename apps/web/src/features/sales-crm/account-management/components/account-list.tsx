@@ -51,6 +51,7 @@ import { useHasPermission } from "@/features/master-data/user-management/hooks/u
 import { toast } from "sonner";
 import type { Account, Contact } from "../types";
 import type { CreateContactFormData, UpdateContactFormData } from "../schemas/contact.schema";
+import type { CreateAccountFormData, UpdateAccountFormData } from "../schemas/account.schema";
 import { useTranslations } from "next-intl";
 
 export function AccountList() {
@@ -372,7 +373,7 @@ export function AccountList() {
           </DialogHeader>
           <AccountForm
             onSubmit={async (data) => {
-              await handleCreate(data);
+              await handleCreate(data as CreateAccountFormData);
             }}
             onCancel={() => setIsCreateDialogOpen(false)}
             isLoading={createAccount.isPending}
@@ -424,7 +425,7 @@ export function AccountList() {
             <ContactForm
               defaultAccountId={createContactAccountId}
               onSubmit={async (data) => {
-                await handleCreateContactSubmit(data);
+                await handleCreateContactSubmit(data as CreateContactFormData);
               }}
               onCancel={() => {
                 setIsCreateContactDialogOpen(false);
