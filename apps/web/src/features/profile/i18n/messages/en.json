@@ -1,0 +1,72 @@
+{
+  "profile": {
+    "title": "Profile Settings",
+    "description": "Manage your profile information and password",
+    "settings": "Settings",
+    "tabs": {
+      "overview": "Overview",
+      "projects": "Projects",
+      "activities": "Activities",
+      "members": "Members",
+      "projectsContent": "Projects content coming soon...",
+      "activitiesContent": "Activities content coming soon...",
+      "membersContent": "Members content coming soon..."
+    },
+    "contact": {
+      "title": "Contact Information"
+    },
+    "completion": {
+      "title": "Complete Your Profile",
+      "label": "Profile Completion"
+    },
+    "skills": {
+      "title": "Skills"
+    },
+    "activity": {
+      "title": "Latest Activity",
+      "viewAll": "View All",
+      "description": "Application UI kit with modern design system",
+      "download": "Download ZIP"
+    },
+    "transactions": {
+      "title": "Transaction History",
+      "product": "Product",
+      "status": "Status",
+      "date": "Date",
+      "amount": "Amount"
+    },
+    "connections": {
+      "title": "Connections",
+      "connect": "Connect",
+      "disconnect": "Disconnect"
+    },
+    "information": {
+      "title": "Profile Information",
+      "description": "Update your profile information",
+      "emailLabel": "Email",
+      "emailHint": "Email cannot be changed",
+      "nameLabel": "Name",
+      "namePlaceholder": "Enter your name",
+      "save": "Save Changes",
+      "saving": "Saving..."
+    },
+    "password": {
+      "title": "Change Password",
+      "description": "Update your password to keep your account secure",
+      "currentPasswordLabel": "Current Password",
+      "currentPasswordPlaceholder": "Enter your current password",
+      "newPasswordLabel": "New Password",
+      "newPasswordPlaceholder": "Enter your new password",
+      "confirmPasswordLabel": "Confirm New Password",
+      "confirmPasswordPlaceholder": "Confirm your new password",
+      "change": "Change Password",
+      "changing": "Changing...",
+      "cancel": "Cancel"
+    },
+    "settings": {
+      "title": "Account Settings",
+      "description": "Manage your account information and security"
+    }
+  }
+}
+
