@@ -119,7 +119,9 @@
       "addVisitReport": "Tambah Laporan Kunjungan",
       "viewDetails": "Lihat Detail",
       "edit": "Ubah",
-      "delete": "Hapus"
+      "delete": "Hapus",
+      "approve": "Setujui",
+      "reject": "Tolak"
     },
     "empty": {
       "table": "Tidak ada laporan kunjungan"

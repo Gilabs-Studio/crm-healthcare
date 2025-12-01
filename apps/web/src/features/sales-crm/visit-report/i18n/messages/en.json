@@ -119,7 +119,9 @@
       "addVisitReport": "Add Visit Report",
       "viewDetails": "View Details",
       "edit": "Edit",
-      "delete": "Delete"
+      "delete": "Delete",
+      "approve": "Approve",
+      "reject": "Reject"
     },
     "empty": {
       "table": "No visit reports found"
