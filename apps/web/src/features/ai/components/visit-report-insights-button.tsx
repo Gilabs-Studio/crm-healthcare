@@ -96,20 +96,22 @@ export function VisitReportInsightsButton({
               {/* Summary */}
               <div>
                 <h3 className="text-sm font-semibold mb-2">Summary</h3>
-                <p className="text-sm text-muted-foreground">{insight.summary}</p>
+                <p className="text-sm text-muted-foreground">{insight.summary || "No summary available"}</p>
               </div>
 
               {/* Sentiment */}
-              <div>
-                <h3 className="text-sm font-semibold mb-2">Sentiment</h3>
-                <Badge
-                  className={getSentimentColor(insight.sentiment)}
-                  variant="outline"
-                >
-                  {getSentimentIcon(insight.sentiment)}
-                  <span className="ml-1 capitalize">{insight.sentiment}</span>
-                </Badge>
-              </div>
+              {insight.sentiment && (
+                <div>
+                  <h3 className="text-sm font-semibold mb-2">Sentiment</h3>
+                  <Badge
+                    className={getSentimentColor(insight.sentiment)}
+                    variant="outline"
+                  >
+                    {getSentimentIcon(insight.sentiment)}
+                    <span className="ml-1 capitalize">{insight.sentiment}</span>
+                  </Badge>
+                </div>
+              )}
 
               {/* Key Points */}
               {insight.key_points && insight.key_points.length > 0 && (

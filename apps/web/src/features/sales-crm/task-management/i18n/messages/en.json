@@ -116,7 +116,9 @@
       "duePrefix": "Due {date}",
       "markCompletedTooltip": "Mark as completed",
       "editTooltip": "Edit task",
-      "deleteTooltip": "Delete task"
+      "deleteTooltip": "Delete task",
+      "unknownAccount": "Unknown Account",
+      "unknownContact": "Unknown Contact"
     },
     "form": {
       "titleLabel": "Title",

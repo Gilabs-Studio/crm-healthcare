@@ -97,18 +97,20 @@ export function RecentActivities() {
                     {formatTime(activity.timestamp)}
                   </span>
                 </div>
-                <div className="text-sm">{activity.description}</div>
+                <div className="text-sm">{activity.description || t("noDescription")}</div>
                 <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                   {activity.account && (
                     <div className="flex items-center gap-1">
                       <Building2 className="h-3 w-3" />
-                      <span>{activity.account.name}</span>
+                      <span>{activity.account?.name || t("unknownAccount")}</span>
                     </div>
                   )}
-                  <div className="flex items-center gap-1">
-                    <User className="h-3 w-3" />
-                    <span>{activity.user.name}</span>
-                  </div>
+                  {activity.user && (
+                    <div className="flex items-center gap-1">
+                      <User className="h-3 w-3" />
+                      <span>{activity.user?.name || t("unknownUser")}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

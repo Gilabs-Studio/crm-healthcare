@@ -108,6 +108,14 @@ export function ActivityTrends() {
     return null;
   }
 
+  const activityStats = overview.activity_stats ?? {
+    total: 0,
+    visits: 0,
+    calls: 0,
+    emails: 0,
+    change_percent: 0,
+  };
+
   return (
     <Card>
       <CardHeader className="relative flex items-center gap-2 space-y-0 sm:flex-row">
@@ -134,15 +142,15 @@ export function ActivityTrends() {
           <div className="grid grid-cols-3 gap-4">
             <div>
               <div className="text-sm text-muted-foreground">{t("totalVisits")}</div>
-              <div className="text-2xl font-bold">{overview.activity_stats.visits}</div>
+              <div className="text-2xl font-bold">{activityStats.visits}</div>
             </div>
             <div>
               <div className="text-sm text-muted-foreground">{t("totalCalls")}</div>
-              <div className="text-2xl font-bold">{overview.activity_stats.calls}</div>
+              <div className="text-2xl font-bold">{activityStats.calls}</div>
             </div>
             <div>
               <div className="text-sm text-muted-foreground">{t("totalEmails")}</div>
-              <div className="text-2xl font-bold">{overview.activity_stats.emails}</div>
+              <div className="text-2xl font-bold">{activityStats.emails}</div>
             </div>
           </div>
 

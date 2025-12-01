@@ -95,17 +95,17 @@ export function AccountDetailModal({ accountId, open, onOpenChange, onAccountUpd
                   <Building2 className="h-8 w-8 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <h2 className="text-2xl font-semibold tracking-tight">{account.name}</h2>
+                  <h2 className="text-2xl font-semibold tracking-tight">{account.name || t("infoCard.notAvailable")}</h2>
                   <div className="flex items-center gap-2 mt-1">
                     {account.category ? (
-                      <Badge variant={account.category.badge_color as any} className="font-normal">
-                        {account.category.name}
+                      <Badge variant={(account.category?.badge_color || "secondary") as any} className="font-normal">
+                        {account.category?.name || "-"}
                       </Badge>
                     ) : (
                       <Badge variant="outline">-</Badge>
                     )}
-                    <Badge variant={account.status === "active" ? "active" : "inactive"}>
-                      {account.status}
+                    <Badge variant={(account.status === "active" ? "active" : "inactive") as any}>
+                      {account.status || "-"}
                     </Badge>
                   </div>
                 </div>
@@ -143,7 +143,7 @@ export function AccountDetailModal({ accountId, open, onOpenChange, onAccountUpd
                         <Building2 className="h-4 w-4" />
                         <span>{t("infoCard.name")}</span>
                       </div>
-                      <div className="text-base font-medium">{account.name}</div>
+                      <div className="text-base font-medium">{account.name || t("infoCard.notAvailable")}</div>
                     </div>
 
                     <div className="space-y-2">
@@ -152,8 +152,8 @@ export function AccountDetailModal({ accountId, open, onOpenChange, onAccountUpd
                       </div>
                       <div>
                         {account.category ? (
-                          <Badge variant={account.category.badge_color as any} className="font-normal">
-                            {account.category.name}
+                          <Badge variant={(account.category?.badge_color || "secondary") as any} className="font-normal">
+                            {account.category?.name || "-"}
                           </Badge>
                         ) : (
                           <span className="text-muted-foreground">{t("infoCard.notAvailable")}</span>

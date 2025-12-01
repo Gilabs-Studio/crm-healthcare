@@ -116,7 +116,10 @@
     "minutesAgo": "{count}mnt lalu",
     "hoursAgo": "{count}jam lalu",
     "daysAgo": "{count}hr lalu",
-    "olderDate": "{date}"
+    "olderDate": "{date}",
+    "unknownUser": "Pengguna Tidak Dikenal",
+    "unknownAccount": "Akun Tidak Dikenal",
+    "noDescription": "Tidak ada deskripsi"
   },
   "topAccounts": {
     "title": "Akun Teratas",
@@ -236,7 +239,9 @@
         "confirmLoading": "Menghapus..."
       },
       "fallbacks": {
-        "unknownAccount": "Tidak diketahui"
+        "unknownAccount": "Tidak diketahui",
+        "unknownContact": "Kontak Tidak Dikenal",
+        "unknownStage": "Tahap Tidak Dikenal"
       }
     }
   },

@@ -128,9 +128,9 @@ export function DealDetailModal({
                       <>
                         <Circle
                           className="h-3 w-3"
-                          style={{ color: deal.stage.color, fill: deal.stage.color }}
+                          style={{ color: deal.stage.color || "#CBD5F5", fill: deal.stage.color || "#CBD5F5" }}
                         />
-                        <span className="text-sm text-muted-foreground">{deal.stage.name}</span>
+                        <span className="text-sm text-muted-foreground">{deal.stage.name || t("fallbacks.unknownStage")}</span>
                       </>
                     )}
                   </div>
@@ -207,7 +207,7 @@ export function DealDetailModal({
                             className="h-auto p-0 text-base font-medium"
                             onClick={() => setViewingAccountId(deal.account?.id || null)}
                           >
-                            {deal.account.name}
+                            {deal.account?.name || t("fallbacks.unknownAccount")}
                           </Button>
                         </div>
                       </div>
@@ -225,7 +225,7 @@ export function DealDetailModal({
                             className="h-auto p-0 text-base font-medium"
                             onClick={() => setViewingContactId(deal.contact?.id || null)}
                           >
-                            {deal.contact.name}
+                            {deal.contact?.name || t("fallbacks.unknownContact")}
                           </Button>
                         </div>
                       </div>

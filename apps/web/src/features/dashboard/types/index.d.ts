@@ -25,7 +25,7 @@ export interface DashboardOverview {
     start: string;
     end: string;
   };
-  visit_stats: {
+  visit_stats?: {
     total: number;
     completed: number;
     pending: number;
@@ -33,20 +33,20 @@ export interface DashboardOverview {
     rejected: number;
     change_percent: number;
   };
-  account_stats: {
+  account_stats?: {
     total: number;
     active: number;
     inactive: number;
     change_percent: number;
   };
-  activity_stats: {
+  activity_stats?: {
     total: number;
     visits: number;
     calls: number;
     emails: number;
     change_percent: number;
   };
-  target: {
+  target?: {
     target_amount: number;
     target_amount_formatted: string;
     achieved_amount: number;
@@ -54,7 +54,7 @@ export interface DashboardOverview {
     progress_percent: number;
     change_percent: number;
   };
-  deals: {
+  deals?: {
     total_deals: number;
     open_deals: number;
     won_deals: number;
@@ -63,26 +63,26 @@ export interface DashboardOverview {
     total_value_formatted: string;
     change_percent: number;
   };
-  revenue: {
+  revenue?: {
     total_revenue: number;
     total_revenue_formatted: string;
     change_percent: number;
   };
-  leads_by_source: {
+  leads_by_source?: {
     total: number;
     by_source: Array<{
       source: string;
       count: number;
     }>;
   };
-  upcoming_tasks: Array<{
+  upcoming_tasks?: Array<{
     id: string;
     title: string;
     priority: string;
     status: string;
     due_date?: string | null;
   }>;
-  pipeline_stages: Array<{
+  pipeline_stages?: Array<{
     stage_id: string;
     stage_name: string;
     stage_code: string;

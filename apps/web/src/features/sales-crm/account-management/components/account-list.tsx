@@ -544,10 +544,10 @@ function AccountRow({
         <TableCell>
           {account.category ? (
             <Badge 
-              variant={account.category.badge_color as VariantProps<typeof badgeVariants>["variant"]} 
+              variant={(account.category?.badge_color || "secondary") as VariantProps<typeof badgeVariants>["variant"]} 
               className="font-normal"
             >
-              {account.category.name}
+              {account.category?.name || "-"}
             </Badge>
           ) : (
             <span className="text-muted-foreground">-</span>

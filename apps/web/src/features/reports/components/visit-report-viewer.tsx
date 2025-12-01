@@ -31,6 +31,17 @@ export function VisitReportViewer({ data, isLoading }: VisitReportViewerProps) {
     );
   }
 
+  const summary = data.summary ?? {
+    total: 0,
+    completed: 0,
+    pending: 0,
+    approved: 0,
+    rejected: 0,
+  };
+  const byAccount = data.by_account ?? [];
+  const bySalesRep = data.by_sales_rep ?? [];
+  const byDate = data.by_date ?? [];
+
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
@@ -42,7 +53,7 @@ export function VisitReportViewer({ data, isLoading }: VisitReportViewerProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.summary.total}</div>
+            <div className="text-2xl font-bold">{summary.total}</div>
           </CardContent>
         </Card>
         <Card>
@@ -52,7 +63,7 @@ export function VisitReportViewer({ data, isLoading }: VisitReportViewerProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.summary.completed}</div>
+            <div className="text-2xl font-bold">{summary.completed}</div>
           </CardContent>
         </Card>
         <Card>
@@ -62,7 +73,7 @@ export function VisitReportViewer({ data, isLoading }: VisitReportViewerProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.summary.pending}</div>
+            <div className="text-2xl font-bold">{summary.pending}</div>
           </CardContent>
         </Card>
         <Card>
@@ -72,7 +83,7 @@ export function VisitReportViewer({ data, isLoading }: VisitReportViewerProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.summary.approved}</div>
+            <div className="text-2xl font-bold">{summary.approved}</div>
           </CardContent>
         </Card>
         <Card>
@@ -82,13 +93,13 @@ export function VisitReportViewer({ data, isLoading }: VisitReportViewerProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.summary.rejected}</div>
+            <div className="text-2xl font-bold">{summary.rejected}</div>
           </CardContent>
         </Card>
       </div>
 
       {/* By Account */}
-      {data.by_account && data.by_account.length > 0 && (
+      {byAccount.length > 0 && (
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
@@ -98,22 +109,27 @@ export function VisitReportViewer({ data, isLoading }: VisitReportViewerProps) {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {data.by_account.map((item) => (
-                <div
-                  key={item.account.id}
-                  className="flex items-center justify-between p-3 rounded-lg border"
-                >
-                  <div className="font-medium">{item.account.name}</div>
-                  <div className="text-sm text-muted-foreground">{item.visit_count} visits</div>
-                </div>
-              ))}
+              {byAccount.map((item) => {
+                const account = item.account ?? { id: "", name: "Unknown Account" };
+                const visitCount = item.visit_count ?? 0;
+                
+                return (
+                  <div
+                    key={account.id || `account-${Math.random()}`}
+                    className="flex items-center justify-between p-3 rounded-lg border"
+                  >
+                    <div className="font-medium">{account.name}</div>
+                    <div className="text-sm text-muted-foreground">{visitCount} visits</div>
+                  </div>
+                );
+              })}
             </div>
           </CardContent>
         </Card>
       )}
 
       {/* By Sales Rep */}
-      {data.by_sales_rep && data.by_sales_rep.length > 0 && (
+      {bySalesRep.length > 0 && (
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
@@ -123,22 +139,27 @@ export function VisitReportViewer({ data, isLoading }: VisitReportViewerProps) {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {data.by_sales_rep.map((item) => (
-                <div
-                  key={item.sales_rep.id}
-                  className="flex items-center justify-between p-3 rounded-lg border"
-                >
-                  <div className="font-medium">{item.sales_rep.name}</div>
-                  <div className="text-sm text-muted-foreground">{item.visit_count} visits</div>
-                </div>
-              ))}
+              {bySalesRep.map((item) => {
+                const salesRep = item.sales_rep ?? { id: "", name: "Unknown Sales Rep" };
+                const visitCount = item.visit_count ?? 0;
+                
+                return (
+                  <div
+                    key={salesRep.id || `sales-rep-${Math.random()}`}
+                    className="flex items-center justify-between p-3 rounded-lg border"
+                  >
+                    <div className="font-medium">{salesRep.name}</div>
+                    <div className="text-sm text-muted-foreground">{visitCount} visits</div>
+                  </div>
+                );
+              })}
             </div>
           </CardContent>
         </Card>
       )}
 
       {/* By Date */}
-      {data.by_date && data.by_date.length > 0 && (
+      {byDate.length > 0 && (
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
@@ -148,32 +169,34 @@ export function VisitReportViewer({ data, isLoading }: VisitReportViewerProps) {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {data.by_date.slice(0, 20).map((item) => (
-                <div key={item.date} className="flex items-center gap-3">
-                  <div className="text-sm text-muted-foreground w-32">
-                    {new Date(item.date).toLocaleDateString("id-ID", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </div>
-                  <div className="flex-1">
-                    <div className="h-6 bg-muted rounded-full relative overflow-hidden">
-                      <div
-                        className="h-full bg-primary rounded-full transition-all"
-                        style={{
-                          width: `${
-                            (item.count /
-                              Math.max(...data.by_date.map((d) => d.count), 1)) *
-                            100
-                          }%`,
-                        }}
-                      />
+              {byDate.slice(0, 20).map((item) => {
+                const itemDate = item.date ?? "";
+                const itemCount = item.count ?? 0;
+                const maxCount = Math.max(...byDate.map((d) => d.count ?? 0), 1);
+                
+                return (
+                  <div key={itemDate || `date-${Math.random()}`} className="flex items-center gap-3">
+                    <div className="text-sm text-muted-foreground w-32">
+                      {itemDate ? new Date(itemDate).toLocaleDateString("id-ID", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      }) : "-"}
                     </div>
+                    <div className="flex-1">
+                      <div className="h-6 bg-muted rounded-full relative overflow-hidden">
+                        <div
+                          className="h-full bg-primary rounded-full transition-all"
+                          style={{
+                            width: `${(itemCount / maxCount) * 100}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <div className="text-sm font-medium w-12 text-right">{itemCount}</div>
                   </div>
-                  <div className="text-sm font-medium w-12 text-right">{item.count}</div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </CardContent>
         </Card>

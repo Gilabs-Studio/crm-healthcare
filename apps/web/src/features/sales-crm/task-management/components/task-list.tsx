@@ -129,7 +129,7 @@ export function TaskList() {
             className="text-sm text-primary hover:underline"
             // detail modal contact akan di-handle di level yang lebih tinggi bila diperlukan
           >
-            {row.contact.name}
+            {row.contact?.name || "-"}
           </button>
         ) : (
           <span className="text-sm text-muted-foreground">-</span>

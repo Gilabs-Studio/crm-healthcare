@@ -33,37 +33,52 @@ const chartConfig = {
 export function SalesFunnelInsights({ data }: SalesFunnelInsightsProps) {
   const t = useTranslations("reportsFeature.salesFunnelInsights");
 
+  // Extract with null safety
+  const summary = data?.summary ?? {
+    total_deals: 0,
+    total_value: 0,
+    won_deals: 0,
+    lost_deals: 0,
+    open_deals: 0,
+    expected_revenue: 0,
+    won_value: 0,
+    open_value: 0,
+  };
+  const byStage = data?.by_stage ?? {};
+  const deals = data?.deals ?? [];
+
   // Prepare chart data from by_stage and deals
   const stageChartData = React.useMemo(() => {
-    if (!data.by_stage || Object.keys(data.by_stage).length === 0) {
+    if (!byStage || Object.keys(byStage).length === 0) {
       return [];
     }
 
     // Calculate value per stage from deals
     const stageValues: Record<string, number> = {};
-    if (data.deals) {
-      data.deals.forEach((deal) => {
+    if (deals.length > 0) {
+      deals.forEach((deal) => {
         const stageKey = deal.stage_code || deal.stage;
         if (stageKey) {
-          stageValues[stageKey] = (stageValues[stageKey] || 0) + deal.value;
+          const dealValue = deal.value ?? 0;
+          stageValues[stageKey] = (stageValues[stageKey] || 0) + dealValue;
         }
       });
     }
 
-    return Object.entries(data.by_stage).map(([stage, count]) => ({
+    return Object.entries(byStage).map(([stage, count]) => ({
       stage: stage.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
-      deals: count,
+      deals: count ?? 0,
       value: stageValues[stage] || 0,
     }));
-  }, [data.by_stage, data.deals]);
+  }, [byStage, deals]);
 
   // Calculate metrics
-  const winRate = data.summary.total_deals > 0
-    ? ((data.summary.won_deals / data.summary.total_deals) * 100).toFixed(1)
+  const winRate = summary.total_deals > 0
+    ? ((summary.won_deals / summary.total_deals) * 100).toFixed(1)
     : "0.0";
 
-  const averageDealValue = data.summary.total_deals > 0
-    ? data.summary.total_value / data.summary.total_deals
+  const averageDealValue = summary.total_deals > 0
+    ? summary.total_value / summary.total_deals
     : 0;
 
   const formatCurrency = (value: number) => {
@@ -89,8 +104,8 @@ export function SalesFunnelInsights({ data }: SalesFunnelInsightsProps) {
             <div className="text-2xl font-bold">{winRate}%</div>
             <p className="text-xs text-muted-foreground">
               {t("metricWinRateDetail", {
-                won: data.summary.won_deals,
-                total: data.summary.total_deals,
+                won: summary.won_deals,
+                total: summary.total_deals,
               })}
             </p>
           </CardContent>
@@ -119,7 +134,7 @@ export function SalesFunnelInsights({ data }: SalesFunnelInsightsProps) {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(data.summary.total_value)}</div>
+            <div className="text-2xl font-bold">{formatCurrency(summary.total_value)}</div>
             <p className="text-xs text-muted-foreground">
               {t("metricTotalPipelineValueDetail")}
             </p>
@@ -134,7 +149,7 @@ export function SalesFunnelInsights({ data }: SalesFunnelInsightsProps) {
             <AlertCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{data.summary.lost_deals}</div>
+            <div className="text-2xl font-bold text-red-600">{summary.lost_deals}</div>
             <p className="text-xs text-muted-foreground">
               {t("metricLostDealsDetail")}
             </p>
@@ -152,7 +167,7 @@ export function SalesFunnelInsights({ data }: SalesFunnelInsightsProps) {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(data.summary.won_value || 0)}</div>
+            <div className="text-2xl font-bold">{formatCurrency(summary.won_value ?? 0)}</div>
             <p className="text-xs text-muted-foreground">
               Total value of won deals
             </p>
@@ -167,7 +182,7 @@ export function SalesFunnelInsights({ data }: SalesFunnelInsightsProps) {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(data.summary.expected_revenue || 0)}</div>
+            <div className="text-2xl font-bold">{formatCurrency(summary.expected_revenue ?? 0)}</div>
             <p className="text-xs text-muted-foreground">
               Total expected revenue
             </p>
@@ -182,7 +197,7 @@ export function SalesFunnelInsights({ data }: SalesFunnelInsightsProps) {
             <Target className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.summary.open_deals || 0}</div>
+            <div className="text-2xl font-bold">{summary.open_deals ?? 0}</div>
             <p className="text-xs text-muted-foreground">
               Currently open opportunities
             </p>
@@ -197,7 +212,7 @@ export function SalesFunnelInsights({ data }: SalesFunnelInsightsProps) {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(data.summary.open_value || 0)}</div>
+            <div className="text-2xl font-bold">{formatCurrency(summary.open_value ?? 0)}</div>
             <p className="text-xs text-muted-foreground">
               Total value of open deals
             </p>
@@ -246,7 +261,7 @@ export function SalesFunnelInsights({ data }: SalesFunnelInsightsProps) {
       )}
 
       {/* Stage Breakdown */}
-      {data.by_stage && Object.keys(data.by_stage).length > 0 && (
+      {byStage && Object.keys(byStage).length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle>{t("stageBreakdownTitle")}</CardTitle>
@@ -256,11 +271,12 @@ export function SalesFunnelInsights({ data }: SalesFunnelInsightsProps) {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {Object.entries(data.by_stage)
-                .sort(([, a], [, b]) => b - a)
+              {Object.entries(byStage)
+                .sort(([, a], [, b]) => (b ?? 0) - (a ?? 0))
                 .map(([stage, count]) => {
-                  const percentage = data.summary.total_deals > 0
-                    ? ((count / data.summary.total_deals) * 100).toFixed(1)
+                  const stageCount = count ?? 0;
+                  const percentage = summary.total_deals > 0
+                    ? ((stageCount / summary.total_deals) * 100).toFixed(1)
                     : "0.0";
 
                   return (
@@ -270,7 +286,7 @@ export function SalesFunnelInsights({ data }: SalesFunnelInsightsProps) {
                           {stage.replace(/_/g, " ")}
                         </span>
                         <span className="text-muted-foreground">
-                          {t("stageBreakdownItem", { count, percentage })}
+                          {t("stageBreakdownItem", { count: stageCount, percentage })}
                         </span>
                       </div>
                       <div className="h-2 w-full rounded-full bg-muted">
@@ -288,7 +304,7 @@ export function SalesFunnelInsights({ data }: SalesFunnelInsightsProps) {
       )}
 
       {/* Empty State */}
-      {(!data.by_stage || Object.keys(data.by_stage).length === 0) && (
+      {(!byStage || Object.keys(byStage).length === 0) && (
         <Card>
           <CardContent className="py-8 text-center text-muted-foreground">
             <p className="text-sm">

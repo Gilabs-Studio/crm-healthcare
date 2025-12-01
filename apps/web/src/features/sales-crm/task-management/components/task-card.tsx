@@ -38,7 +38,7 @@ export function TaskCard({ task, onEdit, onDelete, onComplete, onClickTitle, onC
       {/* Status dot + title */}
       <div className="flex items-start gap-2">
         <span
-          className={`mt-1 h-2 w-2 flex-shrink-0 rounded-full ${statusColorMap[task.status]}`}
+          className={`mt-1 h-2 w-2 shrink-0 rounded-full ${statusColorMap[task.status]}`}
           aria-hidden="true"
         />
         <div className="min-w-0 flex-1 space-y-1">
@@ -75,19 +75,23 @@ export function TaskCard({ task, onEdit, onDelete, onComplete, onClickTitle, onC
           <span className="inline-flex items-center gap-1 truncate max-w-[160px]">
             <Factory className="h-3 w-3" />
             <span className="truncate">
-              {t("accountLabel")} {task.account.name}
+              {t("accountLabel")} {task.account?.name || t("unknownAccount")}
             </span>
           </span>
         )}
         {task.contact && (
           <button
             type="button"
-            onClick={onClickContact ? () => onClickContact(task.contact!.id) : undefined}
+            onClick={() => {
+              if (onClickContact && task.contact?.id) {
+                onClickContact(task.contact.id);
+              }
+            }}
             className="inline-flex items-center gap-1 truncate max-w-[160px] text-left hover:text-primary"
           >
             <Contact className="h-3 w-3" />
             <span className="truncate">
-              {t("contactLabel")} {task.contact.name}
+              {t("contactLabel")} {task.contact?.name || t("unknownContact")}
             </span>
           </button>
         )}

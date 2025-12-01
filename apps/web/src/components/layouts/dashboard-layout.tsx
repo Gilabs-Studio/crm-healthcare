@@ -3,13 +3,13 @@
 import React, { memo, useMemo, useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/routing";
-import { Bell, HelpCircle, Search } from "lucide-react";
+import { Bell, HelpCircle, Search, Settings } from "lucide-react";
 
 import { useAuthStore } from "@/features/auth/stores/useAuthStore";
 import { useUserPermissions } from "@/features/master-data/user-management/hooks/useUserPermissions";
 import type { MenuWithActions } from "@/features/master-data/user-management/types";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -172,9 +172,6 @@ const Header = memo(function Header({
                     }
                   }}
                 />
-                {avatarUrl && (
-                  <AvatarFallback className="bg-primary/10 text-primary font-medium" />
-                )}
               </Avatar>
             </Button>
           </PopoverTrigger>
@@ -186,6 +183,13 @@ const Header = memo(function Header({
             </div>
             <Separator className="my-1" />
             <div className="flex flex-col gap-1">
+              <Link
+                href="/profile"
+                className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-accent transition-colors"
+              >
+                <Settings className="h-4 w-4" />
+                Settings
+              </Link>
               <button
                 type="button"
                 onClick={logout}

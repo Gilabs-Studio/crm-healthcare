@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import React, { useState } from "react";
-import { User, Lock, Settings, Mail, Phone, MapPin, Globe, FileText, Download, ArrowRight } from "lucide-react";
+import { Settings, Mail, Phone, MapPin, Globe, FileText, Download, ArrowRight } from "lucide-react";
 import { useProfile, useUpdateProfile, useChangePassword } from "../hooks/useProfile";
 import { updateProfileSchema, changePasswordSchema, type UpdateProfileFormData, type ChangePasswordFormData } from "../schemas/profile.schema";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
@@ -110,7 +110,15 @@ export function ProfileSettings() {
                         <Badge variant="default" className="text-xs">Pro</Badge>
                       </div>
                       <p className="text-sm text-muted-foreground mt-1">
-                        {profile?.role?.name || "User"}
+                        {(() => {
+                          if (typeof profile?.role === "object" && profile.role?.name) {
+                            return profile.role.name;
+                          }
+                          if (typeof profile?.role === "string") {
+                            return profile.role;
+                          }
+                          return "User";
+                        })()}
                       </p>
                     </div>
                   </div>
@@ -159,7 +167,7 @@ export function ProfileSettings() {
                   </div>
                   <div className="flex items-center gap-3 text-sm">
                     <Globe className="h-4 w-4 text-muted-foreground" />
-                    <a href="#" className="text-primary hover:underline text-sm">-</a>
+                    <span className="text-muted-foreground">-</span>
                   </div>
                 </CardContent>
               </Card>
@@ -247,21 +255,23 @@ export function ProfileSettings() {
                       </thead>
                       <tbody>
                         {[
-                          { product: "Shadcn UI Kit", status: "pending", date: "2025-12-01", amount: "$99.00" },
-                          { product: "Figma Design", status: "paid", date: "2025-11-28", amount: "$49.00" },
-                          { product: "React Template", status: "failed", date: "2025-11-25", amount: "$79.00" },
-                        ].map((tx, idx) => (
-                          <tr key={idx} className="border-b">
+                          { id: "1", product: "Shadcn UI Kit", status: "pending", date: "2025-12-01", amount: "$99.00" },
+                          { id: "2", product: "Figma Design", status: "paid", date: "2025-11-28", amount: "$49.00" },
+                          { id: "3", product: "React Template", status: "failed", date: "2025-11-25", amount: "$79.00" },
+                        ].map((tx) => {
+                          let statusVariant: "success" | "warning" | "destructive" = "destructive";
+                          if (tx.status === "paid") {
+                            statusVariant = "success";
+                          } else if (tx.status === "pending") {
+                            statusVariant = "warning";
+                          }
+                          
+                          return (
+                            <tr key={tx.id} className="border-b">
                             <td className="py-3">{tx.product}</td>
                             <td className="py-3">
                               <Badge
-                                variant={
-                                  tx.status === "paid"
-                                    ? "success"
-                                    : tx.status === "pending"
-                                    ? "warning"
-                                    : "destructive"
-                                }
+                                variant={statusVariant}
                                 className="text-xs"
                               >
                                 {tx.status}
@@ -270,7 +280,8 @@ export function ProfileSettings() {
                             <td className="py-3 text-muted-foreground">{tx.date}</td>
                             <td className="py-3 text-right font-medium">{tx.amount}</td>
                           </tr>
-                        ))}
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>

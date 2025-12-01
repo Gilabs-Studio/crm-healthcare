@@ -147,14 +147,18 @@ export function ActivityTimeline({ activities, isLoading, accountId }: ActivityT
       id: "user",
       header: t("table.user"),
       accessor: (row) => (
-        <div className="flex items-center gap-2">
-          <User className="h-3 w-3 text-muted-foreground" />
-          <span className="text-sm text-muted-foreground">
-            {typeof row.user === "object" && "name" in row.user
-              ? row.user.name
-              : "N/A"}
-          </span>
-        </div>
+        row.user ? (
+          <div className="flex items-center gap-2">
+            <User className="h-3 w-3 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">
+              {typeof row.user === "object" && "name" in row.user
+                ? row.user.name
+                : "N/A"}
+            </span>
+          </div>
+        ) : (
+          <span className="text-sm text-muted-foreground">-</span>
+        )
       ),
       className: "w-[150px]",
     },
