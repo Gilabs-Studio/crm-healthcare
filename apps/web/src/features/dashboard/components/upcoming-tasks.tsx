@@ -37,9 +37,9 @@ export function UpcomingTasks() {
   }
 
   const overview = data?.data;
-  const tasks = overview?.upcoming_tasks ?? [];
+  const tasks = Array.isArray(overview?.upcoming_tasks) ? overview.upcoming_tasks : [];
 
-  if (tasks.length === 0) {
+  if (!tasks || tasks.length === 0) {
     return (
       <Card>
         <CardHeader>
@@ -57,6 +57,7 @@ export function UpcomingTasks() {
   const formatDueDate = (value?: string | null) => {
     if (!value) return t("upcomingTasks.noDueDate");
     const date = new Date(value);
+    if (isNaN(date.getTime())) return t("upcomingTasks.invalidDate");
     return date.toLocaleDateString(locale, {
       day: "2-digit",
       month: "short",
@@ -71,26 +72,29 @@ export function UpcomingTasks() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
-        {tasks.slice(0, 4).map((task) => (
-          <div
-            key={task.id}
-            className="flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm"
-          >
-            <div className="min-w-0 flex-1">
-              <div className="truncate font-medium">{task.title}</div>
-              <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
-                <Clock className="h-3 w-3" />
-                <span>{formatDueDate(task.due_date)}</span>
-              </div>
-            </div>
-            <Badge
-              variant={priorityVariant[task.priority] ?? "outline"}
-              className="text-xs capitalize"
+        {tasks.slice(0, 4).map((task) => {
+          if (!task) return null;
+          return (
+            <div
+              key={task.id}
+              className="flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm"
             >
-              {task.priority}
-            </Badge>
-          </div>
-        ))}
+              <div className="min-w-0 flex-1">
+                <div className="truncate font-medium">{task.title ?? t("upcomingTasks.noTitle")}</div>
+                <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
+                  <Clock className="h-3 w-3" />
+                  <span>{formatDueDate(task.due_date)}</span>
+                </div>
+              </div>
+              <Badge
+                variant={priorityVariant[task.priority ?? ""] ?? "outline"}
+                className="text-xs capitalize"
+              >
+                {task.priority ?? "unknown"}
+              </Badge>
+            </div>
+          );
+        })}
       </CardContent>
     </Card>
   );

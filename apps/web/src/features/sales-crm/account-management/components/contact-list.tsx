@@ -168,11 +168,13 @@ export function ContactList() {
             className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground"
           >
             <option value="">All Accounts</option>
-            {accounts.map((account) => (
-              <option key={account.id} value={account.id}>
-                {account.name}
-              </option>
-            ))}
+            {Array.isArray(accounts) && accounts.length > 0
+              ? accounts.map((account) => (
+                  <option key={account?.id} value={account?.id ?? ""}>
+                    {account?.name ?? "-"}
+                  </option>
+                ))
+              : null}
           </select>
           <select
             value={role}
