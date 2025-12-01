@@ -5,12 +5,12 @@
     "settings": "Settings",
     "tabs": {
       "overview": "Overview",
-      "projects": "Projects",
-      "activities": "Activities",
-      "members": "Members",
-      "projectsContent": "Projects content coming soon...",
-      "activitiesContent": "Activities content coming soon...",
-      "membersContent": "Members content coming soon..."
+      "password": "Account Settings"
+    },
+    "stats": {
+      "visits": "Visits",
+      "deals": "Deals",
+      "tasks": "Tasks"
     },
     "contact": {
       "title": "Contact Information"
@@ -26,19 +26,23 @@
       "title": "Latest Activity",
       "viewAll": "View All",
       "description": "Application UI kit with modern design system",
-      "download": "Download ZIP"
+      "download": "Download ZIP",
+      "empty": "No activities found"
     },
     "transactions": {
       "title": "Transaction History",
       "product": "Product",
       "status": "Status",
       "date": "Date",
-      "amount": "Amount"
+      "amount": "Amount",
+      "empty": "No transactions found"
     },
     "connections": {
       "title": "Connections",
       "connect": "Connect",
-      "disconnect": "Disconnect"
+      "connected": "Connected",
+      "disconnect": "Disconnect",
+      "empty": "No connections found"
     },
     "information": {
       "title": "Profile Information",

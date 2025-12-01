@@ -5,12 +5,12 @@
     "settings": "Pengaturan",
     "tabs": {
       "overview": "Ringkasan",
-      "projects": "Proyek",
-      "activities": "Aktivitas",
-      "members": "Anggota",
-      "projectsContent": "Konten proyek akan segera hadir...",
-      "activitiesContent": "Konten aktivitas akan segera hadir...",
-      "membersContent": "Konten anggota akan segera hadir..."
+      "password": "Pengaturan Akun"
+    },
+    "stats": {
+      "visits": "Kunjungan",
+      "deals": "Deal",
+      "tasks": "Tugas"
     },
     "contact": {
       "title": "Informasi Kontak"
@@ -26,19 +26,23 @@
       "title": "Aktivitas Terbaru",
       "viewAll": "Lihat Semua",
       "description": "Kit UI aplikasi dengan sistem desain modern",
-      "download": "Unduh ZIP"
+      "download": "Unduh ZIP",
+      "empty": "Tidak ada aktivitas ditemukan"
     },
     "transactions": {
       "title": "Riwayat Transaksi",
       "product": "Produk",
       "status": "Status",
       "date": "Tanggal",
-      "amount": "Jumlah"
+      "amount": "Jumlah",
+      "empty": "Tidak ada transaksi ditemukan"
     },
     "connections": {
       "title": "Koneksi",
       "connect": "Hubungkan",
-      "disconnect": "Putuskan"
+      "connected": "Terhubung",
+      "disconnect": "Putuskan",
+      "empty": "Tidak ada koneksi ditemukan"
     },
     "information": {
       "title": "Informasi Profil",

@@ -106,6 +106,7 @@ func main() {
 	// Setup services
 	authService := authservice.NewService(authRepo, jwtManager)
 	userService := userservice.NewService(userRepo, roleRepo)
+	profileService := userservice.NewProfileService(userRepo, activityRepo, dealRepo, visitReportRepo, taskRepo)
 	roleService := roleservice.NewService(roleRepo)
 	permissionService := permissionservice.NewService(permissionRepo, userRepo)
 	categoryService := categoryservice.NewService(categoryRepo)
@@ -147,7 +148,7 @@ func main() {
 
 	// Setup handlers
 	authHandler := handlers.NewAuthHandler(authService)
-	userHandler := handlers.NewUserHandler(userService)
+	userHandler := handlers.NewUserHandler(userService, profileService)
 	roleHandler := handlers.NewRoleHandler(roleService)
 	permissionHandler := handlers.NewPermissionHandler(permissionService)
 	categoryHandler := handlers.NewCategoryHandler(categoryService)

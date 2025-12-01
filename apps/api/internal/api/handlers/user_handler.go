@@ -10,12 +10,14 @@ import (
 )
 
 type UserHandler struct {
-	userService *userservice.Service
+	userService    *userservice.Service
+	profileService *userservice.ProfileService
 }
 
-func NewUserHandler(userService *userservice.Service) *UserHandler {
+func NewUserHandler(userService *userservice.Service, profileService *userservice.ProfileService) *UserHandler {
 	return &UserHandler{
-		userService: userService,
+		userService:    userService,
+		profileService: profileService,
 	}
 }
 
@@ -185,6 +187,106 @@ func (h *UserHandler) Delete(c *gin.Context) {
 			errors.ErrorResponse(c, "USER_NOT_FOUND", map[string]interface{}{
 				"user_id": id,
 			}, nil)
+			return
+		}
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	response.SuccessResponseNoContent(c)
+}
+
+// GetProfile handles get user profile request
+func (h *UserHandler) GetProfile(c *gin.Context) {
+	id := c.Param("id")
+
+	profile, err := h.profileService.GetProfile(id)
+	if err != nil {
+		if err == userservice.ErrUserNotFound {
+			errors.ErrorResponse(c, "USER_NOT_FOUND", map[string]interface{}{
+				"user_id": id,
+			}, nil)
+			return
+		}
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	response.SuccessResponse(c, profile, nil)
+}
+
+// UpdateProfile handles update user profile request
+func (h *UserHandler) UpdateProfile(c *gin.Context) {
+	id := c.Param("id")
+	var req user.UpdateProfileRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			errors.HandleValidationError(c, validationErrors)
+			return
+		}
+		errors.InvalidRequestBodyResponse(c)
+		return
+	}
+
+	updatedUser, err := h.profileService.UpdateProfile(id, &req)
+	if err != nil {
+		if err == userservice.ErrUserNotFound {
+			errors.ErrorResponse(c, "USER_NOT_FOUND", map[string]interface{}{
+				"user_id": id,
+			}, nil)
+			return
+		}
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	meta := &response.Meta{}
+	if userID, exists := c.Get("user_id"); exists {
+		if uid, ok := userID.(string); ok {
+			meta.UpdatedBy = uid
+		}
+	}
+
+	response.SuccessResponse(c, updatedUser, meta)
+}
+
+// ChangePassword handles change password request
+func (h *UserHandler) ChangePassword(c *gin.Context) {
+	id := c.Param("id")
+	var req user.ChangePasswordRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			errors.HandleValidationError(c, validationErrors)
+			return
+		}
+		errors.InvalidRequestBodyResponse(c)
+		return
+	}
+
+	err := h.profileService.ChangePassword(id, &req)
+	if err != nil {
+		if err == userservice.ErrUserNotFound {
+			errors.ErrorResponse(c, "USER_NOT_FOUND", map[string]interface{}{
+				"user_id": id,
+			}, nil)
+			return
+		}
+		if err.Error() == "current password is incorrect" {
+			errors.ErrorResponse(c, "INVALID_CREDENTIALS", map[string]interface{}{
+				"field": "current_password",
+			}, nil)
+			return
+		}
+		if err.Error() == "passwords do not match" {
+			errors.ErrorResponse(c, "VALIDATION_ERROR", nil, []response.FieldError{
+				{
+					Field:   "confirm_password",
+					Code:    "INVALID_FORMAT",
+					Message: "Passwords do not match",
+				},
+			})
 			return
 		}
 		errors.InternalServerErrorResponse(c, "")
