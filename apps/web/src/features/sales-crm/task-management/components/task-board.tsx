@@ -327,7 +327,7 @@ export function TaskBoard() {
           </DialogHeader>
           <TaskForm
             onSubmit={async (data) => {
-              await handleCreate(data as any);
+              await handleCreate(data);
             }}
             onCancel={() => setIsCreateDialogOpen(false)}
             isLoading={createTask.isPending}
@@ -345,7 +345,7 @@ export function TaskBoard() {
             <TaskForm
               task={editingTaskData.data}
               onSubmit={async (data) => {
-                await handleUpdate(data as any);
+                await handleUpdate(data);
               }}
               onCancel={() => setEditingTaskId(null)}
               isLoading={updateTask.isPending}

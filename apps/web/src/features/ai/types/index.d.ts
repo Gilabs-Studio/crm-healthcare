@@ -44,6 +44,7 @@ export interface AISettingsResponse {
   provider: string;
   model: string;
   base_url?: string;
+  api_key?: string;
   data_privacy: AIDataPrivacySettings;
   timezone: string;
   usage_limit?: number;

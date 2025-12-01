@@ -230,7 +230,7 @@ export function ContactList() {
           </DialogHeader>
           <ContactForm
             onSubmit={async (data) => {
-              await handleCreate(data as any);
+              await handleCreate(data);
             }}
             onCancel={() => setIsCreateDialogOpen(false)}
             isLoading={createContact.isPending}

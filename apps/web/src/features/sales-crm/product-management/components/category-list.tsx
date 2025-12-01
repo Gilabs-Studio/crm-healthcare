@@ -166,7 +166,7 @@ export function CategoryList() {
             </DialogHeader>
             <CategoryForm
               onSubmit={async (data) => {
-                await handleCreate(data as any);
+                await handleCreate(data);
               }}
               onCancel={() => setIsCreateDialogOpen(false)}
               isLoading={createCategory.isPending}
@@ -185,7 +185,7 @@ export function CategoryList() {
             <CategoryForm
               category={categoryForEdit}
               onSubmit={async (data) => {
-                await handleUpdate(data as any);
+                await handleUpdate(data);
               }}
               onCancel={() => setEditingCategory(null)}
               isLoading={updateCategory.isPending}

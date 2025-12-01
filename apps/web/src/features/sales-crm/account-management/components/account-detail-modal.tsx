@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { AccountForm } from "./account-form";
 import { useTranslations } from "next-intl";
+import { toBadgeVariant } from "@/lib/badge-variant";
 
 interface AccountDetailModalProps {
   readonly accountId: string | null;
@@ -98,13 +99,13 @@ export function AccountDetailModal({ accountId, open, onOpenChange, onAccountUpd
                   <h2 className="text-2xl font-semibold tracking-tight">{account.name || t("infoCard.notAvailable")}</h2>
                   <div className="flex items-center gap-2 mt-1">
                     {account.category ? (
-                      <Badge variant={(account.category?.badge_color || "secondary") as any} className="font-normal">
+                      <Badge variant={toBadgeVariant(account.category?.badge_color, "secondary")} className="font-normal">
                         {account.category?.name || "-"}
                       </Badge>
                     ) : (
                       <Badge variant="outline">-</Badge>
                     )}
-                    <Badge variant={(account.status === "active" ? "active" : "inactive") as any}>
+                    <Badge variant={account.status === "active" ? "active" : "inactive"}>
                       {account.status || "-"}
                     </Badge>
                   </div>
@@ -152,7 +153,7 @@ export function AccountDetailModal({ accountId, open, onOpenChange, onAccountUpd
                       </div>
                       <div>
                         {account.category ? (
-                          <Badge variant={(account.category?.badge_color || "secondary") as any} className="font-normal">
+                          <Badge variant={toBadgeVariant(account.category?.badge_color, "secondary")} className="font-normal">
                             {account.category?.name || "-"}
                           </Badge>
                         ) : (

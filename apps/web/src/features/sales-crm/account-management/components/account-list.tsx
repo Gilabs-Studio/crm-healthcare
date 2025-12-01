@@ -367,7 +367,7 @@ export function AccountList() {
           </DialogHeader>
           <AccountForm
             onSubmit={async (data) => {
-              await handleCreate(data as any);
+              await handleCreate(data);
             }}
             onCancel={() => setIsCreateDialogOpen(false)}
             isLoading={createAccount.isPending}
@@ -385,7 +385,7 @@ export function AccountList() {
             <AccountForm
               account={editingAccountData.data}
               onSubmit={async (data) => {
-                await handleUpdate(data as any);
+                await handleUpdate(data);
               }}
               onCancel={() => setEditingAccount(null)}
               isLoading={updateAccount.isPending}
@@ -419,7 +419,7 @@ export function AccountList() {
             <ContactForm
               defaultAccountId={createContactAccountId}
               onSubmit={async (data) => {
-                await handleCreateContactSubmit(data as any);
+                await handleCreateContactSubmit(data);
               }}
               onCancel={() => {
                 setIsCreateContactDialogOpen(false);

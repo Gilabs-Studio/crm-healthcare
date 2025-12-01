@@ -67,12 +67,12 @@ export function ProductForm({ product, onSubmit, onCancel, isLoading }: ProductF
 
   const handleFormSubmit = async (data: CreateProductFormData | UpdateProductFormData) => {
     // Convert price and cost from rupiah to sen
-    const submitData = {
+    const submitData: CreateProductFormData | UpdateProductFormData = {
       ...data,
-      price: Math.round((data.price as number) * 100),
-      cost: data.cost ? Math.round((data.cost as number) * 100) : 0,
+      price: Math.round(data.price * 100),
+      cost: data.cost ? Math.round(data.cost * 100) : undefined,
     };
-    await onSubmit(submitData as any);
+    await onSubmit(submitData);
   };
 
   return (

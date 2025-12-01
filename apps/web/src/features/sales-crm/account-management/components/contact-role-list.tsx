@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { useTranslations } from "next-intl";
+import { toBadgeVariant } from "@/lib/badge-variant";
 
 export function ContactRoleList() {
   const {
@@ -95,7 +96,7 @@ export function ContactRoleList() {
                       {contactRole.description || "-"}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={contactRole.badge_color as any} className="font-normal">
+                      <Badge variant={toBadgeVariant(contactRole.badge_color, "secondary")} className="font-normal">
                         {contactRole.badge_color}
                       </Badge>
                     </TableCell>
@@ -140,7 +141,7 @@ export function ContactRoleList() {
           </DialogHeader>
           <ContactRoleForm
             onSubmit={async (data) => {
-              await handleCreate(data as any);
+              await handleCreate(data);
             }}
             onCancel={() => setIsCreateDialogOpen(false)}
             isLoading={createContactRole.isPending}

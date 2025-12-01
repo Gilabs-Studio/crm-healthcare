@@ -340,7 +340,7 @@ export function VisitReportList() {
           </DialogHeader>
           <VisitReportForm
             onSubmit={async (data) => {
-              await handleCreate(data as any);
+              await handleCreate(data);
             }}
             onCancel={() => setIsCreateDialogOpen(false)}
             isLoading={createVisitReport.isPending}

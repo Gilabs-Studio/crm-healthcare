@@ -282,7 +282,7 @@ export function ProductList() {
             </DialogHeader>
             <ProductForm
               onSubmit={async (data) => {
-                await handleCreate(data as any);
+                await handleCreate(data);
               }}
               onCancel={() => setIsCreateDialogOpen(false)}
               isLoading={createProduct.isPending}
@@ -301,7 +301,7 @@ export function ProductList() {
             <ProductForm
               product={editingProductData.data}
               onSubmit={async (data) => {
-                await handleUpdate(data as any);
+                await handleUpdate(data);
               }}
               onCancel={() => setEditingProduct(null)}
               isLoading={updateProduct.isPending}
