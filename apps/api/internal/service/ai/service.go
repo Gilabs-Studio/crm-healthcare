@@ -463,11 +463,61 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 		// Try to extract data from user message - ALWAYS try to get data
 		messageLower := strings.ToLower(message)
 		
+		// Check for analytics/statistics queries (HIGHEST PRIORITY - needs all deals data)
+		// These queries require comprehensive deals data for calculations
+		isAnalyticsQuery := strings.Contains(messageLower, "conversion rate") || 
+		                   strings.Contains(messageLower, "conversion") ||
+		                   strings.Contains(messageLower, "rate konversi") ||
+		                   strings.Contains(messageLower, "statistik") ||
+		                   strings.Contains(messageLower, "statistics") ||
+		                   strings.Contains(messageLower, "analisis") ||
+		                   strings.Contains(messageLower, "analysis") ||
+		                   strings.Contains(messageLower, "rata-rata") ||
+		                   strings.Contains(messageLower, "average") ||
+		                   strings.Contains(messageLower, "trend") ||
+		                   strings.Contains(messageLower, "perbandingan") ||
+		                   strings.Contains(messageLower, "comparison") ||
+		                   strings.Contains(messageLower, "breakdown") ||
+		                   (strings.Contains(messageLower, "berapa") && (strings.Contains(messageLower, "lead") || strings.Contains(messageLower, "closed won") || strings.Contains(messageLower, "closed lost")))
+		
+		if isAnalyticsQuery {
+			// Check data privacy and user permissions
+			allowed, _ := s.checkDataPrivacy("deal", userID)
+			if !allowed {
+				dataAccessInfo = "⚠️ Akses ke data deals/pipeline tidak diizinkan berdasarkan pengaturan privasi data atau permission yang Anda miliki."
+			} else {
+				// For analytics queries, fetch ALL deals (or at least a large sample) without stage filter
+				// This allows AI to calculate conversion rates, averages, etc.
+				req := &pipeline.ListDealsRequest{
+					Page:    1,
+					PerPage: 100, // Fetch more deals for analytics
+				}
+				
+				deals, _, err := s.dealRepo.List(req)
+				fmt.Printf("=== ANALYTICS DATA FETCH DEBUG ===\n")
+				fmt.Printf("Fetching ALL deals for analytics - Error: %v, Count: %d\n", err, len(deals))
+				if err == nil && len(deals) > 0 {
+					// Transform deals to user-friendly format with names
+					dealsFormatted := s.formatDealsForAI(deals)
+					dealsJSON, _ := json.Marshal(dealsFormatted)
+					contextData = fmt.Sprintf("REAL PIPELINE/DEALS DATA FROM DATABASE (showing %d deals for analytics/statistics calculation):\n%s\n\nCRITICAL INSTRUCTION FOR ANALYTICS: You have ALL deals data above. You MUST calculate statistics, conversion rates, averages, or any requested metrics using ONLY this real data. For conversion rate calculations (e.g., Lead to Closed Won):\n1. Count deals with stage_name 'Lead' (or stage_code 'lead')\n2. Count deals with stage_name 'Closed Won' (or stage_code 'closed_won')\n3. Calculate: (Closed Won / Total Leads) * 100\n4. Present the calculation clearly with the actual numbers from the data\n5. DO NOT create, invent, or make up any numbers - use ONLY the data provided\n6. Present data in Markdown table format when showing multiple deals\n7. ALWAYS show NAMES (account_name, contact_name, stage_name) instead of IDs\n8. For IDs, use format [Name](type://ID) to create clickable links\n9. If the data doesn't contain the specific stages needed for calculation, inform the user honestly", len(deals), string(dealsJSON))
+					contextType = "deal"
+					fmt.Printf("Context data set with %d deals for analytics\n", len(deals))
+				} else {
+					if err != nil {
+						fmt.Printf("Error fetching deals for analytics: %v\n", err)
+					}
+					dataAccessInfo = "⚠️ Tidak dapat mengakses data pipeline/deals dari database untuk perhitungan statistik. Data mungkin tidak tersedia."
+				}
+				fmt.Printf("====================================\n")
+			}
+		}
+		
 		// Check priority: pipeline/deals first (more specific), then accounts
 		// Check if user is asking for pipeline/deals/sales funnel (HIGHEST PRIORITY)
-		if strings.Contains(messageLower, "pipeline") || strings.Contains(messageLower, "sales funnel") || 
+		if contextData == "" && (strings.Contains(messageLower, "pipeline") || strings.Contains(messageLower, "sales funnel") || 
 		   strings.Contains(messageLower, "funnel") || strings.Contains(messageLower, "deal") ||
-		   strings.Contains(messageLower, "opportunity") || strings.Contains(messageLower, "kesempatan") {
+		   strings.Contains(messageLower, "opportunity") || strings.Contains(messageLower, "kesempatan")) {
 			// Check data privacy and user permissions
 			allowed, _ := s.checkDataPrivacy("deal", userID)
 			if !allowed {
@@ -547,8 +597,10 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 				fmt.Printf("=== DATA FETCH DEBUG ===\n")
 				fmt.Printf("Fetching accounts - Error: %v, Count: %d, Total: %d\n", err, len(accounts), total)
 				if err == nil && len(accounts) > 0 {
-					accountsJSON, _ := json.Marshal(accounts)
-					contextData = fmt.Sprintf("REAL ACCOUNTS DATA FROM DATABASE (showing %d of %d total accounts):\n%s\n\nCRITICAL INSTRUCTION: You MUST use ONLY the data above. Present it in a Markdown table format. ALWAYS show NAMES instead of IDs. For IDs, use format [Name](account://ID) to create clickable links. DO NOT create, invent, or make up any data. DO NOT add columns that don't exist in the data.", len(accounts), total, string(accountsJSON))
+					// Transform accounts to user-friendly format with names
+					accountsFormatted := s.formatAccountsForAI(accounts)
+					accountsJSON, _ := json.Marshal(accountsFormatted)
+					contextData = fmt.Sprintf("REAL ACCOUNTS DATA FROM DATABASE (showing %d of %d total accounts):\n%s\n\nCRITICAL INSTRUCTION: You MUST use ONLY the data above. Present it in a Markdown table format. For the 'Nama Akun' (Name) column, you MUST format it as [Name](account://id) to create clickable links. Example: [RSUD Jakarta](account://ab868b77-e9b3-429f-ad8c-d55ac1f6561b). Use the EXACT id from the data above - DO NOT create or invent IDs. DO NOT create, invent, or make up any data. DO NOT add columns that don't exist in the data.", len(accounts), total, string(accountsJSON))
 					contextType = "account" // Set context type for proper prompt
 					fmt.Printf("Context data set with %d accounts\n", len(accounts))
 				} else {
@@ -807,8 +859,10 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 				fmt.Printf("=== DATA FETCH DEBUG (GENERAL REQUEST) ===\n")
 				fmt.Printf("User asked for general data, fetching accounts - Error: %v, Count: %d, Total: %d\n", err, len(accounts), total)
 				if err == nil && len(accounts) > 0 {
-					accountsJSON, _ := json.Marshal(accounts)
-					contextData = fmt.Sprintf("REAL ACCOUNTS DATA FROM DATABASE (showing %d of %d total accounts):\n%s\n\nCRITICAL INSTRUCTION: You MUST use ONLY the data above. Present it in a Markdown table format. DO NOT create, invent, or make up any data. DO NOT add columns that don't exist in the data.", len(accounts), total, string(accountsJSON))
+					// Transform accounts to user-friendly format with names
+					accountsFormatted := s.formatAccountsForAI(accounts)
+					accountsJSON, _ := json.Marshal(accountsFormatted)
+					contextData = fmt.Sprintf("REAL ACCOUNTS DATA FROM DATABASE (showing %d of %d total accounts):\n%s\n\nCRITICAL INSTRUCTION: You MUST use ONLY the data above. Present it in a Markdown table format. For the 'Nama Akun' (Name) column, you MUST format it as [Name](account://id) to create clickable links. Example: [RSUD Jakarta](account://ab868b77-e9b3-429f-ad8c-d55ac1f6561b). Use the EXACT id from the data above - DO NOT create or invent IDs. DO NOT create, invent, or make up any data. DO NOT add columns that don't exist in the data.", len(accounts), total, string(accountsJSON))
 					contextType = "account"
 					fmt.Printf("Context data set with %d accounts\n", len(accounts))
 				} else {
@@ -1023,6 +1077,21 @@ type DealFormatted struct {
 	CreatedAt       string  `json:"created_at"`
 }
 
+// AccountFormatted represents a user-friendly account format for AI
+type AccountFormatted struct {
+	ID         string `json:"id"`          // ID for creating links
+	Name       string `json:"name"`        // Account name
+	CategoryID string `json:"category_id"` // Category ID
+	Category   string `json:"category"`    // Category name
+	Address    string `json:"address"`
+	City       string `json:"city"`
+	Province   string `json:"province"`
+	Phone      string `json:"phone"`
+	Email      string `json:"email"`
+	Status     string `json:"status"`
+	CreatedAt  string `json:"created_at"`
+}
+
 // formatDealsForAI transforms deals to user-friendly format with names
 func (s *Service) formatDealsForAI(deals []pipeline.Deal) []DealFormatted {
 	formatted := make([]DealFormatted, 0, len(deals))
@@ -1224,6 +1293,37 @@ func (s *Service) formatTasksForAI(tasks []task.Task) []TaskFormatted {
 			Priority:    t.Priority,
 			DueDate:     dueDate,
 			CreatedAt:   t.CreatedAt.Format("2006-01-02"),
+		})
+	}
+	
+	return formatted
+}
+
+// formatAccountsForAI transforms accounts to user-friendly format with names
+func (s *Service) formatAccountsForAI(accounts []account.Account) []AccountFormatted {
+	formatted := make([]AccountFormatted, 0, len(accounts))
+	
+	for _, acc := range accounts {
+		categoryName := ""
+		if acc.Category != nil {
+			categoryName = acc.Category.Name
+		}
+		if categoryName == "" {
+			categoryName = "N/A"
+		}
+		
+		formatted = append(formatted, AccountFormatted{
+			ID:         acc.ID,
+			Name:       acc.Name,
+			CategoryID: acc.CategoryID,
+			Category:   categoryName,
+			Address:    acc.Address,
+			City:       acc.City,
+			Province:   acc.Province,
+			Phone:      acc.Phone,
+			Email:      acc.Email,
+			Status:     acc.Status,
+			CreatedAt:  acc.CreatedAt.Format("2006-01-02"),
 		})
 	}
 	

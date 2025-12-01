@@ -27,6 +27,7 @@ import { ContactDetailModal } from "@/features/sales-crm/account-management/comp
 import { TaskDetailModal } from "@/features/sales-crm/task-management/components/task-detail-modal";
 import { VisitReportDetailModal } from "@/features/sales-crm/visit-report/components/visit-report-detail-modal";
 import { DealDetailModal } from "@/features/sales-crm/pipeline-management/components/deal-detail-modal";
+import { chatTemplates, templateCategories, getTemplatesByCategory, type ChatTemplate } from "../data/chat-templates";
 
 interface Message {
   id: string;
@@ -78,6 +79,9 @@ export function Chatbot() {
   // Use settings.model as default, but allow user to override via Select
   const [userSelectedModel, setUserSelectedModel] = useState<string | null>(null);
   const selectedModel = userSelectedModel || settings.model || "llama-3.1-8b";
+
+  // Template selector state
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
 
   // State for detail modals/drawers
   const [viewingAccountId, setViewingAccountId] = useState<string | null>(null);
@@ -244,6 +248,18 @@ export function Chatbot() {
       handleSend();
     }
   };
+
+  const handleSelectTemplate = (template: ChatTemplate) => {
+    setInput(template.content);
+    // Focus input after selecting template
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 100);
+  };
+
+  const filteredTemplates = useMemo(() => {
+    return getTemplatesByCategory(selectedCategory);
+  }, [selectedCategory]);
 
   const handleCopyChat = () => {
     const chatText = messages
@@ -546,9 +562,9 @@ export function Chatbot() {
         }}
       >
         {messages.length === 1 && messages[0].id === "initial-greeting" ? (
-          // Empty state - centered welcome message
+          // Empty state - centered welcome message with templates
           <div className="flex flex-col items-center justify-center min-h-full px-4 py-12">
-            <div className="max-w-2xl w-full space-y-8">
+            <div className="max-w-4xl w-full space-y-8">
               <div className="text-center space-y-3">
                 <h1 className="text-4xl font-semibold bg-linear-to-r from-primary to-primary/60 bg-clip-text text-transparent">
                   AI Assistant
@@ -556,6 +572,61 @@ export function Chatbot() {
                 <p className="text-muted-foreground text-lg">
                   Chat with AI assistant to get insights and answers about your CRM data
                 </p>
+              </div>
+
+              {/* Template Selector */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold">Quick Start Templates</h2>
+                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                    <SelectTrigger className="w-[200px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {templateCategories.map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Template Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[400px] overflow-y-auto">
+                  {filteredTemplates.map((template) => (
+                    <button
+                      key={template.id}
+                      onClick={() => handleSelectTemplate(template)}
+                      className="text-left p-4 rounded-lg border border-border bg-card hover:bg-muted/50 hover:border-primary/50 transition-all group"
+                    >
+                      <div className="space-y-2">
+                        <div className="flex items-start justify-between gap-2">
+                          <h3 className="font-medium text-sm group-hover:text-primary transition-colors">
+                            {template.name}
+                          </h3>
+                          <span className="text-xs text-muted-foreground px-2 py-0.5 rounded bg-muted/50 shrink-0">
+                            {template.category}
+                          </span>
+                        </div>
+                        {template.description && (
+                          <p className="text-xs text-muted-foreground line-clamp-2">
+                            {template.description}
+                          </p>
+                        )}
+                        <p className="text-xs text-foreground/80 font-mono bg-muted/30 p-2 rounded line-clamp-2 mt-2">
+                          {template.content}
+                        </p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+
+                {filteredTemplates.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p>No templates found in this category.</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
