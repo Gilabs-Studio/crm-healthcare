@@ -1,7 +1,9 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { LayoutDashboard, BarChart3, TrendingUp, Settings, Plus } from "lucide-react";
 import { AuthGuard } from "@/features/auth/components/auth-guard";
+import { PermissionGuard } from "@/features/auth/components/permission-guard";
 import { KanbanBoard } from "@/features/sales-crm/pipeline-management/components/kanban-board";
 import { PipelineSummary } from "@/features/sales-crm/pipeline-management/components/pipeline-summary";
 import { Forecast } from "@/features/sales-crm/pipeline-management/components/forecast";
@@ -20,6 +22,25 @@ import {
 import { DealForm } from "@/features/sales-crm/pipeline-management/components/deal-form";
 import { DealDetailModal } from "@/features/sales-crm/pipeline-management/components/deal-detail-modal";
 import { useCreateDeal } from "@/features/sales-crm/pipeline-management/hooks/useDeals";
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.4 },
+  },
+};
 
 function PipelinePageContent() {
   // All hooks must be called in the same order on every render
@@ -43,14 +64,19 @@ function PipelinePageContent() {
   };
 
   return (
-    <div className="container mx-auto py-6 px-4">
-      <div className="space-y-6">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="space-y-6 p-4"
+    >
+      <motion.div variants={itemVariants}>
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">
               {t("title")}
             </h1>
-            <p className="text-muted-foreground mt-2">
+            <p className="text-muted-foreground mt-1">
               {t("description")}
             </p>
           </div>
@@ -59,7 +85,9 @@ function PipelinePageContent() {
             {tKanban("newDeal")}
           </Button>
         </div>
+      </motion.div>
 
+      <motion.div variants={itemVariants}>
         <Tabs defaultValue="kanban" className="w-full">
           <TabsList>
             <TabsTrigger value="kanban" className="gap-2">
@@ -100,33 +128,31 @@ function PipelinePageContent() {
             </TabsContent>
           )}
         </Tabs>
+      </motion.div>
 
-        {/* Create Deal Dialog */}
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{tKanban("createDialogTitle")}</DialogTitle>
-            </DialogHeader>
-            <DealForm
-              onSubmit={handleCreateDeal}
-              onCancel={() => setIsCreateDialogOpen(false)}
-              isLoading={isCreating}
-            />
-          </DialogContent>
-        </Dialog>
+      {/* Create Deal Dialog */}
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{tKanban("createDialogTitle")}</DialogTitle>
+          </DialogHeader>
+          <DealForm
+            onSubmit={handleCreateDeal}
+            onCancel={() => setIsCreateDialogOpen(false)}
+            isLoading={isCreating}
+          />
+        </DialogContent>
+      </Dialog>
 
-        {/* Deal Detail Modal */}
-        <DealDetailModal
-          dealId={viewingDealId}
-          open={!!viewingDealId}
-          onOpenChange={(open) => !open && setViewingDealId(null)}
-        />
-      </div>
-    </div>
+      {/* Deal Detail Modal */}
+      <DealDetailModal
+        dealId={viewingDealId}
+        open={!!viewingDealId}
+        onOpenChange={(open) => !open && setViewingDealId(null)}
+      />
+    </motion.div>
   );
 }
-
-import { PermissionGuard } from "@/features/auth/components/permission-guard";
 
 export default function PipelinePage() {
   return (

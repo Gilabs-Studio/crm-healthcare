@@ -443,7 +443,7 @@ export const DashboardLayout = memo(function DashboardLayout({
             avatarUrl={primaryAvatarUrl}
             fallbackAvatarUrl={fallbackAvatarUrl}
           />
-          <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+          <div className="flex flex-1 flex-col gap-4 p-4">
             {error && (
               <div className="mb-2 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-xs text-destructive">
                 Failed to load menu permissions. Showing minimal navigation.
