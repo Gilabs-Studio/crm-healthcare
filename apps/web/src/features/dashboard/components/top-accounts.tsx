@@ -55,27 +55,33 @@ export function TopAccounts() {
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {topAccounts.map((account) => (
-            <div
-              key={account.account.id}
-              className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
-            >
-              <div className="flex-1">
-                <div className="font-medium">{account.account.name}</div>
-                <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <MapPin className="h-3 w-3" />
-                    <span>{t("visits", { count: account.visit_count })}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Activity className="h-3 w-3" />
-                    <span>{t("activities", { count: account.activity_count })}</span>
+          {topAccounts.map((account) => {
+            const accountData = account.account ?? { id: "", name: "Unknown Account" };
+            const visitCount = account.visit_count ?? 0;
+            const activityCount = account.activity_count ?? 0;
+            
+            return (
+              <div
+                key={accountData.id || `account-${Math.random()}`}
+                className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+              >
+                <div className="flex-1">
+                  <div className="font-medium">{accountData.name}</div>
+                  <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <MapPin className="h-3 w-3" />
+                      <span>{t("visits", { count: visitCount })}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Activity className="h-3 w-3" />
+                      <span>{t("activities", { count: activityCount })}</span>
+                    </div>
                   </div>
                 </div>
+                <Badge variant="outline">{visitCount}</Badge>
               </div>
-              <Badge variant="outline">{account.visit_count}</Badge>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </CardContent>
     </Card>

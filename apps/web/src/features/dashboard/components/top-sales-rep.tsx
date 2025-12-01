@@ -60,39 +60,46 @@ export function TopSalesRep() {
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {topSalesReps.map((salesRep) => (
-            <div
-              key={salesRep.sales_rep.id}
-              className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
-            >
-              <div className="flex items-center gap-3 flex-1">
-                <Avatar className="h-10 w-10">
-                  <AvatarImage
-                    src={getAvatarUrl(salesRep.sales_rep.email)}
-                    alt={salesRep.sales_rep.name}
-                  />
-                </Avatar>
-                <div className="flex-1">
-                  <div className="font-medium">{salesRep.sales_rep.name}</div>
-                  <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <MapPin className="h-3 w-3" />
-                      <span>{t("visits", { count: salesRep.visit_count })}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Building2 className="h-3 w-3" />
-                      <span>{t("accounts", { count: salesRep.account_count })}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Activity className="h-3 w-3" />
-                      <span>{t("activities", { count: salesRep.activity_count })}</span>
+          {topSalesReps.map((salesRep) => {
+            const salesRepData = salesRep.sales_rep ?? { id: "", name: "Unknown User", email: "" };
+            const visitCount = salesRep.visit_count ?? 0;
+            const accountCount = salesRep.account_count ?? 0;
+            const activityCount = salesRep.activity_count ?? 0;
+            
+            return (
+              <div
+                key={salesRepData.id || `sales-rep-${Math.random()}`}
+                className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+              >
+                <div className="flex items-center gap-3 flex-1">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage
+                      src={getAvatarUrl(salesRepData.email || "unknown")}
+                      alt={salesRepData.name || "Unknown User"}
+                    />
+                  </Avatar>
+                  <div className="flex-1">
+                    <div className="font-medium">{salesRepData.name || "Unknown User"}</div>
+                    <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <MapPin className="h-3 w-3" />
+                        <span>{t("visits", { count: visitCount })}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Building2 className="h-3 w-3" />
+                        <span>{t("accounts", { count: accountCount })}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Activity className="h-3 w-3" />
+                        <span>{t("activities", { count: activityCount })}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
+                <Badge variant="outline">{visitCount}</Badge>
               </div>
-              <Badge variant="outline">{salesRep.visit_count}</Badge>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </CardContent>
     </Card>

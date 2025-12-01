@@ -19,6 +19,7 @@ import { TaskCard } from "./task-card";
 import { useHasPermission } from "@/features/master-data/user-management/hooks/useHasPermission";
 import { useTranslations } from "next-intl";
 import { ContactDetailModal } from "@/features/sales-crm/account-management/components/contact-detail-modal";
+import type { CreateTaskFormData, UpdateTaskFormData } from "../schemas/task.schema";
 
 const BOARD_STATUSES: TaskStatus[] = ["pending", "in_progress", "completed", "cancelled"];
 
@@ -327,7 +328,7 @@ export function TaskBoard() {
           </DialogHeader>
           <TaskForm
             onSubmit={async (data) => {
-              await handleCreate(data as any);
+              await handleCreate(data as CreateTaskFormData);
             }}
             onCancel={() => setIsCreateDialogOpen(false)}
             isLoading={createTask.isPending}
@@ -345,7 +346,7 @@ export function TaskBoard() {
             <TaskForm
               task={editingTaskData.data}
               onSubmit={async (data) => {
-                await handleUpdate(data as any);
+                await handleUpdate(data as UpdateTaskFormData);
               }}
               onCancel={() => setEditingTaskId(null)}
               isLoading={updateTask.isPending}

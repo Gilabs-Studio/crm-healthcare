@@ -17,6 +17,10 @@ func SetupUserRoutes(router *gin.RouterGroup, userHandler *handlers.UserHandler,
 		users.PUT("/:id", userHandler.Update)
 		users.DELETE("/:id", userHandler.Delete)
 		users.GET("/:id/permissions", permissionHandler.GetUserPermissions)
+		// Profile routes
+		users.GET("/:id/profile", userHandler.GetProfile)
+		users.PUT("/:id/profile", userHandler.UpdateProfile)
+		users.PUT("/:id/password", userHandler.ChangePassword)
 	}
 }
 

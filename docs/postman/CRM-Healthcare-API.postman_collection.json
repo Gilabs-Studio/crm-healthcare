@@ -372,6 +372,130 @@
             },
             "description": "Get user permissions in hierarchical menu structure"
           }
+        },
+        {
+          "name": "Get User Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/:id/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", ":id", "profile"],
+              "variable": [
+                {"key": "id", "value": "user_id"}
+              ]
+            },
+            "description": "Get complete user profile with stats, activities, transactions, and connections"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/users/:id/profile",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "users", ":id", "profile"],
+                  "variable": [
+                    {"key": "id", "value": "user_id"}
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"user\": {\n      \"id\": \"user_abc123\",\n      \"email\": \"user@example.com\",\n      \"name\": \"John Doe\",\n      \"avatar_url\": \"https://api.dicebear.com/7.x/lorelei/svg?seed=user@example.com\",\n      \"role_id\": \"role_xyz789\",\n      \"role\": {\n        \"id\": \"role_xyz789\",\n        \"name\": \"Sales Rep\",\n        \"code\": \"sales_rep\"\n      },\n      \"status\": \"active\",\n      \"created_at\": \"2024-01-15T10:30:45+07:00\",\n      \"updated_at\": \"2024-01-15T10:30:45+07:00\"\n    },\n    \"stats\": {\n      \"posts\": 184,\n      \"projects\": 32,\n      \"members\": 4500\n    },\n    \"activities\": [\n      {\n        \"id\": \"activity_001\",\n        \"title\": \"Visit Report\",\n        \"description\": \"Visit to Hospital ABC\",\n        \"type\": \"visit\",\n        \"date\": \"2024-01-15T10:30:45+07:00\"\n      }\n    ],\n    \"transactions\": [\n      {\n        \"id\": \"deal_001\",\n        \"product\": \"Product A\",\n        \"status\": \"paid\",\n        \"date\": \"2024-01-15T10:30:45+07:00\",\n        \"amount\": 5000000\n      }\n    ],\n    \"connections\": [\n      {\n        \"id\": \"user_002\",\n        \"name\": \"Jane Smith\",\n        \"email\": \"jane@example.com\",\n        \"avatar_url\": \"https://api.dicebear.com/7.x/lorelei/svg?seed=jane@example.com\",\n        \"is_connected\": false\n      }\n    ]\n  },\n  \"timestamp\": \"2024-01-15T10:30:45+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update User Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Name\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/:id/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", ":id", "profile"],
+              "variable": [
+                {"key": "id", "value": "user_id"}
+              ]
+            },
+            "description": "Update user profile information (name only)"
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"current_password\": \"oldpassword123\",\n  \"password\": \"newpassword123\",\n  \"confirm_password\": \"newpassword123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/:id/password",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", ":id", "password"],
+              "variable": [
+                {"key": "id", "value": "user_id"}
+              ]
+            },
+            "description": "Change user password. Requires current password verification."
+          }
         }
       ]
     },

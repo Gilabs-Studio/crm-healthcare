@@ -11,7 +11,6 @@ import { useTranslations } from "next-intl";
 export function AccountManagement() {
   const hasCategoryPermission = useHasPermission("CATEGORY");
   const hasRolePermission = useHasPermission("ROLE");
-  const tPage = useTranslations("accountManagement.page");
   const tTabs = useTranslations("accountManagement.tabs");
 
   // Determine default tab - use first available tab
@@ -19,13 +18,6 @@ export function AccountManagement() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">{tPage("title")}</h1>
-        <p className="text-muted-foreground mt-2">
-          {tPage("description")}
-        </p>
-      </div>
-
       <Tabs defaultValue={defaultTab} className="w-full">
         <TabsList>
           <TabsTrigger value="accounts" className="gap-2">

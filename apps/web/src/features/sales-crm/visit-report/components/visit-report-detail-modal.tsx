@@ -70,9 +70,10 @@ export function VisitReportDetailModal({
   const t = useTranslations("visitReportDetail");
   const tPhoto = useTranslations("photoUploadDialog");
 
-  const formatDateTime = (dateString?: string) => {
-    if (!dateString) return "-";
+  const formatDateTime = (dateString?: string | null) => {
+    if (!dateString) return t("sections.notAvailable");
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return t("sections.invalidDate");
     return date.toLocaleString("id-ID", {
       year: "numeric",
       month: "short",
@@ -82,8 +83,10 @@ export function VisitReportDetailModal({
     });
   };
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString?: string | null) => {
+    if (!dateString) return t("sections.notAvailable");
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return t("sections.invalidDate");
     return date.toLocaleDateString("id-ID", {
       year: "numeric",
       month: "long",
@@ -342,7 +345,7 @@ export function VisitReportDetailModal({
                         </div>
                         <div className="flex items-center gap-2">
                           <User className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">{visitReport.contact.name}</span>
+                          <span className="font-medium">{visitReport.contact?.name || t("sections.notAvailable")}</span>
                         </div>
                       </div>
                     )}
@@ -395,7 +398,10 @@ export function VisitReportDetailModal({
                       {visitReport.check_in_location && (
                         <div className="text-xs text-muted-foreground mt-1">
                           <MapPin className="h-3 w-3 inline mr-1" />
-                          {visitReport.check_in_location.address || `${visitReport.check_in_location.latitude}, ${visitReport.check_in_location.longitude}`}
+                          {visitReport.check_in_location?.address || 
+                            (visitReport.check_in_location?.latitude && visitReport.check_in_location?.longitude
+                              ? `${visitReport.check_in_location.latitude}, ${visitReport.check_in_location.longitude}`
+                              : t("sections.locationNotAvailable"))}
                         </div>
                       )}
                     </div>
@@ -418,7 +424,10 @@ export function VisitReportDetailModal({
                       {visitReport.check_out_location && (
                         <div className="text-xs text-muted-foreground mt-1">
                           <MapPin className="h-3 w-3 inline mr-1" />
-                          {visitReport.check_out_location.address || `${visitReport.check_out_location.latitude}, ${visitReport.check_out_location.longitude}`}
+                          {visitReport.check_out_location?.address || 
+                            (visitReport.check_out_location?.latitude && visitReport.check_out_location?.longitude
+                              ? `${visitReport.check_out_location.latitude}, ${visitReport.check_out_location.longitude}`
+                              : t("sections.locationNotAvailable"))}
                         </div>
                       )}
                     </div>
@@ -445,7 +454,7 @@ export function VisitReportDetailModal({
                   </div>
                 </CardHeader>
                 <CardContent>
-                  {visitReport.photos && visitReport.photos.length > 0 ? (
+                  {visitReport.photos && Array.isArray(visitReport.photos) && visitReport.photos.length > 0 ? (
                     <div className="grid grid-cols-3 gap-4">
                       {visitReport.photos.map((photo) => (
                         <div key={photo} className="relative group">

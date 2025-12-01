@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Sora } from "next/font/google";
 import { getLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
@@ -24,12 +24,13 @@ const headingFont = Sora({
 export const metadata: Metadata = {
   title: "CRM Healthcare Platform",
   description: "CRM Healthcare/Pharmaceutical Platform",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 5,
-    userScalable: true,
-  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
 };
 
 export default async function RootLayout({

@@ -128,9 +128,9 @@ export function DealDetailModal({
                       <>
                         <Circle
                           className="h-3 w-3"
-                          style={{ color: deal.stage.color, fill: deal.stage.color }}
+                          style={{ color: deal.stage.color || "#CBD5F5", fill: deal.stage.color || "#CBD5F5" }}
                         />
-                        <span className="text-sm text-muted-foreground">{deal.stage.name}</span>
+                        <span className="text-sm text-muted-foreground">{deal.stage.name || t("fallbacks.unknownStage")}</span>
                       </>
                     )}
                   </div>
@@ -181,17 +181,17 @@ export function DealDetailModal({
                         <span>{t("sections.value")}</span>
                       </div>
                       <div className="text-base font-semibold">
-                        {deal.value_formatted || formatCurrency(deal.value)}
+                        {deal.value_formatted || formatCurrency(deal.value ?? 0)}
                       </div>
                     </div>
 
-                    {deal.probability > 0 && (
+                    {(deal.probability ?? 0) > 0 && (
                       <div className="space-y-2">
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <TrendingUp className="h-4 w-4" />
                           <span>Probability</span>
                         </div>
-                        <div className="text-base font-medium">{deal.probability}%</div>
+                        <div className="text-base font-medium">{deal.probability ?? 0}%</div>
                       </div>
                     )}
 
@@ -207,7 +207,7 @@ export function DealDetailModal({
                             className="h-auto p-0 text-base font-medium"
                             onClick={() => setViewingAccountId(deal.account?.id || null)}
                           >
-                            {deal.account.name}
+                            {deal.account?.name || t("fallbacks.unknownAccount")}
                           </Button>
                         </div>
                       </div>
@@ -225,7 +225,7 @@ export function DealDetailModal({
                             className="h-auto p-0 text-base font-medium"
                             onClick={() => setViewingContactId(deal.contact?.id || null)}
                           >
-                            {deal.contact.name}
+                            {deal.contact?.name || t("fallbacks.unknownContact")}
                           </Button>
                         </div>
                       </div>
@@ -238,12 +238,12 @@ export function DealDetailModal({
                           <span>{t("sections.assignedTo")}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          {deal.assigned_user.avatar_url && (
+                          {deal.assigned_user?.avatar_url && (
                             <Avatar className="h-6 w-6">
-                              <AvatarImage src={deal.assigned_user.avatar_url} alt={deal.assigned_user.name} />
+                              <AvatarImage src={deal.assigned_user.avatar_url} alt={deal.assigned_user?.name ?? t("fallbacks.unknownUser")} />
                             </Avatar>
                           )}
-                          <div className="text-base font-medium">{deal.assigned_user.name}</div>
+                          <div className="text-base font-medium">{deal.assigned_user?.name ?? t("fallbacks.unknownUser")}</div>
                         </div>
                       </div>
                     )}
@@ -255,11 +255,16 @@ export function DealDetailModal({
                           <span>{t("sections.expectedCloseDate")}</span>
                         </div>
                         <div className="text-base font-medium">
-                          {new Date(deal.expected_close_date).toLocaleDateString("id-ID", {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          })}
+                          {(() => {
+                            if (!deal.expected_close_date) return t("fallbacks.noDate");
+                            const date = new Date(deal.expected_close_date);
+                            if (isNaN(date.getTime())) return t("fallbacks.invalidDate");
+                            return date.toLocaleDateString("id-ID", {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            });
+                          })()}
                         </div>
                       </div>
                     )}
@@ -271,11 +276,16 @@ export function DealDetailModal({
                           <span>{t("sections.actualCloseDate")}</span>
                         </div>
                         <div className="text-base font-medium">
-                          {new Date(deal.actual_close_date).toLocaleDateString("id-ID", {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          })}
+                          {(() => {
+                            if (!deal.actual_close_date) return t("fallbacks.noDate");
+                            const date = new Date(deal.actual_close_date);
+                            if (isNaN(date.getTime())) return t("fallbacks.invalidDate");
+                            return date.toLocaleDateString("id-ID", {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            });
+                          })()}
                         </div>
                       </div>
                     )}

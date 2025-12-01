@@ -17,6 +17,7 @@ import {
 import { useAccounts } from "../hooks/useAccounts";
 import type { Contact, ContactRole } from "../types";
 import { ContactDetailModal } from "./contact-detail-modal";
+import type { CreateContactFormData, UpdateContactFormData } from "../schemas/contact.schema";
 
 export function ContactList() {
   const {
@@ -168,11 +169,13 @@ export function ContactList() {
             className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground"
           >
             <option value="">All Accounts</option>
-            {accounts.map((account) => (
-              <option key={account.id} value={account.id}>
-                {account.name}
-              </option>
-            ))}
+            {Array.isArray(accounts) && accounts.length > 0
+              ? accounts.map((account) => (
+                  <option key={account?.id} value={account?.id ?? ""}>
+                    {account?.name ?? "-"}
+                  </option>
+                ))
+              : null}
           </select>
           <select
             value={role}
@@ -230,7 +233,7 @@ export function ContactList() {
           </DialogHeader>
           <ContactForm
             onSubmit={async (data) => {
-              await handleCreate(data as any);
+              await handleCreate(data as CreateContactFormData);
             }}
             onCancel={() => setIsCreateDialogOpen(false)}
             isLoading={createContact.isPending}
@@ -248,7 +251,7 @@ export function ContactList() {
             </DialogHeader>
             <ContactForm
               contact={editingContactData.data}
-              onSubmit={(data) => handleUpdate(data)}
+              onSubmit={(data) => handleUpdate(data as UpdateContactFormData)}
               onCancel={() => setEditingContact(null)}
               isLoading={updateContact.isPending}
             />

@@ -35,6 +35,21 @@ export function DashboardOverview() {
   }
 
   const targetProgress = overview.target?.progress_percent ?? 0;
+  const accountStats = overview.account_stats ?? { total: 0, active: 0, inactive: 0, change_percent: 0 };
+  const deals = overview.deals ?? { 
+    total_deals: 0, 
+    open_deals: 0, 
+    won_deals: 0, 
+    lost_deals: 0, 
+    total_value: 0, 
+    total_value_formatted: "Rp 0", 
+    change_percent: 0 
+  };
+  const revenue = overview.revenue ?? { 
+    total_revenue: 0, 
+    total_revenue_formatted: "Rp 0", 
+    change_percent: 0 
+  };
 
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat("id-ID", {
@@ -75,12 +90,12 @@ export function DashboardOverview() {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            {overview.account_stats.total}
+            {accountStats.total}
           </div>
           <p className="text-xs text-muted-foreground mt-1">
             {t("totalAccounts.description", {
-              active: overview.account_stats.active,
-              inactive: overview.account_stats.inactive,
+              active: accountStats.active,
+              inactive: accountStats.inactive,
             })}
           </p>
         </CardContent>
@@ -96,12 +111,12 @@ export function DashboardOverview() {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            {overview.deals.total_deals}
+            {deals.total_deals}
           </div>
           <p className="text-xs text-muted-foreground mt-1">
             {t("totalDeals.description", {
-              open: overview.deals.open_deals,
-              won: overview.deals.won_deals,
+              open: deals.open_deals,
+              won: deals.won_deals,
             })}
           </p>
         </CardContent>
@@ -117,7 +132,7 @@ export function DashboardOverview() {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            {formatCurrency(overview.revenue.total_revenue)}
+            {formatCurrency(revenue.total_revenue)}
           </div>
           <p className="text-xs text-muted-foreground mt-1">
             {t("totalRevenue.description")}

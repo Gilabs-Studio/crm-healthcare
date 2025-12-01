@@ -5,12 +5,14 @@ import { useRouter } from "@/i18n/routing";
 import { useEffect } from "react";
 import { userService } from "../services/userService";
 import { useAuthStore } from "@/features/auth/stores/useAuthStore";
+import { useLogout } from "@/features/auth/hooks/useLogout";
 import { AxiosError } from "axios";
 
 export function useUserPermissions() {
   // Ensure hooks are called in consistent order - router first, then store
   const router = useRouter();
-  const { user, logout } = useAuthStore();
+  const { user } = useAuthStore();
+  const handleLogout = useLogout();
   
   const query = useQuery({
     queryKey: ["user-permissions", user?.id],
@@ -39,11 +41,10 @@ export function useUserPermissions() {
         error.response?.data?.error?.code === "USER_NOT_FOUND"
       ) {
         // Clear auth state and redirect to locale-scoped login
-        logout();
-        router.push("/login");
+        handleLogout();
       }
     }
-  }, [query.error, logout, router]);
+  }, [query.error, handleLogout]);
 
   return query;
 }

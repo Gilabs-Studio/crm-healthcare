@@ -65,7 +65,7 @@ export function useAISettings() {
   };
 
   const updateAPIKey = (apiKey: string) => {
-    updateMutation.mutate({ api_key: apiKey } as any);
+    updateMutation.mutate({ api_key: apiKey });
   };
 
   const updateUsageLimit = (limit: number | undefined) => {

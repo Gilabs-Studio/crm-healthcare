@@ -10,13 +10,6 @@ export function TaskManagement() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
-        <p className="text-muted-foreground">
-          {t("description")}
-        </p>
-      </div>
-
       <Tabs defaultValue="board">
         <TabsList>
           <TabsTrigger value="board">{t("viewBoard")}</TabsTrigger>

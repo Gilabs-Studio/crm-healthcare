@@ -270,9 +270,11 @@ export function TaskDetailModal({
                       </div>
                       <div className="flex items-center gap-2">
                         <User className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-medium">{task.assigned_user.name}</span>
+                        <span className="font-medium">{task.assigned_user?.name || t("sections.notAvailable")}</span>
                       </div>
-                      <span className="text-xs text-muted-foreground">{task.assigned_user.email}</span>
+                      {task.assigned_user?.email && (
+                        <span className="text-xs text-muted-foreground">{task.assigned_user.email}</span>
+                      )}
                     </div>
                   )}
                   {task.account && (
@@ -282,7 +284,7 @@ export function TaskDetailModal({
                       </div>
                       <div className="flex items-center gap-2">
                         <Building2 className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-medium">{task.account.name}</span>
+                        <span className="font-medium">{task.account?.name || t("sections.notAvailable")}</span>
                       </div>
                     </div>
                   )}
@@ -297,14 +299,16 @@ export function TaskDetailModal({
                       type="button"
                       className="flex items-center gap-2 text-left hover:text-primary"
                       onClick={() => {
-                        setViewingContactId(task.contact!.id);
-                        setIsContactModalOpen(true);
+                        if (task.contact?.id) {
+                          setViewingContactId(task.contact.id);
+                          setIsContactModalOpen(true);
+                        }
                       }}
                     >
                       <Contact className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{task.contact.name}</span>
+                      <span className="font-medium">{task.contact?.name || t("sections.notAvailable")}</span>
                     </button>
-                    {task.contact.email && (
+                    {task.contact?.email && (
                       <span className="text-xs text-muted-foreground">{task.contact.email}</span>
                     )}
                   </div>

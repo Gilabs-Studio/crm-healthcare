@@ -37,9 +37,9 @@ export function RecentActivities() {
     );
   }
 
-  const activities = data?.data || [];
+  const activities = Array.isArray(data?.data) ? data.data : [];
 
-  if (activities.length === 0) {
+  if (!activities || activities.length === 0) {
     return (
       <Card>
         <CardHeader>
@@ -54,8 +54,10 @@ export function RecentActivities() {
     );
   }
 
-  const formatTime = (timestamp: string) => {
+  const formatTime = (timestamp?: string | null) => {
+    if (!timestamp) return t("unknownTime");
     const date = new Date(timestamp);
+    if (isNaN(date.getTime())) return t("invalidTime");
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const minutes = Math.floor(diff / 60000);
@@ -79,40 +81,45 @@ export function RecentActivities() {
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {activities.map((activity) => (
-            <div
-              key={activity.id}
-              className="flex items-start gap-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors"
-            >
-              <div className="mt-0.5">
-                {activityIcons[activity.type] || <Activity className="h-4 w-4" />}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <Badge variant="outline" className="text-xs">
-                    {activity.type}
-                  </Badge>
-                  <span className="text-xs text-muted-foreground flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    {formatTime(activity.timestamp)}
-                  </span>
+          {activities.map((activity) => {
+            if (!activity) return null;
+            return (
+              <div
+                key={activity.id}
+                className="flex items-start gap-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+              >
+                <div className="mt-0.5">
+                  {activityIcons[activity.type ?? ""] || <Activity className="h-4 w-4" />}
                 </div>
-                <div className="text-sm">{activity.description}</div>
-                <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                  {activity.account && (
-                    <div className="flex items-center gap-1">
-                      <Building2 className="h-3 w-3" />
-                      <span>{activity.account.name}</span>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-1">
-                    <User className="h-3 w-3" />
-                    <span>{activity.user.name}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Badge variant="outline" className="text-xs">
+                      {activity.type ?? "unknown"}
+                    </Badge>
+                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {formatTime(activity.timestamp)}
+                    </span>
+                  </div>
+                  <div className="text-sm">{activity.description || t("noDescription")}</div>
+                  <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                    {activity.account && (
+                      <div className="flex items-center gap-1">
+                        <Building2 className="h-3 w-3" />
+                        <span>{activity.account?.name || t("unknownAccount")}</span>
+                      </div>
+                    )}
+                    {activity.user && (
+                      <div className="flex items-center gap-1">
+                        <User className="h-3 w-3" />
+                        <span>{activity.user?.name || t("unknownUser")}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </CardContent>
     </Card>

@@ -65,6 +65,216 @@ Components (`components/`)
   - `login-form.tsx` (UI) → `useLogin` hook (logic) → `authService` (API) → `useAuthStore` (state)
 - Keep feature components inside the feature; only promote to `shared/` when reused broadly.
 
+UI/UX Safety Guidelines (CRITICAL - Must Follow)
+- **CRITICAL**: All components MUST implement comprehensive safety checks to prevent runtime errors and provide good UX.
+
+1. **Null Safety for Nested Properties**
+   - **ALWAYS** use optional chaining (`?.`) when accessing nested object properties.
+   - **ALWAYS** provide fallback values using nullish coalescing (`??`) or default values.
+   - **NEVER** access properties like `obj.nested.property` without checking if `obj.nested` exists first.
+   
+   ❌ BAD:
+   ```tsx
+   <div>{user.profile.name}</div>  // Crashes if user.profile is undefined
+   <div>{deal.account.name}</div>  // Crashes if deal.account is undefined
+   ```
+   
+   ✅ GOOD:
+   ```tsx
+   <div>{user.profile?.name ?? "Unknown User"}</div>
+   <div>{deal.account?.name ?? t("unknownAccount")}</div>
+   
+   // Or extract with defaults:
+   const accountName = deal.account?.name ?? t("unknownAccount");
+   <div>{accountName}</div>
+   ```
+
+2. **Array Safety**
+   - **ALWAYS** check array existence and length before mapping/iterating.
+   - **ALWAYS** provide empty state UI when arrays are empty.
+   - Use `Array.isArray()` if the data might not be an array.
+   
+   ❌ BAD:
+   ```tsx
+   {items.map(item => <div key={item.id}>{item.name}</div>)}  // Crashes if items is undefined
+   ```
+   
+   ✅ GOOD:
+   ```tsx
+   const items = data?.items ?? [];
+   if (items.length === 0) {
+     return <EmptyState message={t("noItems")} />;
+   }
+   return items.map(item => <div key={item.id}>{item.name}</div>);
+   ```
+
+3. **Loading and Error States**
+   - **ALWAYS** handle `isLoading` state from TanStack Query hooks.
+   - **ALWAYS** handle `isError` or error states.
+   - **ALWAYS** show loading skeletons/spinners during data fetching.
+   - **ALWAYS** show error messages with retry options when requests fail.
+   
+   ✅ GOOD Pattern:
+   ```tsx
+   const { data, isLoading, isError, error } = useQuery(...);
+   
+   if (isLoading) {
+     return <Skeleton />;
+   }
+   
+   if (isError) {
+     return <ErrorState error={error} onRetry={() => refetch()} />;
+   }
+   
+   const items = data?.data ?? [];
+   if (items.length === 0) {
+     return <EmptyState />;
+   }
+   
+   return <ItemList items={items} />;
+   ```
+
+4. **Type Safety with Default Values**
+   - Extract nested data with defaults at the top of component.
+   - Use type-safe defaults that match the expected structure.
+   - Make types optional (`?`) in `.d.ts` files if properties can be undefined at runtime.
+   
+   ✅ GOOD Pattern:
+   ```tsx
+   const overview = data?.data;
+   if (!overview) return null;
+   
+   // Extract with defaults
+   const deals = overview.deals ?? {
+     total_deals: 0,
+     open_deals: 0,
+     won_deals: 0,
+     lost_deals: 0,
+     total_value: 0,
+     total_value_formatted: "Rp 0",
+     change_percent: 0,
+   };
+   
+   const revenue = overview.revenue ?? {
+     total_revenue: 0,
+     total_revenue_formatted: "Rp 0",
+     change_percent: 0,
+   };
+   
+   // Now safe to use
+   <div>{deals.total_deals}</div>
+   <div>{formatCurrency(revenue.total_revenue)}</div>
+   ```
+
+5. **Defensive Programming for API Responses**
+   - **NEVER** assume API responses match TypeScript types exactly.
+   - TypeScript types are compile-time only; runtime data may differ.
+   - Always validate and provide fallbacks for:
+     - Missing properties
+     - Null/undefined values
+     - Wrong data types
+     - Empty arrays/objects
+   
+   ✅ GOOD:
+   ```tsx
+   // In types/index.d.ts - make optional if can be undefined
+   export interface DashboardOverview {
+     deals?: { total_deals: number; ... };
+     revenue?: { total_revenue: number; ... };
+   }
+   
+   // In component - always check
+   const deals = overview.deals ?? DEFAULT_DEALS;
+   ```
+
+6. **Empty States and Placeholders**
+   - **ALWAYS** show meaningful empty states, not just blank screens.
+   - Use translation keys for empty state messages.
+   - Provide helpful context (e.g., "No tasks found. Create one to get started.").
+   
+   ✅ GOOD:
+   ```tsx
+   if (tasks.length === 0) {
+     return (
+       <Card>
+         <CardContent className="text-center py-8">
+           <p className="text-sm text-muted-foreground">{t("empty")}</p>
+           <Button onClick={onCreate}>{t("createFirst")}</Button>
+         </CardContent>
+       </Card>
+     );
+   }
+   ```
+
+7. **Safe String/Number Operations**
+   - **ALWAYS** handle undefined/null for string operations (`.toLocaleString()`, `.toUpperCase()`, etc.).
+   - **ALWAYS** provide defaults for number operations (division, formatting, etc.).
+   
+   ✅ GOOD:
+   ```tsx
+   const value = deal.value ?? 0;
+   const formatted = value.toLocaleString("id-ID");
+   
+   const name = user.name ?? "";
+   const displayName = name.toUpperCase();
+   ```
+
+8. **Safe Date Operations**
+   - **ALWAYS** validate dates before formatting.
+   - Handle invalid dates gracefully.
+   
+   ✅ GOOD:
+   ```tsx
+   const formatDate = (value?: string | null) => {
+     if (!value) return t("noDate");
+     const date = new Date(value);
+     if (isNaN(date.getTime())) return t("invalidDate");
+     return date.toLocaleDateString(locale, { ... });
+   };
+   ```
+
+9. **Component Props Safety**
+   - Use `readonly` for props to prevent mutations.
+   - Provide default props when appropriate.
+   - Validate required props exist before using.
+   
+   ✅ GOOD:
+   ```tsx
+   interface ComponentProps {
+     readonly data?: DataType;
+     readonly onAction?: () => void;
+   }
+   
+   export function Component({ data, onAction }: ComponentProps) {
+     const safeData = data ?? DEFAULT_DATA;
+     // ...
+   }
+   ```
+
+10. **Error Boundaries**
+    - Use Error Boundaries for component-level error handling.
+    - Provide fallback UI when components crash.
+    - Log errors for debugging but show user-friendly messages.
+    
+    ✅ GOOD:
+    ```tsx
+    <ErrorBoundary fallback={<ErrorFallback />}>
+      <DashboardOverview />
+    </ErrorBoundary>
+    ```
+
+**Checklist Before Committing Component Code:**
+- [ ] All nested property accesses use optional chaining (`?.`)
+- [ ] All arrays checked for existence and length before iteration
+- [ ] Loading states handled with skeletons/spinners
+- [ ] Error states handled with user-friendly messages
+- [ ] Empty states provide helpful context
+- [ ] Default values provided for all potentially undefined data
+- [ ] Type definitions match runtime reality (optional properties marked with `?`)
+- [ ] Date operations validate input
+- [ ] String/Number operations handle null/undefined
+- [ ] Component tested with missing/undefined data
+
 Smart Suspense usage (Next.js App Router)
 - Prioritize static/above-the-fold UI:
   - Use route-level `loading.tsx` for coarse skeletons.
