@@ -140,6 +140,7 @@ type UpdateVisitReportRequest struct {
 	CheckInLocation  *Location  `json:"check_in_location" binding:"omitempty"`
 	CheckOutLocation *Location  `json:"check_out_location" binding:"omitempty"`
 	Photos           []string   `json:"photos" binding:"omitempty"`
+	Status           string     `json:"status" binding:"omitempty,oneof=draft submitted"`
 }
 
 // CheckInRequest represents check-in request DTO

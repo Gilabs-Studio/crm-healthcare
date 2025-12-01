@@ -343,6 +343,18 @@ func (s *Service) Update(id string, req *visit_report.UpdateVisitReportRequest) 
 		vr.Photos = photosBytes
 	}
 
+	// Update status if provided (only allow draft -> submitted transition)
+	if req.Status != "" {
+		if req.Status == "submitted" && vr.Status == "draft" {
+			vr.Status = "submitted"
+		} else if req.Status == "draft" && vr.Status == "submitted" {
+			// Allow reverting from submitted to draft
+			vr.Status = "draft"
+		} else if req.Status != vr.Status {
+			return nil, errors.New("invalid status transition")
+		}
+	}
+
 	if err := s.visitReportRepo.Update(vr); err != nil {
 		return nil, err
 	}

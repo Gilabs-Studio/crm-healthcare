@@ -121,7 +121,8 @@
       "edit": "Ubah",
       "delete": "Hapus",
       "approve": "Setujui",
-      "reject": "Tolak"
+      "reject": "Tolak",
+      "submit": "Kirim"
     },
     "empty": {
       "table": "Tidak ada laporan kunjungan"

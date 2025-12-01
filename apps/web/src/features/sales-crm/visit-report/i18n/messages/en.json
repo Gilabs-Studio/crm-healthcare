@@ -121,7 +121,8 @@
       "edit": "Edit",
       "delete": "Delete",
       "approve": "Approve",
-      "reject": "Reject"
+      "reject": "Reject",
+      "submit": "Submit"
     },
     "empty": {
       "table": "No visit reports found"

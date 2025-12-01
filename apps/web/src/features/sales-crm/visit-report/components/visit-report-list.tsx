@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Edit, Trash2, Plus, Search, Eye, Calendar, MapPin, CheckCircle2, XCircle, MoreVertical } from "lucide-react";
+import { Edit, Trash2, Plus, Search, Eye, Calendar, MapPin, CheckCircle2, XCircle, MoreVertical, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -88,6 +88,7 @@ export function VisitReportList() {
     updateVisitReport,
     handleApprove,
     handleRejectClick,
+    handleSubmit,
     approvingVisitReportId,
     rejectingVisitReportId,
     setRejectingVisitReportId,
@@ -183,8 +184,9 @@ export function VisitReportList() {
       accessor: (row) => {
         const hasApprovalActions = (hasApprovePermission || hasRejectPermission) && row.status === "submitted";
         const canEdit = hasEditPermission && (row.status === "draft" || row.status === "submitted");
+        const canSubmit = row.status === "draft";
         const canDelete = hasDeletePermission;
-        const hasAnyAction = hasApprovalActions || canEdit || canDelete;
+        const hasAnyAction = hasApprovalActions || canEdit || canSubmit || canDelete;
 
         return (
           <div className="flex items-center justify-end gap-1">
@@ -232,8 +234,18 @@ export function VisitReportList() {
                           {t("buttons.reject")}
                         </DropdownMenuItem>
                       )}
-                      {(canEdit || canDelete) && <DropdownMenuSeparator />}
+                      {(canEdit || canSubmit || canDelete) && <DropdownMenuSeparator />}
                     </>
+                  )}
+                  {canSubmit && (
+                    <DropdownMenuItem
+                      onClick={() => handleSubmit(row.id)}
+                      disabled={updateVisitReport.isPending}
+                      className="text-primary focus:text-primary"
+                    >
+                      <Send className="h-4 w-4 mr-2" />
+                      {t("buttons.submit")}
+                    </DropdownMenuItem>
                   )}
                   {canEdit && (
                     <DropdownMenuItem

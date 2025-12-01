@@ -26,6 +26,7 @@ export const updateVisitReportSchema = z.object({
   check_in_location: locationSchema.optional(),
   check_out_location: locationSchema.optional(),
   photos: z.array(z.string().url("Invalid photo URL")).optional(),
+  status: z.enum(["draft", "submitted"]).optional(),
 });
 
 export const checkInSchema = z.object({

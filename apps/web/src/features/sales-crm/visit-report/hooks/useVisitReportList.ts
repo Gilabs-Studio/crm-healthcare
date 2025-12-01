@@ -126,6 +126,18 @@ export function useVisitReportList() {
     }
   };
 
+  const handleSubmit = async (id: string) => {
+    try {
+      await updateVisitReport.mutateAsync({
+        id,
+        data: { status: "submitted" },
+      });
+      toast.success("Visit report submitted successfully");
+    } catch (error) {
+      // Error already handled in api-client interceptor
+    }
+  };
+
   return {
     // State
     page,
@@ -166,6 +178,7 @@ export function useVisitReportList() {
     handleApprove,
     handleRejectClick,
     handleRejectConfirm,
+    handleSubmit,
     // Mutations
     deleteVisitReport,
     createVisitReport,
