@@ -34,6 +34,11 @@ func SeedAll() error {
 		return err
 	}
 
+	// Seed activity types (required for activities)
+	if err := SeedActivityTypes(); err != nil {
+		return err
+	}
+
 	// Seed products (requires product categories)
 	if err := SeedProducts(); err != nil {
 		return err

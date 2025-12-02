@@ -12,6 +12,7 @@ import (
 	"github.com/gilabs/crm-healthcare/api/internal/database"
 	accountrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/account"
 	activityrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/activity"
+	activitytyperepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/activity_type"
 	"github.com/gilabs/crm-healthcare/api/internal/repository/postgres/auth"
 	categoryrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/category"
 	contactrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/contact"
@@ -29,6 +30,7 @@ import (
 	aisettingsrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/ai_settings"
 	accountservice "github.com/gilabs/crm-healthcare/api/internal/service/account"
 	activityservice "github.com/gilabs/crm-healthcare/api/internal/service/activity"
+	activitytypeservice "github.com/gilabs/crm-healthcare/api/internal/service/activity_type"
 	aiservice "github.com/gilabs/crm-healthcare/api/internal/service/ai"
 	aisettingsservice "github.com/gilabs/crm-healthcare/api/internal/service/ai_settings"
 	authservice "github.com/gilabs/crm-healthcare/api/internal/service/auth"
@@ -97,6 +99,7 @@ func main() {
 	dealRepo := dealrepo.NewRepository(database.DB)
 	visitReportRepo := visitreportrepo.NewRepository(database.DB)
 	activityRepo := activityrepo.NewRepository(database.DB)
+	activityTypeRepo := activitytyperepo.NewRepository(database.DB)
 	productCategoryRepo := productcategoryrepo.NewRepository(database.DB)
 	productRepo := productrepo.NewRepository(database.DB)
 	taskRepo := taskrepo.NewRepository(database.DB)
@@ -114,7 +117,8 @@ func main() {
 	accountService := accountservice.NewService(accountRepo, categoryRepo)
 	contactService := contactservice.NewService(contactRepo, accountRepo, contactRoleRepo)
 	pipelineService := pipelineservice.NewService(pipelineRepo, dealRepo, accountRepo)
-	activityService := activityservice.NewService(activityRepo, accountRepo, contactRepo, userRepo)
+	activityService := activityservice.NewService(activityRepo, activityTypeRepo, accountRepo, contactRepo, userRepo)
+	activityTypeService := activitytypeservice.NewService(activityTypeRepo)
 	visitReportService := visitreportservice.NewService(visitReportRepo, accountRepo, contactRepo, userRepo, activityRepo)
 	dashboardService := dashboardservice.NewService(visitReportRepo, accountRepo, activityRepo, userRepo, dealRepo, taskRepo, pipelineRepo)
 	reportService := reportservice.NewService(visitReportRepo, accountRepo, activityRepo, userRepo, dealRepo)
@@ -158,6 +162,7 @@ func main() {
 	pipelineHandler := handlers.NewPipelineHandler(pipelineService)
 	dealHandler := handlers.NewDealHandler(pipelineService)
 	activityHandler := handlers.NewActivityHandler(activityService)
+	activityTypeHandler := handlers.NewActivityTypeHandler(activityTypeService)
 	visitReportHandler := handlers.NewVisitReportHandler(visitReportService)
 	dashboardHandler := handlers.NewDashboardHandler(dashboardService)
 	reportHandler := handlers.NewReportHandler(reportService)
@@ -180,6 +185,7 @@ func main() {
 		pipelineHandler,
 		dealHandler,
 		activityHandler,
+		activityTypeHandler,
 		visitReportHandler,
 		dashboardHandler,
 		reportHandler,
@@ -210,6 +216,7 @@ func setupRouter(
 	pipelineHandler *handlers.PipelineHandler,
 	dealHandler *handlers.DealHandler,
 	activityHandler *handlers.ActivityHandler,
+	activityTypeHandler *handlers.ActivityTypeHandler,
 	visitReportHandler *handlers.VisitReportHandler,
 	dashboardHandler *handlers.DashboardHandler,
 	reportHandler *handlers.ReportHandler,
@@ -279,7 +286,7 @@ func setupRouter(
 		routes.SetupContactRoutes(v1, contactHandler, jwtManager)
 		
 		// Visit Report routes
-		routes.SetupVisitReportRoutes(v1, visitReportHandler, jwtManager)
+		routes.SetupVisitReportRoutes(v1, visitReportHandler, activityTypeHandler, jwtManager)
 		
 		// Activity routes
 		routes.SetupActivityRoutes(v1, activityHandler, jwtManager)

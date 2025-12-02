@@ -16,18 +16,20 @@ var (
 )
 
 type Service struct {
-	activityRepo interfaces.ActivityRepository
-	accountRepo  interfaces.AccountRepository
-	contactRepo  interfaces.ContactRepository
-	userRepo     interfaces.UserRepository
+	activityRepo     interfaces.ActivityRepository
+	activityTypeRepo interfaces.ActivityTypeRepository
+	accountRepo      interfaces.AccountRepository
+	contactRepo      interfaces.ContactRepository
+	userRepo         interfaces.UserRepository
 }
 
-func NewService(activityRepo interfaces.ActivityRepository, accountRepo interfaces.AccountRepository, contactRepo interfaces.ContactRepository, userRepo interfaces.UserRepository) *Service {
+func NewService(activityRepo interfaces.ActivityRepository, activityTypeRepo interfaces.ActivityTypeRepository, accountRepo interfaces.AccountRepository, contactRepo interfaces.ContactRepository, userRepo interfaces.UserRepository) *Service {
 	return &Service{
-		activityRepo: activityRepo,
-		accountRepo:  accountRepo,
-		contactRepo:  contactRepo,
-		userRepo:     userRepo,
+		activityRepo:     activityRepo,
+		activityTypeRepo: activityTypeRepo,
+		accountRepo:      accountRepo,
+		contactRepo:      contactRepo,
+		userRepo:         userRepo,
 	}
 }
 
@@ -81,6 +83,12 @@ func (s *Service) List(req *activity.ListActivitiesRequest) ([]activity.Activity
 				"name": user.Name,
 			}
 		}
+		// Load ActivityType
+		if a.ActivityTypeID != nil && *a.ActivityTypeID != "" {
+			if activityType, err := s.activityTypeRepo.FindByID(*a.ActivityTypeID); err == nil {
+				response.ActivityType = activityType.ToActivityTypeResponse()
+			}
+		}
 		responses[i] = response
 	}
 
@@ -124,6 +132,12 @@ func (s *Service) GetByID(id string) (*activity.ActivityResponse, error) {
 			response.Metadata = metadata
 		}
 	}
+	// Load ActivityType
+	if a.ActivityTypeID != nil && *a.ActivityTypeID != "" {
+		if activityType, err := s.activityTypeRepo.FindByID(*a.ActivityTypeID); err == nil {
+			response.ActivityType = activityType.ToActivityTypeResponse()
+		}
+	}
 
 	return &response, nil
 }
@@ -133,6 +147,11 @@ func (s *Service) Create(req *activity.CreateActivityRequest) (*activity.Activit
 	// Validate UserID
 	if req.UserID == "" {
 		return nil, errors.New("user_id is required")
+	}
+
+	// Validate that either activity_type_id or type is provided
+	if (req.ActivityTypeID == nil || *req.ActivityTypeID == "") && req.Type == "" {
+		return nil, errors.New("either activity_type_id or type is required")
 	}
 
 	// Parse timestamp
@@ -155,14 +174,31 @@ func (s *Service) Create(req *activity.CreateActivityRequest) (*activity.Activit
 		metadataJSON = metadataBytes
 	}
 
+	// Determine type: use ActivityTypeID if provided, otherwise use Type
+	var activityType string
+	if req.ActivityTypeID != nil && *req.ActivityTypeID != "" {
+		// Load ActivityType to get the code/type
+		activityTypeEntity, err := s.activityTypeRepo.FindByID(*req.ActivityTypeID)
+		if err == nil && activityTypeEntity != nil {
+			activityType = activityTypeEntity.Code
+		} else {
+			// Fallback to provided Type if ActivityType not found
+			activityType = req.Type
+		}
+	} else {
+		// Use provided Type (backward compatibility)
+		activityType = req.Type
+	}
+
 	a := &activity.Activity{
-		Type:        req.Type,
-		AccountID:   req.AccountID,
-		ContactID:   req.ContactID,
-		UserID:      req.UserID,
-		Description: req.Description,
-		Timestamp:   timestamp,
-		Metadata:    metadataJSON,
+		Type:          activityType,
+		ActivityTypeID: req.ActivityTypeID,
+		AccountID:     req.AccountID,
+		ContactID:     req.ContactID,
+		UserID:        req.UserID,
+		Description:   req.Description,
+		Timestamp:     timestamp,
+		Metadata:      metadataJSON,
 	}
 
 	if err := s.activityRepo.Create(a); err != nil {
@@ -226,6 +262,12 @@ func (s *Service) GetTimeline(req *activity.ActivityTimelineRequest) ([]activity
 			response.User = map[string]interface{}{
 				"id":   user.ID,
 				"name": user.Name,
+			}
+		}
+		// Load ActivityType
+		if a.ActivityTypeID != nil && *a.ActivityTypeID != "" {
+			if activityType, err := s.activityTypeRepo.FindByID(*a.ActivityTypeID); err == nil {
+				response.ActivityType = activityType.ToActivityTypeResponse()
 			}
 		}
 		responses[i] = response

@@ -1,6 +1,9 @@
+import type { ActivityType } from "./activity-type";
+
 export interface Activity {
   id: string;
-  type: "visit" | "call" | "email" | "task" | "deal";
+  type: "visit" | "call" | "email" | "task" | "deal"; // Kept for backward compatibility
+  activity_type_id?: string;
   account_id?: string;
   contact_id?: string;
   user_id: string;
@@ -21,6 +24,7 @@ export interface Activity {
     id: string;
     name: string;
   };
+  activity_type?: ActivityType;
 }
 
 export interface ListActivitiesResponse {

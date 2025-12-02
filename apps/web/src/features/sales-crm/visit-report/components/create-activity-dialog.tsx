@@ -21,8 +21,10 @@ import {
 } from "@/components/ui/select";
 import { createActivitySchema, type CreateActivityFormData } from "../schemas/activity.schema";
 import { useCreateActivity } from "../hooks/useVisitReports";
+import { useActivityTypes } from "../hooks/useActivityTypes";
 import { toast } from "sonner";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface CreateActivityDialogProps {
   readonly open: boolean;
@@ -40,6 +42,11 @@ export function CreateActivityDialog({
   onSuccess,
 }: CreateActivityDialogProps) {
   const createActivity = useCreateActivity();
+  const { data: activityTypesData, isLoading: isLoadingTypes } = useActivityTypes({ status: "active" });
+
+  const activityTypes = useMemo(() => {
+    return activityTypesData?.data ?? [];
+  }, [activityTypesData]);
 
   const {
     register,
@@ -51,7 +58,7 @@ export function CreateActivityDialog({
   } = useForm<CreateActivityFormData>({
     resolver: zodResolver(createActivitySchema),
     defaultValues: {
-      type: "call",
+      activity_type_id: "",
       account_id: accountId,
       contact_id: contactId,
       description: "",
@@ -62,15 +69,17 @@ export function CreateActivityDialog({
   // Update form values when accountId/contactId changes or dialog opens
   useEffect(() => {
     if (open) {
+      // Set default activity type to first available type if exists
+      const defaultTypeId = activityTypes.length > 0 ? activityTypes[0]?.id : "";
       reset({
-        type: "call",
+        activity_type_id: defaultTypeId,
         account_id: accountId,
         contact_id: contactId,
         description: "",
         timestamp: new Date().toISOString(),
       });
     }
-  }, [open, accountId, contactId, reset]);
+  }, [open, accountId, contactId, reset, activityTypes]);
 
   // Warn if accountId is missing (should not happen when called from visit report)
   useEffect(() => {
@@ -94,14 +103,14 @@ export function CreateActivityDialog({
 
       // Prepare request payload
       const payload: {
-        type: "visit" | "call" | "email" | "task" | "deal";
+        activity_type_id: string;
         account_id: string;
         contact_id?: string;
         description: string;
         timestamp: string;
         metadata?: Record<string, unknown>;
       } = {
-        type: data.type,
+        activity_type_id: data.activity_type_id,
         account_id: finalAccountId, // Always include account_id
         description: data.description,
         timestamp: data.timestamp,
@@ -115,8 +124,9 @@ export function CreateActivityDialog({
 
       await createActivity.mutateAsync(payload);
       toast.success("Activity created successfully");
+      const defaultTypeId = activityTypes.length > 0 ? activityTypes[0]?.id : "";
       reset({
-        type: "call",
+        activity_type_id: defaultTypeId,
         account_id: accountId,
         contact_id: contactId,
         description: "",
@@ -124,7 +134,7 @@ export function CreateActivityDialog({
       });
       onOpenChange(false);
       onSuccess?.();
-    } catch (error) {
+    } catch {
       // Error already handled in api-client interceptor
     }
   };
@@ -138,22 +148,32 @@ export function CreateActivityDialog({
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <Field orientation="vertical">
             <FieldLabel>Activity Type *</FieldLabel>
-            <Select
-              value={watch("type")}
-              onValueChange={(value) => setValue("type", value as CreateActivityFormData["type"])}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select activity type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="visit">Visit</SelectItem>
-                <SelectItem value="call">Call</SelectItem>
-                <SelectItem value="email">Email</SelectItem>
-                <SelectItem value="task">Task</SelectItem>
-                <SelectItem value="deal">Deal</SelectItem>
-              </SelectContent>
-            </Select>
-            {errors.type && <FieldError>{errors.type.message}</FieldError>}
+            {isLoadingTypes ? (
+              <Skeleton className="h-10 w-full" />
+            ) : (
+              <Select
+                value={watch("activity_type_id") ?? ""}
+                onValueChange={(value) => setValue("activity_type_id", value, { shouldValidate: true })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select activity type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {activityTypes.length === 0 ? (
+                    <div className="p-2 text-sm text-muted-foreground text-center">
+                      No activity types available
+                    </div>
+                  ) : (
+                    activityTypes.map((type) => (
+                      <SelectItem key={type.id} value={type.id}>
+                        {type.name}
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+            )}
+            {errors.activity_type_id && <FieldError>{errors.activity_type_id.message}</FieldError>}
           </Field>
 
           <Field orientation="vertical">

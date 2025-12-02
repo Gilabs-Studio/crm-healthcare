@@ -9,6 +9,7 @@ import (
 	"github.com/gilabs/crm-healthcare/api/internal/config"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/account"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/activity"
+	"github.com/gilabs/crm-healthcare/api/internal/domain/activity_type"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/category"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/contact"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/contact_role"
@@ -87,6 +88,7 @@ func AutoMigrate() error {
 		&task.Task{},
 		&reminder.Reminder{},
 		&visit_report.VisitReport{},
+		&activity_type.ActivityType{},
 		&activity.Activity{},
 		&ai_settings.AISettings{},
 	)

@@ -21,11 +21,12 @@ func SeedAccounts() error {
 
 	// Get admin user for assigned_to (sales rep)
 	var adminUser user.User
-	adminUserID := ""
+	var adminUserID *string
 	if err := database.DB.Where("email = ?", "admin@example.com").First(&adminUser).Error; err != nil {
 		log.Printf("Warning: Admin user not found, accounts will be created without assigned_to: %v", err)
+		adminUserID = nil
 	} else {
-		adminUserID = adminUser.ID
+		adminUserID = &adminUser.ID
 	}
 
 	// Get categories by code

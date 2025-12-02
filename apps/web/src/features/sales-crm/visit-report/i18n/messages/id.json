@@ -3,6 +3,10 @@
     "page": {
       "title": "Laporan Kunjungan",
       "description": "Pantau dan kelola kunjungan sales dengan check-in/out, GPS, dan dokumentasi"
+    },
+    "tabs": {
+      "visitReports": "Laporan Kunjungan",
+      "activityTypes": "Tipe Aktivitas"
     }
   },
   "visitReportForm": {
@@ -119,7 +123,10 @@
       "addVisitReport": "Tambah Laporan Kunjungan",
       "viewDetails": "Lihat Detail",
       "edit": "Ubah",
-      "delete": "Hapus"
+      "delete": "Hapus",
+      "approve": "Setujui",
+      "reject": "Tolak",
+      "submit": "Kirim"
     },
     "empty": {
       "table": "Tidak ada laporan kunjungan"
@@ -152,6 +159,56 @@
       "valueLabel": "Nilai"
     },
     "empty": "Tidak ada aktivitas"
+  },
+  "visitReportActivityType": {
+    "list": {
+      "noPermission": "Anda tidak memiliki izin untuk melihat tipe aktivitas.",
+      "addType": "Tambah Tipe Aktivitas",
+      "name": "Nama",
+      "code": "Kode",
+      "description": "Deskripsi",
+      "icon": "Ikon",
+      "badgeColor": "Warna Badge",
+      "order": "Urutan",
+      "status": "Status",
+      "actions": "Aksi",
+      "empty": "Tidak ada tipe aktivitas ditemukan",
+      "edit": "Ubah",
+      "delete": "Hapus",
+      "createTitle": "Buat Tipe Aktivitas",
+      "editTitle": "Ubah Tipe Aktivitas",
+      "deleteTitle": "Hapus Tipe Aktivitas?",
+      "deleteDescription": "Apakah Anda yakin ingin menghapus tipe aktivitas ini? Tindakan ini tidak dapat dibatalkan."
+    },
+    "form": {
+      "nameLabel": "Nama",
+      "namePlaceholder": "Masukkan nama tipe aktivitas",
+      "codeLabel": "Kode",
+      "codePlaceholder": "Masukkan kode unik (contoh: visit, call, email)",
+      "codeHint": "Pengenal unik untuk tipe aktivitas ini",
+      "descriptionLabel": "Deskripsi",
+      "descriptionPlaceholder": "Masukkan deskripsi (opsional)",
+      "iconLabel": "Ikon",
+      "iconPlaceholder": "Masukkan nama ikon (contoh: Activity, Phone, Mail)",
+      "iconHint": "Nama ikon Lucide (opsional)",
+      "badgeColorLabel": "Warna Badge",
+      "badgeColorPlaceholder": "Pilih warna badge",
+      "badgeColorDefault": "Default",
+      "badgeColorSecondary": "Secondary",
+      "badgeColorDestructive": "Destructive",
+      "badgeColorOutline": "Outline",
+      "orderLabel": "Urutan",
+      "orderPlaceholder": "Masukkan urutan tampilan",
+      "orderHint": "Angka lebih kecil muncul terlebih dahulu",
+      "statusLabel": "Status",
+      "statusPlaceholder": "Pilih status",
+      "statusActive": "Aktif",
+      "statusInactive": "Tidak Aktif",
+      "cancel": "Batal",
+      "create": "Buat",
+      "update": "Perbarui",
+      "submitting": "Menyimpan..."
+    }
   }
 }
 

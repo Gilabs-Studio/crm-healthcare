@@ -19,7 +19,7 @@ type Account struct {
 	Phone      string    `gorm:"type:varchar(20)" json:"phone"`
 	Email      string    `gorm:"type:varchar(255)" json:"email"`
 	Status     string    `gorm:"type:varchar(20);not null;default:'active'" json:"status"`
-	AssignedTo string    `gorm:"type:uuid;index" json:"assigned_to"` // Sales rep ID
+	AssignedTo *string   `gorm:"type:uuid;index" json:"assigned_to"` // Sales rep ID (optional)
 	CreatedAt  time.Time `json:"created_at"`
 	UpdatedAt  time.Time `json:"updated_at"`
 	DeletedAt  gorm.DeletedAt `gorm:"index" json:"-"`
@@ -60,7 +60,7 @@ type AccountResponse struct {
 	Phone      string    `json:"phone"`
 	Email      string    `json:"email"`
 	Status     string    `json:"status"`
-	AssignedTo string    `json:"assigned_to"`
+	AssignedTo *string   `json:"assigned_to"`
 	CreatedAt  time.Time `json:"created_at"`
 	UpdatedAt  time.Time `json:"updated_at"`
 }

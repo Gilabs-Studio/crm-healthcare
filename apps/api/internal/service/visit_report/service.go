@@ -182,11 +182,28 @@ func (s *Service) Create(req *visit_report.CreateVisitReportRequest) (*visit_rep
 		return nil, err
 	}
 
-	// Parse visit date
-	visitDate, err := time.Parse("2006-01-02", req.VisitDate)
-	if err != nil {
-		return nil, errors.New("invalid visit_date format, expected YYYY-MM-DD")
+	// Parse visit date (support both "YYYY-MM-DD" and "YYYY-MM-DD HH:mm" formats)
+	var visitDate time.Time
+	if len(req.VisitDate) > 10 {
+		// Format with time: "YYYY-MM-DD HH:mm"
+		visitDate, err = time.Parse("2006-01-02 15:04", req.VisitDate)
+		if err != nil {
+			// Try alternative format "2006-01-02T15:04:05"
+			visitDate, err = time.Parse("2006-01-02T15:04:05", req.VisitDate)
+		}
+		if err != nil {
+			// Try ISO format
+			visitDate, err = time.Parse(time.RFC3339, req.VisitDate)
+		}
+	} else {
+		// Format without time: "YYYY-MM-DD"
+		visitDate, err = time.Parse("2006-01-02", req.VisitDate)
 	}
+	if err != nil {
+		return nil, errors.New("invalid visit_date format, expected YYYY-MM-DD or YYYY-MM-DD HH:mm")
+	}
+	// Normalize to date only (remove time component)
+	visitDate = time.Date(visitDate.Year(), visitDate.Month(), visitDate.Day(), 0, 0, 0, 0, visitDate.Location())
 
 	// Marshal photos to JSON
 	var photosJSON datatypes.JSON
@@ -304,10 +321,28 @@ func (s *Service) Update(id string, req *visit_report.UpdateVisitReportRequest) 
 	}
 
 	if req.VisitDate != "" {
-		visitDate, err := time.Parse("2006-01-02", req.VisitDate)
-		if err != nil {
-			return nil, errors.New("invalid visit_date format, expected YYYY-MM-DD")
+		var visitDate time.Time
+		var err error
+		if len(req.VisitDate) > 10 {
+			// Format with time: "YYYY-MM-DD HH:mm"
+			visitDate, err = time.Parse("2006-01-02 15:04", req.VisitDate)
+			if err != nil {
+				// Try alternative format "2006-01-02T15:04:05"
+				visitDate, err = time.Parse("2006-01-02T15:04:05", req.VisitDate)
+			}
+			if err != nil {
+				// Try ISO format
+				visitDate, err = time.Parse(time.RFC3339, req.VisitDate)
+			}
+		} else {
+			// Format without time: "YYYY-MM-DD"
+			visitDate, err = time.Parse("2006-01-02", req.VisitDate)
 		}
+		if err != nil {
+			return nil, errors.New("invalid visit_date format, expected YYYY-MM-DD or YYYY-MM-DD HH:mm")
+		}
+		// Normalize to date only (remove time component)
+		visitDate = time.Date(visitDate.Year(), visitDate.Month(), visitDate.Day(), 0, 0, 0, 0, visitDate.Location())
 		vr.VisitDate = visitDate
 	}
 
@@ -341,6 +376,18 @@ func (s *Service) Update(id string, req *visit_report.UpdateVisitReportRequest) 
 			return nil, err
 		}
 		vr.Photos = photosBytes
+	}
+
+	// Update status if provided (only allow draft -> submitted transition)
+	if req.Status != "" {
+		if req.Status == "submitted" && vr.Status == "draft" {
+			vr.Status = "submitted"
+		} else if req.Status == "draft" && vr.Status == "submitted" {
+			// Allow reverting from submitted to draft
+			vr.Status = "draft"
+		} else if req.Status != vr.Status {
+			return nil, errors.New("invalid status transition")
+		}
 	}
 
 	if err := s.visitReportRepo.Update(vr); err != nil {

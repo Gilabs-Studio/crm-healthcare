@@ -113,6 +113,9 @@ func SeedPermissions() error {
 		{visitReportsMenu.ID, "CREATE_VISIT_REPORTS", "Create Visit Reports", "CREATE", &visitReportsMenu},
 		{visitReportsMenu.ID, "EDIT_VISIT_REPORTS", "Edit Visit Reports", "EDIT", &visitReportsMenu},
 		{visitReportsMenu.ID, "DELETE_VISIT_REPORTS", "Delete Visit Reports", "DELETE", &visitReportsMenu},
+		{visitReportsMenu.ID, "APPROVE_VISIT_REPORTS", "Approve Visit Reports", "APPROVE", &visitReportsMenu},
+		{visitReportsMenu.ID, "REJECT_VISIT_REPORTS", "Reject Visit Reports", "REJECT", &visitReportsMenu},
+		{visitReportsMenu.ID, "ACTIVITY", "Manage Activity Types", "ACTIVITY", &visitReportsMenu},
 
 		// Products actions
 		{productsMenu.ID, "VIEW_PRODUCTS", "View Products", "VIEW", &productsMenu},

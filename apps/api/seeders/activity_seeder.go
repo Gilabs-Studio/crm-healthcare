@@ -8,6 +8,7 @@ import (
 	"github.com/gilabs/crm-healthcare/api/internal/database"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/account"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/activity"
+	"github.com/gilabs/crm-healthcare/api/internal/domain/activity_type"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/contact"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/user"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/visit_report"
@@ -50,6 +51,18 @@ func SeedActivities() error {
 		return nil
 	}
 
+	// Get activity types
+	var activityTypes []activity_type.ActivityType
+	if err := database.DB.Find(&activityTypes).Error; err != nil {
+		return err
+	}
+
+	// Create map of activity types by code
+	activityTypeMap := make(map[string]string)
+	for _, at := range activityTypes {
+		activityTypeMap[at.Code] = at.ID
+	}
+
 	// Get visit reports to create related activities
 	var visitReports []visit_report.VisitReport
 	if err := database.DB.Find(&visitReports).Error; err != nil {
@@ -67,14 +80,18 @@ func SeedActivities() error {
 
 	// Create activities from visit reports
 	for _, vr := range visitReports {
+		// Get visit activity type ID
+		visitTypeID := activityTypeMap["visit"]
+		
 		// Activity for visit report creation
 		activities = append(activities, activity.Activity{
-			Type:        "visit",
-			AccountID:   &vr.AccountID,
-			ContactID:   vr.ContactID,
-			UserID:      vr.SalesRepID,
-			Description: "Visit report created: " + vr.Purpose,
-			Timestamp:   vr.CreatedAt,
+			Type:           "visit",
+			ActivityTypeID: &visitTypeID,
+			AccountID:      &vr.AccountID,
+			ContactID:      vr.ContactID,
+			UserID:         vr.SalesRepID,
+			Description:    "Visit report created: " + vr.Purpose,
+			Timestamp:      vr.CreatedAt,
 			Metadata: marshalMetadata(map[string]interface{}{
 				"visit_report_id": vr.ID,
 				"status":         vr.Status,
@@ -85,12 +102,13 @@ func SeedActivities() error {
 		// Activity for check-in if exists
 		if vr.CheckInTime != nil {
 			activities = append(activities, activity.Activity{
-				Type:        "visit",
-				AccountID:   &vr.AccountID,
-				ContactID:   vr.ContactID,
-				UserID:      vr.SalesRepID,
-				Description: "Checked in for visit: " + vr.Purpose,
-				Timestamp:   *vr.CheckInTime,
+				Type:           "visit",
+				ActivityTypeID: &visitTypeID,
+				AccountID:      &vr.AccountID,
+				ContactID:      vr.ContactID,
+				UserID:         vr.SalesRepID,
+				Description:    "Checked in for visit: " + vr.Purpose,
+				Timestamp:      *vr.CheckInTime,
 				Metadata: marshalMetadata(map[string]interface{}{
 					"visit_report_id": vr.ID,
 					"action":          "check_in",
@@ -102,12 +120,13 @@ func SeedActivities() error {
 		// Activity for check-out if exists
 		if vr.CheckOutTime != nil {
 			activities = append(activities, activity.Activity{
-				Type:        "visit",
-				AccountID:   &vr.AccountID,
-				ContactID:   vr.ContactID,
-				UserID:      vr.SalesRepID,
-				Description: "Checked out from visit: " + vr.Purpose,
-				Timestamp:   *vr.CheckOutTime,
+				Type:           "visit",
+				ActivityTypeID: &visitTypeID,
+				AccountID:      &vr.AccountID,
+				ContactID:      vr.ContactID,
+				UserID:         vr.SalesRepID,
+				Description:    "Checked out from visit: " + vr.Purpose,
+				Timestamp:      *vr.CheckOutTime,
 				Metadata: marshalMetadata(map[string]interface{}{
 					"visit_report_id": vr.ID,
 					"action":          "check_out",
@@ -119,12 +138,13 @@ func SeedActivities() error {
 		// Activity for approval if exists
 		if vr.Status == "approved" && vr.ApprovedAt != nil {
 			activities = append(activities, activity.Activity{
-				Type:        "visit",
-				AccountID:   &vr.AccountID,
-				ContactID:   vr.ContactID,
-				UserID:      vr.SalesRepID,
-				Description: "Visit report approved: " + vr.Purpose,
-				Timestamp:   *vr.ApprovedAt,
+				Type:           "visit",
+				ActivityTypeID: &visitTypeID,
+				AccountID:      &vr.AccountID,
+				ContactID:      vr.ContactID,
+				UserID:         vr.SalesRepID,
+				Description:    "Visit report approved: " + vr.Purpose,
+				Timestamp:      *vr.ApprovedAt,
 				Metadata: marshalMetadata(map[string]interface{}{
 					"visit_report_id": vr.ID,
 					"action":          "approved",
@@ -136,12 +156,13 @@ func SeedActivities() error {
 		// Activity for rejection if exists
 		if vr.Status == "rejected" && vr.ApprovedAt != nil {
 			activities = append(activities, activity.Activity{
-				Type:        "visit",
-				AccountID:   &vr.AccountID,
-				ContactID:   vr.ContactID,
-				UserID:      vr.SalesRepID,
-				Description: "Visit report rejected: " + vr.Purpose,
-				Timestamp:   *vr.ApprovedAt,
+				Type:           "visit",
+				ActivityTypeID: &visitTypeID,
+				AccountID:      &vr.AccountID,
+				ContactID:      vr.ContactID,
+				UserID:         vr.SalesRepID,
+				Description:    "Visit report rejected: " + vr.Purpose,
+				Timestamp:      *vr.ApprovedAt,
 				Metadata: marshalMetadata(map[string]interface{}{
 					"visit_report_id": vr.ID,
 					"action":          "rejected",
@@ -158,14 +179,21 @@ func SeedActivities() error {
 			contactID = &contacts[0].ID
 		}
 
+		// Get activity type IDs
+		callTypeID := activityTypeMap["call"]
+		emailTypeID := activityTypeMap["email"]
+		taskTypeID := activityTypeMap["task"]
+		dealTypeID := activityTypeMap["deal"]
+
 		// Call activity
 		activities = append(activities, activity.Activity{
-			Type:        "call",
-			AccountID:   &accounts[0].ID,
-			ContactID:  contactID,
-			UserID:     users[0].ID,
-			Description: "Follow-up call regarding product inquiry",
-			Timestamp:   now.Add(-3 * 24 * time.Hour), // 3 days ago
+			Type:           "call",
+			ActivityTypeID: &callTypeID,
+			AccountID:      &accounts[0].ID,
+			ContactID:      contactID,
+			UserID:         users[0].ID,
+			Description:    "Follow-up call regarding product inquiry",
+			Timestamp:      now.Add(-3 * 24 * time.Hour), // 3 days ago
 			Metadata: marshalMetadata(map[string]interface{}{
 				"duration": "15 minutes",
 				"outcome":  "Positive response, scheduled meeting",
@@ -174,12 +202,13 @@ func SeedActivities() error {
 
 		// Email activity
 		activities = append(activities, activity.Activity{
-			Type:        "email",
-			AccountID:   &accounts[0].ID,
-			ContactID:  contactID,
-			UserID:     users[0].ID,
-			Description: "Sent product catalog and pricing information",
-			Timestamp:   now.Add(-2 * 24 * time.Hour), // 2 days ago
+			Type:           "email",
+			ActivityTypeID: &emailTypeID,
+			AccountID:      &accounts[0].ID,
+			ContactID:      contactID,
+			UserID:         users[0].ID,
+			Description:    "Sent product catalog and pricing information",
+			Timestamp:      now.Add(-2 * 24 * time.Hour), // 2 days ago
 			Metadata: marshalMetadata(map[string]interface{}{
 				"subject": "Product Catalog - Q1 2024",
 				"status":  "sent",
@@ -193,12 +222,13 @@ func SeedActivities() error {
 				taskContactID = &contacts[1].ID
 			}
 			activities = append(activities, activity.Activity{
-				Type:        "task",
-				AccountID:   &accounts[1].ID,
-				ContactID:  taskContactID,
-				UserID:     users[0].ID,
-				Description: "Prepare proposal for new product line",
-				Timestamp:   now.Add(-1 * 24 * time.Hour), // 1 day ago
+				Type:           "task",
+				ActivityTypeID: &taskTypeID,
+				AccountID:      &accounts[1].ID,
+				ContactID:      taskContactID,
+				UserID:         users[0].ID,
+				Description:    "Prepare proposal for new product line",
+				Timestamp:      now.Add(-1 * 24 * time.Hour), // 1 day ago
 				Metadata: marshalMetadata(map[string]interface{}{
 					"priority": "high",
 					"due_date": now.Add(2 * 24 * time.Hour).Format("2006-01-02"),
@@ -214,12 +244,13 @@ func SeedActivities() error {
 				dealContactID = &contacts[2].ID
 			}
 			activities = append(activities, activity.Activity{
-				Type:        "deal",
-				AccountID:   &accounts[2].ID,
-				ContactID:  dealContactID,
-				UserID:     users[0].ID,
-				Description: "New deal opportunity: Annual supply contract",
-				Timestamp:   now.Add(-5 * 24 * time.Hour), // 5 days ago
+				Type:           "deal",
+				ActivityTypeID: &dealTypeID,
+				AccountID:      &accounts[2].ID,
+				ContactID:      dealContactID,
+				UserID:         users[0].ID,
+				Description:    "New deal opportunity: Annual supply contract",
+				Timestamp:      now.Add(-5 * 24 * time.Hour), // 5 days ago
 				Metadata: marshalMetadata(map[string]interface{}{
 					"value":     500000000,
 					"currency":  "IDR",
