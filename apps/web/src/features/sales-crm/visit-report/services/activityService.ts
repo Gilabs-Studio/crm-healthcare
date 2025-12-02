@@ -39,7 +39,7 @@ export const activityService = {
   },
 
   async create(data: {
-    type: "visit" | "call" | "email" | "task" | "deal";
+    activity_type_id: string;
     account_id: string; // Required - activity must be linked to an account
     contact_id?: string;
     description: string;
