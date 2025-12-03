@@ -23,6 +23,7 @@ import (
 	productrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/product"
 	productcategoryrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/product_category"
 	reminderrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/reminder"
+	notificationrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/notification"
 	rolerepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/role"
 	taskrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/task"
 	userrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/user"
@@ -44,8 +45,11 @@ import (
 	reportservice "github.com/gilabs/crm-healthcare/api/internal/service/report"
 	roleservice "github.com/gilabs/crm-healthcare/api/internal/service/role"
 	taskservice "github.com/gilabs/crm-healthcare/api/internal/service/task"
+	notificationservice "github.com/gilabs/crm-healthcare/api/internal/service/notification"
 	userservice "github.com/gilabs/crm-healthcare/api/internal/service/user"
 	visitreportservice "github.com/gilabs/crm-healthcare/api/internal/service/visit_report"
+	"github.com/gilabs/crm-healthcare/api/internal/hub"
+	"github.com/gilabs/crm-healthcare/api/internal/worker"
 	"github.com/gilabs/crm-healthcare/api/pkg/cerebras"
 	"github.com/gilabs/crm-healthcare/api/pkg/jwt"
 	"github.com/gilabs/crm-healthcare/api/pkg/logger"
@@ -104,6 +108,7 @@ func main() {
 	productRepo := productrepo.NewRepository(database.DB)
 	taskRepo := taskrepo.NewRepository(database.DB)
 	reminderRepo := reminderrepo.NewRepository(database.DB)
+	notificationRepo := notificationrepo.NewRepository(database.DB)
 	aiSettingsRepo := aisettingsrepo.NewRepository(database.DB)
 
 	// Setup services
@@ -124,6 +129,14 @@ func main() {
 	reportService := reportservice.NewService(visitReportRepo, accountRepo, activityRepo, userRepo, dealRepo)
 	productService := productservice.NewService(productRepo, productCategoryRepo)
 	taskService := taskservice.NewService(taskRepo, reminderRepo, userRepo, accountRepo, contactRepo, dealRepo)
+	
+	// Setup WebSocket hub
+	notificationHub := hub.NewNotificationHub()
+	go notificationHub.Run()
+	
+	// Setup notification service with hub
+	notificationService := notificationservice.NewService(notificationRepo)
+	notificationService.SetHub(notificationHub)
 
 	// Setup Cerebras AI Client
 	cerebrasClient := cerebras.NewClient(
@@ -168,8 +181,21 @@ func main() {
 	reportHandler := handlers.NewReportHandler(reportService)
 	productHandler := handlers.NewProductHandler(productService)
 	taskHandler := handlers.NewTaskHandler(taskService)
+	notificationHandler := handlers.NewNotificationHandler(notificationService)
 	aiHandler := handlers.NewAIHandler(aiService)
 	aiSettingsHandler := handlers.NewAISettingsHandler(aiSettingsService)
+
+	// Setup WebSocket handler
+	wsHandler := handlers.NewWebSocketHandler(notificationHub, jwtManager)
+
+	// Setup reminder worker
+	reminderWorker := worker.NewReminderWorker(
+		reminderRepo,
+		notificationService,
+		notificationHub,
+		1*time.Minute, // Run every 1 minute
+	)
+	reminderWorker.Start()
 
 	// Setup router
 	router := setupRouter(
@@ -191,6 +217,8 @@ func main() {
 		reportHandler,
 		productHandler,
 		taskHandler,
+		notificationHandler,
+		wsHandler,
 		aiHandler,
 		aiSettingsHandler,
 	)
@@ -222,6 +250,8 @@ func setupRouter(
 	reportHandler *handlers.ReportHandler,
 	productHandler *handlers.ProductHandler,
 	taskHandler *handlers.TaskHandler,
+	notificationHandler *handlers.NotificationHandler,
+	wsHandler *handlers.WebSocketHandler,
 	aiHandler *handlers.AIHandler,
 	aiSettingsHandler *handlers.AISettingsHandler,
 ) *gin.Engine {
@@ -308,6 +338,9 @@ func setupRouter(
 
 		// Task & Reminder routes
 		routes.SetupTaskRoutes(v1, taskHandler, jwtManager)
+
+		// Notification routes
+		routes.SetupNotificationRoutes(v1, notificationHandler, wsHandler, jwtManager)
 
 		// AI routes
 		routes.SetupAIRoutes(v1, aiHandler, aiSettingsHandler, jwtManager)

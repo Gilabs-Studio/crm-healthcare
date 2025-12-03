@@ -74,6 +74,16 @@ func SeedAll() error {
 		return err
 	}
 
+	// Seed reminders (requires tasks)
+	if err := SeedReminders(); err != nil {
+		return err
+	}
+
+	// Seed notifications (requires reminders)
+	if err := SeedNotifications(); err != nil {
+		return err
+	}
+
 	// Seed visit reports (requires accounts, contacts, and users)
 	if err := SeedVisitReports(); err != nil {
 		return err

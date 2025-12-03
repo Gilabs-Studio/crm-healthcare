@@ -65,11 +65,11 @@ export function ReminderSettings({ taskId }: ReminderSettingsProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="text-sm font-semibold flex items-center gap-2">
           <Clock className="h-4 w-4 text-muted-foreground" />
-          <h3 className="text-sm font-semibold">{t("title")}</h3>
-        </div>
+          {t("title")}
+        </h3>
         <Button
           type="button"
           size="sm"

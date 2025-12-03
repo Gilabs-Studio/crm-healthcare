@@ -3,7 +3,8 @@
 import React, { memo, useMemo, useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/routing";
-import { Bell, HelpCircle, Search, Settings } from "lucide-react";
+import { HelpCircle, Search, Settings } from "lucide-react";
+import { NotificationBadge } from "@/features/notifications/components/notification-badge";
 
 import { useAuthStore } from "@/features/auth/stores/useAuthStore";
 import { useUserPermissions } from "@/features/master-data/user-management/hooks/useUserPermissions";
@@ -30,6 +31,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { getMenuIcon } from "@/lib/menu-icons";
 import { useLogout } from "@/features/auth/hooks/useLogout";
 import { useDashboardCommandPalette } from "@/features/layout/hooks/useDashboardCommandPalette";
+import { NotificationDrawer } from "@/features/notifications/components/notification-drawer";
+import { useNotificationStore } from "@/features/notifications/stores/useNotificationStore";
 import {
   Sidebar,
   SidebarContent,
@@ -123,16 +126,7 @@ const Header = memo(function Header({
 
       <div className="ml-auto flex items-center gap-1">
         {/* Notifications */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative size-8"
-          type="button"
-        >
-          <Bell className="h-4 w-4" aria-hidden="true" />
-          <span className="bg-destructive absolute end-1 top-1 block size-2 rounded-full" />
-          <span className="sr-only">Open notifications</span>
-        </Button>
+        <NotificationBadge />
 
         {/* Theme toggle – now driven by internal minimal UI */}
         <ThemeToggle />
@@ -326,6 +320,7 @@ export const DashboardLayout = memo(function DashboardLayout({
   const commandPalette = useDashboardCommandPalette({
     menus: permissionsData?.data?.menus,
   });
+  const { isDrawerOpen, closeDrawer } = useNotificationStore();
 
   const userName = user?.name ?? "User";
   const primaryAvatarUrl =
@@ -453,6 +448,9 @@ export const DashboardLayout = memo(function DashboardLayout({
           </div>
         </SidebarInset>
       </div>
+
+      {/* Notification Drawer */}
+      <NotificationDrawer open={isDrawerOpen} onOpenChange={closeDrawer} />
 
       <Dialog open={commandPalette.isOpen} onOpenChange={commandPalette.toggle}>
         <DialogContent
