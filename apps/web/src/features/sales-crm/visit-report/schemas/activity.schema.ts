@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const createActivitySchema = z.object({
-  type: z.enum(["visit", "call", "email", "task", "deal"] as const),
+  activity_type_id: z.string().uuid("Invalid activity type ID"),
   account_id: z.string().uuid("Invalid account ID").optional(),
   contact_id: z.string().uuid("Invalid contact ID").optional(),
   description: z.string().min(3, "Description must be at least 3 characters"),

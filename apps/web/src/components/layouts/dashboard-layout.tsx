@@ -3,13 +3,14 @@
 import React, { memo, useMemo, useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/routing";
-import { Bell, HelpCircle, Search } from "lucide-react";
+import { HelpCircle, Search, Settings } from "lucide-react";
+import { NotificationBadge } from "@/features/notifications/components/notification-badge";
 
 import { useAuthStore } from "@/features/auth/stores/useAuthStore";
 import { useUserPermissions } from "@/features/master-data/user-management/hooks/useUserPermissions";
 import type { MenuWithActions } from "@/features/master-data/user-management/types";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -30,6 +31,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { getMenuIcon } from "@/lib/menu-icons";
 import { useLogout } from "@/features/auth/hooks/useLogout";
 import { useDashboardCommandPalette } from "@/features/layout/hooks/useDashboardCommandPalette";
+import { NotificationDrawer } from "@/features/notifications/components/notification-drawer";
+import { useNotificationStore } from "@/features/notifications/stores/useNotificationStore";
 import {
   Sidebar,
   SidebarContent,
@@ -123,16 +126,7 @@ const Header = memo(function Header({
 
       <div className="ml-auto flex items-center gap-1">
         {/* Notifications */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative size-8"
-          type="button"
-        >
-          <Bell className="h-4 w-4" aria-hidden="true" />
-          <span className="bg-destructive absolute end-1 top-1 block size-2 rounded-full" />
-          <span className="sr-only">Open notifications</span>
-        </Button>
+        <NotificationBadge />
 
         {/* Theme toggle – now driven by internal minimal UI */}
         <ThemeToggle />
@@ -172,9 +166,6 @@ const Header = memo(function Header({
                     }
                   }}
                 />
-                {avatarUrl && (
-                  <AvatarFallback className="bg-primary/10 text-primary font-medium" />
-                )}
               </Avatar>
             </Button>
           </PopoverTrigger>
@@ -186,6 +177,13 @@ const Header = memo(function Header({
             </div>
             <Separator className="my-1" />
             <div className="flex flex-col gap-1">
+              <Link
+                href="/profile"
+                className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-accent transition-colors"
+              >
+                <Settings className="h-4 w-4" />
+                Settings
+              </Link>
               <button
                 type="button"
                 onClick={logout}
@@ -322,6 +320,7 @@ export const DashboardLayout = memo(function DashboardLayout({
   const commandPalette = useDashboardCommandPalette({
     menus: permissionsData?.data?.menus,
   });
+  const { isDrawerOpen, closeDrawer } = useNotificationStore();
 
   const userName = user?.name ?? "User";
   const primaryAvatarUrl =
@@ -439,7 +438,7 @@ export const DashboardLayout = memo(function DashboardLayout({
             avatarUrl={primaryAvatarUrl}
             fallbackAvatarUrl={fallbackAvatarUrl}
           />
-          <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+          <div className="flex flex-1 flex-col gap-4 p-4">
             {error && (
               <div className="mb-2 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-xs text-destructive">
                 Failed to load menu permissions. Showing minimal navigation.
@@ -449,6 +448,9 @@ export const DashboardLayout = memo(function DashboardLayout({
           </div>
         </SidebarInset>
       </div>
+
+      {/* Notification Drawer */}
+      <NotificationDrawer open={isDrawerOpen} onOpenChange={closeDrawer} />
 
       <Dialog open={commandPalette.isOpen} onOpenChange={commandPalette.toggle}>
         <DialogContent

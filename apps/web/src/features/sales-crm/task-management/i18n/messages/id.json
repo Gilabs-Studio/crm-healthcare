@@ -116,7 +116,9 @@
       "duePrefix": "Jatuh tempo {date}",
       "markCompletedTooltip": "Tandai selesai",
       "editTooltip": "Edit task",
-      "deleteTooltip": "Hapus task"
+      "deleteTooltip": "Hapus task",
+      "unknownAccount": "Akun Tidak Dikenal",
+      "unknownContact": "Kontak Tidak Dikenal"
     },
     "form": {
       "titleLabel": "Judul",

@@ -16,7 +16,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge, badgeVariants } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/badge";
+import { toBadgeVariant } from "@/lib/badge-variant";
 import {
   Select,
   SelectContent,
@@ -50,7 +51,7 @@ import { useHasPermission } from "@/features/master-data/user-management/hooks/u
 import { toast } from "sonner";
 import type { Account, Contact } from "../types";
 import type { CreateContactFormData, UpdateContactFormData } from "../schemas/contact.schema";
-import type { VariantProps } from "class-variance-authority";
+import type { CreateAccountFormData, UpdateAccountFormData } from "../schemas/account.schema";
 import { useTranslations } from "next-intl";
 
 export function AccountList() {
@@ -202,13 +203,15 @@ export function AccountList() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("allCategories")}</SelectItem>
-              {categories
-                .filter((cat) => cat.status === "active")
-                .map((category) => (
-                  <SelectItem key={category.id} value={category.id}>
-                    {category.name}
-                  </SelectItem>
-                ))}
+              {Array.isArray(categories) && categories.length > 0
+                ? categories
+                    .filter((cat) => cat?.status === "active")
+                    .map((category) => (
+                      <SelectItem key={category?.id} value={category?.id ?? ""}>
+                        {category?.name ?? "-"}
+                      </SelectItem>
+                    ))
+                : null}
             </SelectContent>
           </Select>
         </div>
@@ -245,29 +248,32 @@ export function AccountList() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {accounts.length === 0 ? (
+                {!Array.isArray(accounts) || accounts.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                       {t("empty")}
                     </TableCell>
                   </TableRow>
                 ) : (
-                  accounts.map((account) => (
-                    <AccountRow
-                      key={account.id}
-                      account={account}
-                      isExpanded={expandedRows.has(account.id)}
-                      onToggle={() => toggleRow(account.id)}
-                      onView={() => handleViewAccount(account.id)}
-                      onEdit={() => setEditingAccount(account.id)}
-                      onDelete={() => handleDeleteClick(account.id)}
-                      onCreateContact={() => handleCreateContact(account.id)}
-                      onEditContact={handleEditContact}
-                      onDeleteContact={handleDeleteContactClick}
-                      hasEditPermission={hasEditPermission}
-                      hasDeletePermission={hasDeletePermission}
-                    />
-                  ))
+                  accounts.map((account) => {
+                    if (!account) return null;
+                    return (
+                      <AccountRow
+                        key={account.id}
+                        account={account}
+                        isExpanded={expandedRows.has(account.id)}
+                        onToggle={() => toggleRow(account.id)}
+                        onView={() => handleViewAccount(account.id)}
+                        onEdit={() => setEditingAccount(account.id)}
+                        onDelete={() => handleDeleteClick(account.id)}
+                        onCreateContact={() => handleCreateContact(account.id)}
+                        onEditContact={handleEditContact}
+                        onDeleteContact={handleDeleteContactClick}
+                        hasEditPermission={hasEditPermission}
+                        hasDeletePermission={hasDeletePermission}
+                      />
+                    );
+                  })
                 )}
               </TableBody>
             </Table>
@@ -367,7 +373,7 @@ export function AccountList() {
           </DialogHeader>
           <AccountForm
             onSubmit={async (data) => {
-              await handleCreate(data as any);
+              await handleCreate(data as CreateAccountFormData);
             }}
             onCancel={() => setIsCreateDialogOpen(false)}
             isLoading={createAccount.isPending}
@@ -385,7 +391,7 @@ export function AccountList() {
             <AccountForm
               account={editingAccountData.data}
               onSubmit={async (data) => {
-                await handleUpdate(data as any);
+                await handleUpdate(data);
               }}
               onCancel={() => setEditingAccount(null)}
               isLoading={updateAccount.isPending}
@@ -419,7 +425,7 @@ export function AccountList() {
             <ContactForm
               defaultAccountId={createContactAccountId}
               onSubmit={async (data) => {
-                await handleCreateContactSubmit(data as any);
+                await handleCreateContactSubmit(data as CreateContactFormData);
               }}
               onCancel={() => {
                 setIsCreateContactDialogOpen(false);
@@ -544,10 +550,10 @@ function AccountRow({
         <TableCell>
           {account.category ? (
             <Badge 
-              variant={account.category.badge_color as VariantProps<typeof badgeVariants>["variant"]} 
+              variant={toBadgeVariant(account.category?.badge_color, "secondary")} 
               className="font-normal"
             >
-              {account.category.name}
+              {account.category?.name || "-"}
             </Badge>
           ) : (
             <span className="text-muted-foreground">-</span>
@@ -636,7 +642,7 @@ function AccountRow({
                     </div>
                   );
                 }
-                if (contacts.length === 0) {
+                if (!Array.isArray(contacts) || contacts.length === 0) {
                   return (
                     <div className="flex flex-col items-center justify-center py-8 text-center">
                       <div className="rounded-full bg-muted p-3 mb-3">
@@ -662,85 +668,88 @@ function AccountRow({
                 }
                 return (
                   <div className="grid gap-3">
-                    {contacts.map((contact) => (
-                    <div
-                      key={contact.id}
-                      className="group relative flex items-start gap-4 p-4 rounded-lg border bg-card hover:border-border/80 hover:shadow-sm transition-all"
-                    >
-                      {/* Avatar/Icon */}
-                      <div className="shrink-0">
-                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                          <ContactIcon className="h-5 w-5 text-primary" />
-                        </div>
-                      </div>
-
-                      {/* Content */}
-                      <div className="flex-1 min-w-0 space-y-2">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0 flex-1">
-                            <h5 className="font-medium text-sm text-foreground truncate">
-                              {contact.name}
-                            </h5>
-                            {contact.position && (
-                              <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                                {contact.position}
-                              </p>
-                            )}
+                    {contacts.map((contact) => {
+                      if (!contact) return null;
+                      return (
+                        <div
+                          key={contact.id}
+                          className="group relative flex items-start gap-4 p-4 rounded-lg border bg-card hover:border-border/80 hover:shadow-sm transition-all"
+                        >
+                          {/* Avatar/Icon */}
+                          <div className="shrink-0">
+                            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                              <ContactIcon className="h-5 w-5 text-primary" />
+                            </div>
                           </div>
-                          {contact.role ? (
-                            <Badge 
-                              variant={contact.role.badge_color as VariantProps<typeof badgeVariants>["variant"]} 
-                              className="text-xs font-normal shrink-0"
+
+                          {/* Content */}
+                          <div className="flex-1 min-w-0 space-y-2">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="min-w-0 flex-1">
+                                <h5 className="font-medium text-sm text-foreground truncate">
+                                  {contact.name ?? "-"}
+                                </h5>
+                                {contact.position && (
+                                  <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                                    {contact.position}
+                                  </p>
+                                )}
+                              </div>
+                              {contact.role ? (
+                                <Badge 
+                                  variant={toBadgeVariant(contact.role?.badge_color, "secondary")} 
+                                  className="text-xs font-normal shrink-0"
+                                >
+                                  {contact.role?.name || "-"}
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline" className="text-xs font-normal shrink-0">
+                                  -
+                                </Badge>
+                              )}
+                            </div>
+
+                            {/* Contact Info */}
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
+                              {contact.phone && (
+                                <div className="flex items-center gap-1.5">
+                                  <Phone className="h-3.5 w-3.5" />
+                                  <span className="truncate">{contact.phone}</span>
+                                </div>
+                              )}
+                              {contact.email && (
+                                <div className="flex items-center gap-1.5">
+                                  <Mail className="h-3.5 w-3.5" />
+                                  <span className="truncate">{contact.email}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Actions */}
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              className="h-8 w-8"
+                              onClick={() => onEditContact(account.id, contact.id)}
+                              title={tContacts("editContactTooltip")}
                             >
-                              {contact.role.name}
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline" className="text-xs font-normal shrink-0">
-                              -
-                            </Badge>
-                          )}
+                              <Edit className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                              onClick={() => onDeleteContact(contact.id)}
+                              title={tContacts("deleteContactTooltip")}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
                         </div>
-
-                        {/* Contact Info */}
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
-                          {contact.phone && (
-                            <div className="flex items-center gap-1.5">
-                              <Phone className="h-3.5 w-3.5" />
-                              <span className="truncate">{contact.phone}</span>
-                            </div>
-                          )}
-                          {contact.email && (
-                            <div className="flex items-center gap-1.5">
-                              <Mail className="h-3.5 w-3.5" />
-                              <span className="truncate">{contact.email}</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Actions */}
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          className="h-8 w-8"
-                          onClick={() => onEditContact(account.id, contact.id)}
-                          title={tContacts("editContactTooltip")}
-                        >
-                          <Edit className="h-3.5 w-3.5" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                          onClick={() => onDeleteContact(contact.id)}
-                          title={tContacts("deleteContactTooltip")}
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 );
               })()}

@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupVisitReportRoutes(router *gin.RouterGroup, visitReportHandler *handlers.VisitReportHandler, jwtManager *jwt.JWTManager) {
+func SetupVisitReportRoutes(router *gin.RouterGroup, visitReportHandler *handlers.VisitReportHandler, activityTypeHandler *handlers.ActivityTypeHandler, jwtManager *jwt.JWTManager) {
 	visitReports := router.Group("/visit-reports")
 	visitReports.Use(middleware.AuthMiddleware(jwtManager))
 	{
@@ -21,6 +21,13 @@ func SetupVisitReportRoutes(router *gin.RouterGroup, visitReportHandler *handler
 		visitReports.POST("/:id/approve", visitReportHandler.Approve)
 		visitReports.POST("/:id/reject", visitReportHandler.Reject)
 		visitReports.POST("/:id/photos", visitReportHandler.UploadPhoto)
+
+		// Activity Types management
+		visitReports.GET("/activity-types", activityTypeHandler.List)
+		visitReports.GET("/activity-types/:id", activityTypeHandler.GetByID)
+		visitReports.POST("/activity-types", activityTypeHandler.Create)
+		visitReports.PUT("/activity-types/:id", activityTypeHandler.Update)
+		visitReports.DELETE("/activity-types/:id", activityTypeHandler.Delete)
 	}
 }
 

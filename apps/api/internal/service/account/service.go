@@ -90,6 +90,11 @@ func (s *Service) Create(req *account.CreateAccountRequest) (*account.AccountRes
 		return nil, err
 	}
 
+	var assignedTo *string
+	if req.AssignedTo != "" {
+		assignedTo = &req.AssignedTo
+	}
+
 	a := &account.Account{
 		Name:       req.Name,
 		CategoryID: req.CategoryID,
@@ -98,7 +103,7 @@ func (s *Service) Create(req *account.CreateAccountRequest) (*account.AccountRes
 		Province:   req.Province,
 		Phone:      req.Phone,
 		Email:      req.Email,
-		AssignedTo: req.AssignedTo,
+		AssignedTo: assignedTo,
 	}
 
 	if req.Status != "" {
@@ -164,7 +169,10 @@ func (s *Service) Update(id string, req *account.UpdateAccountRequest) (*account
 		a.Status = req.Status
 	}
 	if req.AssignedTo != "" {
-		a.AssignedTo = req.AssignedTo
+		assignedTo := req.AssignedTo
+		a.AssignedTo = &assignedTo
+	} else {
+		a.AssignedTo = nil
 	}
 
 	if err := s.accountRepo.Update(a); err != nil {

@@ -34,6 +34,11 @@ func SeedAll() error {
 		return err
 	}
 
+	// Seed activity types (required for activities)
+	if err := SeedActivityTypes(); err != nil {
+		return err
+	}
+
 	// Seed products (requires product categories)
 	if err := SeedProducts(); err != nil {
 		return err
@@ -66,6 +71,16 @@ func SeedAll() error {
 
 	// Seed tasks (requires users, accounts, contacts)
 	if err := SeedTasks(); err != nil {
+		return err
+	}
+
+	// Seed reminders (requires tasks)
+	if err := SeedReminders(); err != nil {
+		return err
+	}
+
+	// Seed notifications (requires reminders)
+	if err := SeedNotifications(); err != nil {
 		return err
 	}
 

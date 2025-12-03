@@ -3,15 +3,34 @@
 import { useCallback } from "react";
 import { useRouter } from "@/i18n/routing";
 import { useAuthStore } from "../stores/useAuthStore";
+import { authService } from "../services/authService";
 
 export function useLogout() {
   const router = useRouter();
-  const { logout } = useAuthStore();
+  const { setUser, setToken } = useAuthStore();
 
   const handleLogout = useCallback(async () => {
-    await logout();
-    router.push("/login");
-  }, [logout, router]);
+    try {
+      await authService.logout();
+    } catch (error) {
+      // Ignore logout errors
+    } finally {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("token");
+        localStorage.removeItem("refreshToken");
+        // Remove cookie
+        document.cookie = "token=; path=/; max-age=0";
+      }
+      setUser(null);
+      setToken(null);
+      useAuthStore.setState({
+        refreshToken: null,
+        isAuthenticated: false,
+        error: null,
+      });
+      router.push("/login");
+    }
+  }, [router, setUser, setToken]);
 
   return handleLogout;
 }

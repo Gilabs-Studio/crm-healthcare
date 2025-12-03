@@ -3,6 +3,7 @@
 import type React from "react";
 import { usePathname } from "@/i18n/routing";
 import { DashboardLayout } from "@/components/layouts/dashboard-layout";
+import { useWebSocket } from "@/features/notifications/hooks/useWebSocket";
 
 interface AppLayoutProps {
   readonly children: React.ReactNode;
@@ -16,6 +17,9 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   const publicRoutes: readonly string[] = ["/login"];
   const isPublicRoute = publicRoutes.includes(pathname);
+
+  // Always call useWebSocket hook (Rules of Hooks) - it will handle connection internally
+  useWebSocket();
 
   if (isPublicRoute) {
     return <>{children}</>;

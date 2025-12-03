@@ -15,16 +15,24 @@ import { useTranslations } from "next-intl";
 import type { PipelineReport } from "../types";
 
 interface SalesFunnelTableProps {
-  data: PipelineReport;
+  readonly data: PipelineReport;
 }
 
 export function SalesFunnelTable({ data }: SalesFunnelTableProps) {
   const t = useTranslations("reportsFeature.salesFunnelTable");
   
-  // Use actual data from API
-  const deals = data.deals || [];
-  const grandTotalValue = data.summary.total_value;
-  const grandTotalExpected = data.summary.expected_revenue || 0;
+  // Use actual data from API with null safety
+  const deals = data?.deals ?? [];
+  const summary = data?.summary ?? {
+    total_deals: 0,
+    total_value: 0,
+    won_deals: 0,
+    lost_deals: 0,
+    open_deals: 0,
+    expected_revenue: 0,
+  };
+  const grandTotalValue = summary.total_value ?? 0;
+  const grandTotalExpected = summary.expected_revenue ?? 0;
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -34,12 +42,19 @@ export function SalesFunnelTable({ data }: SalesFunnelTableProps) {
     }).format(value);
   };
 
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString("id-ID", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+  const formatDate = (date?: string | null) => {
+    if (!date) return "-";
+    try {
+      const dateObj = new Date(date);
+      if (Number.isNaN(dateObj.getTime())) return "-";
+      return dateObj.toLocaleDateString("id-ID", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+    } catch {
+      return "-";
+    }
   };
 
   const getStageColor = (stage: string) => {
@@ -98,34 +113,37 @@ export function SalesFunnelTable({ data }: SalesFunnelTableProps) {
                 </TableRow>
 
                 {/* Deal Rows */}
-                {deals.map((deal) => (
-                  <TableRow key={deal.id}>
-                    <TableCell className="font-medium">{deal.company_name || "-"}</TableCell>
-                    <TableCell>{deal.contact_name || "-"}</TableCell>
-                    <TableCell>{deal.contact_email || "-"}</TableCell>
-                    <TableCell>
-                      <Badge className={getStageColor(deal.stage)}>{deal.stage || "-"}</Badge>
-                    </TableCell>
-                    <TableCell className="text-right">{formatCurrency(deal.value)}</TableCell>
-                    <TableCell className="text-right">{deal.probability}%</TableCell>
-                    <TableCell className="text-right">{formatCurrency(deal.expected_revenue)}</TableCell>
-                    <TableCell>{formatDate(deal.creation_date)}</TableCell>
-                    <TableCell>
-                      {deal.expected_close_date ? formatDate(deal.expected_close_date) : "-"}
-                    </TableCell>
-                    <TableCell>{deal.team_member || "-"}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2 w-24">
-                        <Progress value={deal.progress_to_won} className="flex-1" />
-                        <span className="text-xs text-muted-foreground">{deal.progress_to_won}%</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {deal.last_interacted_on ? formatDate(deal.last_interacted_on) : "-"}
-                    </TableCell>
-                    <TableCell>{deal.next_step || "-"}</TableCell>
-                  </TableRow>
-                ))}
+                {deals.map((deal) => {
+                  const dealValue = deal.value ?? 0;
+                  const dealExpectedRevenue = deal.expected_revenue ?? 0;
+                  const dealProbability = deal.probability ?? 0;
+                  const dealProgress = deal.progress_to_won ?? 0;
+                  
+                  return (
+                    <TableRow key={deal.id}>
+                      <TableCell className="font-medium">{deal.company_name || "-"}</TableCell>
+                      <TableCell>{deal.contact_name || "-"}</TableCell>
+                      <TableCell>{deal.contact_email || "-"}</TableCell>
+                      <TableCell>
+                        <Badge className={getStageColor(deal.stage || "")}>{deal.stage || "-"}</Badge>
+                      </TableCell>
+                      <TableCell className="text-right">{formatCurrency(dealValue)}</TableCell>
+                      <TableCell className="text-right">{dealProbability}%</TableCell>
+                      <TableCell className="text-right">{formatCurrency(dealExpectedRevenue)}</TableCell>
+                      <TableCell>{formatDate(deal.creation_date)}</TableCell>
+                      <TableCell>{formatDate(deal.expected_close_date)}</TableCell>
+                      <TableCell>{deal.team_member || "-"}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2 w-24">
+                          <Progress value={dealProgress} className="flex-1" />
+                          <span className="text-xs text-muted-foreground">{dealProgress}%</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>{formatDate(deal.last_interacted_on)}</TableCell>
+                      <TableCell>{deal.next_step || "-"}</TableCell>
+                    </TableRow>
+                  );
+                })}
 
                 {/* Empty state if no deals */}
                 {deals.length === 0 && (

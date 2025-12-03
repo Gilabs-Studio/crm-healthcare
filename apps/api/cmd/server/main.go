@@ -12,6 +12,7 @@ import (
 	"github.com/gilabs/crm-healthcare/api/internal/database"
 	accountrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/account"
 	activityrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/activity"
+	activitytyperepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/activity_type"
 	"github.com/gilabs/crm-healthcare/api/internal/repository/postgres/auth"
 	categoryrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/category"
 	contactrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/contact"
@@ -22,6 +23,7 @@ import (
 	productrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/product"
 	productcategoryrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/product_category"
 	reminderrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/reminder"
+	notificationrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/notification"
 	rolerepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/role"
 	taskrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/task"
 	userrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/user"
@@ -29,6 +31,7 @@ import (
 	aisettingsrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/ai_settings"
 	accountservice "github.com/gilabs/crm-healthcare/api/internal/service/account"
 	activityservice "github.com/gilabs/crm-healthcare/api/internal/service/activity"
+	activitytypeservice "github.com/gilabs/crm-healthcare/api/internal/service/activity_type"
 	aiservice "github.com/gilabs/crm-healthcare/api/internal/service/ai"
 	aisettingsservice "github.com/gilabs/crm-healthcare/api/internal/service/ai_settings"
 	authservice "github.com/gilabs/crm-healthcare/api/internal/service/auth"
@@ -42,8 +45,11 @@ import (
 	reportservice "github.com/gilabs/crm-healthcare/api/internal/service/report"
 	roleservice "github.com/gilabs/crm-healthcare/api/internal/service/role"
 	taskservice "github.com/gilabs/crm-healthcare/api/internal/service/task"
+	notificationservice "github.com/gilabs/crm-healthcare/api/internal/service/notification"
 	userservice "github.com/gilabs/crm-healthcare/api/internal/service/user"
 	visitreportservice "github.com/gilabs/crm-healthcare/api/internal/service/visit_report"
+	"github.com/gilabs/crm-healthcare/api/internal/hub"
+	"github.com/gilabs/crm-healthcare/api/internal/worker"
 	"github.com/gilabs/crm-healthcare/api/pkg/cerebras"
 	"github.com/gilabs/crm-healthcare/api/pkg/jwt"
 	"github.com/gilabs/crm-healthcare/api/pkg/logger"
@@ -97,15 +103,18 @@ func main() {
 	dealRepo := dealrepo.NewRepository(database.DB)
 	visitReportRepo := visitreportrepo.NewRepository(database.DB)
 	activityRepo := activityrepo.NewRepository(database.DB)
+	activityTypeRepo := activitytyperepo.NewRepository(database.DB)
 	productCategoryRepo := productcategoryrepo.NewRepository(database.DB)
 	productRepo := productrepo.NewRepository(database.DB)
 	taskRepo := taskrepo.NewRepository(database.DB)
 	reminderRepo := reminderrepo.NewRepository(database.DB)
+	notificationRepo := notificationrepo.NewRepository(database.DB)
 	aiSettingsRepo := aisettingsrepo.NewRepository(database.DB)
 
 	// Setup services
 	authService := authservice.NewService(authRepo, jwtManager)
 	userService := userservice.NewService(userRepo, roleRepo)
+	profileService := userservice.NewProfileService(userRepo, activityRepo, dealRepo, visitReportRepo, taskRepo)
 	roleService := roleservice.NewService(roleRepo)
 	permissionService := permissionservice.NewService(permissionRepo, userRepo)
 	categoryService := categoryservice.NewService(categoryRepo)
@@ -113,12 +122,21 @@ func main() {
 	accountService := accountservice.NewService(accountRepo, categoryRepo)
 	contactService := contactservice.NewService(contactRepo, accountRepo, contactRoleRepo)
 	pipelineService := pipelineservice.NewService(pipelineRepo, dealRepo, accountRepo)
-	activityService := activityservice.NewService(activityRepo, accountRepo, contactRepo, userRepo)
+	activityService := activityservice.NewService(activityRepo, activityTypeRepo, accountRepo, contactRepo, userRepo)
+	activityTypeService := activitytypeservice.NewService(activityTypeRepo)
 	visitReportService := visitreportservice.NewService(visitReportRepo, accountRepo, contactRepo, userRepo, activityRepo)
 	dashboardService := dashboardservice.NewService(visitReportRepo, accountRepo, activityRepo, userRepo, dealRepo, taskRepo, pipelineRepo)
 	reportService := reportservice.NewService(visitReportRepo, accountRepo, activityRepo, userRepo, dealRepo)
 	productService := productservice.NewService(productRepo, productCategoryRepo)
 	taskService := taskservice.NewService(taskRepo, reminderRepo, userRepo, accountRepo, contactRepo, dealRepo)
+	
+	// Setup WebSocket hub
+	notificationHub := hub.NewNotificationHub()
+	go notificationHub.Run()
+	
+	// Setup notification service with hub
+	notificationService := notificationservice.NewService(notificationRepo)
+	notificationService.SetHub(notificationHub)
 
 	// Setup Cerebras AI Client
 	cerebrasClient := cerebras.NewClient(
@@ -147,7 +165,7 @@ func main() {
 
 	// Setup handlers
 	authHandler := handlers.NewAuthHandler(authService)
-	userHandler := handlers.NewUserHandler(userService)
+	userHandler := handlers.NewUserHandler(userService, profileService)
 	roleHandler := handlers.NewRoleHandler(roleService)
 	permissionHandler := handlers.NewPermissionHandler(permissionService)
 	categoryHandler := handlers.NewCategoryHandler(categoryService)
@@ -157,13 +175,27 @@ func main() {
 	pipelineHandler := handlers.NewPipelineHandler(pipelineService)
 	dealHandler := handlers.NewDealHandler(pipelineService)
 	activityHandler := handlers.NewActivityHandler(activityService)
+	activityTypeHandler := handlers.NewActivityTypeHandler(activityTypeService)
 	visitReportHandler := handlers.NewVisitReportHandler(visitReportService)
 	dashboardHandler := handlers.NewDashboardHandler(dashboardService)
 	reportHandler := handlers.NewReportHandler(reportService)
 	productHandler := handlers.NewProductHandler(productService)
 	taskHandler := handlers.NewTaskHandler(taskService)
+	notificationHandler := handlers.NewNotificationHandler(notificationService)
 	aiHandler := handlers.NewAIHandler(aiService)
 	aiSettingsHandler := handlers.NewAISettingsHandler(aiSettingsService)
+
+	// Setup WebSocket handler
+	wsHandler := handlers.NewWebSocketHandler(notificationHub, jwtManager)
+
+	// Setup reminder worker
+	reminderWorker := worker.NewReminderWorker(
+		reminderRepo,
+		notificationService,
+		notificationHub,
+		1*time.Minute, // Run every 1 minute
+	)
+	reminderWorker.Start()
 
 	// Setup router
 	router := setupRouter(
@@ -179,11 +211,14 @@ func main() {
 		pipelineHandler,
 		dealHandler,
 		activityHandler,
+		activityTypeHandler,
 		visitReportHandler,
 		dashboardHandler,
 		reportHandler,
 		productHandler,
 		taskHandler,
+		notificationHandler,
+		wsHandler,
 		aiHandler,
 		aiSettingsHandler,
 	)
@@ -209,11 +244,14 @@ func setupRouter(
 	pipelineHandler *handlers.PipelineHandler,
 	dealHandler *handlers.DealHandler,
 	activityHandler *handlers.ActivityHandler,
+	activityTypeHandler *handlers.ActivityTypeHandler,
 	visitReportHandler *handlers.VisitReportHandler,
 	dashboardHandler *handlers.DashboardHandler,
 	reportHandler *handlers.ReportHandler,
 	productHandler *handlers.ProductHandler,
 	taskHandler *handlers.TaskHandler,
+	notificationHandler *handlers.NotificationHandler,
+	wsHandler *handlers.WebSocketHandler,
 	aiHandler *handlers.AIHandler,
 	aiSettingsHandler *handlers.AISettingsHandler,
 ) *gin.Engine {
@@ -278,7 +316,7 @@ func setupRouter(
 		routes.SetupContactRoutes(v1, contactHandler, jwtManager)
 		
 		// Visit Report routes
-		routes.SetupVisitReportRoutes(v1, visitReportHandler, jwtManager)
+		routes.SetupVisitReportRoutes(v1, visitReportHandler, activityTypeHandler, jwtManager)
 		
 		// Activity routes
 		routes.SetupActivityRoutes(v1, activityHandler, jwtManager)
@@ -300,6 +338,9 @@ func setupRouter(
 
 		// Task & Reminder routes
 		routes.SetupTaskRoutes(v1, taskHandler, jwtManager)
+
+		// Notification routes
+		routes.SetupNotificationRoutes(v1, notificationHandler, wsHandler, jwtManager)
 
 		// AI routes
 		routes.SetupAIRoutes(v1, aiHandler, aiSettingsHandler, jwtManager)

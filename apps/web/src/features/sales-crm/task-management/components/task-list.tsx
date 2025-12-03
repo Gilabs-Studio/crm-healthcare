@@ -17,6 +17,7 @@ import { useUsers } from "@/features/master-data/user-management/hooks/useUsers"
 import { useAccounts } from "@/features/sales-crm/account-management/hooks/useAccounts";
 import { useHasPermission } from "@/features/master-data/user-management/hooks/useHasPermission";
 import { useTranslations } from "next-intl";
+import type { CreateTaskFormData, UpdateTaskFormData } from "../schemas/task.schema";
 
 export function TaskList() {
   const t = useTranslations("taskManagement.list");
@@ -129,7 +130,7 @@ export function TaskList() {
             className="text-sm text-primary hover:underline"
             // detail modal contact akan di-handle di level yang lebih tinggi bila diperlukan
           >
-            {row.contact.name}
+            {row.contact?.name || "-"}
           </button>
         ) : (
           <span className="text-sm text-muted-foreground">-</span>
@@ -385,7 +386,7 @@ export function TaskList() {
           </DialogHeader>
           <TaskForm
             onSubmit={async (data) => {
-              await handleCreate(data as any);
+              await handleCreate(data as CreateTaskFormData);
             }}
             onCancel={() => setIsCreateDialogOpen(false)}
             isLoading={createTask.isPending}
@@ -403,7 +404,7 @@ export function TaskList() {
             <TaskForm
               task={editingTaskData.data}
               onSubmit={async (data) => {
-                await handleUpdate(data as any);
+                await handleUpdate(data as UpdateTaskFormData);
               }}
               onCancel={() => setEditingTaskId(null)}
               isLoading={updateTask.isPending}

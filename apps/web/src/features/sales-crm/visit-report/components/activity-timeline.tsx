@@ -1,35 +1,18 @@
 "use client";
 
-import { Activity, Clock, User, Building2, Contact, Phone, Mail, CheckSquare, TrendingUp } from "lucide-react";
+import { Activity, Clock, User, Building2, Contact } from "lucide-react";
 import { DataTable, type Column } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Activity as ActivityType } from "../types/activity";
 import { useTranslations } from "next-intl";
+import { renderIcon } from "../lib/icon-utils";
 
 interface ActivityTimelineProps {
   readonly activities: ActivityType[];
-  readonly isLoading?: boolean;
+  readonly isLoading: boolean;
   readonly accountId?: string;
 }
-
-const activityIcons: Record<string, React.ReactNode> = {
-  visit: <Activity className="h-4 w-4" />,
-  call: <Phone className="h-4 w-4" />,
-  email: <Mail className="h-4 w-4" />,
-  task: <CheckSquare className="h-4 w-4" />,
-  deal: <TrendingUp className="h-4 w-4" />,
-  other: <Activity className="h-4 w-4" />,
-};
-
-const activityColors: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-  visit: "default",
-  call: "secondary",
-  email: "secondary",
-  task: "outline",
-  deal: "default",
-  other: "outline",
-};
 
 export function ActivityTimeline({ activities, isLoading, accountId }: ActivityTimelineProps) {
   const t = useTranslations("visitReportActivityTimeline");
@@ -38,16 +21,24 @@ export function ActivityTimeline({ activities, isLoading, accountId }: ActivityT
     {
       id: "type",
       header: t("table.type"),
-      accessor: (row) => (
-        <div className="flex items-center gap-2">
-          <div className="text-muted-foreground">
-            {activityIcons[row.type] || activityIcons.other}
+      accessor: (row) => {
+        // Use ActivityType if available, otherwise fallback to type string
+        const activityType = row.activity_type;
+        const iconName = activityType?.icon;
+        const badgeColor = activityType?.badge_color as "default" | "secondary" | "destructive" | "outline" | undefined;
+        const typeName = activityType?.name ?? row.type;
+        
+        return (
+          <div className="flex items-center gap-2">
+            <div className="text-muted-foreground">
+              {iconName ? renderIcon(iconName, "h-4 w-4") : <Activity className="h-4 w-4" />}
+            </div>
+            <Badge variant={badgeColor ?? "outline"} className="text-xs">
+              {typeName}
+            </Badge>
           </div>
-          <Badge variant={activityColors[row.type] || "outline"} className="text-xs">
-            {row.type}
-          </Badge>
-        </div>
-      ),
+        );
+      },
       className: "w-[120px]",
     },
     {
@@ -147,14 +138,18 @@ export function ActivityTimeline({ activities, isLoading, accountId }: ActivityT
       id: "user",
       header: t("table.user"),
       accessor: (row) => (
-        <div className="flex items-center gap-2">
-          <User className="h-3 w-3 text-muted-foreground" />
-          <span className="text-sm text-muted-foreground">
-            {typeof row.user === "object" && "name" in row.user
-              ? row.user.name
-              : "N/A"}
-          </span>
-        </div>
+        row.user ? (
+          <div className="flex items-center gap-2">
+            <User className="h-3 w-3 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">
+              {typeof row.user === "object" && "name" in row.user
+                ? row.user.name
+                : "N/A"}
+            </span>
+          </div>
+        ) : (
+          <span className="text-sm text-muted-foreground">-</span>
+        )
       ),
       className: "w-[150px]",
     },

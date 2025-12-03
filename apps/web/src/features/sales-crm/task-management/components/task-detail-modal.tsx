@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar, User, Building2, Contact, FileText, Clock, CheckCircle2, Edit, Trash2 } from "lucide-react";
+import { Calendar, User, Building2, Contact, FileText, Clock, CheckCircle2, Edit, Trash2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,11 +8,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Drawer } from "@/components/ui/drawer";
 import { useTask, useCompleteTask, useDeleteTask, useUpdateTask } from "../hooks/useTasks";
 import { toast } from "sonner";
-import { useState } from "react";
+import React, { useState, useRef } from "react";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { TaskForm } from "./task-form";
-import { ReminderSettings } from "./reminder-settings";
+import { ReminderSettings, ReminderSettingsHeader } from "./reminder-settings";
 import { useHasPermission } from "@/features/master-data/user-management/hooks/useHasPermission";
 import type { Task } from "../types";
 import type { UpdateTaskFormData } from "../schemas/task.schema";
@@ -57,6 +57,7 @@ export function TaskDetailModal({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [viewingContactId, setViewingContactId] = useState<string | null>(null);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const reminderSettingsRef = useRef<{ openDialog: () => void } | null>(null);
 
   const task = data?.data;
   const t = useTranslations("taskManagement.detail");
@@ -270,9 +271,11 @@ export function TaskDetailModal({
                       </div>
                       <div className="flex items-center gap-2">
                         <User className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-medium">{task.assigned_user.name}</span>
+                        <span className="font-medium">{task.assigned_user?.name || t("sections.notAvailable")}</span>
                       </div>
-                      <span className="text-xs text-muted-foreground">{task.assigned_user.email}</span>
+                      {task.assigned_user?.email && (
+                        <span className="text-xs text-muted-foreground">{task.assigned_user.email}</span>
+                      )}
                     </div>
                   )}
                   {task.account && (
@@ -282,7 +285,7 @@ export function TaskDetailModal({
                       </div>
                       <div className="flex items-center gap-2">
                         <Building2 className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-medium">{task.account.name}</span>
+                        <span className="font-medium">{task.account?.name || t("sections.notAvailable")}</span>
                       </div>
                     </div>
                   )}
@@ -297,14 +300,16 @@ export function TaskDetailModal({
                       type="button"
                       className="flex items-center gap-2 text-left hover:text-primary"
                       onClick={() => {
-                        setViewingContactId(task.contact!.id);
-                        setIsContactModalOpen(true);
+                        if (task.contact?.id) {
+                          setViewingContactId(task.contact.id);
+                          setIsContactModalOpen(true);
+                        }
                       }}
                     >
                       <Contact className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{task.contact.name}</span>
+                      <span className="font-medium">{task.contact?.name || t("sections.notAvailable")}</span>
                     </button>
-                    {task.contact.email && (
+                    {task.contact?.email && (
                       <span className="text-xs text-muted-foreground">{task.contact.email}</span>
                     )}
                   </div>
@@ -315,13 +320,21 @@ export function TaskDetailModal({
             {/* Reminders */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Clock className="h-5 w-5" />
-                  {t("sections.remindersTitle")}
+                <CardTitle className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-5 w-5" />
+                    {t("sections.remindersTitle")}
+                  </div>
+                  <ReminderSettingsHeader 
+                    onCreateClick={() => reminderSettingsRef.current?.openDialog()}
+                  />
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ReminderSettings taskId={task.id} />
+                <ReminderSettings 
+                  ref={reminderSettingsRef}
+                  taskId={task.id}
+                />
               </CardContent>
             </Card>
 

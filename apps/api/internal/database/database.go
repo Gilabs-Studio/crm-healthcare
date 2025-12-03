@@ -9,6 +9,7 @@ import (
 	"github.com/gilabs/crm-healthcare/api/internal/config"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/account"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/activity"
+	"github.com/gilabs/crm-healthcare/api/internal/domain/activity_type"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/category"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/contact"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/contact_role"
@@ -21,6 +22,7 @@ import (
 	"github.com/gilabs/crm-healthcare/api/internal/domain/user"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/visit_report"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/ai_settings"
+	"github.com/gilabs/crm-healthcare/api/internal/domain/notification"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -86,7 +88,9 @@ func AutoMigrate() error {
 		&product.Product{},
 		&task.Task{},
 		&reminder.Reminder{},
+		&notification.Notification{},
 		&visit_report.VisitReport{},
+		&activity_type.ActivityType{},
 		&activity.Activity{},
 		&ai_settings.AISettings{},
 	)

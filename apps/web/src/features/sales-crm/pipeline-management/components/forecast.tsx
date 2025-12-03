@@ -149,44 +149,53 @@ export function Forecast() {
                 </Badge>
               </div>
               <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
-                {forecast.deals.map((deal) => (
-                  <Card 
-                    key={deal.id} 
-                    className="p-4 hover:bg-muted/50 transition-colors border-border"
-                  >
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                      <div className="flex-1 min-w-0 space-y-2">
-                        <div className="flex items-start gap-3">
-                          <Building2 className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-                          <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-foreground truncate">{deal.title}</p>
-                            <p className="text-sm text-muted-foreground truncate mt-0.5">
-                              {deal.account_name}
-                            </p>
+                {forecast.deals.map((deal) => {
+                  const dealTitle = deal.title ?? "";
+                  const accountName = deal.account_name ?? "";
+                  const stageName = deal.stage_name ?? "";
+                  const probability = deal.probability ?? 0;
+                  const weightedValue = deal.weighted_value ?? 0;
+                  const dealValue = deal.value ?? 0;
+                  
+                  return (
+                    <Card 
+                      key={deal.id} 
+                      className="p-4 hover:bg-muted/50 transition-colors border-border"
+                    >
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div className="flex-1 min-w-0 space-y-2">
+                          <div className="flex items-start gap-3">
+                            <Building2 className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-foreground truncate">{dealTitle}</p>
+                              <p className="text-sm text-muted-foreground truncate mt-0.5">
+                                {accountName}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge variant="outline" className="text-xs">
+                              <Circle className="h-2 w-2 mr-1.5" />
+                              {stageName}
+                            </Badge>
+                            <Badge variant="secondary" className="text-xs">
+                              {probability}% probability
+                            </Badge>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <Badge variant="outline" className="text-xs">
-                            <Circle className="h-2 w-2 mr-1.5" />
-                            {deal.stage_name}
-                          </Badge>
-                          <Badge variant="secondary" className="text-xs">
-                            {deal.probability}% probability
-                          </Badge>
+                        <div className="text-left sm:text-right shrink-0 sm:ml-4">
+                          <p className="text-lg font-bold text-primary">
+                            {deal.weighted_value_formatted || formatCurrency(weightedValue)}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {t("dealValuePrefix")}{" "}
+                            {deal.value_formatted || formatCurrency(dealValue)}
+                          </p>
                         </div>
                       </div>
-                      <div className="text-left sm:text-right shrink-0 sm:ml-4">
-                        <p className="text-lg font-bold text-primary">
-                          {deal.weighted_value_formatted || formatCurrency(deal.weighted_value)}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          {t("dealValuePrefix")}{" "}
-                          {deal.value_formatted || formatCurrency(deal.value)}
-                        </p>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
+                    </Card>
+                  );
+                })}
               </div>
             </div>
           )}

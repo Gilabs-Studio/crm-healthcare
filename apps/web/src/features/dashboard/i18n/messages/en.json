@@ -116,7 +116,10 @@
     "minutesAgo": "{count}m ago",
     "hoursAgo": "{count}h ago",
     "daysAgo": "{count}d ago",
-    "olderDate": "{date}"
+    "olderDate": "{date}",
+    "unknownUser": "Unknown User",
+    "unknownAccount": "Unknown Account",
+    "noDescription": "No description"
   },
   "topAccounts": {
     "title": "Top Accounts",
@@ -236,7 +239,9 @@
         "confirmLoading": "Deleting..."
       },
       "fallbacks": {
-        "unknownAccount": "Unknown"
+        "unknownAccount": "Unknown",
+        "unknownContact": "Unknown Contact",
+        "unknownStage": "Unknown Stage"
       }
     }
   },

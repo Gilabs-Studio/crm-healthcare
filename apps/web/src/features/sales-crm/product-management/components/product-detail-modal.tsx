@@ -188,7 +188,7 @@ export function ProductDetailModal({ productId, open, onOpenChange, onProductUpd
                         <span>{t("productInfo.price")}</span>
                       </div>
                       <div className="text-base font-medium">
-                        {product.price_formatted || formatCurrency(product.price)}
+                        {product.price_formatted || formatCurrency(product.price ?? 0)}
                       </div>
                     </div>
 
@@ -198,7 +198,7 @@ export function ProductDetailModal({ productId, open, onOpenChange, onProductUpd
                         <span>{t("productInfo.cost")}</span>
                       </div>
                       <div className="text-base font-medium">
-                        {formatCurrency(product.cost)}
+                        {formatCurrency(product.cost ?? 0)}
                       </div>
                     </div>
 
@@ -207,7 +207,7 @@ export function ProductDetailModal({ productId, open, onOpenChange, onProductUpd
                         <Box className="h-4 w-4" />
                         <span>{t("productInfo.stock")}</span>
                       </div>
-                      <div className="text-base font-medium">{product.stock}</div>
+                      <div className="text-base font-medium">{product.stock ?? 0}</div>
                     </div>
 
                     <div className="space-y-2">
