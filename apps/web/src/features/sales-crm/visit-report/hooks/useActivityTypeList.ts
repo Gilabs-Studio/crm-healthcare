@@ -9,6 +9,7 @@ import {
   useCreateActivityType,
   useUpdateActivityType,
 } from "./useActivityTypes";
+import type { CreateActivityTypeFormData, UpdateActivityTypeFormData } from "../schemas/activity-type.schema";
 
 export function useActivityTypeList() {
   const [editingType, setEditingType] = useState<string | null>(null);
@@ -24,33 +25,28 @@ export function useActivityTypeList() {
   const types = data?.data || [];
   const typeForEdit = editingTypeData?.data;
 
-  const handleCreate = async (formData: {
-    name: string;
-    code: string;
-    description?: string;
-    icon?: string;
-    badge_color?: string;
-    status?: string;
-    order?: number;
-  }) => {
+  const handleCreate = async (formData: CreateActivityTypeFormData | UpdateActivityTypeFormData) => {
     try {
-      await createType.mutateAsync(formData);
-      setIsCreateDialogOpen(false);
-      toast.success("Activity type created successfully");
+      // Type guard to ensure required fields for create
+      if ("name" in formData && "code" in formData && formData.name && formData.code) {
+        await createType.mutateAsync({
+          name: formData.name,
+          code: formData.code,
+          description: formData.description,
+          icon: formData.icon,
+          badge_color: formData.badge_color,
+          status: formData.status,
+          order: formData.order,
+        });
+        setIsCreateDialogOpen(false);
+        toast.success("Activity type created successfully");
+      }
     } catch {
       // Error already handled in api-client interceptor
     }
   };
 
-  const handleUpdate = async (formData: {
-    name?: string;
-    code?: string;
-    description?: string;
-    icon?: string;
-    badge_color?: string;
-    status?: string;
-    order?: number;
-  }) => {
+  const handleUpdate = async (formData: CreateActivityTypeFormData | UpdateActivityTypeFormData) => {
     if (editingType) {
       try {
         await updateType.mutateAsync({ id: editingType, data: formData });

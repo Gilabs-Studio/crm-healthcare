@@ -20,6 +20,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     visitReportMessages,
     aiMessages,
     profileMessages,
+    notificationMessages,
   ] = await Promise.all([
     import(`@/features/dashboard/i18n/messages/${locale}.json`),
     import(`@/features/master-data/user-management/i18n/messages/${locale}.json`),
@@ -31,6 +32,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     import(`@/features/sales-crm/visit-report/i18n/messages/${locale}.json`),
     import(`@/features/ai/i18n/messages/${locale}.json`),
     import(`@/features/profile/i18n/messages/${locale}.json`),
+    import(`@/features/notifications/i18n/messages/${locale}.json`),
   ]);
 
   const messages = {
@@ -44,6 +46,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     ...visitReportMessages.default,
     ...aiMessages.default,
     ...profileMessages.default,
+    ...notificationMessages.default,
   };
 
   return {

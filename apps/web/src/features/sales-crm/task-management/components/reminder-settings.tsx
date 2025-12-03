@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { Clock, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import {
   Select,
@@ -20,6 +19,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
+import { ReminderDateTimePicker } from "@/components/ui/reminder-date-time-picker";
 import type { Reminder } from "../types";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -36,7 +36,28 @@ interface ReminderSettingsProps {
   readonly taskId: string;
 }
 
-export function ReminderSettings({ taskId }: ReminderSettingsProps) {
+// Separate component for header button to be used in CardTitle
+export function ReminderSettingsHeader({ onCreateClick }: { onCreateClick?: () => void }) {
+  const t = useTranslations("taskManagement.reminders");
+  
+  return (
+    <Button
+      type="button"
+      size="sm"
+      variant="outline"
+      className="h-8 gap-2"
+      onClick={onCreateClick}
+    >
+      <Plus className="h-3.5 w-3.5" />
+      <span className="text-xs">{t("addButton")}</span>
+    </Button>
+  );
+}
+
+export const ReminderSettings = React.forwardRef<
+  { openDialog: () => void },
+  ReminderSettingsProps
+>(({ taskId }, ref) => {
   const {
     reminders,
     isLoading,
@@ -51,6 +72,11 @@ export function ReminderSettings({ taskId }: ReminderSettingsProps) {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingReminder, setEditingReminder] = useState<Reminder | null>(null);
   const [deletingReminderId, setDeletingReminderId] = useState<string | null>(null);
+  
+  // Expose open dialog function to parent via ref
+  React.useImperativeHandle(ref, () => ({
+    openDialog: () => setIsCreateDialogOpen(true),
+  }), []);
 
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -65,22 +91,6 @@ export function ReminderSettings({ taskId }: ReminderSettingsProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Clock className="h-4 w-4 text-muted-foreground" />
-          <h3 className="text-sm font-semibold">{t("title")}</h3>
-        </div>
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          className="h-8 gap-2"
-          onClick={() => setIsCreateDialogOpen(true)}
-        >
-          <Plus className="h-3.5 w-3.5" />
-          <span className="text-xs">{t("addButton")}</span>
-        </Button>
-      </div>
 
       {isLoading ? (
         <p className="text-sm text-muted-foreground">{t("loading")}</p>
@@ -188,7 +198,9 @@ export function ReminderSettings({ taskId }: ReminderSettingsProps) {
       />
     </div>
   );
-}
+});
+
+ReminderSettings.displayName = "ReminderSettings";
 
 interface ReminderDialogProps {
   readonly open: boolean;
@@ -226,7 +238,7 @@ function ReminderDialog({
           reminder_type: reminder?.reminder_type,
           message: reminder?.message,
           remind_at: reminder?.remind_at
-            ? new Date(reminder.remind_at).toISOString().slice(0, 16)
+            ? new Date(reminder.remind_at).toISOString()
             : "",
         }
       : {
@@ -234,6 +246,9 @@ function ReminderDialog({
           reminder_type: "in_app",
         },
   });
+
+  // Watch remind_at value for the picker
+  const remindAtValue = watch("remind_at");
 
   const onSubmit = async (data: CreateReminderFormData | UpdateReminderFormData) => {
     if (isEdit) {
@@ -296,28 +311,28 @@ function ReminderDialog({
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {!isEdit && (
-            <input type="hidden" {...register("task_id" as "task_id")} value={taskId} />
+            <input type="hidden" {...register("task_id")} value={taskId} />
           )}
 
           <Field orientation="vertical">
             <FieldLabel>{tDialog("remindAtLabel")} *</FieldLabel>
-            <Input
-              type="datetime-local"
-              {...register("remind_at" as "remind_at")}
-              value={(watch("remind_at") as string | undefined) ?? ""}
-              onChange={(event) => setValue("remind_at" as "remind_at", event.target.value)}
-              className="h-9"
+            <ReminderDateTimePicker
+              value={remindAtValue ?? ""}
+              onChange={(value) => {
+                setValue("remind_at", value);
+              }}
+              error={errors.remind_at?.message}
             />
-            {errors.remind_at && <FieldError>{errors.remind_at.message}</FieldError>}
           </Field>
 
           <Field orientation="vertical">
             <FieldLabel>{tDialog("channelLabel")}</FieldLabel>
             <Select
-              value={(watch("reminder_type") as string | undefined) ?? "in_app"}
-              onValueChange={(value) =>
-                setValue("reminder_type" as "reminder_type", value as "in_app" | "email" | "sms")
-              }
+              value={watch("reminder_type") ?? "in_app"}
+              onValueChange={(value) => {
+                const fieldName = "reminder_type" as keyof (CreateReminderFormData | UpdateReminderFormData);
+                setValue(fieldName, value as "in_app" | "email" | "sms");
+              }}
             >
               <SelectTrigger className="h-9">
                 <SelectValue placeholder={tDialog("channelPlaceholder")} />
@@ -334,7 +349,7 @@ function ReminderDialog({
           <Field orientation="vertical">
             <FieldLabel>{tDialog("messageLabel")}</FieldLabel>
             <Textarea
-              {...register("message" as "message")}
+              {...register("message")}
               placeholder={tDialog("messagePlaceholder")}
               rows={3}
             />

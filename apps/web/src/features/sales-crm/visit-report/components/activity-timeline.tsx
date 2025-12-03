@@ -8,6 +8,12 @@ import type { Activity as ActivityType } from "../types/activity";
 import { useTranslations } from "next-intl";
 import { renderIcon } from "../lib/icon-utils";
 
+interface ActivityTimelineProps {
+  readonly activities: ActivityType[];
+  readonly isLoading: boolean;
+  readonly accountId?: string;
+}
+
 export function ActivityTimeline({ activities, isLoading, accountId }: ActivityTimelineProps) {
   const t = useTranslations("visitReportActivityTimeline");
 
