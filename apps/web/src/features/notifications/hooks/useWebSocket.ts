@@ -29,8 +29,12 @@ export function useWebSocket() {
     // Don't connect if no token
     if (!token) {
       // Close connection if token is removed
-      if (wsRef.current) {
-        wsRef.current.close(1000, "Token removed");
+      if (wsRef.current && wsRef.current.readyState !== WebSocket.CLOSED) {
+        try {
+          wsRef.current.close(1000, "Token removed");
+        } catch {
+          // Ignore errors
+        }
         wsRef.current = null;
       }
       return;
@@ -42,21 +46,28 @@ export function useWebSocket() {
     }
 
     // Don't reconnect if already connected and token is the same
+    const currentWs = wsRef.current;
     if (
-      wsRef.current &&
-      (wsRef.current.readyState === WebSocket.OPEN || wsRef.current.readyState === WebSocket.CONNECTING) &&
+      currentWs &&
+      (currentWs.readyState === WebSocket.OPEN || currentWs.readyState === WebSocket.CONNECTING) &&
       tokenRef.current === token
     ) {
       return;
     }
 
-    // Close existing connection if token changed or connection is in wrong state
-    if (wsRef.current) {
-      if (tokenRef.current !== token) {
-        // Token changed, close old connection
-        wsRef.current.close(1000, "Token changed");
-      } else if (wsRef.current.readyState === WebSocket.CLOSED || wsRef.current.readyState === WebSocket.CLOSING) {
-        // Connection is closed/closing, clear ref
+    // Close existing connection only if token changed
+    if (currentWs && tokenRef.current !== token) {
+      // Token changed, close old connection
+      try {
+        currentWs.close(1000, "Token changed");
+      } catch {
+        // Ignore errors
+      }
+      wsRef.current = null;
+      reconnectAttemptsRef.current = 0;
+    } else if (currentWs) {
+      // Connection exists but is closed/closing, clear ref
+      if (currentWs.readyState === WebSocket.CLOSED || currentWs.readyState === WebSocket.CLOSING) {
         wsRef.current = null;
       } else {
         // Connection exists and is open/connecting with same token, don't create new one
@@ -66,12 +77,47 @@ export function useWebSocket() {
 
     isConnectingRef.current = true;
     // Reset reconnect attempts on new connection attempt
-    if (wsRef.current === null) {
-      reconnectAttemptsRef.current = 0;
-    }
+    reconnectAttemptsRef.current = 0;
 
     // Build WebSocket URL with token
     const wsUrl = `${WS_URL}/api/v1/ws/notifications?token=${encodeURIComponent(token)}`;
+
+    // Store message handler for reuse
+    const messageHandler = (event: MessageEvent) => {
+      try {
+        const message: WebSocketMessage = JSON.parse(event.data);
+
+        switch (message.type) {
+          case "notification.created": {
+            const notification = message.data as Notification;
+            
+            // Invalidate queries to refresh data
+            queryClientRef.current.invalidateQueries({ queryKey: ["notifications"] });
+            queryClientRef.current.invalidateQueries({ queryKey: ["notifications", "unread-count"] });
+
+            // Show toast notification
+            toast.info(notification.title, {
+              description: notification.message,
+              duration: 5000,
+            });
+            break;
+          }
+
+          case "notification.updated":
+          case "notification.deleted": {
+            // Invalidate queries to refresh data
+            queryClientRef.current.invalidateQueries({ queryKey: ["notifications"] });
+            queryClientRef.current.invalidateQueries({ queryKey: ["notifications", "unread-count"] });
+            break;
+          }
+
+          default:
+            console.warn("Unknown WebSocket message type:", message.type);
+        }
+      } catch (error) {
+        console.error("Error parsing WebSocket message:", error);
+      }
+    };
 
     try {
       const ws = new WebSocket(wsUrl);
@@ -88,47 +134,8 @@ export function useWebSocket() {
         }
       };
 
-      ws.onmessage = (event) => {
-        try {
-          const message: WebSocketMessage = JSON.parse(event.data);
 
-          switch (message.type) {
-            case "notification.created": {
-              const notification = message.data as Notification;
-              
-              // Invalidate queries to refresh data
-              queryClientRef.current.invalidateQueries({ queryKey: ["notifications"] });
-              queryClientRef.current.invalidateQueries({ queryKey: ["notifications", "unread-count"] });
-
-              // Show toast notification
-              toast.info(notification.title, {
-                description: notification.message,
-                duration: 5000,
-              });
-              break;
-            }
-
-            case "notification.updated": {
-              // Invalidate queries to refresh data
-              queryClientRef.current.invalidateQueries({ queryKey: ["notifications"] });
-              queryClientRef.current.invalidateQueries({ queryKey: ["notifications", "unread-count"] });
-              break;
-            }
-
-            case "notification.deleted": {
-              // Invalidate queries to refresh data
-              queryClientRef.current.invalidateQueries({ queryKey: ["notifications"] });
-              queryClientRef.current.invalidateQueries({ queryKey: ["notifications", "unread-count"] });
-              break;
-            }
-
-            default:
-              console.warn("Unknown WebSocket message type:", message.type);
-          }
-        } catch (error) {
-          console.error("Error parsing WebSocket message:", error);
-        }
-      };
+      ws.onmessage = messageHandler;
 
       ws.onerror = (error) => {
         console.error("WebSocket error:", error);
@@ -138,7 +145,11 @@ export function useWebSocket() {
       ws.onclose = (event) => {
         console.log("WebSocket disconnected", event.code, event.reason);
         isConnectingRef.current = false;
-        wsRef.current = null;
+        
+        // Clear ref only if this is the current connection
+        if (wsRef.current === ws) {
+          wsRef.current = null;
+        }
 
         // Only reconnect if not a normal closure (1000) and we have a token
         // Don't reconnect if it was closed intentionally (code 1000)
@@ -151,31 +162,9 @@ export function useWebSocket() {
             
             reconnectTimeoutRef.current = setTimeout(() => {
               console.log(`Attempting to reconnect WebSocket... (attempt ${reconnectAttemptsRef.current})`);
-              // Manually reconnect - create new WebSocket connection
-              const currentToken = tokenRef.current;
-              if (currentToken && !wsRef.current && !isConnectingRef.current) {
-                isConnectingRef.current = true;
-                const reconnectWs = new WebSocket(`${WS_URL}/api/v1/ws/notifications?token=${encodeURIComponent(currentToken)}`);
-                
-                reconnectWs.onopen = () => {
-                  console.log("WebSocket reconnected");
-                  isConnectingRef.current = false;
-                  reconnectAttemptsRef.current = 0;
-                  if (reconnectTimeoutRef.current) {
-                    clearTimeout(reconnectTimeoutRef.current);
-                    reconnectTimeoutRef.current = null;
-                  }
-                };
-
-                reconnectWs.onmessage = ws.onmessage;
-                reconnectWs.onerror = (error) => {
-                  console.error("WebSocket reconnection error:", error);
-                  isConnectingRef.current = false;
-                };
-                reconnectWs.onclose = ws.onclose; // Reuse same close handler
-                
-                wsRef.current = reconnectWs;
-              }
+              // Don't manually reconnect here - let the effect handle it
+              // This prevents duplicate connections and handler issues
+              // The effect will check if connection is needed and create it
             }, delay);
           } else {
             console.warn("Max reconnection attempts reached. Stopping reconnection.");
@@ -191,19 +180,15 @@ export function useWebSocket() {
 
     return () => {
       // Cleanup on unmount or token change
+      // Only cleanup reconnect timeout - don't close WebSocket here
+      // WebSocket will be closed in the next effect run if token changed
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
         reconnectTimeoutRef.current = null;
       }
-      if (wsRef.current) {
-        // Only close if token changed or unmounting
-        if (tokenRef.current !== token || !token) {
-          wsRef.current.close(1000, "Token changed or component unmounting");
-        }
-        wsRef.current = null;
-      }
-      isConnectingRef.current = false;
+      // Don't close WebSocket in cleanup - let the effect handle it based on token comparison
+      // This prevents closing a valid connection when effect re-runs for other reasons
     };
-  }, [token]); // Removed queryClient from dependencies to prevent unnecessary reconnects
+  }, [token]); // Only depend on token - queryClient is stable and doesn't need to be in deps
 }
 

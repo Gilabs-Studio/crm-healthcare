@@ -1,9 +1,7 @@
 {
   "badgeAriaLabel": "View notifications",
-  "page": {
-    "title": "Notifications",
-    "description": "View and manage your notifications"
-  },
+  "drawerTitle": "Notifications",
+  "drawerDescription": "View and manage your notifications",
   "filterAll": "All",
   "filterUnread": "Unread",
   "filterRead": "Read",

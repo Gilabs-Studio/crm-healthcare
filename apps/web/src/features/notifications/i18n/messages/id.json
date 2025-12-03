@@ -1,9 +1,7 @@
 {
   "badgeAriaLabel": "Lihat notifikasi",
-  "page": {
-    "title": "Notifikasi",
-    "description": "Lihat dan kelola notifikasi Anda"
-  },
+  "drawerTitle": "Notifikasi",
+  "drawerDescription": "Lihat dan kelola notifikasi Anda",
   "filterAll": "Semua",
   "filterUnread": "Belum dibaca",
   "filterRead": "Sudah dibaca",

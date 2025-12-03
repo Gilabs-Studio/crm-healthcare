@@ -10,14 +10,14 @@ interface NotificationDrawerProps {
 }
 
 export function NotificationDrawer({ open, onOpenChange }: NotificationDrawerProps) {
-  const t = useTranslations("notifications.page");
+  const t = useTranslations("notifications");
 
   return (
     <Drawer
       open={open}
       onOpenChange={onOpenChange}
-      title={t("title")}
-      description={t("description")}
+      title={t("drawerTitle")}
+      description={t("drawerDescription")}
       side="right"
       defaultWidth={480}
       minWidth={320}
