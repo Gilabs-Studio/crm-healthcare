@@ -474,3 +474,168 @@ class ActivityUser {
   }
 }
 
+class TopAccount {
+  final ActivityAccount account;
+  final int visitCount;
+  final int activityCount;
+  final String? lastVisitDate;
+
+  TopAccount({
+    required this.account,
+    required this.visitCount,
+    required this.activityCount,
+    this.lastVisitDate,
+  });
+
+  factory TopAccount.fromJson(Map<String, dynamic> json) {
+    return TopAccount(
+      account: json['account'] != null
+          ? ActivityAccount.fromJson(json['account'] as Map<String, dynamic>)
+          : ActivityAccount(id: '', name: 'Unknown Account'),
+      visitCount: (json['visit_count'] as num?)?.toInt() ?? 0,
+      activityCount: (json['activity_count'] as num?)?.toInt() ?? 0,
+      lastVisitDate: json['last_visit_date'] as String?,
+    );
+  }
+}
+
+class TopSalesRep {
+  final SalesRepInfo salesRep;
+  final int visitCount;
+  final int accountCount;
+  final int activityCount;
+
+  TopSalesRep({
+    required this.salesRep,
+    required this.visitCount,
+    required this.accountCount,
+    required this.activityCount,
+  });
+
+  factory TopSalesRep.fromJson(Map<String, dynamic> json) {
+    return TopSalesRep(
+      salesRep: json['sales_rep'] != null
+          ? SalesRepInfo.fromJson(json['sales_rep'] as Map<String, dynamic>)
+          : SalesRepInfo(id: '', name: 'Unknown User', email: ''),
+      visitCount: (json['visit_count'] as num?)?.toInt() ?? 0,
+      accountCount: (json['account_count'] as num?)?.toInt() ?? 0,
+      activityCount: (json['activity_count'] as num?)?.toInt() ?? 0,
+    );
+  }
+}
+
+class SalesRepInfo {
+  final String id;
+  final String name;
+  final String email;
+
+  SalesRepInfo({
+    required this.id,
+    required this.name,
+    required this.email,
+  });
+
+  factory SalesRepInfo.fromJson(Map<String, dynamic> json) {
+    return SalesRepInfo(
+      id: json['id'] as String? ?? '',
+      name: json['name'] as String? ?? 'Unknown User',
+      email: json['email'] as String? ?? '',
+    );
+  }
+}
+
+class VisitStatistics {
+  final int total;
+  final int completed;
+  final int pending;
+  final int approved;
+  final List<VisitStatisticsByDate> byDate;
+
+  VisitStatistics({
+    required this.total,
+    required this.completed,
+    required this.pending,
+    required this.approved,
+    required this.byDate,
+  });
+
+  factory VisitStatistics.fromJson(Map<String, dynamic> json) {
+    return VisitStatistics(
+      total: (json['total'] as num?)?.toInt() ?? 0,
+      completed: (json['completed'] as num?)?.toInt() ?? 0,
+      pending: (json['pending'] as num?)?.toInt() ?? 0,
+      approved: (json['approved'] as num?)?.toInt() ?? 0,
+      byDate: (json['by_date'] as List<dynamic>?)
+              ?.map((e) => VisitStatisticsByDate.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+    );
+  }
+}
+
+class VisitStatisticsByDate {
+  final String date;
+  final int count;
+  final int completed;
+  final int approved;
+  final int pending;
+
+  VisitStatisticsByDate({
+    required this.date,
+    required this.count,
+    required this.completed,
+    required this.approved,
+    required this.pending,
+  });
+
+  factory VisitStatisticsByDate.fromJson(Map<String, dynamic> json) {
+    return VisitStatisticsByDate(
+      date: json['date'] as String? ?? '',
+      count: (json['count'] as num?)?.toInt() ?? 0,
+      completed: (json['completed'] as num?)?.toInt() ?? 0,
+      approved: (json['approved'] as num?)?.toInt() ?? 0,
+      pending: (json['pending'] as num?)?.toInt() ?? 0,
+    );
+  }
+}
+
+class ActivityTrends {
+  final List<ActivityTrendsByDate> byDate;
+
+  ActivityTrends({
+    required this.byDate,
+  });
+
+  factory ActivityTrends.fromJson(Map<String, dynamic> json) {
+    return ActivityTrends(
+      byDate: (json['by_date'] as List<dynamic>?)
+              ?.map((e) => ActivityTrendsByDate.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+    );
+  }
+}
+
+class ActivityTrendsByDate {
+  final String date;
+  final int visits;
+  final int calls;
+  final int emails;
+
+  ActivityTrendsByDate({
+    required this.date,
+    required this.visits,
+    required this.calls,
+    required this.emails,
+  });
+
+  factory ActivityTrendsByDate.fromJson(Map<String, dynamic> json) {
+    return ActivityTrendsByDate(
+      date: json['date'] as String? ?? '',
+      visits: (json['visits'] as num?)?.toInt() ?? 0,
+      calls: (json['calls'] as num?)?.toInt() ?? 0,
+      emails: (json['emails'] as num?)?.toInt() ?? 0,
+    );
+  }
+}
+

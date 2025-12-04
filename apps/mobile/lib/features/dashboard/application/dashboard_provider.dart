@@ -31,10 +31,18 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
     try {
       final overview = await _repository.getOverview(period: selectedPeriod);
       final recentActivities = await _repository.getRecentActivities(limit: 10);
+      final topAccounts = await _repository.getTopAccounts(period: selectedPeriod, limit: 5);
+      final topSalesReps = await _repository.getTopSalesRep(period: selectedPeriod, limit: 5);
+      final visitStatistics = await _repository.getVisitStatistics(period: selectedPeriod);
+      final activityTrends = await _repository.getActivityTrends(period: selectedPeriod);
 
       state = state.copyWith(
         overview: overview,
         recentActivities: recentActivities,
+        topAccounts: topAccounts,
+        topSalesReps: topSalesReps,
+        visitStatistics: visitStatistics,
+        activityTrends: activityTrends,
         isLoading: false,
         errorMessage: null,
       );

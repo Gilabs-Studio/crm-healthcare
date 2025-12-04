@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
-
 class StatCard extends StatelessWidget {
   const StatCard({
     super.key,
@@ -24,19 +22,22 @@ class StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: AppTheme.borderColor,
-          width: 1,
-        ),
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
+      padding: const EdgeInsets.all(20),
       child: Container(
-        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -103,7 +104,7 @@ class StatCard extends StatelessWidget {
                 value,
                 style: theme.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
+                  color: theme.colorScheme.onSurface,
                   fontSize: 32,
                 ),
                 maxLines: 1,
@@ -113,7 +114,7 @@ class StatCard extends StatelessWidget {
             Text(
               title,
               style: theme.textTheme.titleMedium?.copyWith(
-                color: AppTheme.textSecondary,
+                color: theme.colorScheme.onSurface.withOpacity(0.7),
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),
@@ -125,7 +126,7 @@ class StatCard extends StatelessWidget {
               Text(
                 subtitle!,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: AppTheme.textSecondary,
+                  color: theme.colorScheme.onSurface.withOpacity(0.7),
                   fontSize: 13,
                 ),
                 maxLines: 1,

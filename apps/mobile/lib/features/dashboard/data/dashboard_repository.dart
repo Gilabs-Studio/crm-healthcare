@@ -130,5 +130,239 @@ class DashboardRepository {
       throw Exception('Failed to fetch recent activities: $e');
     }
   }
+
+  Future<List<TopAccount>> getTopAccounts({
+    String? period,
+    int? limit,
+  }) async {
+    try {
+      final queryParams = <String, dynamic>{};
+      if (period != null && period.isNotEmpty) {
+        queryParams['period'] = period;
+      }
+      if (limit != null && limit > 0) {
+        queryParams['limit'] = limit;
+      }
+
+      final response = await _dio.get(
+        '/api/v1/dashboard/top-accounts',
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      );
+
+      if (response.data is Map<String, dynamic>) {
+        final responseData = response.data as Map<String, dynamic>;
+        if (responseData['success'] == true) {
+          final data = responseData['data'];
+          if (data is List) {
+            return data
+                .map((e) => TopAccount.fromJson(e as Map<String, dynamic>))
+                .toList();
+          } else if (data is Map<String, dynamic> && data['items'] != null) {
+            return (data['items'] as List<dynamic>)
+                .map((e) => TopAccount.fromJson(e as Map<String, dynamic>))
+                .toList();
+          } else {
+            return [];
+          }
+        } else {
+          throw Exception(
+            responseData['error']?['message'] ?? 'Failed to fetch top accounts',
+          );
+        }
+      } else if (response.data is List) {
+        return (response.data as List<dynamic>)
+            .map((e) => TopAccount.fromJson(e as Map<String, dynamic>))
+            .toList();
+      } else {
+        return [];
+      }
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final errorData = e.response!.data;
+        if (errorData is Map<String, dynamic> && errorData['error'] != null) {
+          throw Exception(
+            errorData['error']['message'] ?? 'Failed to fetch top accounts',
+          );
+        }
+      }
+      throw Exception('Network error: ${e.message}');
+    } catch (e) {
+      throw Exception('Failed to fetch top accounts: $e');
+    }
+  }
+
+  Future<List<TopSalesRep>> getTopSalesRep({
+    String? period,
+    int? limit,
+  }) async {
+    try {
+      final queryParams = <String, dynamic>{};
+      if (period != null && period.isNotEmpty) {
+        queryParams['period'] = period;
+      }
+      if (limit != null && limit > 0) {
+        queryParams['limit'] = limit;
+      }
+
+      final response = await _dio.get(
+        '/api/v1/dashboard/top-sales-rep',
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      );
+
+      if (response.data is Map<String, dynamic>) {
+        final responseData = response.data as Map<String, dynamic>;
+        if (responseData['success'] == true) {
+          final data = responseData['data'];
+          if (data is List) {
+            return data
+                .map((e) => TopSalesRep.fromJson(e as Map<String, dynamic>))
+                .toList();
+          } else if (data is Map<String, dynamic> && data['items'] != null) {
+            return (data['items'] as List<dynamic>)
+                .map((e) => TopSalesRep.fromJson(e as Map<String, dynamic>))
+                .toList();
+          } else {
+            return [];
+          }
+        } else {
+          throw Exception(
+            responseData['error']?['message'] ?? 'Failed to fetch top sales rep',
+          );
+        }
+      } else if (response.data is List) {
+        return (response.data as List<dynamic>)
+            .map((e) => TopSalesRep.fromJson(e as Map<String, dynamic>))
+            .toList();
+      } else {
+        return [];
+      }
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final errorData = e.response!.data;
+        if (errorData is Map<String, dynamic> && errorData['error'] != null) {
+          throw Exception(
+            errorData['error']['message'] ?? 'Failed to fetch top sales rep',
+          );
+        }
+      }
+      throw Exception('Network error: ${e.message}');
+    } catch (e) {
+      throw Exception('Failed to fetch top sales rep: $e');
+    }
+  }
+
+  Future<VisitStatistics> getVisitStatistics({
+    String? period,
+  }) async {
+    try {
+      final queryParams = <String, dynamic>{};
+      if (period != null && period.isNotEmpty) {
+        queryParams['period'] = period;
+      }
+
+      final response = await _dio.get(
+        '/api/v1/dashboard/visits',
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      );
+
+      if (response.data is Map<String, dynamic>) {
+        final responseData = response.data as Map<String, dynamic>;
+        if (responseData['success'] == true) {
+          final data = responseData['data'];
+          if (data == null) {
+            throw Exception('Visit statistics data is null');
+          }
+          if (data is! Map<String, dynamic>) {
+            throw Exception('Invalid visit statistics data format');
+          }
+          return VisitStatistics.fromJson(data);
+        } else {
+          throw Exception(
+            responseData['error']?['message'] ?? 'Failed to fetch visit statistics',
+          );
+        }
+      } else if (response.data is Map) {
+        final data = response.data;
+        if (data == null) {
+          throw Exception('Visit statistics data is null');
+        }
+        if (data is! Map<String, dynamic>) {
+          throw Exception('Invalid visit statistics data format');
+        }
+        return VisitStatistics.fromJson(data);
+      } else {
+        throw Exception('Invalid response format: ${response.data.runtimeType}');
+      }
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final errorData = e.response!.data;
+        if (errorData is Map<String, dynamic> && errorData['error'] != null) {
+          throw Exception(
+            errorData['error']['message'] ?? 'Failed to fetch visit statistics',
+          );
+        }
+      }
+      throw Exception('Network error: ${e.message}');
+    } catch (e) {
+      throw Exception('Failed to fetch visit statistics: $e');
+    }
+  }
+
+  Future<ActivityTrends> getActivityTrends({
+    String? period,
+  }) async {
+    try {
+      final queryParams = <String, dynamic>{};
+      if (period != null && period.isNotEmpty) {
+        queryParams['period'] = period;
+      }
+
+      final response = await _dio.get(
+        '/api/v1/dashboard/activity-trends',
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      );
+
+      if (response.data is Map<String, dynamic>) {
+        final responseData = response.data as Map<String, dynamic>;
+        if (responseData['success'] == true) {
+          final data = responseData['data'];
+          if (data == null) {
+            throw Exception('Activity trends data is null');
+          }
+          if (data is! Map<String, dynamic>) {
+            throw Exception('Invalid activity trends data format');
+          }
+          return ActivityTrends.fromJson(data);
+        } else {
+          throw Exception(
+            responseData['error']?['message'] ?? 'Failed to fetch activity trends',
+          );
+        }
+      } else if (response.data is Map) {
+        final data = response.data;
+        if (data == null) {
+          throw Exception('Activity trends data is null');
+        }
+        if (data is! Map<String, dynamic>) {
+          throw Exception('Invalid activity trends data format');
+        }
+        return ActivityTrends.fromJson(data);
+      } else {
+        throw Exception('Invalid response format: ${response.data.runtimeType}');
+      }
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final errorData = e.response!.data;
+        if (errorData is Map<String, dynamic> && errorData['error'] != null) {
+          throw Exception(
+            errorData['error']['message'] ?? 'Failed to fetch activity trends',
+          );
+        }
+      }
+      throw Exception('Network error: ${e.message}');
+    } catch (e) {
+      throw Exception('Failed to fetch activity trends: $e');
+    }
+  }
 }
 
