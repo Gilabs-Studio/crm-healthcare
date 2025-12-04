@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/l10n/app_localizations.dart';
 import '../../data/models/dashboard.dart';
 
 class RecentActivitiesWidget extends StatelessWidget {
@@ -16,57 +16,93 @@ class RecentActivitiesWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: AppTheme.borderColor,
-          width: 1,
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Recent Activities',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+    return _DashboardCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.teal.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.history,
+                  color: Colors.teal,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  l10n.recentActivities,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
-                if (onTap != null)
-                  TextButton(
-                    onPressed: onTap,
-                    child: const Text('View All'),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            if (activities.isEmpty)
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
+              ),
+              if (onTap != null)
+                TextButton(
+                  onPressed: onTap,
                   child: Text(
-                    'No recent activities',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: AppTheme.textSecondary,
+                    'View All',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.primary,
                     ),
                   ),
                 ),
-              )
-            else
-              ...activities.take(5).map((activity) {
-                return _ActivityItem(activity: activity);
-              }),
-          ],
-        ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          if (activities.isEmpty)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  'No recent activities',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurface.withOpacity(0.7),
+                  ),
+                ),
+              ),
+            )
+          else
+            ...activities.take(5).map((activity) {
+              return _ActivityItem(activity: activity);
+            }),
+        ],
       ),
+    );
+  }
+}
+
+class _DashboardCard extends StatelessWidget {
+  const _DashboardCard({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(20),
+      child: child,
     );
   }
 }
@@ -118,20 +154,20 @@ class _ActivityItem extends StatelessWidget {
                     Text(
                       activity.user.name,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: AppTheme.textSecondary,
+                        color: theme.colorScheme.onSurface.withOpacity(0.7),
                       ),
                     ),
                     if (activity.account != null) ...[
                       Text(
                         ' • ',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: AppTheme.textSecondary,
+                          color: theme.colorScheme.onSurface.withOpacity(0.7),
                         ),
                       ),
                       Text(
                         activity.account!.name,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: AppTheme.textSecondary,
+                          color: theme.colorScheme.onSurface.withOpacity(0.7),
                         ),
                       ),
                     ],
@@ -141,7 +177,7 @@ class _ActivityItem extends StatelessWidget {
                 Text(
                   timeAgo,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: AppTheme.textSecondary,
+                    color: theme.colorScheme.onSurface.withOpacity(0.7),
                     fontSize: 11,
                   ),
                 ),

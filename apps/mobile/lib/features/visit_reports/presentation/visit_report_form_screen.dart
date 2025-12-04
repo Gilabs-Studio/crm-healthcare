@@ -137,7 +137,7 @@ class _VisitReportFormScreenState
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
-                value: _selectedAccountId,
+                initialValue: _selectedAccountId,
                 decoration: InputDecoration(
                   hintText: 'Select account',
                   filled: true,
@@ -183,7 +183,7 @@ class _VisitReportFormScreenState
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
-                value: _selectedContactId,
+                initialValue: _selectedContactId,
                 decoration: InputDecoration(
                   hintText: 'Select contact (optional)',
                   filled: true,

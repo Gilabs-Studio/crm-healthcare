@@ -9,7 +9,12 @@ import '../../../core/theme/app_theme.dart';
 import 'widgets/task_card.dart';
 
 class TaskListScreen extends ConsumerStatefulWidget {
-  const TaskListScreen({super.key});
+  const TaskListScreen({
+    super.key,
+    this.hideAppBar = false,
+  });
+
+  final bool hideAppBar;
 
   @override
   ConsumerState<TaskListScreen> createState() => _TaskListScreenState();
@@ -67,6 +72,51 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
     final state = ref.watch(taskListProvider);
     final theme = Theme.of(context);
 
+    final body = Column(
+      children: [
+        // Search Bar
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: TextField(
+            controller: _searchController,
+            onChanged: _onSearchChanged,
+            decoration: InputDecoration(
+              hintText: 'Search tasks...',
+              prefixIcon: const Icon(Icons.search),
+              suffixIcon: _searchController.text.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        _searchController.clear();
+                        _onSearchChanged('');
+                      },
+                    )
+                  : null,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: theme.colorScheme.surface,
+            ),
+          ),
+        ),
+        // Filters
+        _buildFilters(context, state),
+        // Content
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: _onRefresh,
+            child: _buildContent(context, state, theme),
+          ),
+        ),
+      ],
+    );
+
+    if (widget.hideAppBar) {
+      return body;
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Tasks'),
@@ -83,46 +133,7 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // Search Bar
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: _searchController,
-              onChanged: _onSearchChanged,
-              decoration: InputDecoration(
-                hintText: 'Search tasks...',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          _onSearchChanged('');
-                        },
-                      )
-                    : null,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                fillColor: theme.colorScheme.surface,
-              ),
-            ),
-          ),
-          // Filters
-          _buildFilters(context, state),
-          // Content
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: _onRefresh,
-              child: _buildContent(context, state, theme),
-            ),
-          ),
-        ],
-      ),
+      body: body,
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           await Navigator.of(context).pushNamed(AppRoutes.tasksCreate);

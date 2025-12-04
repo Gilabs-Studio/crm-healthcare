@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/routing/app_router.dart';
-import '../../../core/theme/app_theme.dart';
-import '../../auth/application/auth_provider.dart';
+import '../../../core/l10n/app_localizations.dart';
+import '../../../core/widgets/main_scaffold.dart';
 import '../application/dashboard_provider.dart';
+import 'widgets/activity_trends_widget.dart';
+import 'widgets/deals_overview_widget.dart';
+import 'widgets/leads_by_source_widget.dart';
+import 'widgets/overview_stat_card.dart';
 import 'widgets/pipeline_summary_widget.dart';
 import 'widgets/recent_activities_widget.dart';
-import 'widgets/stat_card.dart';
+import 'widgets/target_progress_widget.dart';
+import 'widgets/top_accounts_widget.dart';
+import 'widgets/top_sales_rep_widget.dart';
+import 'widgets/upcoming_tasks_widget.dart';
+import 'widgets/visit_statistics_widget.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -33,47 +40,39 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final dashboardState = ref.watch(dashboardProvider);
+    final l10n = AppLocalizations.of(context)!;
+      final dashboardState = ref.watch(dashboardProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dashboard'),
-        elevation: 0,
-        actions: [
-          // Period selector
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.calendar_today),
-            onSelected: (period) {
-              ref.read(dashboardProvider.notifier).changePeriod(period);
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'today',
-                child: Text('Today'),
-              ),
-              const PopupMenuItem(
-                value: 'week',
-                child: Text('This Week'),
-              ),
-              const PopupMenuItem(
-                value: 'month',
-                child: Text('This Month'),
-              ),
-              const PopupMenuItem(
-                value: 'year',
-                child: Text('This Year'),
-              ),
-            ],
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await ref.read(authProvider.notifier).logout();
-            },
-            tooltip: 'Logout',
-          ),
-        ],
-      ),
+    return MainScaffold(
+      currentIndex: 0,
+      title: l10n.dashboard,
+      actions: [
+        // Period selector
+        PopupMenuButton<String>(
+          icon: const Icon(Icons.calendar_today),
+          onSelected: (period) {
+            ref.read(dashboardProvider.notifier).changePeriod(period);
+          },
+          itemBuilder: (context) => [
+            PopupMenuItem(
+              value: 'today',
+              child: Text(l10n.today),
+            ),
+            PopupMenuItem(
+              value: 'week',
+              child: Text(l10n.thisWeek),
+            ),
+            PopupMenuItem(
+              value: 'month',
+              child: Text(l10n.thisMonth),
+            ),
+            PopupMenuItem(
+              value: 'year',
+              child: Text(l10n.thisYear),
+            ),
+          ],
+        ),
+      ],
       body: RefreshIndicator(
         onRefresh: _onRefresh,
         child: dashboardState.isLoading
@@ -107,13 +106,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     ),
                   )
                 : SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Welcome Section
-                        const _WelcomeCard(),
-                        const SizedBox(height: 24),
                         // Period indicator
                         if (dashboardState.selectedPeriod != 'today')
                           Container(
@@ -135,7 +131,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
-                                  _getPeriodLabel(dashboardState.selectedPeriod),
+                                  _getPeriodLabel(dashboardState.selectedPeriod, l10n),
                                   style: theme.textTheme.bodySmall?.copyWith(
                                     color: colorScheme.primary,
                                     fontWeight: FontWeight.w600,
@@ -146,7 +142,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           ),
                         if (dashboardState.selectedPeriod != 'today')
                           const SizedBox(height: 16),
-                        // Stats Cards
+                        // Overview Stats - 2 Cards (Accounts, Revenue)
                         if (dashboardState.overview != null) ...[
                           GridView.count(
                             crossAxisCount: 2,
@@ -154,56 +150,58 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                             physics: const NeverScrollableScrollPhysics(),
                             crossAxisSpacing: 16,
                             mainAxisSpacing: 16,
-                            childAspectRatio: 0.88,
+                            childAspectRatio: 1.15,
                             children: [
-                              StatCard(
-                                title: 'Total Visits',
-                                value: dashboardState.overview!.visitStats.total
-                                    .toString(),
-                                icon: Icons.location_on,
-                                color: Colors.orange,
-                                subtitle:
-                                    '${dashboardState.overview!.visitStats.completed} completed',
-                                changePercent: dashboardState
-                                    .overview!.visitStats.changePercent,
-                              ),
-                              StatCard(
-                                title: 'Total Accounts',
-                                value: dashboardState.overview!.accountStats.total
-                                    .toString(),
+                              OverviewStatCard(
+                                title: l10n.totalAccounts,
+                                value: dashboardState.overview!.accountStats.total.toString(),
+                                subtitle: l10n.totalAccountsDescription(
+                                  dashboardState.overview!.accountStats.active,
+                                  dashboardState.overview!.accountStats.inactive,
+                                ),
                                 icon: Icons.business,
                                 color: colorScheme.primary,
-                                subtitle:
-                                    '${dashboardState.overview!.accountStats.active} active',
-                                changePercent: dashboardState
-                                    .overview!.accountStats.changePercent,
+                                changePercent: dashboardState.overview!.accountStats.changePercent,
                               ),
-                              StatCard(
-                                title: 'Total Activities',
-                                value: dashboardState
-                                    .overview!.activityStats.total
-                                    .toString(),
-                                icon: Icons.timeline,
-                                color: Colors.blue,
-                                subtitle:
-                                    '${dashboardState.overview!.activityStats.visits} visits, ${dashboardState.overview!.activityStats.calls} calls',
-                                changePercent: dashboardState
-                                    .overview!.activityStats.changePercent,
-                              ),
-                              StatCard(
-                                title: 'Revenue',
-                                value: dashboardState.overview!.revenue
-                                    .totalRevenueFormatted,
+                              OverviewStatCard(
+                                title: l10n.revenue,
+                                value: dashboardState.overview!.revenue.totalRevenueFormatted,
+                                subtitle: l10n.totalRevenueDescription,
                                 icon: Icons.attach_money,
                                 color: Colors.green,
-                                subtitle: 'From won deals',
-                                changePercent: dashboardState
-                                    .overview!.revenue.changePercent,
+                                changePercent: dashboardState.overview!.revenue.changePercent,
                               ),
                             ],
                           ),
                           const SizedBox(height: 24),
-                          // Pipeline Summary
+                          // Sales Target - Full Width
+                          TargetProgressWidget(
+                            target: dashboardState.overview!.target,
+                          ),
+                          const SizedBox(height: 24),
+                          // Total Deals - Full Width
+                          DealsOverviewWidget(
+                            deals: dashboardState.overview!.deals,
+                          ),
+                          const SizedBox(height: 24),
+                          // Bento Layout - Row 2: Leads by Source & Upcoming Tasks
+                          Row(
+                            children: [
+                              Expanded(
+                                child: LeadsBySourceWidget(
+                                  leadsBySource: dashboardState.overview!.leadsBySource,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: UpcomingTasksWidget(
+                                  tasks: dashboardState.overview!.upcomingTasks,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+                          // Pipeline Summary - Full Width
                           if (dashboardState.overview!.pipelineStages.isNotEmpty)
                             PipelineSummaryWidget(
                               pipelineStages:
@@ -212,7 +210,42 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                             ),
                           if (dashboardState.overview!.pipelineStages.isNotEmpty)
                             const SizedBox(height: 24),
-                          // Recent Activities
+                          // Visit Statistics - Full Width
+                          if (dashboardState.visitStatistics != null)
+                            VisitStatisticsWidget(
+                              statistics: dashboardState.visitStatistics!,
+                            ),
+                          if (dashboardState.visitStatistics != null)
+                            const SizedBox(height: 24),
+                          // Activity Trends - Full Width
+                          if (dashboardState.activityTrends != null &&
+                              dashboardState.overview != null)
+                            ActivityTrendsWidget(
+                              trends: dashboardState.activityTrends!,
+                              activityStats: dashboardState.overview!.activityStats,
+                            ),
+                          if (dashboardState.activityTrends != null &&
+                              dashboardState.overview != null)
+                            const SizedBox(height: 24),
+                          // Top Accounts - Full Width
+                          if (dashboardState.topAccounts != null &&
+                              dashboardState.topAccounts!.isNotEmpty)
+                            TopAccountsWidget(
+                              accounts: dashboardState.topAccounts!,
+                            ),
+                          if (dashboardState.topAccounts != null &&
+                              dashboardState.topAccounts!.isNotEmpty)
+                            const SizedBox(height: 24),
+                          // Top Sales Rep - Full Width
+                          if (dashboardState.topSalesReps != null &&
+                              dashboardState.topSalesReps!.isNotEmpty)
+                            TopSalesRepWidget(
+                              salesReps: dashboardState.topSalesReps!,
+                            ),
+                          if (dashboardState.topSalesReps != null &&
+                              dashboardState.topSalesReps!.isNotEmpty)
+                            const SizedBox(height: 24),
+                          // Recent Activities - Full Width
                           if (dashboardState.recentActivities != null &&
                               dashboardState.recentActivities!.isNotEmpty)
                             RecentActivitiesWidget(
@@ -222,60 +255,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                               dashboardState.recentActivities!.isNotEmpty)
                             const SizedBox(height: 24),
                         ],
-                        // Quick Actions Title
-                        Text(
-                          'Quick Actions',
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        // Menu Grid
-                        GridView.count(
-                          crossAxisCount: 2,
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 16,
-                          childAspectRatio: 1.1,
-                          children: [
-                            _MenuCard(
-                              icon: Icons.business_outlined,
-                              title: 'Accounts',
-                              color: colorScheme.primary,
-                              onTap: () {
-                                Navigator.pushNamed(context, AppRoutes.accounts);
-                              },
-                            ),
-                            _MenuCard(
-                              icon: Icons.people_outline,
-                              title: 'Contacts',
-                              color: Colors.blue,
-                              onTap: () {
-                                Navigator.pushNamed(context, AppRoutes.contacts);
-                              },
-                            ),
-                            _MenuCard(
-                              icon: Icons.assignment_outlined,
-                              title: 'Visit Reports',
-                              color: Colors.orange,
-                              onTap: () {
-                                Navigator.pushNamed(
-                                  context,
-                                  AppRoutes.visitReports,
-                                );
-                              },
-                            ),
-                            _MenuCard(
-                              icon: Icons.task_outlined,
-                              title: 'Tasks',
-                              color: Colors.purple,
-                              onTap: () {
-                                Navigator.pushNamed(context, AppRoutes.tasks);
-                              },
-                            ),
-                          ],
-                        ),
                       ],
                     ),
                   ),
@@ -283,157 +262,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-  String _getPeriodLabel(String period) {
+  String _getPeriodLabel(String period, AppLocalizations l10n) {
     switch (period) {
       case 'week':
-        return 'This Week';
+        return l10n.thisWeek;
       case 'month':
-        return 'This Month';
+        return l10n.thisMonth;
       case 'year':
-        return 'This Year';
+        return l10n.thisYear;
       default:
-        return 'Today';
+        return l10n.today;
     }
-  }
-}
-
-class _WelcomeCard extends StatelessWidget {
-  const _WelcomeCard();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: AppTheme.borderColor,
-          width: 1,
-        ),
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              colorScheme.primary.withOpacity(0.1),
-              colorScheme.primary.withOpacity(0.05),
-            ],
-          ),
-        ),
-        padding: const EdgeInsets.all(20),
-        child: Row(
-          children: [
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: colorScheme.primary,
-                borderRadius: BorderRadius.circular(28),
-              ),
-              child: Icon(
-                Icons.person,
-                color: colorScheme.onPrimary,
-                size: 28,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Welcome back,',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: AppTheme.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Sales Rep',
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.textPrimary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _MenuCard extends StatelessWidget {
-  const _MenuCard({
-    required this.icon,
-    required this.title,
-    required this.color,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String title;
-  final Color color;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: AppTheme.borderColor,
-          width: 1,
-        ),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                color.withOpacity(0.1),
-                color.withOpacity(0.05),
-              ],
-            ),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                icon,
-                size: 48,
-                color: color,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                title,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.textPrimary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }

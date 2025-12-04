@@ -83,7 +83,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await storage.saveRefreshToken(loginResponse.refreshToken);
       await storage.setRememberMe(rememberMe);
 
-      state = AuthState.authenticated();
+      // Set authenticated state with user data
+      state = AuthState(
+        status: AuthStatus.authenticated,
+        isLoading: false,
+        errorMessage: null,
+        user: loginResponse.user,
+      );
     } catch (error) {
       final errorMessage = error is Exception
           ? error.toString().replaceFirst('Exception: ', '')

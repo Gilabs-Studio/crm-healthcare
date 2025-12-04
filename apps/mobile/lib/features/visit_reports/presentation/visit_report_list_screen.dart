@@ -8,7 +8,12 @@ import '../../../core/routing/app_router.dart';
 import 'widgets/visit_report_card.dart';
 
 class VisitReportListScreen extends ConsumerStatefulWidget {
-  const VisitReportListScreen({super.key});
+  const VisitReportListScreen({
+    super.key,
+    this.hideAppBar = false,
+  });
+
+  final bool hideAppBar;
 
   @override
   ConsumerState<VisitReportListScreen> createState() =>
@@ -67,21 +72,7 @@ class _VisitReportListScreenState
     final state = ref.watch(visitReportListProvider);
     final theme = Theme.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Visit Reports'),
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              Navigator.pushNamed(context, '${AppRoutes.visitReports}/create');
-            },
-            tooltip: 'Create Visit Report',
-          ),
-        ],
-      ),
-      body: Column(
+    final body = Column(
         children: [
           // Search Bar
           Padding(
@@ -112,7 +103,27 @@ class _VisitReportListScreenState
             ),
           ),
         ],
+      );
+
+    if (widget.hideAppBar) {
+      return body;
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Visit Reports'),
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () {
+              Navigator.pushNamed(context, '${AppRoutes.visitReports}/create');
+            },
+            tooltip: 'Create Visit Report',
+          ),
+        ],
       ),
+      body: body,
     );
   }
 
