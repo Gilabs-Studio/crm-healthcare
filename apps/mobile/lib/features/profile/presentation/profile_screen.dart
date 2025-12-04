@@ -2,23 +2,74 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/main_scaffold.dart';
 import '../../auth/application/auth_provider.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
+  String _getThemeLabel(ThemeMode themeMode) {
+    switch (themeMode) {
+      case ThemeMode.light:
+        return 'Light';
+      case ThemeMode.dark:
+        return 'Dark';
+      case ThemeMode.system:
+        return 'System';
+    }
+  }
+
+  IconData _getThemeIcon(ThemeMode themeMode) {
+    switch (themeMode) {
+      case ThemeMode.light:
+        return Icons.light_mode_outlined;
+      case ThemeMode.dark:
+        return Icons.dark_mode_outlined;
+      case ThemeMode.system:
+        return Icons.brightness_auto_outlined;
+    }
+  }
+
+  void _showThemeModal(
+    BuildContext context,
+    WidgetRef ref,
+    ThemeMode currentThemeMode,
+    ThemeModeNotifier themeNotifier,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => _ThemeSelectorModal(
+        currentThemeMode: currentThemeMode,
+        onThemeSelected: (mode) async {
+          await themeNotifier.setThemeMode(mode);
+          if (context.mounted) {
+            Navigator.pop(context);
+          }
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final authState = ref.watch(authProvider);
     final user = authState.user;
+    final themeMode = ref.watch(themeModeProvider);
+    final themeNotifier = ref.read(themeModeProvider.notifier);
 
     // Use user data from auth state, fallback to placeholder if not available
     final userName = user?.name.isNotEmpty == true ? user!.name : 'User';
     final userEmail = user?.email.isNotEmpty == true ? user!.email : 'user@example.com';
     final userRole = user?.role.isNotEmpty == true ? user!.role : 'Sales Rep';
+
+    // Get current theme mode label
+    final themeLabel = _getThemeLabel(themeMode);
+    final themeIcon = _getThemeIcon(themeMode);
 
     return MainScaffold(
       currentIndex: 3,
@@ -34,7 +85,7 @@ class ProfileScreen extends ConsumerWidget {
                 child: Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: theme.colorScheme.surface,
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
@@ -106,7 +157,7 @@ class ProfileScreen extends ConsumerWidget {
                               userName,
                               style: theme.textTheme.titleLarge?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: AppTheme.textPrimary,
+                                color: theme.colorScheme.onSurface,
                                 fontSize: 20,
                               ),
                             ),
@@ -115,7 +166,7 @@ class ProfileScreen extends ConsumerWidget {
                             Text(
                               userEmail,
                               style: theme.textTheme.bodyMedium?.copyWith(
-                                color: AppTheme.textSecondary,
+                                color: theme.colorScheme.onSurface.withOpacity(0.7),
                                 fontSize: 14,
                               ),
                             ),
@@ -177,11 +228,11 @@ class ProfileScreen extends ConsumerWidget {
               // Theme
               _SettingsCard(
                 child: _SettingsTile(
-                  icon: Icons.dark_mode_outlined,
+                  icon: themeIcon,
                   title: 'Theme',
-                  subtitle: 'Light',
+                  subtitle: themeLabel,
                   onTap: () {
-                    // TODO: Navigate to theme settings
+                    _showThemeModal(context, ref, themeMode, themeNotifier);
                   },
                 ),
               ),
@@ -389,7 +440,7 @@ class _SectionTitle extends StatelessWidget {
       title,
       style: theme.textTheme.titleMedium?.copyWith(
         fontWeight: FontWeight.w600,
-        color: AppTheme.textPrimary,
+        color: theme.colorScheme.onSurface,
         fontSize: 16,
         letterSpacing: 0.2,
       ),
@@ -404,9 +455,10 @@ class _SettingsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -449,12 +501,12 @@ class _SettingsTile extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: AppTheme.textSecondary.withOpacity(0.1),
+                color: theme.colorScheme.onSurface.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
                 icon,
-                color: AppTheme.textSecondary,
+                color: theme.colorScheme.onSurface.withOpacity(0.7),
                 size: 20,
               ),
             ),
@@ -467,7 +519,7 @@ class _SettingsTile extends StatelessWidget {
                     title,
                     style: theme.textTheme.bodyLarge?.copyWith(
                       fontWeight: FontWeight.w500,
-                      color: AppTheme.textPrimary,
+                      color: theme.colorScheme.onSurface,
                       fontSize: 15,
                     ),
                   ),
@@ -475,7 +527,7 @@ class _SettingsTile extends StatelessWidget {
                   Text(
                     subtitle,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: AppTheme.textSecondary,
+                      color: theme.colorScheme.onSurface.withOpacity(0.7),
                       fontSize: 13,
                     ),
                   ),
@@ -485,8 +537,150 @@ class _SettingsTile extends StatelessWidget {
             if (onTap != null)
               Icon(
                 Icons.chevron_right,
-                color: AppTheme.textSecondary.withOpacity(0.5),
+                color: theme.colorScheme.onSurface.withOpacity(0.5),
                 size: 20,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ThemeSelectorModal extends StatelessWidget {
+  const _ThemeSelectorModal({
+    required this.currentThemeMode,
+    required this.onThemeSelected,
+  });
+
+  final ThemeMode currentThemeMode;
+  final ValueChanged<ThemeMode> onThemeSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Handle bar
+          Container(
+            width: 40,
+            height: 4,
+            margin: const EdgeInsets.only(bottom: 20),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.onSurface.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          // Title
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Text(
+              'Select Theme',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          // Theme Options
+          _ThemeOption(
+            icon: Icons.light_mode_outlined,
+            title: 'Light',
+            subtitle: 'Light theme',
+            isSelected: currentThemeMode == ThemeMode.light,
+            onTap: () => onThemeSelected(ThemeMode.light),
+          ),
+          const Divider(height: 1),
+          _ThemeOption(
+            icon: Icons.dark_mode_outlined,
+            title: 'Dark',
+            subtitle: 'Dark theme',
+            isSelected: currentThemeMode == ThemeMode.dark,
+            onTap: () => onThemeSelected(ThemeMode.dark),
+          ),
+          const Divider(height: 1),
+          _ThemeOption(
+            icon: Icons.brightness_auto_outlined,
+            title: 'System',
+            subtitle: 'Follow system setting',
+            isSelected: currentThemeMode == ThemeMode.system,
+            onTap: () => onThemeSelected(ThemeMode.system),
+          ),
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+}
+
+class _ThemeOption extends StatelessWidget {
+  const _ThemeOption({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: isSelected
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.onSurface.withOpacity(0.7),
+              size: 24,
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                      color: isSelected
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.onSurface,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withOpacity(0.7),
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (isSelected)
+              Icon(
+                Icons.check_circle,
+                color: theme.colorScheme.primary,
+                size: 24,
               ),
           ],
         ),

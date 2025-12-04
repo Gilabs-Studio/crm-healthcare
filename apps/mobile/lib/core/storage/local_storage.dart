@@ -32,6 +32,12 @@ class LocalStorage {
     await _prefs.remove('auth_token');
     await _prefs.remove('refresh_token');
   }
+
+  Future<void> setThemeMode(String themeMode) async {
+    await _prefs.setString('theme_mode', themeMode);
+  }
+
+  String getThemeMode() => _prefs.getString('theme_mode') ?? 'light';
 }
 
 
