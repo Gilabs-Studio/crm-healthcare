@@ -53,7 +53,11 @@ class AppLocalizations {
   // Bottom Navigation
   String get home => _localizedValues[locale.languageCode]?['home'] ?? 'Home';
   String get accounts => _localizedValues[locale.languageCode]?['accounts'] ?? 'Accounts';
+  String get contacts => _localizedValues[locale.languageCode]?['contacts'] ?? 'Contacts';
+  String get accountsAndContacts => _localizedValues[locale.languageCode]?['accountsAndContacts'] ?? 'Accounts';
   String get reports => _localizedValues[locale.languageCode]?['reports'] ?? 'Reports';
+  String get tasks => _localizedValues[locale.languageCode]?['tasks'] ?? 'Tasks';
+  String get reportsAndTasks => _localizedValues[locale.languageCode]?['reportsAndTasks'] ?? 'Reports';
 
   static final Map<String, Map<String, String>> _localizedValues = {
     'en': {
@@ -88,7 +92,11 @@ class AppLocalizations {
       'logIn': 'Log In',
       'home': 'Home',
       'accounts': 'Accounts',
+      'contacts': 'Contacts',
+      'accountsAndContacts': 'Accounts',
       'reports': 'Reports',
+      'tasks': 'Tasks',
+      'reportsAndTasks': 'Reports',
     },
     'id': {
       'profile': 'Profil',
@@ -122,7 +130,11 @@ class AppLocalizations {
       'logIn': 'Masuk',
       'home': 'Beranda',
       'accounts': 'Akun',
+      'contacts': 'Kontak',
+      'accountsAndContacts': 'Akun',
       'reports': 'Laporan',
+      'tasks': 'Tugas',
+      'reportsAndTasks': 'Laporan',
     },
   };
 }

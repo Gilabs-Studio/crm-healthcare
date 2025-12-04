@@ -52,14 +52,14 @@ class BottomNavBar extends StatelessWidget {
               _NavItem(
                 icon: Icons.business_outlined,
                 activeIcon: Icons.business,
-                label: l10n?.accounts ?? 'Accounts',
+                label: l10n?.accountsAndContacts ?? 'Accounts',
                 isActive: currentIndex == 1,
                 onTap: () => onTap(1),
               ),
               _NavItem(
                 icon: Icons.assignment_outlined,
                 activeIcon: Icons.assignment,
-                label: l10n?.reports ?? 'Reports',
+                label: l10n?.reportsAndTasks ?? 'Reports',
                 isActive: currentIndex == 2,
                 onTap: () => onTap(2),
               ),
