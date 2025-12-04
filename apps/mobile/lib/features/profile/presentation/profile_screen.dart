@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/main_scaffold.dart';
@@ -50,14 +51,6 @@ class ProfileScreen extends ConsumerWidget {
                         width: 80,
                         height: 80,
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              theme.colorScheme.primary,
-                              theme.colorScheme.primary.withOpacity(0.8),
-                            ],
-                          ),
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
@@ -67,15 +60,38 @@ class ProfileScreen extends ConsumerWidget {
                             ),
                           ],
                         ),
-                        child: Center(
-                          child: Text(
-                            userName.substring(0, 1).toUpperCase(),
-                            style: theme.textTheme.headlineLarge?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 32,
-                            ),
-                          ),
+                        child: ClipOval(
+                          child: user?.avatarUrl != null &&
+                                  user!.avatarUrl!.isNotEmpty
+                              ? _buildAvatarImage(
+                                  user.avatarUrl!,
+                                  userName,
+                                  theme,
+                                )
+                              : Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: [
+                                        theme.colorScheme.primary,
+                                        theme.colorScheme.primary
+                                            .withOpacity(0.8),
+                                      ],
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      userName.substring(0, 1).toUpperCase(),
+                                      style: theme.textTheme.headlineLarge
+                                          ?.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 32,
+                                      ),
+                                    ),
+                                  ),
+                                ),
                         ),
                       ),
                       const SizedBox(width: 20),
@@ -262,6 +278,101 @@ class ProfileScreen extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+Widget _buildAvatarImage(
+  String avatarUrl,
+  String userName,
+  ThemeData theme,
+) {
+  // Check if URL is SVG - dicebear URLs contain .svg in the path
+  final isSvg = avatarUrl.toLowerCase().contains('.svg') ||
+      avatarUrl.toLowerCase().contains('dicebear');
+
+  final fallbackWidget = Container(
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          theme.colorScheme.primary,
+          theme.colorScheme.primary.withOpacity(0.8),
+        ],
+      ),
+    ),
+    child: Center(
+      child: Text(
+        userName.substring(0, 1).toUpperCase(),
+        style: theme.textTheme.headlineLarge?.copyWith(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 32,
+        ),
+      ),
+    ),
+  );
+
+  if (isSvg) {
+    return SvgPicture.network(
+      avatarUrl,
+      width: 80,
+      height: 80,
+      fit: BoxFit.cover,
+      placeholderBuilder: (context) => Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              theme.colorScheme.primary,
+              theme.colorScheme.primary.withOpacity(0.8),
+            ],
+          ),
+        ),
+        child: Center(
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+          ),
+        ),
+      ),
+    );
+  } else {
+    return Image.network(
+      avatarUrl,
+      width: 80,
+      height: 80,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return fallbackWidget;
+      },
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                theme.colorScheme.primary,
+                theme.colorScheme.primary.withOpacity(0.8),
+              ],
+            ),
+          ),
+          child: Center(
+            child: CircularProgressIndicator(
+              value: loadingProgress.expectedTotalBytes != null
+                  ? loadingProgress.cumulativeBytesLoaded /
+                      loadingProgress.expectedTotalBytes!
+                  : null,
+              strokeWidth: 2,
+              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+          ),
+        );
+      },
     );
   }
 }
