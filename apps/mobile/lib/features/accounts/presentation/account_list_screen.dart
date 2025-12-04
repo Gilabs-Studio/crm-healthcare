@@ -8,7 +8,12 @@ import '../../../core/routing/app_router.dart';
 import 'widgets/account_card.dart';
 
 class AccountListScreen extends ConsumerStatefulWidget {
-  const AccountListScreen({super.key});
+  const AccountListScreen({
+    super.key,
+    this.hideAppBar = false,
+  });
+
+  final bool hideAppBar;
 
   @override
   ConsumerState<AccountListScreen> createState() => _AccountListScreenState();
@@ -65,12 +70,7 @@ class _AccountListScreenState extends ConsumerState<AccountListScreen> {
     final state = ref.watch(accountListProvider);
     final theme = Theme.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Accounts'),
-        elevation: 0,
-      ),
-      body: Column(
+    final body = Column(
         children: [
           // Search Bar
           Padding(
@@ -101,7 +101,18 @@ class _AccountListScreenState extends ConsumerState<AccountListScreen> {
             ),
           ),
         ],
+      );
+
+    if (widget.hideAppBar) {
+      return body;
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Accounts'),
+        elevation: 0,
       ),
+      body: body,
     );
   }
 

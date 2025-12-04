@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/routing/app_router.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../auth/application/auth_provider.dart';
+import '../../../core/widgets/main_scaffold.dart';
 import '../application/dashboard_provider.dart';
 import 'widgets/pipeline_summary_widget.dart';
 import 'widgets/recent_activities_widget.dart';
@@ -35,45 +35,36 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final colorScheme = theme.colorScheme;
     final dashboardState = ref.watch(dashboardProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dashboard'),
-        elevation: 0,
-        actions: [
-          // Period selector
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.calendar_today),
-            onSelected: (period) {
-              ref.read(dashboardProvider.notifier).changePeriod(period);
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'today',
-                child: Text('Today'),
-              ),
-              const PopupMenuItem(
-                value: 'week',
-                child: Text('This Week'),
-              ),
-              const PopupMenuItem(
-                value: 'month',
-                child: Text('This Month'),
-              ),
-              const PopupMenuItem(
-                value: 'year',
-                child: Text('This Year'),
-              ),
-            ],
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await ref.read(authProvider.notifier).logout();
-            },
-            tooltip: 'Logout',
-          ),
-        ],
-      ),
+    return MainScaffold(
+      currentIndex: 0,
+      title: 'Dashboard',
+      actions: [
+        // Period selector
+        PopupMenuButton<String>(
+          icon: const Icon(Icons.calendar_today),
+          onSelected: (period) {
+            ref.read(dashboardProvider.notifier).changePeriod(period);
+          },
+          itemBuilder: (context) => [
+            const PopupMenuItem(
+              value: 'today',
+              child: Text('Today'),
+            ),
+            const PopupMenuItem(
+              value: 'week',
+              child: Text('This Week'),
+            ),
+            const PopupMenuItem(
+              value: 'month',
+              child: Text('This Month'),
+            ),
+            const PopupMenuItem(
+              value: 'year',
+              child: Text('This Year'),
+            ),
+          ],
+        ),
+      ],
       body: RefreshIndicator(
         onRefresh: _onRefresh,
         child: dashboardState.isLoading
@@ -240,30 +231,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           childAspectRatio: 1.1,
                           children: [
                             _MenuCard(
-                              icon: Icons.business_outlined,
-                              title: 'Accounts',
-                              color: colorScheme.primary,
-                              onTap: () {
-                                Navigator.pushNamed(context, AppRoutes.accounts);
-                              },
-                            ),
-                            _MenuCard(
                               icon: Icons.people_outline,
                               title: 'Contacts',
                               color: Colors.blue,
                               onTap: () {
                                 Navigator.pushNamed(context, AppRoutes.contacts);
-                              },
-                            ),
-                            _MenuCard(
-                              icon: Icons.assignment_outlined,
-                              title: 'Visit Reports',
-                              color: Colors.orange,
-                              onTap: () {
-                                Navigator.pushNamed(
-                                  context,
-                                  AppRoutes.visitReports,
-                                );
                               },
                             ),
                             _MenuCard(
