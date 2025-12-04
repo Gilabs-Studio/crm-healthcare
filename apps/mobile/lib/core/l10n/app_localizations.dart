@@ -41,6 +41,20 @@ class AppLocalizations {
   String get english => _localizedValues[locale.languageCode]?['english'] ?? 'English';
   String get indonesian => _localizedValues[locale.languageCode]?['indonesian'] ?? 'Indonesian';
 
+  // Login Screen
+  String get signInToYourAccount => _localizedValues[locale.languageCode]?['signInToYourAccount'] ?? 'Sign in to your Account';
+  String get enterEmailPassword => _localizedValues[locale.languageCode]?['enterEmailPassword'] ?? 'Enter your email and password to log in';
+  String get email => _localizedValues[locale.languageCode]?['email'] ?? 'Email';
+  String get password => _localizedValues[locale.languageCode]?['password'] ?? 'Password';
+  String get enterPassword => _localizedValues[locale.languageCode]?['enterPassword'] ?? 'Enter your password';
+  String get rememberMe => _localizedValues[locale.languageCode]?['rememberMe'] ?? 'Remember me';
+  String get logIn => _localizedValues[locale.languageCode]?['logIn'] ?? 'Log In';
+
+  // Bottom Navigation
+  String get home => _localizedValues[locale.languageCode]?['home'] ?? 'Home';
+  String get accounts => _localizedValues[locale.languageCode]?['accounts'] ?? 'Accounts';
+  String get reports => _localizedValues[locale.languageCode]?['reports'] ?? 'Reports';
+
   static final Map<String, Map<String, String>> _localizedValues = {
     'en': {
       'profile': 'Profile',
@@ -65,6 +79,16 @@ class AppLocalizations {
       'selectLanguage': 'Select Language',
       'english': 'English',
       'indonesian': 'Indonesian',
+      'signInToYourAccount': 'Sign in to your Account',
+      'enterEmailPassword': 'Enter your email and password to log in',
+      'email': 'Email',
+      'password': 'Password',
+      'enterPassword': 'Enter your password',
+      'rememberMe': 'Remember me',
+      'logIn': 'Log In',
+      'home': 'Home',
+      'accounts': 'Accounts',
+      'reports': 'Reports',
     },
     'id': {
       'profile': 'Profil',
@@ -89,6 +113,16 @@ class AppLocalizations {
       'selectLanguage': 'Pilih Bahasa',
       'english': 'Bahasa Inggris',
       'indonesian': 'Bahasa Indonesia',
+      'signInToYourAccount': 'Masuk ke Akun Anda',
+      'enterEmailPassword': 'Masukkan email dan kata sandi Anda untuk masuk',
+      'email': 'Email',
+      'password': 'Kata Sandi',
+      'enterPassword': 'Masukkan kata sandi Anda',
+      'rememberMe': 'Ingat saya',
+      'logIn': 'Masuk',
+      'home': 'Beranda',
+      'accounts': 'Akun',
+      'reports': 'Laporan',
     },
   };
 }

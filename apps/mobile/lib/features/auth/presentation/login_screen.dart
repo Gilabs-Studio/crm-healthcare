@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/l10n/app_localizations.dart';
 import '../../../core/routing/app_router.dart';
-import '../../../core/theme/app_theme.dart';
 import '../application/auth_provider.dart';
 import '../application/auth_state.dart';
 
@@ -38,6 +38,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(authProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     if (state.status == AuthStatus.authenticated) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -50,11 +51,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final isLoading = state.isLoading;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.colorScheme.background,
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        color: Colors.white,
+        color: theme.colorScheme.background,
         child: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -96,19 +97,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const SizedBox(height: 24),
                   // Title
                   Text(
-                    'Sign in to your Account',
+                    l10n.signInToYourAccount,
                     style: theme.textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: AppTheme.textPrimary,
+                      color: theme.colorScheme.onBackground,
                     ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
                   // Subtitle
                   Text(
-                    'Enter your email and password to log in',
+                    l10n.enterEmailPassword,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: AppTheme.textSecondary,
+                      color: theme.colorScheme.onBackground.withOpacity(0.7),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -119,10 +120,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     children: [
                       // Email Field
                       Text(
-                        'Email',
+                        l10n.email,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w500,
-                          color: AppTheme.textPrimary,
+                          color: theme.colorScheme.onBackground,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -130,13 +131,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
                         enabled: !isLoading,
+                        style: TextStyle(color: theme.colorScheme.onBackground),
                         decoration: InputDecoration(
                           hintText: 'admin@example.com',
                           hintStyle: TextStyle(
-                            color: AppTheme.textSecondary.withOpacity(0.5),
+                            color: theme.colorScheme.onBackground.withOpacity(0.5),
                           ),
                           filled: true,
-                          fillColor: AppTheme.cardBackground,
+                          fillColor: theme.colorScheme.surface,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide.none,
@@ -150,10 +152,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       const SizedBox(height: 16),
                       // Password Field
                       Text(
-                        'Password',
+                        l10n.password,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w500,
-                          color: AppTheme.textPrimary,
+                          color: theme.colorScheme.onBackground,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -161,13 +163,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         controller: _passwordController,
                         enabled: !isLoading,
                         obscureText: _obscurePassword,
+                        style: TextStyle(color: theme.colorScheme.onBackground),
                         decoration: InputDecoration(
-                          hintText: 'Enter your password',
+                          hintText: l10n.enterPassword,
                           hintStyle: TextStyle(
-                            color: AppTheme.textSecondary.withOpacity(0.5),
+                            color: theme.colorScheme.onBackground.withOpacity(0.5),
                           ),
                           filled: true,
-                          fillColor: AppTheme.cardBackground,
+                          fillColor: theme.colorScheme.surface,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide.none,
@@ -181,7 +184,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               _obscurePassword
                                   ? Icons.visibility_off
                                   : Icons.visibility,
-                              color: AppTheme.textSecondary,
+                              color: theme.colorScheme.onBackground.withOpacity(0.7),
                             ),
                             onPressed: () {
                               setState(() {
@@ -207,9 +210,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             activeColor: colorScheme.primary,
                           ),
                           Text(
-                            'Remember me',
+                            l10n.rememberMe,
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: AppTheme.textPrimary,
+                              color: theme.colorScheme.onBackground,
                             ),
                           ),
                         ],
@@ -253,7 +256,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     ),
                                   ),
                                 )
-                              : const Text('Log In'),
+                              : Text(l10n.logIn),
                         ),
                       ),
                     ],

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_theme.dart';
+import '../l10n/app_localizations.dart';
 
 enum NavItem {
   home,
@@ -21,9 +21,12 @@ class BottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -42,28 +45,28 @@ class BottomNavBar extends StatelessWidget {
               _NavItem(
                 icon: Icons.home_outlined,
                 activeIcon: Icons.home,
-                label: 'Home',
+                label: l10n?.home ?? 'Home',
                 isActive: currentIndex == 0,
                 onTap: () => onTap(0),
               ),
               _NavItem(
                 icon: Icons.business_outlined,
                 activeIcon: Icons.business,
-                label: 'Accounts',
+                label: l10n?.accounts ?? 'Accounts',
                 isActive: currentIndex == 1,
                 onTap: () => onTap(1),
               ),
               _NavItem(
                 icon: Icons.assignment_outlined,
                 activeIcon: Icons.assignment,
-                label: 'Reports',
+                label: l10n?.reports ?? 'Reports',
                 isActive: currentIndex == 2,
                 onTap: () => onTap(2),
               ),
               _NavItem(
                 icon: Icons.person_outline,
                 activeIcon: Icons.person,
-                label: 'Profile',
+                label: l10n?.profile ?? 'Profile',
                 isActive: currentIndex == 3,
                 onTap: () => onTap(3),
               ),
@@ -92,6 +95,8 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Expanded(
       child: InkWell(
         onTap: onTap,
@@ -101,7 +106,9 @@ class _NavItem extends StatelessWidget {
           children: [
             Icon(
               isActive ? activeIcon : icon,
-              color: isActive ? AppTheme.primaryColor : AppTheme.textSecondary,
+              color: isActive
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.onSurface.withOpacity(0.7),
               size: 24,
             ),
             const SizedBox(height: 4),
@@ -110,7 +117,9 @@ class _NavItem extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
-                color: isActive ? AppTheme.primaryColor : AppTheme.textSecondary,
+                color: isActive
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurface.withOpacity(0.7),
               ),
             ),
             if (isActive) ...[
@@ -119,7 +128,7 @@ class _NavItem extends StatelessWidget {
                 width: 24,
                 height: 2,
                 decoration: BoxDecoration(
-                  color: AppTheme.primaryColor,
+                  color: theme.colorScheme.primary,
                   borderRadius: BorderRadius.circular(1),
                 ),
               ),
