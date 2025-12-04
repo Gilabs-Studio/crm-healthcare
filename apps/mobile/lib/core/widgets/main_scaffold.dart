@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../features/accounts/presentation/accounts_screen.dart';
+import '../../features/dashboard/presentation/dashboard_screen.dart';
+import '../../features/profile/presentation/profile_screen.dart';
+import '../../features/visit_reports/presentation/reports_screen.dart';
 import '../routing/app_router.dart';
+import 'auth_gate.dart';
 import 'bottom_nav_bar.dart';
 
 class MainScaffold extends StatelessWidget {
@@ -24,18 +29,52 @@ class MainScaffold extends StatelessWidget {
   void _handleNavTap(BuildContext context, int index) {
     if (index == currentIndex) return;
 
+    // Helper function to create a route without animation
+    Route<T> _createNoAnimationRoute<T>(Widget page, String routeName) {
+      return PageRouteBuilder<T>(
+        settings: RouteSettings(name: routeName),
+        pageBuilder: (context, animation, secondaryAnimation) => page,
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
+      );
+    }
+
     switch (index) {
       case 0:
-        Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+        Navigator.pushReplacement(
+          context,
+          _createNoAnimationRoute(
+            const AuthGate(child: DashboardScreen()),
+            AppRoutes.dashboard,
+          ),
+        );
         break;
       case 1:
-        Navigator.pushReplacementNamed(context, AppRoutes.accounts);
+        Navigator.pushReplacement(
+          context,
+          _createNoAnimationRoute(
+            const AuthGate(child: AccountsScreen()),
+            AppRoutes.accounts,
+          ),
+        );
         break;
       case 2:
-        Navigator.pushReplacementNamed(context, AppRoutes.visitReports);
+        Navigator.pushReplacement(
+          context,
+          _createNoAnimationRoute(
+            const AuthGate(child: ReportsScreen()),
+            AppRoutes.visitReports,
+          ),
+        );
         break;
       case 3:
-        Navigator.pushReplacementNamed(context, AppRoutes.profile);
+        Navigator.pushReplacement(
+          context,
+          _createNoAnimationRoute(
+            const AuthGate(child: ProfileScreen()),
+            AppRoutes.profile,
+          ),
+        );
         break;
     }
   }
