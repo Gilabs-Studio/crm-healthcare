@@ -109,8 +109,6 @@ class AppTheme {
           onSecondary: darkForeground,
           surface: darkCard,
           onSurface: darkForeground,
-          background: darkBackground,
-          onBackground: darkForeground,
           error: const Color(0xFFEF4444),
           onError: Colors.white,
           outline: darkBorder,

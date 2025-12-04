@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../core/l10n/app_localizations.dart';
+import '../../../core/l10n/locale_provider.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/main_scaffold.dart';
 import '../../auth/application/auth_provider.dart';
@@ -9,14 +11,24 @@ import '../../auth/application/auth_provider.dart';
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
-  String _getThemeLabel(ThemeMode themeMode) {
+  String _getThemeLabel(ThemeMode themeMode, AppLocalizations l10n) {
     switch (themeMode) {
       case ThemeMode.light:
-        return 'Light';
+        return l10n.lightTheme;
       case ThemeMode.dark:
-        return 'Dark';
+        return l10n.darkTheme;
       case ThemeMode.system:
-        return 'System';
+        return l10n.systemTheme;
+    }
+  }
+
+  String _getLanguageLabel(Locale locale, AppLocalizations l10n) {
+    switch (locale.languageCode) {
+      case 'id':
+        return l10n.indonesian;
+      case 'en':
+      default:
+        return l10n.english;
     }
   }
 
@@ -36,6 +48,7 @@ class ProfileScreen extends ConsumerWidget {
     WidgetRef ref,
     ThemeMode currentThemeMode,
     ThemeModeNotifier themeNotifier,
+    AppLocalizations l10n,
   ) {
     showModalBottomSheet(
       context: context,
@@ -50,6 +63,32 @@ class ProfileScreen extends ConsumerWidget {
             Navigator.pop(context);
           }
         },
+        l10n: l10n,
+      ),
+    );
+  }
+
+  void _showLanguageModal(
+    BuildContext context,
+    WidgetRef ref,
+    Locale currentLocale,
+    LocaleNotifier localeNotifier,
+    AppLocalizations l10n,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => _LanguageSelectorModal(
+        currentLocale: currentLocale,
+        onLanguageSelected: (locale) async {
+          await localeNotifier.setLocale(locale);
+          if (context.mounted) {
+            Navigator.pop(context);
+          }
+        },
+        l10n: l10n,
       ),
     );
   }
@@ -57,10 +96,13 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final authState = ref.watch(authProvider);
     final user = authState.user;
     final themeMode = ref.watch(themeModeProvider);
     final themeNotifier = ref.read(themeModeProvider.notifier);
+    final locale = ref.watch(localeProvider);
+    final localeNotifier = ref.read(localeProvider.notifier);
 
     // Use user data from auth state, fallback to placeholder if not available
     final userName = user?.name.isNotEmpty == true ? user!.name : 'User';
@@ -68,8 +110,9 @@ class ProfileScreen extends ConsumerWidget {
     final userRole = user?.role.isNotEmpty == true ? user!.role : 'Sales Rep';
 
     // Get current theme mode label
-    final themeLabel = _getThemeLabel(themeMode);
+    final themeLabel = _getThemeLabel(themeMode, l10n);
     final themeIcon = _getThemeIcon(themeMode);
+    final languageLabel = _getLanguageLabel(locale, l10n);
 
     return MainScaffold(
       currentIndex: 3,
@@ -199,14 +242,14 @@ class ProfileScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 32),
               // Settings Section
-              _SectionTitle(title: 'Settings'),
+              _SectionTitle(title: l10n.settings),
               const SizedBox(height: 16),
               // Notifications
               _SettingsCard(
                 child: _SettingsTile(
                   icon: Icons.notifications_outlined,
-                  title: 'Notifications',
-                  subtitle: 'Manage notification settings',
+                  title: l10n.notifications,
+                  subtitle: l10n.manageNotificationSettings,
                   onTap: () {
                     // TODO: Navigate to notifications
                   },
@@ -217,10 +260,10 @@ class ProfileScreen extends ConsumerWidget {
               _SettingsCard(
                 child: _SettingsTile(
                   icon: Icons.language_outlined,
-                  title: 'Language',
-                  subtitle: 'English',
+                  title: l10n.language,
+                  subtitle: languageLabel,
                   onTap: () {
-                    // TODO: Navigate to language settings
+                    _showLanguageModal(context, ref, locale, localeNotifier, l10n);
                   },
                 ),
               ),
@@ -229,22 +272,22 @@ class ProfileScreen extends ConsumerWidget {
               _SettingsCard(
                 child: _SettingsTile(
                   icon: themeIcon,
-                  title: 'Theme',
+                  title: l10n.theme,
                   subtitle: themeLabel,
                   onTap: () {
-                    _showThemeModal(context, ref, themeMode, themeNotifier);
+                    _showThemeModal(context, ref, themeMode, themeNotifier, l10n);
                   },
                 ),
               ),
               const SizedBox(height: 32),
               // About Section
-              _SectionTitle(title: 'About'),
+              _SectionTitle(title: l10n.about),
               const SizedBox(height: 16),
               // App Version
               _SettingsCard(
                 child: _SettingsTile(
                   icon: Icons.info_outline,
-                  title: 'App Version',
+                  title: l10n.appVersion,
                   subtitle: '1.0.0',
                   onTap: null,
                 ),
@@ -254,8 +297,8 @@ class ProfileScreen extends ConsumerWidget {
               _SettingsCard(
                 child: _SettingsTile(
                   icon: Icons.privacy_tip_outlined,
-                  title: 'Privacy Policy',
-                  subtitle: 'View privacy policy',
+                  title: l10n.privacyPolicy,
+                  subtitle: l10n.viewPrivacyPolicy,
                   onTap: () {
                     // TODO: Navigate to privacy policy
                   },
@@ -266,8 +309,8 @@ class ProfileScreen extends ConsumerWidget {
               _SettingsCard(
                 child: _SettingsTile(
                   icon: Icons.description_outlined,
-                  title: 'Terms of Service',
-                  subtitle: 'View terms of service',
+                  title: l10n.termsOfService,
+                  subtitle: l10n.viewTermsOfService,
                   onTap: () {
                     // TODO: Navigate to terms of service
                   },
@@ -285,16 +328,16 @@ class ProfileScreen extends ConsumerWidget {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
-                        title: const Text('Logout'),
-                        content: const Text('Are you sure you want to logout?'),
+                        title: Text(l10n.logout),
+                        content: Text(l10n.logoutConfirmation),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(context, false),
-                            child: const Text('Cancel'),
+                            child: Text(l10n.cancel),
                           ),
                           FilledButton(
                             onPressed: () => Navigator.pop(context, true),
-                            child: const Text('Logout'),
+                            child: Text(l10n.logout),
                           ),
                         ],
                       ),
@@ -315,9 +358,9 @@ class ProfileScreen extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  child: const Text(
-                    'Logout',
-                    style: TextStyle(
+                  child: Text(
+                    l10n.logout,
+                    style: const TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 16,
                     ),
@@ -551,10 +594,12 @@ class _ThemeSelectorModal extends StatelessWidget {
   const _ThemeSelectorModal({
     required this.currentThemeMode,
     required this.onThemeSelected,
+    required this.l10n,
   });
 
   final ThemeMode currentThemeMode;
   final ValueChanged<ThemeMode> onThemeSelected;
+  final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
@@ -579,7 +624,7 @@ class _ThemeSelectorModal extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Text(
-              'Select Theme',
+              l10n.selectTheme,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: theme.colorScheme.onSurface,
@@ -590,24 +635,24 @@ class _ThemeSelectorModal extends StatelessWidget {
           // Theme Options
           _ThemeOption(
             icon: Icons.light_mode_outlined,
-            title: 'Light',
-            subtitle: 'Light theme',
+            title: l10n.lightTheme,
+            subtitle: l10n.lightTheme,
             isSelected: currentThemeMode == ThemeMode.light,
             onTap: () => onThemeSelected(ThemeMode.light),
           ),
           const Divider(height: 1),
           _ThemeOption(
             icon: Icons.dark_mode_outlined,
-            title: 'Dark',
-            subtitle: 'Dark theme',
+            title: l10n.darkTheme,
+            subtitle: l10n.darkTheme,
             isSelected: currentThemeMode == ThemeMode.dark,
             onTap: () => onThemeSelected(ThemeMode.dark),
           ),
           const Divider(height: 1),
           _ThemeOption(
             icon: Icons.brightness_auto_outlined,
-            title: 'System',
-            subtitle: 'Follow system setting',
+            title: l10n.systemTheme,
+            subtitle: l10n.systemTheme,
             isSelected: currentThemeMode == ThemeMode.system,
             onTap: () => onThemeSelected(ThemeMode.system),
           ),
@@ -649,6 +694,153 @@ class _ThemeOption extends StatelessWidget {
                   ? theme.colorScheme.primary
                   : theme.colorScheme.onSurface.withOpacity(0.7),
               size: 24,
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                      color: isSelected
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.onSurface,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withOpacity(0.7),
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (isSelected)
+              Icon(
+                Icons.check_circle,
+                color: theme.colorScheme.primary,
+                size: 24,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LanguageSelectorModal extends StatelessWidget {
+  const _LanguageSelectorModal({
+    required this.currentLocale,
+    required this.onLanguageSelected,
+    required this.l10n,
+  });
+
+  final Locale currentLocale;
+  final ValueChanged<Locale> onLanguageSelected;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Handle bar
+          Container(
+            width: 40,
+            height: 4,
+            margin: const EdgeInsets.only(bottom: 20),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.onSurface.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          // Title
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Text(
+              l10n.selectLanguage,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          // Language Options
+          _LanguageOption(
+            locale: const Locale('en', ''),
+            title: l10n.english,
+            subtitle: l10n.english,
+            isSelected: currentLocale.languageCode == 'en',
+            onTap: () => onLanguageSelected(const Locale('en', '')),
+          ),
+          const Divider(height: 1),
+          _LanguageOption(
+            locale: const Locale('id', ''),
+            title: l10n.indonesian,
+            subtitle: l10n.indonesian,
+            isSelected: currentLocale.languageCode == 'id',
+            onTap: () => onLanguageSelected(const Locale('id', '')),
+          ),
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+}
+
+class _LanguageOption extends StatelessWidget {
+  const _LanguageOption({
+    required this.locale,
+    required this.title,
+    required this.subtitle,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final Locale locale;
+  final String title;
+  final String subtitle;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    // Get flag emoji for locale
+    final flagEmoji = locale.languageCode == 'id' ? '🇮🇩' : '🇬🇧';
+
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        child: Row(
+          children: [
+            // Flag emoji
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.onSurface.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Center(
+                child: Text(
+                  flagEmoji,
+                  style: const TextStyle(fontSize: 24),
+                ),
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(

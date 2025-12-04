@@ -38,6 +38,12 @@ class LocalStorage {
   }
 
   String getThemeMode() => _prefs.getString('theme_mode') ?? 'light';
+
+  Future<void> setLocale(String locale) async {
+    await _prefs.setString('locale', locale);
+  }
+
+  String getLocale() => _prefs.getString('locale') ?? 'en';
 }
 
 
