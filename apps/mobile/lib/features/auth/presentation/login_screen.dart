@@ -49,21 +49,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final colorScheme = theme.colorScheme;
     final isLoading = state.isLoading;
 
-    // Light blue to white gradient (matching image)
-    const gradientStart = Color(0xFFE3F2FD); // Light blue
-    const gradientEnd = Colors.white;
-
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [gradientStart, gradientEnd],
-          ),
-        ),
+        color: Colors.white,
         child: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -140,7 +131,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         keyboardType: TextInputType.emailAddress,
                         enabled: !isLoading,
                         decoration: InputDecoration(
-                          hintText: 'Loisbecket@gmail.com',
+                          hintText: 'admin@example.com',
+                          hintStyle: TextStyle(
+                            color: AppTheme.textSecondary.withOpacity(0.5),
+                          ),
                           filled: true,
                           fillColor: AppTheme.cardBackground,
                           border: OutlineInputBorder(
@@ -169,6 +163,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         obscureText: _obscurePassword,
                         decoration: InputDecoration(
                           hintText: 'Enter your password',
+                          hintStyle: TextStyle(
+                            color: AppTheme.textSecondary.withOpacity(0.5),
+                          ),
                           filled: true,
                           fillColor: AppTheme.cardBackground,
                           border: OutlineInputBorder(

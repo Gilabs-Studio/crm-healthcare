@@ -7,7 +7,7 @@ class AppTheme {
   // Primary: oklch(0.5234 0.1347 144.1672) - Green/Teal
   static const Color primaryColor = Color(0xFF22C55E); // Approximate green
   static const Color primaryColorDark = Color(0xFF16A34A);
-  static const Color backgroundColor = Color(0xFFF8F9FA); // Light background
+  static const Color backgroundColor = Color(0xFFFFFFFF); // White background
   static const Color cardBackground = Color(0xFFFFFFFF);
   static const Color formCardBackground = Color(0xFFF5F5F5); // Light grey for form card
   static const Color textPrimary = Color(0xFF1F2937); // Dark grey/black
@@ -23,13 +23,11 @@ class AppTheme {
           onSecondary: primaryColorDark,
           surface: cardBackground,
           onSurface: textPrimary,
-          background: backgroundColor,
-          onBackground: textPrimary,
           error: const Color(0xFFEF4444),
           onError: Colors.white,
           outline: borderColor,
         ),
-        scaffoldBackgroundColor: backgroundColor,
+        scaffoldBackgroundColor: Colors.white,
         cardColor: cardBackground,
         textTheme: const TextTheme(
           headlineMedium: TextStyle(
@@ -91,8 +89,6 @@ class AppTheme {
           onSecondary: const Color(0xFFD1D5DB),
           surface: const Color(0xFF1F2937),
           onSurface: const Color(0xFFF9FAFB),
-          background: const Color(0xFF111827),
-          onBackground: const Color(0xFFF9FAFB),
           error: const Color(0xFFEF4444),
           onError: Colors.white,
           outline: const Color(0xFF374151),

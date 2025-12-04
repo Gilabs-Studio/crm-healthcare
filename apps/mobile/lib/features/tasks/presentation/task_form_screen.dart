@@ -212,7 +212,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
               const SizedBox(height: 16),
               // Type
               DropdownButtonFormField<String>(
-                value: _selectedType,
+                initialValue: _selectedType,
                 decoration: const InputDecoration(
                   labelText: 'Type *',
                   border: OutlineInputBorder(),
@@ -233,7 +233,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
               const SizedBox(height: 16),
               // Priority
               DropdownButtonFormField<String>(
-                value: _selectedPriority,
+                initialValue: _selectedPriority,
                 decoration: const InputDecoration(
                   labelText: 'Priority *',
                   border: OutlineInputBorder(),
@@ -276,7 +276,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
               // Account (only for create)
               if (widget.taskId == null) ...[
                 DropdownButtonFormField<String>(
-                  value: _selectedAccountId,
+                  initialValue: _selectedAccountId,
                   decoration: const InputDecoration(
                     labelText: 'Account (optional)',
                     border: OutlineInputBorder(),
@@ -305,7 +305,7 @@ class _TaskFormScreenState extends ConsumerState<TaskFormScreen> {
                 const SizedBox(height: 16),
                 // Contact (only for create, filtered by account)
                 DropdownButtonFormField<String>(
-                  value: _selectedContactId,
+                  initialValue: _selectedContactId,
                   decoration: const InputDecoration(
                     labelText: 'Contact (optional)',
                     border: OutlineInputBorder(),

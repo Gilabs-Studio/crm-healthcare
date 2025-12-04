@@ -17,6 +17,7 @@ class AuthGate extends ConsumerWidget {
     // Show loading saat check auth status (unknown)
     if (state.status == AuthStatus.unknown) {
       return const Scaffold(
+        backgroundColor: Colors.white,
         body: Center(
           child: CircularProgressIndicator(),
         ),
