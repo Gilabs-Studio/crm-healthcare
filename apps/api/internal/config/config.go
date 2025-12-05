@@ -43,8 +43,11 @@ type CerebrasConfig struct {
 var AppConfig *Config
 
 func Load() error {
-	// Load .env file if exists (for local development)
-	_ = godotenv.Load()
+	// Load .env file if exists (for local development only)
+	// Skip .env loading in production to use Docker environment variables
+	if os.Getenv("ENV") != "production" {
+		_ = godotenv.Load()
+	}
 
 	AppConfig = &Config{
 		Server: ServerConfig{
