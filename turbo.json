@@ -10,7 +10,8 @@
         "!.next/cache/**",
         "bin/**",
         "dist/**"
-      ]
+      ],
+      "env": ["NODE_ENV"]
     },
     "lint": {
       "dependsOn": ["^lint"]
