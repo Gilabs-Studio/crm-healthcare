@@ -5,8 +5,8 @@ import 'dart:async';
 import '../application/task_provider.dart';
 import '../application/task_state.dart';
 import '../../../core/routing/app_router.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/l10n/app_localizations.dart';
+import 'task_form_screen.dart';
 import 'widgets/task_card.dart';
 
 class TaskListScreen extends ConsumerStatefulWidget {
@@ -125,24 +125,36 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: () async {
-              await Navigator.of(context).pushNamed(AppRoutes.tasksCreate);
-              // Refresh list after returning from create screen
-              if (mounted) {
-                ref.read(taskListProvider.notifier).refresh();
-              }
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const TaskFormScreen(),
+                ),
+              ).then((result) {
+                // Refresh list after creating task
+                if (result != null && mounted) {
+                  ref.read(taskListProvider.notifier).refresh();
+                }
+              });
             },
           ),
         ],
       ),
       body: body,
       floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          await Navigator.of(context).pushNamed(AppRoutes.tasksCreate);
-          // Refresh list after returning from create screen
-          if (mounted) {
-            ref.read(taskListProvider.notifier).refresh();
-          }
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const TaskFormScreen(),
+            ),
+          ).then((result) {
+            // Refresh list after creating task
+            if (result != null && mounted) {
+              ref.read(taskListProvider.notifier).refresh();
+            }
+          });
         },
         child: const Icon(Icons.add),
       ),
@@ -180,7 +192,7 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
               onPressed: () {
                 ref.read(taskListProvider.notifier).clearFilters();
               },
-              tooltip: 'Clear filters',
+              tooltip: l10n.clearFilters,
             ),
           ],
         ],
@@ -297,14 +309,18 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
         final task = state.tasks[index];
         return TaskCard(
           task: task,
-          onTap: () async {
-            await Navigator.of(context).pushNamed(
+          onTap: () {
+            Navigator.of(context).pushNamed(
               '${AppRoutes.tasks}/${task.id}',
-            );
-            // Refresh list after returning from detail screen
-            if (mounted) {
-              ref.read(taskListProvider.notifier).refresh();
-            }
+            ).then((result) {
+              // Refresh list after returning from detail screen
+              if (result != null && mounted) {
+                ref.read(taskListProvider.notifier).refresh();
+              } else if (mounted) {
+                // Also refresh if we just came back (might have been deleted)
+                ref.read(taskListProvider.notifier).refresh();
+              }
+            });
           },
         );
       },
@@ -326,15 +342,18 @@ class _FilterChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
+          color: colorScheme.surface,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: AppTheme.borderColor),
+          border: Border.all(
+            color: colorScheme.outline.withOpacity(0.2),
+          ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -342,21 +361,21 @@ class _FilterChip extends StatelessWidget {
             Text(
               '$label: ',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: AppTheme.textSecondary,
+                color: colorScheme.onSurface.withOpacity(0.7),
               ),
             ),
             Text(
               value,
               style: theme.textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.w600,
-                color: AppTheme.textPrimary,
+                color: colorScheme.onSurface,
               ),
             ),
             const SizedBox(width: 4),
             Icon(
               Icons.keyboard_arrow_down,
               size: 16,
-              color: AppTheme.textSecondary,
+              color: colorScheme.onSurface.withOpacity(0.7),
             ),
           ],
         ),
@@ -377,6 +396,8 @@ class _StatusFilterSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    final colorScheme = theme.colorScheme;
     final statuses = [
       null,
       'pending',
@@ -392,19 +413,20 @@ class _StatusFilterSheet extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Filter by Status',
+            l10n.filterByStatus,
             style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
+              color: colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 16),
           ...statuses.map((status) {
-            final label = status == null ? 'All' : status.toUpperCase().replaceAll('_', ' ');
+            final label = status == null ? l10n.all : status.toUpperCase().replaceAll('_', ' ');
             final isSelected = selectedStatus == status;
             return ListTile(
               title: Text(label),
               trailing: isSelected
-                  ? Icon(Icons.check, color: theme.colorScheme.primary)
+                  ? Icon(Icons.check, color: colorScheme.primary)
                   : null,
               onTap: () => onSelect(status),
             );
@@ -427,6 +449,8 @@ class _PriorityFilterSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    final colorScheme = theme.colorScheme;
     final priorities = [
       null,
       'low',
@@ -442,19 +466,20 @@ class _PriorityFilterSheet extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Filter by Priority',
+            l10n.filterByPriority,
             style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
+              color: colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 16),
           ...priorities.map((priority) {
-            final label = priority == null ? 'All' : priority.toUpperCase();
+            final label = priority == null ? l10n.all : priority.toUpperCase();
             final isSelected = selectedPriority == priority;
             return ListTile(
               title: Text(label),
               trailing: isSelected
-                  ? Icon(Icons.check, color: theme.colorScheme.primary)
+                  ? Icon(Icons.check, color: colorScheme.primary)
                   : null,
               onTap: () => onSelect(priority),
             );

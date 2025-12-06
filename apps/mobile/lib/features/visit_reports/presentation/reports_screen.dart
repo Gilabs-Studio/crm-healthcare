@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/l10n/app_localizations.dart';
-import '../../../core/routing/app_router.dart';
 import '../../../core/widgets/main_scaffold.dart';
 import '../../tasks/presentation/task_list_screen.dart';
+import '../../tasks/presentation/task_form_screen.dart';
+import '../../tasks/application/task_provider.dart';
 import '../application/visit_report_provider.dart';
 import 'visit_report_form_screen.dart';
 import 'visit_report_list_screen.dart';
@@ -57,10 +58,17 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen>
             });
           } else {
             // Create Task
-            Navigator.pushNamed(
+            Navigator.push(
               context,
-              AppRoutes.tasksCreate,
-            );
+              MaterialPageRoute(
+                builder: (context) => const TaskFormScreen(),
+              ),
+            ).then((result) {
+              // Refresh list after creating task
+              if (result != null) {
+                ref.read(taskListProvider.notifier).refresh();
+              }
+            });
           }
         },
         child: const Icon(Icons.add),

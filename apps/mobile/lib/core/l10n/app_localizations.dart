@@ -96,6 +96,43 @@ class AppLocalizations {
   String get visitReportCreatedSuccessfully => _localizedValues[locale.languageCode]?['visitReportCreatedSuccessfully'] ?? 'Visit report created successfully';
   String get failedToCreateVisitReport => _localizedValues[locale.languageCode]?['failedToCreateVisitReport'] ?? 'Failed to create visit report';
   String get all => _localizedValues[locale.languageCode]?['all'] ?? 'All';
+  String get filterByStatus => _localizedValues[locale.languageCode]?['filterByStatus'] ?? 'Filter by Status';
+  String get filterByPriority => _localizedValues[locale.languageCode]?['filterByPriority'] ?? 'Filter by Priority';
+  String get clearFilters => _localizedValues[locale.languageCode]?['clearFilters'] ?? 'Clear filters';
+  String get taskDetails => _localizedValues[locale.languageCode]?['taskDetails'] ?? 'Task Details';
+  String get taskInformation => _localizedValues[locale.languageCode]?['taskInformation'] ?? 'Task Information';
+  String get relatedInformation => _localizedValues[locale.languageCode]?['relatedInformation'] ?? 'Related Information';
+  String get reminders => _localizedValues[locale.languageCode]?['reminders'] ?? 'Reminders';
+  String get completeTask => _localizedValues[locale.languageCode]?['completeTask'] ?? 'Complete Task';
+  String get addReminder => _localizedValues[locale.languageCode]?['addReminder'] ?? 'Add Reminder';
+  String get completeTaskConfirmation => _localizedValues[locale.languageCode]?['completeTaskConfirmation'] ?? 'Are you sure you want to mark this task as completed?';
+  String get taskCompletedSuccessfully => _localizedValues[locale.languageCode]?['taskCompletedSuccessfully'] ?? 'Task completed successfully';
+  String get failedToCompleteTask => _localizedValues[locale.languageCode]?['failedToCompleteTask'] ?? 'Failed to complete task';
+  String get deleteTask => _localizedValues[locale.languageCode]?['deleteTask'] ?? 'Delete Task';
+  String get deleteTaskConfirmation => _localizedValues[locale.languageCode]?['deleteTaskConfirmation'] ?? 'Are you sure you want to delete this task? This action cannot be undone.';
+  String get taskDeletedSuccessfully => _localizedValues[locale.languageCode]?['taskDeletedSuccessfully'] ?? 'Task deleted successfully';
+  String get failedToDeleteTask => _localizedValues[locale.languageCode]?['failedToDeleteTask'] ?? 'Failed to delete task';
+  String get reminderCreatedSuccessfully => _localizedValues[locale.languageCode]?['reminderCreatedSuccessfully'] ?? 'Reminder created successfully';
+  String get failedToCreateReminder => _localizedValues[locale.languageCode]?['failedToCreateReminder'] ?? 'Failed to create reminder';
+  String get selectReminderDate => _localizedValues[locale.languageCode]?['selectReminderDate'] ?? 'Select reminder date and time';
+  String get reminderMessage => _localizedValues[locale.languageCode]?['reminderMessage'] ?? 'Message (optional)';
+  String get enterReminderMessage => _localizedValues[locale.languageCode]?['enterReminderMessage'] ?? 'Enter reminder message';
+  String get title => _localizedValues[locale.languageCode]?['title'] ?? 'Title';
+  String get description => _localizedValues[locale.languageCode]?['description'] ?? 'Description';
+  String get type => _localizedValues[locale.languageCode]?['type'] ?? 'Type';
+  String get dueDate => _localizedValues[locale.languageCode]?['dueDate'] ?? 'Due Date';
+  String get selectDueDate => _localizedValues[locale.languageCode]?['selectDueDate'] ?? 'Select due date';
+  String get createTask => _localizedValues[locale.languageCode]?['createTask'] ?? 'Create Task';
+  String get editTask => _localizedValues[locale.languageCode]?['editTask'] ?? 'Edit Task';
+  String get updateTask => _localizedValues[locale.languageCode]?['updateTask'] ?? 'Update Task';
+  String get enterTaskTitle => _localizedValues[locale.languageCode]?['enterTaskTitle'] ?? 'Enter task title';
+  String get enterTaskDescription => _localizedValues[locale.languageCode]?['enterTaskDescription'] ?? 'Enter task description';
+  String get taskCreatedSuccessfully => _localizedValues[locale.languageCode]?['taskCreatedSuccessfully'] ?? 'Task created successfully';
+  String get taskUpdatedSuccessfully => _localizedValues[locale.languageCode]?['taskUpdatedSuccessfully'] ?? 'Task updated successfully';
+  String get failedToCreateTask => _localizedValues[locale.languageCode]?['failedToCreateTask'] ?? 'Failed to create task';
+  String get failedToUpdateTask => _localizedValues[locale.languageCode]?['failedToUpdateTask'] ?? 'Failed to update task';
+  String get titleIsRequired => _localizedValues[locale.languageCode]?['titleIsRequired'] ?? 'Title is required';
+  String get sent => _localizedValues[locale.languageCode]?['sent'] ?? 'Sent';
 
   // Dashboard
   String get dashboard => _localizedValues[locale.languageCode]?['dashboard'] ?? 'Dashboard';
@@ -268,6 +305,43 @@ class AppLocalizations {
       'visitReportCreatedSuccessfully': 'Visit report created successfully',
       'failedToCreateVisitReport': 'Failed to create visit report',
       'all': 'All',
+      'filterByStatus': 'Filter by Status',
+      'filterByPriority': 'Filter by Priority',
+      'clearFilters': 'Clear filters',
+      'taskDetails': 'Task Details',
+      'taskInformation': 'Task Information',
+      'relatedInformation': 'Related Information',
+      'reminders': 'Reminders',
+      'completeTask': 'Complete Task',
+      'addReminder': 'Add Reminder',
+      'completeTaskConfirmation': 'Are you sure you want to mark this task as completed?',
+      'taskCompletedSuccessfully': 'Task completed successfully',
+      'failedToCompleteTask': 'Failed to complete task',
+      'deleteTask': 'Delete Task',
+      'deleteTaskConfirmation': 'Are you sure you want to delete this task? This action cannot be undone.',
+      'taskDeletedSuccessfully': 'Task deleted successfully',
+      'failedToDeleteTask': 'Failed to delete task',
+      'reminderCreatedSuccessfully': 'Reminder created successfully',
+      'failedToCreateReminder': 'Failed to create reminder',
+      'selectReminderDate': 'Select reminder date and time',
+      'reminderMessage': 'Message (optional)',
+      'enterReminderMessage': 'Enter reminder message',
+      'title': 'Title',
+      'description': 'Description',
+      'type': 'Type',
+      'dueDate': 'Due Date',
+      'selectDueDate': 'Select due date',
+      'createTask': 'Create Task',
+      'editTask': 'Edit Task',
+      'updateTask': 'Update Task',
+      'enterTaskTitle': 'Enter task title',
+      'enterTaskDescription': 'Enter task description',
+      'taskCreatedSuccessfully': 'Task created successfully',
+      'taskUpdatedSuccessfully': 'Task updated successfully',
+      'failedToCreateTask': 'Failed to create task',
+      'failedToUpdateTask': 'Failed to update task',
+      'titleIsRequired': 'Title is required',
+      'sent': 'Sent',
       'dashboard': 'Dashboard',
       'welcomeBack': 'Welcome back,',
       'today': 'Today',
@@ -396,6 +470,41 @@ class AppLocalizations {
       'reports': 'Laporan',
       'tasks': 'Tugas',
       'reportsAndTasks': 'Laporan',
+      'clearFilters': 'Hapus filter',
+      'taskDetails': 'Detail Tugas',
+      'taskInformation': 'Informasi Tugas',
+      'relatedInformation': 'Informasi Terkait',
+      'reminders': 'Pengingat',
+      'completeTask': 'Selesaikan Tugas',
+      'addReminder': 'Tambah Pengingat',
+      'completeTaskConfirmation': 'Apakah Anda yakin ingin menandai tugas ini sebagai selesai?',
+      'taskCompletedSuccessfully': 'Tugas berhasil diselesaikan',
+      'failedToCompleteTask': 'Gagal menyelesaikan tugas',
+      'deleteTask': 'Hapus Tugas',
+      'deleteTaskConfirmation': 'Apakah Anda yakin ingin menghapus tugas ini? Tindakan ini tidak dapat dibatalkan.',
+      'taskDeletedSuccessfully': 'Tugas berhasil dihapus',
+      'failedToDeleteTask': 'Gagal menghapus tugas',
+      'reminderCreatedSuccessfully': 'Pengingat berhasil dibuat',
+      'failedToCreateReminder': 'Gagal membuat pengingat',
+      'selectReminderDate': 'Pilih tanggal dan waktu pengingat',
+      'reminderMessage': 'Pesan (opsional)',
+      'enterReminderMessage': 'Masukkan pesan pengingat',
+      'title': 'Judul',
+      'description': 'Deskripsi',
+      'type': 'Tipe',
+      'dueDate': 'Tanggal Jatuh Tempo',
+      'selectDueDate': 'Pilih tanggal jatuh tempo',
+      'createTask': 'Buat Tugas',
+      'editTask': 'Edit Tugas',
+      'updateTask': 'Perbarui Tugas',
+      'enterTaskTitle': 'Masukkan judul tugas',
+      'enterTaskDescription': 'Masukkan deskripsi tugas',
+      'taskCreatedSuccessfully': 'Tugas berhasil dibuat',
+      'taskUpdatedSuccessfully': 'Tugas berhasil diperbarui',
+      'failedToCreateTask': 'Gagal membuat tugas',
+      'failedToUpdateTask': 'Gagal memperbarui tugas',
+      'titleIsRequired': 'Judul wajib diisi',
+      'sent': 'Terkirim',
       'dashboard': 'Dashboard',
       'welcomeBack': 'Selamat datang kembali,',
       'today': 'Hari Ini',
