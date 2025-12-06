@@ -109,6 +109,50 @@ class AppLocalizations {
   String get approved => _localizedValues[locale.languageCode]?['approved'] ?? 'approved';
   String get total => _localizedValues[locale.languageCode]?['total'] ?? 'Total';
 
+  // Accounts & Contacts
+  String get searchAccounts => _localizedValues[locale.languageCode]?['searchAccounts'] ?? 'Search accounts...';
+  String get searchContacts => _localizedValues[locale.languageCode]?['searchContacts'] ?? 'Search contacts...';
+  String get noAccountsFound => _localizedValues[locale.languageCode]?['noAccountsFound'] ?? 'No accounts found';
+  String get noContactsFound => _localizedValues[locale.languageCode]?['noContactsFound'] ?? 'No contacts found';
+  String get createAccount => _localizedValues[locale.languageCode]?['createAccount'] ?? 'Create Account';
+  String get createContact => _localizedValues[locale.languageCode]?['createContact'] ?? 'Create Contact';
+  String get accountDetails => _localizedValues[locale.languageCode]?['accountDetails'] ?? 'Account Details';
+  String get contactDetails => _localizedValues[locale.languageCode]?['contactDetails'] ?? 'Contact Details';
+  String get name => _localizedValues[locale.languageCode]?['name'] ?? 'Name';
+  String get category => _localizedValues[locale.languageCode]?['category'] ?? 'Category';
+  String get address => _localizedValues[locale.languageCode]?['address'] ?? 'Address';
+  String get city => _localizedValues[locale.languageCode]?['city'] ?? 'City';
+  String get province => _localizedValues[locale.languageCode]?['province'] ?? 'Province';
+  String get phone => _localizedValues[locale.languageCode]?['phone'] ?? 'Phone';
+  String get status => _localizedValues[locale.languageCode]?['status'] ?? 'Status';
+  String get inactive => _localizedValues[locale.languageCode]?['inactive'] ?? 'inactive';
+  String get position => _localizedValues[locale.languageCode]?['position'] ?? 'Position';
+  String get role => _localizedValues[locale.languageCode]?['role'] ?? 'Role';
+  String get notes => _localizedValues[locale.languageCode]?['notes'] ?? 'Notes';
+  String get save => _localizedValues[locale.languageCode]?['save'] ?? 'Save';
+  String get retry => _localizedValues[locale.languageCode]?['retry'] ?? 'Retry';
+  String get viewContacts => _localizedValues[locale.languageCode]?['viewContacts'] ?? 'View Contacts';
+  String get selectCategory => _localizedValues[locale.languageCode]?['selectCategory'] ?? 'Select Category';
+  String get selectAccount => _localizedValues[locale.languageCode]?['selectAccount'] ?? 'Select Account';
+  String get selectRole => _localizedValues[locale.languageCode]?['selectRole'] ?? 'Select Role';
+  String get required => _localizedValues[locale.languageCode]?['required'] ?? 'Required';
+  String get optional => _localizedValues[locale.languageCode]?['optional'] ?? 'Optional';
+  String get edit => _localizedValues[locale.languageCode]?['edit'] ?? 'Edit';
+  String get delete => _localizedValues[locale.languageCode]?['delete'] ?? 'Delete';
+  String get editAccount => _localizedValues[locale.languageCode]?['editAccount'] ?? 'Edit Account';
+  String get deleteAccount => _localizedValues[locale.languageCode]?['deleteAccount'] ?? 'Delete Account';
+  String get deleteConfirmation => _localizedValues[locale.languageCode]?['deleteConfirmation'] ?? 'Are you sure you want to delete this account?';
+  String get accountDeleted => _localizedValues[locale.languageCode]?['accountDeleted'] ?? 'Account deleted successfully';
+  String get accountUpdated => _localizedValues[locale.languageCode]?['accountUpdated'] ?? 'Account updated successfully';
+  String get accountCreatedSuccessfully => _localizedValues[locale.languageCode]?['accountCreatedSuccessfully'] ?? 'Account created successfully';
+  String get editContact => _localizedValues[locale.languageCode]?['editContact'] ?? 'Edit Contact';
+  String get deleteContact => _localizedValues[locale.languageCode]?['deleteContact'] ?? 'Delete Contact';
+  String get deleteContactConfirmation => _localizedValues[locale.languageCode]?['deleteContactConfirmation'] ?? 'Are you sure you want to delete this contact?';
+  String get contactDeleted => _localizedValues[locale.languageCode]?['contactDeleted'] ?? 'Contact deleted successfully';
+  String get contactUpdatedSuccessfully => _localizedValues[locale.languageCode]?['contactUpdatedSuccessfully'] ?? 'Contact updated successfully';
+  String get contactCreatedSuccessfully => _localizedValues[locale.languageCode]?['contactCreatedSuccessfully'] ?? 'Contact created successfully';
+  String get confirm => _localizedValues[locale.languageCode]?['confirm'] ?? 'Confirm';
+
   static final Map<String, Map<String, String>> _localizedValues = {
     'en': {
       'profile': 'Profile',
@@ -195,6 +239,48 @@ class AppLocalizations {
       'pending': 'pending',
       'approved': 'approved',
       'total': 'Total',
+      'searchAccounts': 'Search accounts...',
+      'searchContacts': 'Search contacts...',
+      'noAccountsFound': 'No accounts found',
+      'noContactsFound': 'No contacts found',
+      'createAccount': 'Create Account',
+      'createContact': 'Create Contact',
+      'accountDetails': 'Account Details',
+      'contactDetails': 'Contact Details',
+      'name': 'Name',
+      'category': 'Category',
+      'address': 'Address',
+      'city': 'City',
+      'province': 'Province',
+      'phone': 'Phone',
+      'status': 'Status',
+      'inactive': 'inactive',
+      'position': 'Position',
+      'role': 'Role',
+      'notes': 'Notes',
+      'save': 'Save',
+      'retry': 'Retry',
+      'viewContacts': 'View Contacts',
+      'selectCategory': 'Select Category',
+      'selectAccount': 'Select Account',
+      'selectRole': 'Select Role',
+      'required': 'Required',
+      'optional': 'Optional',
+      'edit': 'Edit',
+      'delete': 'Delete',
+      'editAccount': 'Edit Account',
+      'deleteAccount': 'Delete Account',
+      'deleteConfirmation': 'Are you sure you want to delete this account?',
+      'accountDeleted': 'Account deleted successfully',
+      'accountUpdated': 'Account updated successfully',
+      'accountCreatedSuccessfully': 'Account created successfully',
+      'editContact': 'Edit Contact',
+      'deleteContact': 'Delete Contact',
+      'deleteContactConfirmation': 'Are you sure you want to delete this contact?',
+      'contactDeleted': 'Contact deleted successfully',
+      'contactUpdatedSuccessfully': 'Contact updated successfully',
+      'contactCreatedSuccessfully': 'Contact created successfully',
+      'confirm': 'Confirm',
     },
     'id': {
       'profile': 'Profil',
@@ -281,6 +367,48 @@ class AppLocalizations {
       'pending': 'tertunda',
       'approved': 'disetujui',
       'total': 'Total',
+      'searchAccounts': 'Cari akun...',
+      'searchContacts': 'Cari kontak...',
+      'noAccountsFound': 'Tidak ada akun ditemukan',
+      'noContactsFound': 'Tidak ada kontak ditemukan',
+      'createAccount': 'Buat Akun',
+      'createContact': 'Buat Kontak',
+      'accountDetails': 'Detail Akun',
+      'contactDetails': 'Detail Kontak',
+      'name': 'Nama',
+      'category': 'Kategori',
+      'address': 'Alamat',
+      'city': 'Kota',
+      'province': 'Provinsi',
+      'phone': 'Telepon',
+      'status': 'Status',
+      'inactive': 'tidak aktif',
+      'position': 'Posisi',
+      'role': 'Peran',
+      'notes': 'Catatan',
+      'save': 'Simpan',
+      'retry': 'Coba Lagi',
+      'viewContacts': 'Lihat Kontak',
+      'selectCategory': 'Pilih Kategori',
+      'selectAccount': 'Pilih Akun',
+      'selectRole': 'Pilih Peran',
+      'required': 'Wajib',
+      'optional': 'Opsional',
+      'edit': 'Edit',
+      'delete': 'Hapus',
+      'editAccount': 'Edit Akun',
+      'deleteAccount': 'Hapus Akun',
+      'deleteConfirmation': 'Apakah Anda yakin ingin menghapus akun ini?',
+      'accountDeleted': 'Akun berhasil dihapus',
+      'accountUpdated': 'Akun berhasil diperbarui',
+      'accountCreatedSuccessfully': 'Akun berhasil dibuat',
+      'editContact': 'Edit Kontak',
+      'deleteContact': 'Hapus Kontak',
+      'deleteContactConfirmation': 'Apakah Anda yakin ingin menghapus kontak ini?',
+      'contactDeleted': 'Kontak berhasil dihapus',
+      'contactUpdatedSuccessfully': 'Kontak berhasil diperbarui',
+      'contactCreatedSuccessfully': 'Kontak berhasil dibuat',
+      'confirm': 'Konfirmasi',
     },
   };
 }

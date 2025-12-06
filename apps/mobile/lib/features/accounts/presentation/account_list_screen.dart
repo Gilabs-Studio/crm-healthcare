@@ -5,22 +5,24 @@ import 'dart:async';
 import '../application/account_provider.dart';
 import '../application/account_state.dart';
 import '../../../core/routing/app_router.dart';
+import '../../../core/l10n/app_localizations.dart';
 import 'widgets/account_card.dart';
 
 class AccountListScreen extends ConsumerStatefulWidget {
   const AccountListScreen({
     super.key,
     this.hideAppBar = false,
+    this.searchController,
   });
 
   final bool hideAppBar;
+  final TextEditingController? searchController;
 
   @override
   ConsumerState<AccountListScreen> createState() => _AccountListScreenState();
 }
 
 class _AccountListScreenState extends ConsumerState<AccountListScreen> {
-  final TextEditingController _searchController = TextEditingController();
   Timer? _debounceTimer;
   final ScrollController _scrollController = ScrollController();
 
@@ -36,7 +38,6 @@ class _AccountListScreenState extends ConsumerState<AccountListScreen> {
 
   @override
   void dispose() {
-    _searchController.dispose();
     _debounceTimer?.cancel();
     _scrollController.dispose();
     super.dispose();
@@ -50,15 +51,8 @@ class _AccountListScreenState extends ConsumerState<AccountListScreen> {
   }
 
   void _onSearchChanged(String query) {
-    _debounceTimer?.cancel();
-    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
-      ref.read(accountListProvider.notifier).updateSearchQuery(query);
-      ref.read(accountListProvider.notifier).loadAccounts(
-            page: 1,
-            refresh: true,
-            search: query,
-          );
-    });
+    // Search is handled by parent (AccountsScreen)
+    // This method is kept for compatibility but not used when searchController is provided
   }
 
   Future<void> _onRefresh() async {
@@ -70,38 +64,33 @@ class _AccountListScreenState extends ConsumerState<AccountListScreen> {
     final state = ref.watch(accountListProvider);
     final theme = Theme.of(context);
 
-    final body = Column(
-        children: [
-          // Search Bar
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: TextField(
-              controller: _searchController,
-              onChanged: _onSearchChanged,
-              decoration: InputDecoration(
-                hintText: 'Search accounts...',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          _onSearchChanged('');
-                        },
-                      )
-                    : null,
+    final body = widget.searchController != null
+        ? RefreshIndicator(
+            onRefresh: _onRefresh,
+            child: _buildContent(context, state, theme),
+          )
+        : Column(
+            children: [
+              // Search Bar (only if not provided by parent)
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: TextField(
+                  onChanged: _onSearchChanged,
+                  decoration: const InputDecoration(
+                    hintText: 'Search accounts...',
+                    prefixIcon: Icon(Icons.search),
+                  ),
+                ),
               ),
-            ),
-          ),
-          // Content
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: _onRefresh,
-              child: _buildContent(context, state, theme),
-            ),
-          ),
-        ],
-      );
+              // Content
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: _onRefresh,
+                  child: _buildContent(context, state, theme),
+                ),
+              ),
+            ],
+          );
 
     if (widget.hideAppBar) {
       return body;
@@ -148,7 +137,7 @@ class _AccountListScreenState extends ConsumerState<AccountListScreen> {
               onPressed: () {
                 ref.read(accountListProvider.notifier).refresh();
               },
-              child: const Text('Retry'),
+              child: Text(AppLocalizations.of(context)!.retry),
             ),
           ],
         ),
@@ -167,7 +156,7 @@ class _AccountListScreenState extends ConsumerState<AccountListScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'No accounts found',
+              AppLocalizations.of(context)!.noAccountsFound,
               style: theme.textTheme.titleMedium?.copyWith(
                 color: theme.colorScheme.onSurface.withOpacity(0.6),
               ),

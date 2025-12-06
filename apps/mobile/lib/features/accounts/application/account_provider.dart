@@ -2,11 +2,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_client.dart';
 import '../data/account_repository.dart';
+import '../data/category_repository.dart';
 import '../data/models/account.dart';
 import 'account_state.dart';
 
 final accountRepositoryProvider = Provider<AccountRepository>((ref) {
   return AccountRepository(ApiClient.dio);
+});
+
+final categoryRepositoryProvider = Provider<CategoryRepository>((ref) {
+  return CategoryRepository(ApiClient.dio);
+});
+
+final categoriesProvider = FutureProvider<List<Category>>((ref) async {
+  final repository = ref.read(categoryRepositoryProvider);
+  return repository.getCategories();
 });
 
 final accountListProvider =
@@ -83,6 +93,99 @@ class AccountListNotifier extends StateNotifier<AccountListState> {
 
   void updateSearchQuery(String query) {
     state = state.copyWith(searchQuery: query);
+  }
+
+  Future<Account?> createAccount({
+    required String name,
+    required String categoryId,
+    String? address,
+    String? city,
+    String? province,
+    String? phone,
+    String? email,
+    String? status,
+    String? assignedTo,
+  }) async {
+    try {
+      state = state.copyWith(isLoading: true, errorMessage: null);
+      final account = await _repository.createAccount(
+        name: name,
+        categoryId: categoryId,
+        address: address,
+        city: city,
+        province: province,
+        phone: phone,
+        email: email,
+        status: status ?? 'active',
+        assignedTo: assignedTo,
+      );
+      state = state.copyWith(isLoading: false);
+      // Refresh list
+      await loadAccounts(page: 1, refresh: true);
+      return account;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: e.toString().replaceFirst('Exception: ', ''),
+      );
+      return null;
+    }
+  }
+
+  Future<Account?> updateAccount({
+    required String id,
+    String? name,
+    String? categoryId,
+    String? address,
+    String? city,
+    String? province,
+    String? phone,
+    String? email,
+    String? status,
+    String? assignedTo,
+  }) async {
+    try {
+      state = state.copyWith(isLoading: true, errorMessage: null);
+      final account = await _repository.updateAccount(
+        id: id,
+        name: name,
+        categoryId: categoryId,
+        address: address,
+        city: city,
+        province: province,
+        phone: phone,
+        email: email,
+        status: status,
+        assignedTo: assignedTo,
+      );
+      state = state.copyWith(isLoading: false);
+      // Refresh list and detail
+      await loadAccounts(page: 1, refresh: true);
+      return account;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: e.toString().replaceFirst('Exception: ', ''),
+      );
+      return null;
+    }
+  }
+
+  Future<bool> deleteAccount(String id) async {
+    try {
+      state = state.copyWith(isLoading: true, errorMessage: null);
+      await _repository.deleteAccount(id);
+      state = state.copyWith(isLoading: false);
+      // Refresh list
+      await loadAccounts(page: 1, refresh: true);
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: e.toString().replaceFirst('Exception: ', ''),
+      );
+      return false;
+    }
   }
 }
 

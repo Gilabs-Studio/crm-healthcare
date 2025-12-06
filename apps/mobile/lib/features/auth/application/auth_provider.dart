@@ -107,6 +107,37 @@ class AuthNotifier extends StateNotifier<AuthState> {
     await storage.clearAuthToken();
     state = AuthState.unauthenticated();
   }
+
+  Future<bool> refreshToken() async {
+    try {
+      final storage = await _ref.read(localStorageProvider.future);
+      final refreshToken = storage.getRefreshToken();
+
+      if (refreshToken == null) {
+        return false;
+      }
+
+      final loginResponse = await _repository.refreshToken(refreshToken);
+
+      // Save new tokens to local storage
+      await storage.saveAuthToken(loginResponse.token);
+      await storage.saveRefreshToken(loginResponse.refreshToken);
+
+      // Update state with new user data
+      state = AuthState(
+        status: AuthStatus.authenticated,
+        isLoading: false,
+        errorMessage: null,
+        user: loginResponse.user,
+      );
+
+      return true;
+    } catch (e) {
+      // Refresh token failed, logout user
+      await logout();
+      return false;
+    }
+  }
 }
 
 

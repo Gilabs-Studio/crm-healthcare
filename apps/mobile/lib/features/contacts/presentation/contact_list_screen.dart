@@ -4,20 +4,28 @@ import 'dart:async';
 
 import '../application/contact_provider.dart';
 import '../application/contact_state.dart';
+import '../presentation/contact_form_screen.dart';
 import '../../../core/routing/app_router.dart';
+import '../../../core/l10n/app_localizations.dart';
 import 'widgets/contact_card.dart';
 
 class ContactListScreen extends ConsumerStatefulWidget {
-  const ContactListScreen({super.key, this.accountId});
+  const ContactListScreen({
+    super.key,
+    this.accountId,
+    this.hideAppBar = false,
+    this.searchController,
+  });
 
   final String? accountId;
+  final bool hideAppBar;
+  final TextEditingController? searchController;
 
   @override
   ConsumerState<ContactListScreen> createState() => _ContactListScreenState();
 }
 
 class _ContactListScreenState extends ConsumerState<ContactListScreen> {
-  final TextEditingController _searchController = TextEditingController();
   Timer? _debounceTimer;
   final ScrollController _scrollController = ScrollController();
 
@@ -38,7 +46,6 @@ class _ContactListScreenState extends ConsumerState<ContactListScreen> {
 
   @override
   void dispose() {
-    _searchController.dispose();
     _debounceTimer?.cancel();
     _scrollController.dispose();
     super.dispose();
@@ -52,16 +59,8 @@ class _ContactListScreenState extends ConsumerState<ContactListScreen> {
   }
 
   void _onSearchChanged(String query) {
-    _debounceTimer?.cancel();
-    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
-      ref.read(contactListProvider.notifier).updateSearchQuery(query);
-      ref.read(contactListProvider.notifier).loadContacts(
-            page: 1,
-            refresh: true,
-            search: query,
-            accountId: widget.accountId,
-          );
-    });
+    // Search is handled by parent (AccountsScreen)
+    // This method is kept for compatibility but not used when searchController is provided
   }
 
   Future<void> _onRefresh() async {
@@ -73,43 +72,62 @@ class _ContactListScreenState extends ConsumerState<ContactListScreen> {
     final state = ref.watch(contactListProvider);
     final theme = Theme.of(context);
 
+    final body = widget.searchController != null
+        ? RefreshIndicator(
+            onRefresh: _onRefresh,
+            child: _buildContent(context, state, theme),
+          )
+        : Column(
+            children: [
+              // Search Bar (only if not provided by parent)
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: TextField(
+                  onChanged: _onSearchChanged,
+                  decoration: const InputDecoration(
+                    hintText: 'Search contacts...',
+                    prefixIcon: Icon(Icons.search),
+                  ),
+                ),
+              ),
+              // Content
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: _onRefresh,
+                  child: _buildContent(context, state, theme),
+                ),
+              ),
+            ],
+          );
+
+    if (widget.hideAppBar) {
+      return body;
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.accountId != null ? 'Contacts' : 'All Contacts'),
         elevation: 0,
       ),
-      body: Column(
-        children: [
-          // Search Bar
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: TextField(
-              controller: _searchController,
-              onChanged: _onSearchChanged,
-              decoration: InputDecoration(
-                hintText: 'Search contacts...',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          _onSearchChanged('');
-                        },
-                      )
-                    : null,
-              ),
-            ),
-          ),
-          // Content
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: _onRefresh,
-              child: _buildContent(context, state, theme),
-            ),
-          ),
-        ],
-      ),
+      body: body,
+      floatingActionButton: widget.accountId != null
+          ? FloatingActionButton(
+              onPressed: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ContactFormScreen(
+                      defaultAccountId: widget.accountId,
+                    ),
+                  ),
+                );
+                if (result != null && mounted) {
+                  await ref.read(contactListProvider.notifier).refresh();
+                }
+              },
+              child: const Icon(Icons.add),
+            )
+          : null,
     );
   }
 
@@ -145,7 +163,7 @@ class _ContactListScreenState extends ConsumerState<ContactListScreen> {
               onPressed: () {
                 ref.read(contactListProvider.notifier).refresh();
               },
-              child: const Text('Retry'),
+              child: Text(AppLocalizations.of(context)!.retry),
             ),
           ],
         ),
@@ -164,7 +182,7 @@ class _ContactListScreenState extends ConsumerState<ContactListScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'No contacts found',
+              AppLocalizations.of(context)!.noContactsFound,
               style: theme.textTheme.titleMedium?.copyWith(
                 color: theme.colorScheme.onSurface.withOpacity(0.6),
               ),

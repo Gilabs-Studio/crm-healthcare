@@ -5,9 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/l10n/app_localizations.dart';
 import 'core/l10n/locale_provider.dart';
+import 'core/network/api_client.dart';
 import 'core/routing/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
+import 'features/auth/application/auth_provider.dart';
 
 void main() {
   runApp(
@@ -24,6 +26,18 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
     final locale = ref.watch(localeProvider);
+
+    // Setup API client interceptors
+    ApiClient.setupInterceptors(
+      onRefreshToken: () async {
+        final authNotifier = ref.read(authProvider.notifier);
+        return await authNotifier.refreshToken();
+      },
+      onLogout: () async {
+        final authNotifier = ref.read(authProvider.notifier);
+        await authNotifier.logout();
+      },
+    );
 
     return MaterialApp(
       title: 'CRM Healthcare Mobile',

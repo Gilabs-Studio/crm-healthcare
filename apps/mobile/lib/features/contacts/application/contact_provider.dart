@@ -2,11 +2,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_client.dart';
 import '../data/contact_repository.dart';
+import '../data/role_repository.dart';
 import '../data/models/contact.dart';
 import 'contact_state.dart';
 
 final contactRepositoryProvider = Provider<ContactRepository>((ref) {
   return ContactRepository(ApiClient.dio);
+});
+
+final roleRepositoryProvider = Provider<RoleRepository>((ref) {
+  return RoleRepository(ApiClient.dio);
+});
+
+final rolesProvider = FutureProvider<List<Role>>((ref) async {
+  final repository = ref.read(roleRepositoryProvider);
+  return repository.getRoles();
 });
 
 final contactListProvider =
@@ -91,6 +101,91 @@ class ContactListNotifier extends StateNotifier<ContactListState> {
 
   void setAccountFilter(String? accountId) {
     state = state.copyWith(accountId: accountId);
+  }
+
+  Future<Contact?> createContact({
+    required String accountId,
+    required String name,
+    required String roleId,
+    String? phone,
+    String? email,
+    String? position,
+    String? notes,
+  }) async {
+    try {
+      state = state.copyWith(isLoading: true, errorMessage: null);
+      final contact = await _repository.createContact(
+        accountId: accountId,
+        name: name,
+        roleId: roleId,
+        phone: phone,
+        email: email,
+        position: position,
+        notes: notes,
+      );
+      state = state.copyWith(isLoading: false);
+      // Refresh list
+      await loadContacts(page: 1, refresh: true);
+      return contact;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: e.toString().replaceFirst('Exception: ', ''),
+      );
+      return null;
+    }
+  }
+
+  Future<Contact?> updateContact({
+    required String id,
+    String? accountId,
+    String? name,
+    String? roleId,
+    String? phone,
+    String? email,
+    String? position,
+    String? notes,
+  }) async {
+    try {
+      state = state.copyWith(isLoading: true, errorMessage: null);
+      final contact = await _repository.updateContact(
+        id: id,
+        accountId: accountId,
+        name: name,
+        roleId: roleId,
+        phone: phone,
+        email: email,
+        position: position,
+        notes: notes,
+      );
+      state = state.copyWith(isLoading: false);
+      // Refresh list
+      await loadContacts(page: 1, refresh: true);
+      return contact;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: e.toString().replaceFirst('Exception: ', ''),
+      );
+      return null;
+    }
+  }
+
+  Future<bool> deleteContact(String id) async {
+    try {
+      state = state.copyWith(isLoading: true, errorMessage: null);
+      await _repository.deleteContact(id);
+      state = state.copyWith(isLoading: false);
+      // Refresh list
+      await loadContacts(page: 1, refresh: true);
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: e.toString().replaceFirst('Exception: ', ''),
+      );
+      return false;
+    }
   }
 }
 
