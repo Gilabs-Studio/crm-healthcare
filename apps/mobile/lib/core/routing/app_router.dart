@@ -13,6 +13,7 @@ import '../../features/tasks/presentation/task_list_screen.dart';
 import '../../features/visit_reports/presentation/reports_screen.dart';
 import '../../features/visit_reports/presentation/visit_report_detail_screen.dart';
 import '../../features/visit_reports/presentation/visit_report_form_screen.dart';
+import '../../features/notifications/presentation/notification_list_screen.dart';
 import '../widgets/auth_gate.dart';
 
 class AppRoutes {
@@ -27,6 +28,7 @@ class AppRoutes {
   static const tasks = '/tasks';
   static const tasksCreate = '/tasks/create';
   static const tasksEdit = '/tasks/edit';
+  static const notifications = '/notifications';
   static const profile = '/profile';
 }
 
@@ -61,6 +63,8 @@ class AppRouter {
           final taskId = args is Map ? args['taskId'] as String? : null;
           return AuthGate(child: TaskFormScreen(taskId: taskId));
         },
+        AppRoutes.notifications: (_) =>
+            const AuthGate(child: NotificationListScreen()),
       };
 
   static Route<dynamic>? onGenerateRoute(RouteSettings settings) {

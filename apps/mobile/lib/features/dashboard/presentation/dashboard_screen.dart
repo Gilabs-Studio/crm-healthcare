@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/widgets/main_scaffold.dart';
+import '../../../core/routing/app_router.dart';
+import '../../notifications/application/notification_provider.dart';
+import '../../notifications/presentation/notification_list_screen.dart';
 import '../application/dashboard_provider.dart';
 import 'widgets/activity_trends_widget.dart';
 import 'widgets/deals_overview_widget.dart';
@@ -29,6 +32,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(dashboardProvider.notifier).loadDashboard();
+      ref.read(notificationCountProvider.notifier).loadUnreadCount();
     });
   }
 
@@ -43,10 +47,59 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final l10n = AppLocalizations.of(context)!;
       final dashboardState = ref.watch(dashboardProvider);
 
+    final notificationCountState = ref.watch(notificationCountProvider);
+
     return MainScaffold(
       currentIndex: 0,
       title: l10n.dashboard,
       actions: [
+        // Notification badge
+        Stack(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.notifications_outlined),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const NotificationListScreen(),
+                  ),
+                ).then((_) {
+                  // Refresh unread count when returning
+                  ref.read(notificationCountProvider.notifier).refresh();
+                });
+              },
+            ),
+            if (!notificationCountState.isLoading &&
+                notificationCountState.unreadCount > 0)
+              Positioned(
+                right: 8,
+                top: 8,
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: colorScheme.error,
+                    shape: BoxShape.circle,
+                  ),
+                  constraints: const BoxConstraints(
+                    minWidth: 16,
+                    minHeight: 16,
+                  ),
+                  child: Text(
+                    notificationCountState.unreadCount > 99
+                        ? '99+'
+                        : '${notificationCountState.unreadCount}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onError,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+          ],
+        ),
         // Period selector
         PopupMenuButton<String>(
           icon: const Icon(Icons.calendar_today),

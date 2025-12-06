@@ -22,6 +22,21 @@ class AppLocalizations {
   String get settings => _localizedValues[locale.languageCode]?['settings'] ?? 'Settings';
   String get notifications => _localizedValues[locale.languageCode]?['notifications'] ?? 'Notifications';
   String get manageNotificationSettings => _localizedValues[locale.languageCode]?['manageNotificationSettings'] ?? 'Manage notification settings';
+  String get noNotificationsFound => _localizedValues[locale.languageCode]?['noNotificationsFound'] ?? 'No notifications found';
+  String get markAllAsRead => _localizedValues[locale.languageCode]?['markAllAsRead'] ?? 'Mark All as Read';
+  String get markAsRead => _localizedValues[locale.languageCode]?['markAsRead'] ?? 'Mark as Read';
+  String get filter => _localizedValues[locale.languageCode]?['filter'] ?? 'Filter';
+  String get unread => _localizedValues[locale.languageCode]?['unread'] ?? 'Unread';
+  String get read => _localizedValues[locale.languageCode]?['read'] ?? 'Read';
+  String get filterNotifications => _localizedValues[locale.languageCode]?['filterNotifications'] ?? 'Filter Notifications';
+  String get notificationMarkedAsRead => _localizedValues[locale.languageCode]?['notificationMarkedAsRead'] ?? 'Notification marked as read';
+  String get failedToMarkAsRead => _localizedValues[locale.languageCode]?['failedToMarkAsRead'] ?? 'Failed to mark as read';
+  String get allNotificationsMarkedAsRead => _localizedValues[locale.languageCode]?['allNotificationsMarkedAsRead'] ?? 'All notifications marked as read';
+  String get failedToMarkAllAsRead => _localizedValues[locale.languageCode]?['failedToMarkAllAsRead'] ?? 'Failed to mark all as read';
+  String get deleteNotification => _localizedValues[locale.languageCode]?['deleteNotification'] ?? 'Delete Notification';
+  String get deleteNotificationConfirmation => _localizedValues[locale.languageCode]?['deleteNotificationConfirmation'] ?? 'Are you sure you want to delete this notification?';
+  String get notificationDeleted => _localizedValues[locale.languageCode]?['notificationDeleted'] ?? 'Notification deleted successfully';
+  String get failedToDeleteNotification => _localizedValues[locale.languageCode]?['failedToDeleteNotification'] ?? 'Failed to delete notification';
   String get language => _localizedValues[locale.languageCode]?['language'] ?? 'Language';
   String get theme => _localizedValues[locale.languageCode]?['theme'] ?? 'Theme';
   String get lightTheme => _localizedValues[locale.languageCode]?['lightTheme'] ?? 'Light theme';
@@ -342,6 +357,21 @@ class AppLocalizations {
       'failedToUpdateTask': 'Failed to update task',
       'titleIsRequired': 'Title is required',
       'sent': 'Sent',
+      'noNotificationsFound': 'No notifications found',
+      'markAllAsRead': 'Mark All as Read',
+      'markAsRead': 'Mark as Read',
+      'filter': 'Filter',
+      'unread': 'Unread',
+      'read': 'Read',
+      'filterNotifications': 'Filter Notifications',
+      'notificationMarkedAsRead': 'Notification marked as read',
+      'failedToMarkAsRead': 'Failed to mark as read',
+      'allNotificationsMarkedAsRead': 'All notifications marked as read',
+      'failedToMarkAllAsRead': 'Failed to mark all as read',
+      'deleteNotification': 'Delete Notification',
+      'deleteNotificationConfirmation': 'Are you sure you want to delete this notification?',
+      'notificationDeleted': 'Notification deleted successfully',
+      'failedToDeleteNotification': 'Failed to delete notification',
       'dashboard': 'Dashboard',
       'welcomeBack': 'Welcome back,',
       'today': 'Today',
@@ -505,6 +535,20 @@ class AppLocalizations {
       'failedToUpdateTask': 'Gagal memperbarui tugas',
       'titleIsRequired': 'Judul wajib diisi',
       'sent': 'Terkirim',
+      'markAllAsRead': 'Tandai Semua sebagai Dibaca',
+      'markAsRead': 'Tandai sebagai Dibaca',
+      'filter': 'Filter',
+      'unread': 'Belum Dibaca',
+      'read': 'Dibaca',
+      'filterNotifications': 'Filter Notifikasi',
+      'notificationMarkedAsRead': 'Notifikasi ditandai sebagai dibaca',
+      'failedToMarkAsRead': 'Gagal menandai sebagai dibaca',
+      'allNotificationsMarkedAsRead': 'Semua notifikasi ditandai sebagai dibaca',
+      'failedToMarkAllAsRead': 'Gagal menandai semua sebagai dibaca',
+      'deleteNotification': 'Hapus Notifikasi',
+      'deleteNotificationConfirmation': 'Apakah Anda yakin ingin menghapus notifikasi ini?',
+      'notificationDeleted': 'Notifikasi berhasil dihapus',
+      'failedToDeleteNotification': 'Gagal menghapus notifikasi',
       'dashboard': 'Dashboard',
       'welcomeBack': 'Selamat datang kembali,',
       'today': 'Hari Ini',
