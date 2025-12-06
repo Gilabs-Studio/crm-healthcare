@@ -245,12 +245,16 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: () {
-                        Navigator.pushNamed(
+                      onPressed: () async {
+                        final result = await Navigator.pushNamed(
                           context,
                           AppRoutes.contacts,
                           arguments: {'accountId': account.id},
                         );
+                        // Refresh account detail if contact was deleted
+                        if (result == true && mounted) {
+                          ref.invalidate(accountDetailProvider(widget.accountId));
+                        }
                       },
                       icon: const Icon(Icons.people_outline),
                       label: Text(l10n.viewContacts),

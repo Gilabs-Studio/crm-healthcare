@@ -28,6 +28,7 @@ class ContactListScreen extends ConsumerStatefulWidget {
 class _ContactListScreenState extends ConsumerState<ContactListScreen> {
   Timer? _debounceTimer;
   final ScrollController _scrollController = ScrollController();
+  bool _contactWasDeleted = false;
 
   @override
   void initState() {
@@ -35,10 +36,16 @@ class _ContactListScreenState extends ConsumerState<ContactListScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.accountId != null) {
         ref.read(contactListProvider.notifier).setAccountFilter(widget.accountId);
+        ref.read(contactListProvider.notifier).loadContacts(
+              accountId: widget.accountId,
+            );
+      } else {
+        // Clear account filter to show all contacts
+        ref.read(contactListProvider.notifier).setAccountFilter(null);
+        ref.read(contactListProvider.notifier).loadContacts(
+              accountId: null,
+            );
       }
-      ref.read(contactListProvider.notifier).loadContacts(
-            accountId: widget.accountId,
-          );
     });
 
     _scrollController.addListener(_onScroll);
@@ -104,31 +111,53 @@ class _ContactListScreenState extends ConsumerState<ContactListScreen> {
       return body;
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.accountId != null ? 'Contacts' : 'All Contacts'),
-        elevation: 0,
-      ),
-      body: body,
-      floatingActionButton: widget.accountId != null
-          ? FloatingActionButton(
-              onPressed: () async {
-                final result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ContactFormScreen(
-                      defaultAccountId: widget.accountId,
+    // Wrap with PopScope to handle back navigation when contact is deleted
+    Widget scaffold = Scaffold(
+        appBar: AppBar(
+          title: Text(widget.accountId != null ? 'Contacts' : 'All Contacts'),
+          elevation: 0,
+        ),
+        body: body,
+        floatingActionButton: widget.accountId != null
+            ? FloatingActionButton(
+                onPressed: () async {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ContactFormScreen(
+                        defaultAccountId: widget.accountId,
+                      ),
                     ),
-                  ),
-                );
-                if (result != null && mounted) {
-                  await ref.read(contactListProvider.notifier).refresh();
-                }
-              },
-              child: const Icon(Icons.add),
-            )
-          : null,
+                  );
+                  if (result != null && mounted) {
+                    await ref.read(contactListProvider.notifier).refresh();
+                  }
+                },
+                child: const Icon(Icons.add),
+              )
+            : null,
     );
+
+    // If opened from account detail and contact was deleted, wrap with PopScope
+    if (widget.accountId != null) {
+      return PopScope(
+        canPop: true,
+        onPopInvokedWithResult: (didPop, result) {
+          // If contact was deleted, return true to trigger refresh in parent
+          if (didPop && _contactWasDeleted) {
+            // Use a post-frame callback to ensure navigation is complete
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                Navigator.of(context).pop(true);
+              }
+            });
+          }
+        },
+        child: scaffold,
+      );
+    }
+
+    return scaffold;
   }
 
   Widget _buildContent(
@@ -206,12 +235,17 @@ class _ContactListScreenState extends ConsumerState<ContactListScreen> {
         final contact = state.contacts[index];
         return ContactCard(
           contact: contact,
-          onTap: () {
-            Navigator.pushNamed(
+          onTap: () async {
+            final result = await Navigator.pushNamed(
               context,
               '${AppRoutes.contacts}/${contact.id}',
               arguments: contact.id,
             );
+            // Refresh list if contact was deleted or updated
+            if (result == true && mounted) {
+              _contactWasDeleted = true;
+              await ref.read(contactListProvider.notifier).refresh();
+            }
           },
         );
       },

@@ -44,7 +44,7 @@ class AppRouter {
         AppRoutes.profile: (_) =>
             const AuthGate(child: ProfileScreen()),
         AppRoutes.contacts: (context) {
-          final args = ModalRoute.of(context)!.settings.arguments;
+          final args = ModalRoute.of(context)?.settings.arguments;
           final accountId = args is Map ? args['accountId'] as String? : null;
           return AuthGate(child: ContactListScreen(accountId: accountId));
         },

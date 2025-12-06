@@ -80,7 +80,8 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
               backgroundColor: Colors.green,
             ),
           );
-          Navigator.pop(context);
+          // Pop back and refresh contact list
+          Navigator.pop(context, true); // Pass true to indicate refresh needed
         } else {
           final error = ref.read(contactListProvider).errorMessage;
           ScaffoldMessenger.of(context).showSnackBar(
