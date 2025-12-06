@@ -6,7 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../application/visit_report_provider.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../../core/l10n/app_localizations.dart';
 
 class VisitReportDetailScreen extends ConsumerStatefulWidget {
   const VisitReportDetailScreen({
@@ -112,10 +112,11 @@ class _VisitReportDetailScreenState
     );
 
     if (mounted) {
+      final l10n = AppLocalizations.of(context)!;
       if (result != null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Check-in successful'),
+          SnackBar(
+            content: Text(l10n.checkInSuccessful),
             backgroundColor: Colors.green,
           ),
         );
@@ -125,7 +126,7 @@ class _VisitReportDetailScreenState
         final error = ref.read(visitReportFormProvider).errorMessage;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(error ?? 'Failed to check in'),
+            content: Text(error ?? l10n.failedToCheckIn),
             backgroundColor: Colors.red,
           ),
         );
@@ -145,10 +146,11 @@ class _VisitReportDetailScreenState
     );
 
     if (mounted) {
+      final l10n = AppLocalizations.of(context)!;
       if (result != null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Check-out successful'),
+          SnackBar(
+            content: Text(l10n.checkOutSuccessful),
             backgroundColor: Colors.green,
           ),
         );
@@ -158,7 +160,7 @@ class _VisitReportDetailScreenState
         final error = ref.read(visitReportFormProvider).errorMessage;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(error ?? 'Failed to check out'),
+            content: Text(error ?? l10n.failedToCheckOut),
             backgroundColor: Colors.red,
           ),
         );
@@ -183,10 +185,11 @@ class _VisitReportDetailScreenState
       );
 
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Photo uploaded successfully'),
+            SnackBar(
+              content: Text(l10n.photoUploadedSuccessfully),
               backgroundColor: Colors.green,
             ),
           );
@@ -196,7 +199,7 @@ class _VisitReportDetailScreenState
           final error = ref.read(visitReportFormProvider).errorMessage;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(error ?? 'Failed to upload photo'),
+              content: Text(error ?? l10n.failedToUploadPhoto),
               backgroundColor: Colors.red,
             ),
           );
@@ -221,10 +224,11 @@ class _VisitReportDetailScreenState
     final formState = ref.watch(visitReportFormProvider);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Visit Report Details'),
+        title: Text(l10n.visitReportDetails),
         elevation: 0,
       ),
       body: visitReportAsync.when(
@@ -234,125 +238,160 @@ class _VisitReportDetailScreenState
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header Card
-              Card(
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(
-                    color: AppTheme.borderColor,
-                    width: 1,
-                  ),
+              Container(
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (visitReport.account != null)
-                                  Text(
-                                    visitReport.account!.name,
-                                    style: theme.textTheme.headlineSmall?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: colorScheme.primary,
-                                    ),
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (visitReport.account != null)
+                                Text(
+                                  visitReport.account!.name,
+                                  style: theme.textTheme.headlineSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: colorScheme.onSurface,
                                   ),
-                                if (visitReport.contact != null) ...[
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    visitReport.contact!.name,
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      color: AppTheme.textSecondary,
-                                    ),
+                                ),
+                              if (visitReport.contact != null) ...[
+                                const SizedBox(height: 4),
+                                Text(
+                                  visitReport.contact!.name,
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: colorScheme.onSurface.withOpacity(0.7),
                                   ),
-                                ],
+                                ),
                               ],
-                            ),
+                            ],
                           ),
-                          _StatusBadge(status: visitReport.status),
-                        ],
-                      ),
-                    ],
-                  ),
+                        ),
+                        _StatusBadge(
+                          status: visitReport.status,
+                          theme: theme,
+                          colorScheme: colorScheme,
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 16),
               // Visit Information
-              _SectionTitle(title: 'Visit Information'),
+              _SectionTitle(
+                title: l10n.visitInformation,
+                theme: theme,
+                colorScheme: colorScheme,
+              ),
               const SizedBox(height: 8),
               _InfoCard(
+                theme: theme,
+                colorScheme: colorScheme,
                 children: [
                   _InfoRow(
                     icon: Icons.calendar_today_outlined,
-                    label: 'Visit Date',
+                    label: l10n.visitDate,
                     value: visitReport.visitDate,
+                    theme: theme,
+                    colorScheme: colorScheme,
                   ),
                   if (visitReport.purpose != null)
                     _InfoRow(
                       icon: Icons.description_outlined,
-                      label: 'Purpose',
+                      label: l10n.purpose,
                       value: visitReport.purpose!,
+                      theme: theme,
+                      colorScheme: colorScheme,
                     ),
                   if (visitReport.notes != null && visitReport.notes!.isNotEmpty)
                     _InfoRow(
                       icon: Icons.note_outlined,
-                      label: 'Notes',
+                      label: l10n.notes,
                       value: visitReport.notes!,
+                      theme: theme,
+                      colorScheme: colorScheme,
                     ),
                 ],
               ),
               const SizedBox(height: 16),
               // Check-in/out Information
-              _SectionTitle(title: 'Check-in/out Status'),
+              _SectionTitle(
+                title: l10n.checkInOutStatus,
+                theme: theme,
+                colorScheme: colorScheme,
+              ),
               const SizedBox(height: 8),
               _InfoCard(
+                theme: theme,
+                colorScheme: colorScheme,
                 children: [
                   if (visitReport.checkInTime != null) ...[
                     _InfoRow(
                       icon: Icons.login,
-                      label: 'Check-in Time',
+                      label: l10n.checkInTime,
                       value: visitReport.checkInTime!
                           .toString()
                           .substring(0, 16),
+                      theme: theme,
+                      colorScheme: colorScheme,
                     ),
                     if (visitReport.checkInLocation != null)
                       _InfoRow(
                         icon: Icons.location_on_outlined,
-                        label: 'Check-in Location',
+                        label: l10n.checkInLocation,
                         value:
                             '${visitReport.checkInLocation!.latitude.toStringAsFixed(6)}, ${visitReport.checkInLocation!.longitude.toStringAsFixed(6)}',
+                        theme: theme,
+                        colorScheme: colorScheme,
                       ),
                   ] else
                     _InfoRow(
                       icon: Icons.login,
-                      label: 'Check-in',
-                      value: 'Not checked in',
+                      label: l10n.checkIn,
+                      value: l10n.notCheckedIn,
+                      theme: theme,
+                      colorScheme: colorScheme,
                     ),
                   if (visitReport.checkOutTime != null) ...[
                     _InfoRow(
                       icon: Icons.logout,
-                      label: 'Check-out Time',
+                      label: l10n.checkOutTime,
                       value: visitReport.checkOutTime!
                           .toString()
                           .substring(0, 16),
+                      theme: theme,
+                      colorScheme: colorScheme,
                     ),
                     if (visitReport.checkOutLocation != null)
                       _InfoRow(
                         icon: Icons.location_on_outlined,
-                        label: 'Check-out Location',
+                        label: l10n.checkOutLocation,
                         value:
                             '${visitReport.checkOutLocation!.latitude.toStringAsFixed(6)}, ${visitReport.checkOutLocation!.longitude.toStringAsFixed(6)}',
+                        theme: theme,
+                        colorScheme: colorScheme,
                       ),
                   ] else if (visitReport.checkInTime != null)
                     _InfoRow(
                       icon: Icons.logout,
-                      label: 'Check-out',
-                      value: 'Not checked out',
+                      label: l10n.checkOut,
+                      value: l10n.notCheckedOut,
+                      theme: theme,
+                      colorScheme: colorScheme,
                     ),
                 ],
               ),
@@ -360,7 +399,11 @@ class _VisitReportDetailScreenState
               // Photos
               if (visitReport.photoUrls != null &&
                   visitReport.photoUrls!.isNotEmpty) ...[
-                _SectionTitle(title: 'Photos'),
+                _SectionTitle(
+                  title: l10n.photos,
+                  theme: theme,
+                  colorScheme: colorScheme,
+                ),
                 const SizedBox(height: 8),
                 SizedBox(
                   height: 120,
@@ -372,19 +415,22 @@ class _VisitReportDetailScreenState
                         margin: const EdgeInsets.only(right: 8),
                         width: 120,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: AppTheme.borderColor,
+                            color: colorScheme.outline.withOpacity(0.2),
                           ),
                         ),
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(12),
                           child: Image.network(
                             visitReport.photoUrls![index],
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
-                              return const Center(
-                                child: Icon(Icons.broken_image),
+                              return Center(
+                                child: Icon(
+                                  Icons.broken_image,
+                                  color: colorScheme.onSurface.withOpacity(0.3),
+                                ),
                               );
                             },
                           ),
@@ -402,7 +448,7 @@ class _VisitReportDetailScreenState
                   FilledButton.icon(
                     onPressed: formState.isLoading ? null : _handleCheckIn,
                     icon: formState.isLoading
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 16,
                             height: 16,
                             child: CircularProgressIndicator(
@@ -413,10 +459,13 @@ class _VisitReportDetailScreenState
                             ),
                           )
                         : const Icon(Icons.login),
-                    label: const Text('Check In'),
+                    label: Text(l10n.checkIn),
                     style: FilledButton.styleFrom(
                       minimumSize: const Size(double.infinity, 48),
                       backgroundColor: Colors.green,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                 if (visitReport.checkInTime != null &&
@@ -425,7 +474,7 @@ class _VisitReportDetailScreenState
                   FilledButton.icon(
                     onPressed: formState.isLoading ? null : _handleCheckOut,
                     icon: formState.isLoading
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 16,
                             height: 16,
                             child: CircularProgressIndicator(
@@ -436,10 +485,13 @@ class _VisitReportDetailScreenState
                             ),
                           )
                         : const Icon(Icons.logout),
-                    label: const Text('Check Out'),
+                    label: Text(l10n.checkOut),
                     style: FilledButton.styleFrom(
                       minimumSize: const Size(double.infinity, 48),
                       backgroundColor: Colors.blue,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                 ],
@@ -447,9 +499,12 @@ class _VisitReportDetailScreenState
                 OutlinedButton.icon(
                   onPressed: formState.isLoading ? null : _handleUploadPhoto,
                   icon: const Icon(Icons.camera_alt_outlined),
-                  label: const Text('Upload Photo'),
+                  label: Text(l10n.uploadPhoto),
                   style: OutlinedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
               ],
@@ -479,7 +534,7 @@ class _VisitReportDetailScreenState
                 onPressed: () {
                   ref.invalidate(visitReportDetailProvider(widget.visitReportId));
                 },
-                child: const Text('Retry'),
+                child: Text(l10n.retry),
               ),
             ],
           ),
@@ -490,23 +545,26 @@ class _VisitReportDetailScreenState
 }
 
 class _StatusBadge extends StatelessWidget {
-  const _StatusBadge({required this.status});
+  const _StatusBadge({
+    required this.status,
+    required this.theme,
+    required this.colorScheme,
+  });
 
   final String status;
+  final ThemeData theme;
+  final ColorScheme colorScheme;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
     Color backgroundColor;
     Color textColor;
     String displayText;
 
     switch (status.toLowerCase()) {
       case 'draft':
-        backgroundColor = AppTheme.textSecondary.withOpacity(0.1);
-        textColor = AppTheme.textSecondary;
+        backgroundColor = colorScheme.onSurface.withOpacity(0.1);
+        textColor = colorScheme.onSurface.withOpacity(0.7);
         displayText = 'DRAFT';
         break;
       case 'in_progress':
@@ -525,13 +583,13 @@ class _StatusBadge extends StatelessWidget {
         displayText = 'APPROVED';
         break;
       case 'rejected':
-        backgroundColor = Colors.red.withOpacity(0.1);
-        textColor = Colors.red;
+        backgroundColor = colorScheme.error.withOpacity(0.1);
+        textColor = colorScheme.error;
         displayText = 'REJECTED';
         break;
       default:
-        backgroundColor = AppTheme.textSecondary.withOpacity(0.1);
-        textColor = AppTheme.textSecondary;
+        backgroundColor = colorScheme.onSurface.withOpacity(0.1);
+        textColor = colorScheme.onSurface.withOpacity(0.7);
         displayText = status.toUpperCase();
     }
 
@@ -554,53 +612,66 @@ class _StatusBadge extends StatelessWidget {
 }
 
 class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.title});
+  const _SectionTitle({
+    required this.title,
+    required this.theme,
+    required this.colorScheme,
+  });
 
   final String title;
+  final ThemeData theme;
+  final ColorScheme colorScheme;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Text(
       title,
       style: theme.textTheme.titleMedium?.copyWith(
         fontWeight: FontWeight.w600,
+        color: colorScheme.onSurface,
       ),
     );
   }
 }
 
 class _InfoCard extends StatelessWidget {
-  const _InfoCard({required this.children});
+  const _InfoCard({
+    required this.children,
+    required this.theme,
+    required this.colorScheme,
+  });
 
   final List<Widget> children;
+  final ThemeData theme;
+  final ColorScheme colorScheme;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: AppTheme.borderColor,
-          width: 1,
-        ),
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: children.asMap().entries.map((entry) {
-            final index = entry.key;
-            final child = entry.value;
-            if (index == children.length - 1) {
-              return child;
-            }
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: child,
-            );
-          }).toList(),
-        ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: children.asMap().entries.map((entry) {
+          final index = entry.key;
+          final child = entry.value;
+          if (index == children.length - 1) {
+            return child;
+          }
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: child,
+          );
+        }).toList(),
       ),
     );
   }
@@ -611,22 +682,25 @@ class _InfoRow extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.value,
+    required this.theme,
+    required this.colorScheme,
   });
 
   final IconData icon;
   final String label;
   final String value;
+  final ThemeData theme;
+  final ColorScheme colorScheme;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Icon(
           icon,
           size: 20,
-          color: AppTheme.textSecondary,
+          color: colorScheme.onSurface.withOpacity(0.7),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -636,7 +710,7 @@ class _InfoRow extends StatelessWidget {
               Text(
                 label,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: AppTheme.textSecondary,
+                  color: colorScheme.onSurface.withOpacity(0.7),
                 ),
               ),
               const SizedBox(height: 4),
@@ -644,6 +718,7 @@ class _InfoRow extends StatelessWidget {
                 value,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w500,
+                  color: colorScheme.onSurface,
                 ),
               ),
             ],

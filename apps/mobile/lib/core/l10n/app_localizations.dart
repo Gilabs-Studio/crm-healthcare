@@ -58,6 +58,44 @@ class AppLocalizations {
   String get reports => _localizedValues[locale.languageCode]?['reports'] ?? 'Reports';
   String get tasks => _localizedValues[locale.languageCode]?['tasks'] ?? 'Tasks';
   String get reportsAndTasks => _localizedValues[locale.languageCode]?['reportsAndTasks'] ?? 'Reports';
+  String get searchVisitReports => _localizedValues[locale.languageCode]?['searchVisitReports'] ?? 'Search visit reports...';
+  String get searchTasks => _localizedValues[locale.languageCode]?['searchTasks'] ?? 'Search tasks...';
+  String get noVisitReportsFound => _localizedValues[locale.languageCode]?['noVisitReportsFound'] ?? 'No visit reports found';
+  String get noTasksFound => _localizedValues[locale.languageCode]?['noTasksFound'] ?? 'No tasks found';
+  String get tapToCreateVisitReport => _localizedValues[locale.languageCode]?['tapToCreateVisitReport'] ?? 'Tap + to create a new visit report';
+  String get tapToCreateTask => _localizedValues[locale.languageCode]?['tapToCreateTask'] ?? 'Tap + to create a new task';
+  String get createVisitReport => _localizedValues[locale.languageCode]?['createVisitReport'] ?? 'Create Visit Report';
+  String get visitReports => _localizedValues[locale.languageCode]?['visitReports'] ?? 'Visit Reports';
+  String get visitReportDetails => _localizedValues[locale.languageCode]?['visitReportDetails'] ?? 'Visit Report Details';
+  String get visitInformation => _localizedValues[locale.languageCode]?['visitInformation'] ?? 'Visit Information';
+  String get checkInOutStatus => _localizedValues[locale.languageCode]?['checkInOutStatus'] ?? 'Check-in/out Status';
+  String get visitDate => _localizedValues[locale.languageCode]?['visitDate'] ?? 'Visit Date';
+  String get purpose => _localizedValues[locale.languageCode]?['purpose'] ?? 'Purpose';
+  String get photos => _localizedValues[locale.languageCode]?['photos'] ?? 'Photos';
+  String get checkInTime => _localizedValues[locale.languageCode]?['checkInTime'] ?? 'Check-in Time';
+  String get checkOutTime => _localizedValues[locale.languageCode]?['checkOutTime'] ?? 'Check-out Time';
+  String get checkInLocation => _localizedValues[locale.languageCode]?['checkInLocation'] ?? 'Check-in Location';
+  String get checkOutLocation => _localizedValues[locale.languageCode]?['checkOutLocation'] ?? 'Check-out Location';
+  String get checkIn => _localizedValues[locale.languageCode]?['checkIn'] ?? 'Check In';
+  String get checkOut => _localizedValues[locale.languageCode]?['checkOut'] ?? 'Check Out';
+  String get uploadPhoto => _localizedValues[locale.languageCode]?['uploadPhoto'] ?? 'Upload Photo';
+  String get notCheckedIn => _localizedValues[locale.languageCode]?['notCheckedIn'] ?? 'Not checked in';
+  String get notCheckedOut => _localizedValues[locale.languageCode]?['notCheckedOut'] ?? 'Not checked out';
+  String get checkInSuccessful => _localizedValues[locale.languageCode]?['checkInSuccessful'] ?? 'Check-in successful';
+  String get checkOutSuccessful => _localizedValues[locale.languageCode]?['checkOutSuccessful'] ?? 'Check-out successful';
+  String get photoUploadedSuccessfully => _localizedValues[locale.languageCode]?['photoUploadedSuccessfully'] ?? 'Photo uploaded successfully';
+  String get failedToCheckIn => _localizedValues[locale.languageCode]?['failedToCheckIn'] ?? 'Failed to check in';
+  String get failedToCheckOut => _localizedValues[locale.languageCode]?['failedToCheckOut'] ?? 'Failed to check out';
+  String get failedToUploadPhoto => _localizedValues[locale.languageCode]?['failedToUploadPhoto'] ?? 'Failed to upload photo';
+  String get selectContact => _localizedValues[locale.languageCode]?['selectContact'] ?? 'Select Contact';
+  String get selectContactOptional => _localizedValues[locale.languageCode]?['selectContactOptional'] ?? 'Select contact (optional)';
+  String get selectVisitDate => _localizedValues[locale.languageCode]?['selectVisitDate'] ?? 'Select visit date';
+  String get enterVisitPurpose => _localizedValues[locale.languageCode]?['enterVisitPurpose'] ?? 'Enter visit purpose';
+  String get enterAdditionalNotes => _localizedValues[locale.languageCode]?['enterAdditionalNotes'] ?? 'Enter additional notes';
+  String get pleaseSelectAccount => _localizedValues[locale.languageCode]?['pleaseSelectAccount'] ?? 'Please select an account';
+  String get visitReportCreatedSuccessfully => _localizedValues[locale.languageCode]?['visitReportCreatedSuccessfully'] ?? 'Visit report created successfully';
+  String get failedToCreateVisitReport => _localizedValues[locale.languageCode]?['failedToCreateVisitReport'] ?? 'Failed to create visit report';
+  String get all => _localizedValues[locale.languageCode]?['all'] ?? 'All';
 
   // Dashboard
   String get dashboard => _localizedValues[locale.languageCode]?['dashboard'] ?? 'Dashboard';
@@ -125,6 +163,7 @@ class AppLocalizations {
   String get province => _localizedValues[locale.languageCode]?['province'] ?? 'Province';
   String get phone => _localizedValues[locale.languageCode]?['phone'] ?? 'Phone';
   String get status => _localizedValues[locale.languageCode]?['status'] ?? 'Status';
+  String get priority => _localizedValues[locale.languageCode]?['priority'] ?? 'Priority';
   String get inactive => _localizedValues[locale.languageCode]?['inactive'] ?? 'inactive';
   String get position => _localizedValues[locale.languageCode]?['position'] ?? 'Position';
   String get role => _localizedValues[locale.languageCode]?['role'] ?? 'Role';
@@ -191,6 +230,44 @@ class AppLocalizations {
       'reports': 'Reports',
       'tasks': 'Tasks',
       'reportsAndTasks': 'Reports',
+      'searchVisitReports': 'Search visit reports...',
+      'searchTasks': 'Search tasks...',
+      'noVisitReportsFound': 'No visit reports found',
+      'noTasksFound': 'No tasks found',
+      'tapToCreateVisitReport': 'Tap + to create a new visit report',
+      'tapToCreateTask': 'Tap + to create a new task',
+      'createVisitReport': 'Create Visit Report',
+      'visitReports': 'Visit Reports',
+      'visitReportDetails': 'Visit Report Details',
+      'visitInformation': 'Visit Information',
+      'checkInOutStatus': 'Check-in/out Status',
+      'visitDate': 'Visit Date',
+      'purpose': 'Purpose',
+      'photos': 'Photos',
+      'checkInTime': 'Check-in Time',
+      'checkOutTime': 'Check-out Time',
+      'checkInLocation': 'Check-in Location',
+      'checkOutLocation': 'Check-out Location',
+      'checkIn': 'Check In',
+      'checkOut': 'Check Out',
+      'uploadPhoto': 'Upload Photo',
+      'notCheckedIn': 'Not checked in',
+      'notCheckedOut': 'Not checked out',
+      'checkInSuccessful': 'Check-in successful',
+      'checkOutSuccessful': 'Check-out successful',
+      'photoUploadedSuccessfully': 'Photo uploaded successfully',
+      'failedToCheckIn': 'Failed to check in',
+      'failedToCheckOut': 'Failed to check out',
+      'failedToUploadPhoto': 'Failed to upload photo',
+      'selectContact': 'Select Contact',
+      'selectContactOptional': 'Select contact (optional)',
+      'selectVisitDate': 'Select visit date',
+      'enterVisitPurpose': 'Enter visit purpose',
+      'enterAdditionalNotes': 'Enter additional notes',
+      'pleaseSelectAccount': 'Please select an account',
+      'visitReportCreatedSuccessfully': 'Visit report created successfully',
+      'failedToCreateVisitReport': 'Failed to create visit report',
+      'all': 'All',
       'dashboard': 'Dashboard',
       'welcomeBack': 'Welcome back,',
       'today': 'Today',
@@ -382,6 +459,7 @@ class AppLocalizations {
       'province': 'Provinsi',
       'phone': 'Telepon',
       'status': 'Status',
+      'priority': 'Prioritas',
       'inactive': 'tidak aktif',
       'position': 'Posisi',
       'role': 'Peran',
@@ -409,6 +487,44 @@ class AppLocalizations {
       'contactUpdatedSuccessfully': 'Kontak berhasil diperbarui',
       'contactCreatedSuccessfully': 'Kontak berhasil dibuat',
       'confirm': 'Konfirmasi',
+      'searchVisitReports': 'Cari laporan kunjungan...',
+      'searchTasks': 'Cari tugas...',
+      'noVisitReportsFound': 'Tidak ada laporan kunjungan ditemukan',
+      'noTasksFound': 'Tidak ada tugas ditemukan',
+      'tapToCreateVisitReport': 'Ketuk + untuk membuat laporan kunjungan baru',
+      'tapToCreateTask': 'Ketuk + untuk membuat tugas baru',
+      'createVisitReport': 'Buat Laporan Kunjungan',
+      'visitReports': 'Laporan Kunjungan',
+      'visitReportDetails': 'Detail Laporan Kunjungan',
+      'visitInformation': 'Informasi Kunjungan',
+      'checkInOutStatus': 'Status Check-in/out',
+      'visitDate': 'Tanggal Kunjungan',
+      'purpose': 'Tujuan',
+      'photos': 'Foto',
+      'checkInTime': 'Waktu Check-in',
+      'checkOutTime': 'Waktu Check-out',
+      'checkInLocation': 'Lokasi Check-in',
+      'checkOutLocation': 'Lokasi Check-out',
+      'checkIn': 'Check In',
+      'checkOut': 'Check Out',
+      'uploadPhoto': 'Unggah Foto',
+      'notCheckedIn': 'Belum check in',
+      'notCheckedOut': 'Belum check out',
+      'checkInSuccessful': 'Check-in berhasil',
+      'checkOutSuccessful': 'Check-out berhasil',
+      'photoUploadedSuccessfully': 'Foto berhasil diunggah',
+      'failedToCheckIn': 'Gagal check in',
+      'failedToCheckOut': 'Gagal check out',
+      'failedToUploadPhoto': 'Gagal mengunggah foto',
+      'selectContact': 'Pilih Kontak',
+      'selectContactOptional': 'Pilih kontak (opsional)',
+      'selectVisitDate': 'Pilih tanggal kunjungan',
+      'enterVisitPurpose': 'Masukkan tujuan kunjungan',
+      'enterAdditionalNotes': 'Masukkan catatan tambahan',
+      'pleaseSelectAccount': 'Harap pilih akun',
+      'visitReportCreatedSuccessfully': 'Laporan kunjungan berhasil dibuat',
+      'failedToCreateVisitReport': 'Gagal membuat laporan kunjungan',
+      'all': 'Semua',
     },
   };
 }

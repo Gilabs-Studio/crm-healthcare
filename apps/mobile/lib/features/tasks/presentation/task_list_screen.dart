@@ -6,6 +6,7 @@ import '../application/task_provider.dart';
 import '../application/task_state.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/l10n/app_localizations.dart';
 import 'widgets/task_card.dart';
 
 class TaskListScreen extends ConsumerStatefulWidget {
@@ -71,6 +72,7 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(taskListProvider);
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     final body = Column(
       children: [
@@ -81,7 +83,7 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
             controller: _searchController,
             onChanged: _onSearchChanged,
             decoration: InputDecoration(
-              hintText: 'Search tasks...',
+              hintText: l10n.searchTasks,
               prefixIcon: const Icon(Icons.search),
               suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
@@ -97,7 +99,7 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
                 borderSide: BorderSide.none,
               ),
               filled: true,
-              fillColor: theme.colorScheme.surface,
+              fillColor: theme.colorScheme.surfaceContainerHighest,
             ),
           ),
         ),
@@ -119,7 +121,7 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tasks'),
+        title: Text(l10n.tasks),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
@@ -148,6 +150,7 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
   }
 
   Widget _buildFilters(BuildContext context, TaskListState state) {
+    final l10n = AppLocalizations.of(context)!;
     final hasActiveFilters = state.selectedStatus != null ||
         state.selectedPriority != null;
 
@@ -157,16 +160,16 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
         children: [
           Expanded(
             child: _FilterChip(
-              label: 'Status',
-              value: state.selectedStatus ?? 'All',
+              label: l10n.status,
+              value: state.selectedStatus ?? l10n.all,
               onTap: () => _showStatusFilter(context),
             ),
           ),
           const SizedBox(width: 8),
           Expanded(
             child: _FilterChip(
-              label: 'Priority',
-              value: state.selectedPriority ?? 'All',
+              label: l10n.priority,
+              value: state.selectedPriority ?? l10n.all,
               onTap: () => _showPriorityFilter(context),
             ),
           ),
@@ -216,6 +219,9 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
     TaskListState state,
     ThemeData theme,
   ) {
+    final l10n = AppLocalizations.of(context)!;
+    final colorScheme = theme.colorScheme;
+
     if (state.isLoading && state.tasks.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -225,17 +231,23 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, color: Colors.red, size: 48),
+            Icon(
+              Icons.error_outline,
+              color: colorScheme.error,
+              size: 48,
+            ),
             const SizedBox(height: 16),
             Text(
               state.errorMessage!,
-              style: theme.textTheme.titleMedium?.copyWith(color: Colors.red),
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: colorScheme.error,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
             FilledButton(
               onPressed: () => ref.read(taskListProvider.notifier).refresh(),
-              child: const Text('Retry'),
+              child: Text(l10n.retry),
             ),
           ],
         ),
@@ -247,17 +259,23 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.check_box, size: 64, color: AppTheme.textSecondary),
+            Icon(
+              Icons.check_box,
+              size: 64,
+              color: colorScheme.onSurface.withOpacity(0.3),
+            ),
             const SizedBox(height: 16),
             Text(
-              'No tasks found',
-              style: theme.textTheme.titleMedium,
+              l10n.noTasksFound,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: colorScheme.onSurface.withOpacity(0.6),
+              ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Create a new task to get started',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: AppTheme.textSecondary,
+              l10n.tapToCreateTask,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurface.withOpacity(0.5),
               ),
             ),
           ],

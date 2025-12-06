@@ -5,6 +5,7 @@ import 'dart:async';
 import '../application/visit_report_provider.dart';
 import '../application/visit_report_state.dart';
 import '../../../core/routing/app_router.dart';
+import '../../../core/l10n/app_localizations.dart';
 import 'widgets/visit_report_card.dart';
 
 class VisitReportListScreen extends ConsumerStatefulWidget {
@@ -71,6 +72,7 @@ class _VisitReportListScreenState
   Widget build(BuildContext context) {
     final state = ref.watch(visitReportListProvider);
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     final body = Column(
         children: [
@@ -81,7 +83,7 @@ class _VisitReportListScreenState
               controller: _searchController,
               onChanged: _onSearchChanged,
               decoration: InputDecoration(
-                hintText: 'Search visit reports...',
+                hintText: l10n.searchVisitReports,
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
@@ -92,6 +94,12 @@ class _VisitReportListScreenState
                         },
                       )
                     : null,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor: theme.colorScheme.surfaceContainerHighest,
               ),
             ),
           ),
@@ -111,7 +119,7 @@ class _VisitReportListScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Visit Reports'),
+        title: Text(l10n.visitReports),
         elevation: 0,
         actions: [
           IconButton(
@@ -119,7 +127,7 @@ class _VisitReportListScreenState
             onPressed: () {
               Navigator.pushNamed(context, '${AppRoutes.visitReports}/create');
             },
-            tooltip: 'Create Visit Report',
+            tooltip: l10n.createVisitReport,
           ),
         ],
       ),
@@ -132,6 +140,7 @@ class _VisitReportListScreenState
     VisitReportListState state,
     ThemeData theme,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     if (state.isLoading && state.visitReports.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -159,7 +168,7 @@ class _VisitReportListScreenState
               onPressed: () {
                 ref.read(visitReportListProvider.notifier).refresh();
               },
-              child: const Text('Retry'),
+              child: Text(l10n.retry),
             ),
           ],
         ),
@@ -178,14 +187,14 @@ class _VisitReportListScreenState
             ),
             const SizedBox(height: 16),
             Text(
-              'No visit reports found',
+              l10n.noVisitReportsFound,
               style: theme.textTheme.titleMedium?.copyWith(
                 color: theme.colorScheme.onSurface.withOpacity(0.6),
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Tap + to create a new visit report',
+              l10n.tapToCreateVisitReport,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurface.withOpacity(0.5),
               ),

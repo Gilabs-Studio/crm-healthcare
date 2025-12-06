@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../data/models/visit_report.dart';
-import '../../../../core/theme/app_theme.dart';
 
 class VisitReportCard extends StatelessWidget {
   const VisitReportCard({
@@ -18,22 +17,27 @@ class VisitReportCard extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Card(
+    return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: AppTheme.borderColor,
-          width: 1,
-        ),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header: Account Name & Status
@@ -56,7 +60,7 @@ class VisitReportCard extends StatelessWidget {
                           Text(
                             visitReport.contact!.name,
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: AppTheme.textSecondary,
+                              color: colorScheme.onSurface.withOpacity(0.7),
                             ),
                           ),
                         ],
@@ -70,15 +74,17 @@ class VisitReportCard extends StatelessWidget {
               // Visit Date
               _DetailRow(
                 icon: Icons.calendar_today_outlined,
-                label: 'Visit Date',
-                value: visitReport.visitDate,
+                label: visitReport.visitDate,
+                theme: theme,
+                colorScheme: colorScheme,
               ),
               if (visitReport.purpose != null) ...[
                 const SizedBox(height: 8),
                 _DetailRow(
                   icon: Icons.description_outlined,
-                  label: 'Purpose',
-                  value: visitReport.purpose!,
+                  label: visitReport.purpose!,
+                  theme: theme,
+                  colorScheme: colorScheme,
                 ),
               ],
               // Check-in/out status
@@ -162,13 +168,13 @@ class VisitReportCard extends StatelessWidget {
                     Icon(
                       Icons.photo_outlined,
                       size: 16,
-                      color: AppTheme.textSecondary,
+                      color: colorScheme.onSurface.withOpacity(0.7),
                     ),
                     const SizedBox(width: 8),
                     Text(
                       '${visitReport.photoUrls!.length} photo(s)',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: AppTheme.textSecondary,
+                        color: colorScheme.onSurface.withOpacity(0.7),
                       ),
                     ),
                   ],
@@ -177,6 +183,7 @@ class VisitReportCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
       ),
     );
   }
@@ -198,8 +205,8 @@ class _StatusBadge extends StatelessWidget {
 
     switch (status.toLowerCase()) {
       case 'draft':
-        backgroundColor = AppTheme.textSecondary.withOpacity(0.1);
-        textColor = AppTheme.textSecondary;
+        backgroundColor = colorScheme.onSurface.withOpacity(0.1);
+        textColor = colorScheme.onSurface.withOpacity(0.7);
         displayText = 'DRAFT';
         break;
       case 'in_progress':
@@ -218,13 +225,13 @@ class _StatusBadge extends StatelessWidget {
         displayText = 'APPROVED';
         break;
       case 'rejected':
-        backgroundColor = Colors.red.withOpacity(0.1);
-        textColor = Colors.red;
+        backgroundColor = colorScheme.error.withOpacity(0.1);
+        textColor = colorScheme.error;
         displayText = 'REJECTED';
         break;
       default:
-        backgroundColor = AppTheme.textSecondary.withOpacity(0.1);
-        textColor = AppTheme.textSecondary;
+        backgroundColor = colorScheme.onSurface.withOpacity(0.1);
+        textColor = colorScheme.onSurface.withOpacity(0.7);
         displayText = status.toUpperCase();
     }
 
@@ -250,45 +257,31 @@ class _DetailRow extends StatelessWidget {
   const _DetailRow({
     required this.icon,
     required this.label,
-    required this.value,
+    required this.theme,
+    required this.colorScheme,
   });
 
   final IconData icon;
   final String label;
-  final String value;
+  final ThemeData theme;
+  final ColorScheme colorScheme;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Icon(
           icon,
           size: 16,
-          color: AppTheme.textSecondary,
+          color: colorScheme.onSurface.withOpacity(0.7),
         ),
         const SizedBox(width: 8),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: AppTheme.textSecondary,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                value,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+          child: Text(
+            label,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurface.withOpacity(0.7),
+            ),
           ),
         ),
       ],

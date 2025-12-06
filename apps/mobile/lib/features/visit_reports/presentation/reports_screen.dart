@@ -5,6 +5,8 @@ import '../../../core/l10n/app_localizations.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/widgets/main_scaffold.dart';
 import '../../tasks/presentation/task_list_screen.dart';
+import '../application/visit_report_provider.dart';
+import 'visit_report_form_screen.dart';
 import 'visit_report_list_screen.dart';
 
 class ReportsScreen extends ConsumerStatefulWidget {
@@ -37,50 +39,58 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen>
 
     return MainScaffold(
       currentIndex: 2,
-      title: l10n.reports,
-      actions: [
-        // Show add button only when on Reports tab
-        if (_tabController.index == 0)
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              Navigator.pushNamed(
-                context,
-                '${AppRoutes.visitReports}/create',
-              );
-            },
-            tooltip: 'Create Visit Report',
-          ),
-        // Show add button when on Tasks tab
-        if (_tabController.index == 1)
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              Navigator.pushNamed(
-                context,
-                AppRoutes.tasksCreate,
-              );
-            },
-            tooltip: 'Create Task',
-          ),
-      ],
+      title: null, // Remove title header
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          if (_tabController.index == 0) {
+            // Create Visit Report
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const VisitReportFormScreen(),
+              ),
+            ).then((result) {
+              // Refresh list after creating visit report
+              if (result != null) {
+                ref.read(visitReportListProvider.notifier).refresh();
+              }
+            });
+          } else {
+            // Create Task
+            Navigator.pushNamed(
+              context,
+              AppRoutes.tasksCreate,
+            );
+          }
+        },
+        child: const Icon(Icons.add),
+      ),
       body: Column(
         children: [
-          // Tab Bar
-          Container(
-            color: theme.colorScheme.surface,
-            child: TabBar(
-              controller: _tabController,
-              labelColor: theme.colorScheme.primary,
-              unselectedLabelColor: theme.colorScheme.onSurface.withOpacity(0.7),
-              indicatorColor: theme.colorScheme.primary,
-              onTap: (index) {
-                setState(() {}); // Rebuild to update actions
-              },
-              tabs: [
-                Tab(text: l10n.reports),
-                Tab(text: l10n.tasks),
-              ],
+          // Tab Bar with SafeArea and larger text
+          SafeArea(
+            bottom: false,
+            child: Container(
+              color: theme.colorScheme.surface,
+              padding: const EdgeInsets.only(top: 8),
+              child: TabBar(
+                controller: _tabController,
+                labelColor: theme.colorScheme.primary,
+                unselectedLabelColor: theme.colorScheme.onSurface.withOpacity(0.7),
+                indicatorColor: theme.colorScheme.primary,
+                labelStyle: theme.textTheme.titleMedium?.copyWith(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+                unselectedLabelStyle: theme.textTheme.titleMedium?.copyWith(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                ),
+                tabs: [
+                  Tab(text: l10n.reports),
+                  Tab(text: l10n.tasks),
+                ],
+              ),
             ),
           ),
           // Tab Views

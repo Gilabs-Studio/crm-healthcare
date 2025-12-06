@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../application/visit_report_provider.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../../core/l10n/app_localizations.dart';
 import '../../accounts/application/account_provider.dart';
 import '../../contacts/application/contact_provider.dart';
 
@@ -47,10 +47,11 @@ class _VisitReportFormScreenState
 
   Future<void> _handleSubmit() async {
     if (!_formKey.currentState!.validate()) return;
+    final l10n = AppLocalizations.of(context)!;
     if (_selectedAccountId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select an account'),
+        SnackBar(
+          content: Text(l10n.pleaseSelectAccount),
           backgroundColor: Colors.red,
         ),
       );
@@ -73,8 +74,8 @@ class _VisitReportFormScreenState
     if (mounted) {
       if (visitReport != null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Visit report created successfully'),
+          SnackBar(
+            content: Text(l10n.visitReportCreatedSuccessfully),
             backgroundColor: Colors.green,
           ),
         );
@@ -83,7 +84,7 @@ class _VisitReportFormScreenState
         final error = ref.read(visitReportFormProvider).errorMessage;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(error ?? 'Failed to create visit report'),
+            content: Text(error ?? l10n.failedToCreateVisitReport),
             backgroundColor: Colors.red,
           ),
         );
@@ -93,10 +94,12 @@ class _VisitReportFormScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final formState = ref.watch(visitReportFormProvider);
     final accountListState = ref.watch(accountListProvider);
     final contactListState = ref.watch(contactListProvider);
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     // Load accounts if not loaded
     if (accountListState.accounts.isEmpty && !accountListState.isLoading) {
@@ -118,33 +121,28 @@ class _VisitReportFormScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Visit Report'),
+        title: Text(l10n.createVisitReport),
         elevation: 0,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+      body: SafeArea(
         child: Form(
           key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: ListView(
+            padding: const EdgeInsets.all(16),
             children: [
               // Account Selection
-              Text(
-                'Account *',
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 8),
               DropdownButtonFormField<String>(
-                initialValue: _selectedAccountId,
+                value: _selectedAccountId,
                 decoration: InputDecoration(
-                  hintText: 'Select account',
-                  filled: true,
-                  fillColor: AppTheme.cardBackground,
+                  labelText: '${l10n.selectAccount} *',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: colorScheme.surfaceContainerHighest,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
                   ),
                 ),
                 items: accountListState.accounts.map((account) {
@@ -168,29 +166,25 @@ class _VisitReportFormScreenState
                 },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please select an account';
+                    return '${l10n.selectAccount} ${l10n.required.toLowerCase()}';
                   }
                   return null;
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               // Contact Selection (Optional)
-              Text(
-                'Contact',
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 8),
               DropdownButtonFormField<String>(
-                initialValue: _selectedContactId,
+                value: _selectedContactId,
                 decoration: InputDecoration(
-                  hintText: 'Select contact (optional)',
-                  filled: true,
-                  fillColor: AppTheme.cardBackground,
+                  labelText: l10n.selectContactOptional,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: colorScheme.surfaceContainerHighest,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
                   ),
                 ),
                 items: _selectedAccountId != null
@@ -209,27 +203,27 @@ class _VisitReportFormScreenState
                       }
                     : null,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               // Visit Date
-              Text(
-                'Visit Date *',
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 8),
               InkWell(
                 onTap: _selectDate,
                 child: InputDecorator(
                   decoration: InputDecoration(
-                    hintText: 'Select visit date',
+                    labelText: '${l10n.visitDate} *',
+                    hintText: l10n.selectVisitDate,
                     filled: true,
-                    fillColor: AppTheme.cardBackground,
+                    fillColor: colorScheme.surfaceContainerHighest,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
                     ),
-                    suffixIcon: const Icon(Icons.calendar_today_outlined),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 16,
+                    ),
+                    suffixIcon: Icon(
+                      Icons.calendar_today_outlined,
+                      color: colorScheme.onSurface.withOpacity(0.7),
+                    ),
                   ),
                   child: Text(
                     '${_selectedDate.year}-${_selectedDate.month.toString().padLeft(2, '0')}-${_selectedDate.day.toString().padLeft(2, '0')}',
@@ -237,49 +231,45 @@ class _VisitReportFormScreenState
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               // Purpose
-              Text(
-                'Purpose',
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 8),
               TextFormField(
                 controller: _purposeController,
                 decoration: InputDecoration(
-                  hintText: 'Enter visit purpose',
-                  filled: true,
-                  fillColor: AppTheme.cardBackground,
+                  labelText: l10n.purpose,
+                  hintText: l10n.enterVisitPurpose,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: colorScheme.surfaceContainerHighest,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
                   ),
                 ),
                 maxLines: 3,
+                textInputAction: TextInputAction.next,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               // Notes
-              Text(
-                'Notes',
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 8),
               TextFormField(
                 controller: _notesController,
                 decoration: InputDecoration(
-                  hintText: 'Enter additional notes',
-                  filled: true,
-                  fillColor: AppTheme.cardBackground,
+                  labelText: l10n.notes,
+                  hintText: l10n.enterAdditionalNotes,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: colorScheme.surfaceContainerHighest,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
                   ),
                 ),
                 maxLines: 5,
+                textInputAction: TextInputAction.done,
               ),
               const SizedBox(height: 24),
               // Submit Button
@@ -287,9 +277,12 @@ class _VisitReportFormScreenState
                 onPressed: formState.isSubmitting ? null : _handleSubmit,
                 style: FilledButton.styleFrom(
                   minimumSize: const Size(double.infinity, 48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 child: formState.isSubmitting
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
@@ -299,7 +292,7 @@ class _VisitReportFormScreenState
                           ),
                         ),
                       )
-                    : const Text('Create Visit Report'),
+                    : Text(l10n.createVisitReport),
               ),
             ],
           ),
