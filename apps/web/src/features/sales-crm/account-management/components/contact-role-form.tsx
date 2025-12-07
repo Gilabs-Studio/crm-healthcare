@@ -5,6 +5,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { createContactRoleSchema, updateContactRoleSchema, type CreateContactRoleFormData, type UpdateContactRoleFormData } from "../schemas/contact-role.schema";
 import type { ContactRole } from "../types";
 import { useTranslations } from "next-intl";
@@ -24,6 +31,8 @@ export function ContactRoleForm({ contactRole, onSubmit, onCancel, isLoading = f
   const {
     register,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<CreateContactRoleFormData | UpdateContactRoleFormData>({
     resolver: zodResolver(schema),
@@ -83,33 +92,41 @@ export function ContactRoleForm({ contactRole, onSubmit, onCancel, isLoading = f
 
       <Field>
         <FieldLabel htmlFor="badge_color">{t("badgeColorLabel")}</FieldLabel>
-        <select
-          id="badge_color"
-          {...register("badge_color")}
+        <Select
+          value={watch("badge_color") || "outline"}
+          onValueChange={(value) => setValue("badge_color", value as "default" | "secondary" | "outline" | "success" | "warning" | "active")}
           disabled={isLoading}
-          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <option value="default">{t("badgeColorOptions.default")}</option>
-          <option value="secondary">{t("badgeColorOptions.secondary")}</option>
-          <option value="outline">{t("badgeColorOptions.outline")}</option>
-          <option value="success">{t("badgeColorOptions.success")}</option>
-          <option value="warning">{t("badgeColorOptions.warning")}</option>
-          <option value="active">{t("badgeColorOptions.active")}</option>
-        </select>
+          <SelectTrigger className="h-10">
+            <SelectValue placeholder={t("badgeColorLabel")} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="default">{t("badgeColorOptions.default")}</SelectItem>
+            <SelectItem value="secondary">{t("badgeColorOptions.secondary")}</SelectItem>
+            <SelectItem value="outline">{t("badgeColorOptions.outline")}</SelectItem>
+            <SelectItem value="success">{t("badgeColorOptions.success")}</SelectItem>
+            <SelectItem value="warning">{t("badgeColorOptions.warning")}</SelectItem>
+            <SelectItem value="active">{t("badgeColorOptions.active")}</SelectItem>
+          </SelectContent>
+        </Select>
         {errors.badge_color && <FieldError>{errors.badge_color.message}</FieldError>}
       </Field>
 
       <Field>
         <FieldLabel htmlFor="status">{t("statusLabel")}</FieldLabel>
-        <select
-          id="status"
-          {...register("status")}
+        <Select
+          value={watch("status") || "active"}
+          onValueChange={(value) => setValue("status", value as "active" | "inactive")}
           disabled={isLoading}
-          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <option value="active">{t("statusActive")}</option>
-          <option value="inactive">{t("statusInactive")}</option>
-        </select>
+          <SelectTrigger className="h-10">
+            <SelectValue placeholder={t("statusLabel")} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="active">{t("statusActive")}</SelectItem>
+            <SelectItem value="inactive">{t("statusInactive")}</SelectItem>
+          </SelectContent>
+        </Select>
         {errors.status && <FieldError>{errors.status.message}</FieldError>}
       </Field>
 

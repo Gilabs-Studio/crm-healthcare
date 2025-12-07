@@ -6,6 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { DataTable, type Column } from "@/components/ui/data-table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useContactList } from "../hooks/useContactList";
 import { ContactForm } from "./contact-form";
 import {
@@ -163,31 +170,39 @@ export function ContactList() {
               className="pl-10 h-9"
             />
           </div>
-          <select
-            value={accountId}
-            onChange={(e) => setAccountId(e.target.value)}
-            className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground"
+          <Select
+            value={accountId || "all"}
+            onValueChange={(value) => setAccountId(value === "all" ? "" : value)}
           >
-            <option value="">All Accounts</option>
-            {Array.isArray(accounts) && accounts.length > 0
-              ? accounts.map((account) => (
-                  <option key={account?.id} value={account?.id ?? ""}>
-                    {account?.name ?? "-"}
-                  </option>
-                ))
-              : null}
-          </select>
-          <select
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground"
+            <SelectTrigger className="h-9 w-[160px]">
+              <SelectValue placeholder="All Accounts" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Accounts</SelectItem>
+              {Array.isArray(accounts) && accounts.length > 0
+                ? accounts.map((account) => (
+                    <SelectItem key={account?.id} value={account?.id ?? ""}>
+                      {account?.name ?? "-"}
+                    </SelectItem>
+                  ))
+                : null}
+            </SelectContent>
+          </Select>
+          <Select
+            value={role || "all"}
+            onValueChange={(value) => setRole(value === "all" ? "" : value)}
           >
-            <option value="">All Roles</option>
-            <option value="doctor">Doctor</option>
-            <option value="pic">PIC</option>
-            <option value="manager">Manager</option>
-            <option value="other">Other</option>
-          </select>
+            <SelectTrigger className="h-9 w-[140px]">
+              <SelectValue placeholder="All Roles" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Roles</SelectItem>
+              <SelectItem value="doctor">Doctor</SelectItem>
+              <SelectItem value="pic">PIC</SelectItem>
+              <SelectItem value="manager">Manager</SelectItem>
+              <SelectItem value="other">Other</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <Button onClick={() => setIsCreateDialogOpen(true)} size="sm">
           <Plus className="h-4 w-4 mr-2" />

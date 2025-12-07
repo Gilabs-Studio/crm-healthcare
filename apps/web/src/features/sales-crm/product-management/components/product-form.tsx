@@ -166,7 +166,7 @@ export function ProductForm({ product, onSubmit, onCancel, isLoading }: ProductF
           onValueChange={(value) => setValue("status", value as "active" | "inactive")}
         >
           <SelectTrigger>
-            <SelectValue />
+            <SelectValue placeholder={t("statusLabel")} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="active">{t("statusActive")}</SelectItem>
