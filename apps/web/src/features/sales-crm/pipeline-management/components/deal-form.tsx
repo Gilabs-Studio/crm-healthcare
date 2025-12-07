@@ -12,6 +12,7 @@ import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Select,
   SelectContent,
@@ -72,6 +73,12 @@ export function DealForm({ deal, onSubmit, onCancel, isLoading }: DealFormProps)
           probability: 0,
         },
   });
+
+  // Convert expected_close_date string to Date for DatePicker
+  const expectedCloseDateValue = watch("expected_close_date");
+  const expectedCloseDate = expectedCloseDateValue 
+    ? new Date(expectedCloseDateValue + "T00:00:00")
+    : undefined;
 
   // Load contacts when account is selected
   const accountId = watch("account_id");
@@ -295,7 +302,21 @@ export function DealForm({ deal, onSubmit, onCancel, isLoading }: DealFormProps)
 
       <Field orientation="vertical">
         <FieldLabel>{t("expectedCloseDateLabel")}</FieldLabel>
-        <Input type="date" {...register("expected_close_date")} />
+        <DatePicker
+          date={expectedCloseDate}
+          onDateChange={(date) => {
+            if (date) {
+              // Convert Date to YYYY-MM-DD format
+              const year = date.getFullYear();
+              const month = String(date.getMonth() + 1).padStart(2, "0");
+              const day = String(date.getDate()).padStart(2, "0");
+              setValue("expected_close_date", `${year}-${month}-${day}`);
+            } else {
+              setValue("expected_close_date", "");
+            }
+          }}
+          placeholder={t("expectedCloseDateLabel")}
+        />
         {errors.expected_close_date && <FieldError>{errors.expected_close_date.message}</FieldError>}
       </Field>
 
