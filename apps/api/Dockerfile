@@ -30,6 +30,9 @@ WORKDIR /root/
 # Copy the binary from builder
 COPY --from=builder /app/server .
 
+# Create uploads directory
+RUN mkdir -p /app/uploads && chmod 755 /app/uploads
+
 # Expose port
 EXPOSE 8081
 
