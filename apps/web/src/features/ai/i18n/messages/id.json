@@ -6,6 +6,31 @@
   "aiSettings": {
     "title": "Pengaturan AI",
     "description": "Konfigurasi pengaturan asisten AI dan preferensi privasi data"
+  },
+  "visitReportInsights": {
+    "button": {
+      "getInsights": "Dapatkan Wawasan AI",
+      "analyzing": "Menganalisis..."
+    },
+    "dialog": {
+      "title": "Wawasan AI",
+      "description": "Analisis yang dihasilkan AI untuk laporan kunjungan ini"
+    },
+    "sections": {
+      "summary": "Ringkasan",
+      "sentiment": "Sentimen",
+      "keyPoints": "Poin Utama",
+      "actionItems": "Item Tindakan",
+      "recommendations": "Rekomendasi"
+    },
+    "sentiment": {
+      "positive": "Positif",
+      "neutral": "Netral",
+      "negative": "Negatif"
+    },
+    "empty": {
+      "summary": "Tidak ada ringkasan tersedia"
+    }
   }
 }
 

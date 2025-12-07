@@ -99,9 +99,14 @@ func getEnvAsInt(key string, defaultValue int) int {
 
 func GetDSN() string {
 	db := AppConfig.Database
+	// Ensure sslmode is set, default to disable if empty
+	sslmode := db.SSLMode
+	if sslmode == "" {
+		sslmode = "disable"
+	}
 	return fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-		db.Host, db.Port, db.User, db.Password, db.DBName, db.SSLMode,
+		db.Host, db.Port, db.User, db.Password, db.DBName, sslmode,
 	)
 }
 
