@@ -81,6 +81,20 @@ cp .env.example .env
 - `DB_NAME`: Database name (default: crm_healthcare)
 - `JWT_SECRET`: JWT secret key (min 32 characters)
 
+**Storage Configuration:**
+- `STORAGE_TYPE`: Storage type - `local` (default) or `r2` for Cloudflare R2
+- `STORAGE_UPLOAD_DIR`: Directory for local storage (default: `./uploads`)
+- `STORAGE_BASE_URL`: Base URL for serving files (default: `/uploads`)
+
+**Cloudflare R2 Configuration (if using R2):**
+- `R2_ENDPOINT`: R2 endpoint URL (e.g., `https://<account-id>.r2.cloudflarestorage.com`)
+- `R2_ACCESS_KEY_ID`: R2 Access Key ID
+- `R2_SECRET_ACCESS_KEY`: R2 Secret Access Key
+- `R2_BUCKET`: R2 Bucket name
+- `R2_PUBLIC_URL`: Public URL for R2 bucket (custom domain or r2.dev subdomain)
+
+Untuk detail setup storage, lihat [STORAGE_SETUP.md](./STORAGE_SETUP.md)
+
 ### Database Setup
 
 #### Option 1: Docker Compose (Recommended)

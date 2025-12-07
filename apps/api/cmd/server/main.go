@@ -128,11 +128,33 @@ func main() {
 	visitReportService := visitreportservice.NewService(visitReportRepo, accountRepo, contactRepo, userRepo, activityRepo)
 	dashboardService := dashboardservice.NewService(visitReportRepo, accountRepo, activityRepo, userRepo, dealRepo, taskRepo, pipelineRepo)
 	
-	// Setup file service
-	fileService := fileservice.NewService(
-		config.AppConfig.Storage.UploadDir,
-		config.AppConfig.Storage.BaseURL,
-	)
+	// Setup file service with storage provider
+	var storageProvider fileservice.StorageProvider
+	storageConfig := config.AppConfig.Storage
+	
+	if storageConfig.Type == "r2" {
+		// Initialize R2 storage
+		r2Storage, err := fileservice.NewR2Storage(
+			storageConfig.R2Endpoint,
+			storageConfig.R2AccessKeyID,
+			storageConfig.R2SecretAccessKey,
+			storageConfig.R2Bucket,
+			storageConfig.R2PublicURL,
+			storageConfig.BaseURL,
+		)
+		if err != nil {
+			log.Fatalf("Failed to initialize R2 storage: %v", err)
+		}
+		storageProvider = r2Storage
+	} else {
+		// Initialize local storage (default)
+		storageProvider = fileservice.NewLocalStorage(
+			storageConfig.UploadDir,
+			storageConfig.BaseURL,
+		)
+	}
+	
+	fileService := fileservice.NewService(storageProvider)
 	reportService := reportservice.NewService(visitReportRepo, accountRepo, activityRepo, userRepo, dealRepo)
 	productService := productservice.NewService(productRepo, productCategoryRepo)
 	taskService := taskservice.NewService(taskRepo, reminderRepo, userRepo, accountRepo, contactRepo, dealRepo)
@@ -291,8 +313,10 @@ func setupRouter(
 		})
 	})
 
-	// Serve uploaded files statically
-	router.Static(config.AppConfig.Storage.BaseURL, config.AppConfig.Storage.UploadDir)
+	// Serve uploaded files statically (only for local storage)
+	if config.AppConfig.Storage.Type != "r2" {
+		router.Static(config.AppConfig.Storage.BaseURL, config.AppConfig.Storage.UploadDir)
+	}
 
 	// API v1 routes
 	v1 := router.Group("/api/v1")

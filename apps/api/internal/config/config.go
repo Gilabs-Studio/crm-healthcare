@@ -42,8 +42,15 @@ type CerebrasConfig struct {
 }
 
 type StorageConfig struct {
-	UploadDir string // Directory for uploaded files
+	Type      string // Storage type: "local" or "r2"
+	UploadDir string // Directory for uploaded files (local storage only)
 	BaseURL   string // Base URL for serving files (e.g., /uploads or https://cdn.example.com)
+	// R2 Configuration
+	R2Endpoint       string // R2 endpoint URL (e.g., https://<account-id>.r2.cloudflarestorage.com)
+	R2AccessKeyID    string // R2 Access Key ID
+	R2SecretAccessKey string // R2 Secret Access Key
+	R2Bucket         string // R2 Bucket name
+	R2PublicURL      string // Public URL for R2 bucket (e.g., https://<bucket>.<domain>.com or custom domain)
 }
 
 var AppConfig *Config
@@ -79,8 +86,14 @@ func Load() error {
 			Model:   getEnv("CEREBRAS_MODEL", "llama-3.1-8b"), // Default model
 		},
 		Storage: StorageConfig{
-			UploadDir: getEnv("STORAGE_UPLOAD_DIR", "./uploads"),
-			BaseURL:   getEnv("STORAGE_BASE_URL", "/uploads"),
+			Type:            getEnv("STORAGE_TYPE", "local"), // "local" or "r2"
+			UploadDir:       getEnv("STORAGE_UPLOAD_DIR", "./uploads"),
+			BaseURL:         getEnv("STORAGE_BASE_URL", "/uploads"),
+			R2Endpoint:      getEnv("R2_ENDPOINT", ""),
+			R2AccessKeyID:   getEnv("R2_ACCESS_KEY_ID", ""),
+			R2SecretAccessKey: getEnv("R2_SECRET_ACCESS_KEY", ""),
+			R2Bucket:        getEnv("R2_BUCKET", ""),
+			R2PublicURL:     getEnv("R2_PUBLIC_URL", ""),
 		},
 	}
 
