@@ -221,11 +221,25 @@ h6,
   font-family: var(--font-sans) !important;
 }
 
+/* Base toast - ensure description has same color as title */
+[data-sonner-toast] [data-description],
+[data-sonner-toast] .description {
+  color: var(--card-foreground) !important;
+  opacity: 1 !important;
+}
+
 /* Success toast */
 [data-sonner-toast][data-type="success"] {
   background-color: var(--primary) !important;
   color: var(--primary-foreground) !important;
   border-color: var(--primary) !important;
+}
+
+/* Success toast - ensure description has same color as title */
+[data-sonner-toast][data-type="success"] [data-description],
+[data-sonner-toast][data-type="success"] .description {
+  color: var(--primary-foreground) !important;
+  opacity: 1 !important;
 }
 
 /* Error toast */
@@ -235,11 +249,25 @@ h6,
   border-color: var(--destructive) !important;
 }
 
+/* Error toast - ensure description has same color as title */
+[data-sonner-toast][data-type="error"] [data-description],
+[data-sonner-toast][data-type="error"] .description {
+  color: var(--destructive-foreground) !important;
+  opacity: 1 !important;
+}
+
 /* Info toast */
 [data-sonner-toast][data-type="info"] {
   background-color: var(--accent) !important;
   color: var(--accent-foreground) !important;
   border-color: var(--accent) !important;
+}
+
+/* Info toast - ensure description has same color as title */
+[data-sonner-toast][data-type="info"] [data-description],
+[data-sonner-toast][data-type="info"] .description {
+  color: var(--accent-foreground) !important;
+  opacity: 1 !important;
 }
 
 /* Warning toast */
@@ -253,4 +281,17 @@ h6,
   background-color: oklch(0.65 0.15 80) !important;
   color: oklch(0.95 0.05 80) !important;
   border-color: oklch(0.65 0.15 80) !important;
+}
+
+/* Warning toast - ensure description has same color as title */
+[data-sonner-toast][data-type="warning"] [data-description],
+[data-sonner-toast][data-type="warning"] .description {
+  color: oklch(0.25 0.05 80) !important;
+  opacity: 1 !important;
+}
+
+.dark [data-sonner-toast][data-type="warning"] [data-description],
+.dark [data-sonner-toast][data-type="warning"] .description {
+  color: oklch(0.95 0.05 80) !important;
+  opacity: 1 !important;
 }
