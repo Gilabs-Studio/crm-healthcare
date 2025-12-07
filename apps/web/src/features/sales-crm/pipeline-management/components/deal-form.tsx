@@ -214,7 +214,7 @@ export function DealForm({ deal, onSubmit, onCancel, isLoading }: DealFormProps)
           <SelectContent>
             {accounts.map((account) => (
               <SelectItem key={account.id} value={account.id}>
-                {account.name}
+                {account.name} {account.category && `(${account.category.name})`}
               </SelectItem>
             ))}
           </SelectContent>
