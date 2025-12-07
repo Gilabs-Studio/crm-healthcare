@@ -21,7 +21,12 @@ func CORSMiddleware() gin.HandlerFunc {
 	// Add production origins from environment
 	if envOrigins := os.Getenv("CORS_ALLOWED_ORIGINS"); envOrigins != "" {
 		origins := strings.Split(envOrigins, ",")
-		allowedOrigins = append(allowedOrigins, origins...)
+		for _, origin := range origins {
+			trimmed := strings.TrimSpace(origin)
+			if trimmed != "" {
+				allowedOrigins = append(allowedOrigins, trimmed)
+			}
+		}
 	}
 	
 	config.AllowOrigins = allowedOrigins
