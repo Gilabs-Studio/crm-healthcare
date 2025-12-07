@@ -18,10 +18,12 @@ import { useTranslations } from "next-intl";
 
 interface VisitReportInsightsButtonProps {
   visitReportId: string;
+  iconOnly?: boolean;
 }
 
 export function VisitReportInsightsButton({
   visitReportId,
+  iconOnly = false,
 }: VisitReportInsightsButtonProps) {
   const t = useTranslations("visitReportInsights");
   const [open, setOpen] = useState(false);
@@ -79,18 +81,18 @@ export function VisitReportInsightsButton({
         onClick={handleAnalyze}
         disabled={isPending}
         variant="outline"
-        size="sm"
-        className="gap-2"
+        size={iconOnly ? "icon" : "sm"}
+        className={iconOnly ? "" : "gap-2"}
+        title={iconOnly ? t("button.getInsights") : undefined}
       >
         {isPending ? (
-          <>
-            <Loader2 className="h-4 w-4 animate-spin" />
-            {t("button.analyzing")}
-          </>
+          <Loader2 className="h-4 w-4 animate-spin" />
         ) : (
+          <Sparkles className="h-4 w-4" />
+        )}
+        {!iconOnly && (
           <>
-            <Sparkles className="h-4 w-4" />
-            {t("button.getInsights")}
+            {isPending ? t("button.analyzing") : t("button.getInsights")}
           </>
         )}
       </Button>

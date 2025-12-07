@@ -273,47 +273,47 @@ export function VisitReportDetailModal({
                   </span>
                 </div>
                 <div className="flex gap-2">
-                  <VisitReportInsightsButton visitReportId={visitReport.id} />
+                  <VisitReportInsightsButton visitReportId={visitReport.id} iconOnly />
                   {visitReport.status === "submitted" && (
                     <>
                       <Button
-                        size="sm"
+                        size="icon"
                         variant="outline"
                         onClick={() => setIsRejectDialogOpen(true)}
                         disabled={reject.isPending}
+                        title={t("actions.reject")}
                       >
-                        <XCircle className="h-4 w-4 mr-2" />
-                        {t("actions.reject")}
+                        <XCircle className="h-4 w-4" />
                       </Button>
                       <Button
-                        size="sm"
+                        size="icon"
                         onClick={handleApprove}
                         disabled={approve.isPending}
+                        title={t("actions.approve")}
                       >
-                        <CheckCircle2 className="h-4 w-4 mr-2" />
-                        {t("actions.approve")}
+                        <CheckCircle2 className="h-4 w-4" />
                       </Button>
                     </>
                   )}
                   {visitReport.status === "draft" && !visitReport.check_in_time && (
                     <Button
-                      size="sm"
+                      size="icon"
                       onClick={handleCheckIn}
                       disabled={checkIn.isPending}
+                      title={t("actions.checkIn")}
                     >
-                      <MapPin className="h-4 w-4 mr-2" />
-                      {t("actions.checkIn")}
+                      <MapPin className="h-4 w-4" />
                     </Button>
                   )}
                   {visitReport.check_in_time && !visitReport.check_out_time && (
                     <Button
-                      size="sm"
+                      size="icon"
                       variant="outline"
                       onClick={handleCheckOut}
                       disabled={checkOut.isPending}
+                      title={t("actions.checkOut")}
                     >
-                      <MapPin className="h-4 w-4 mr-2" />
-                      {t("actions.checkOut")}
+                      <MapPin className="h-4 w-4" />
                     </Button>
                   )}
                 </div>
