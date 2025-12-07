@@ -36,7 +36,20 @@ export default async function LocaleLayout({
         >
           <ReactQueryProvider>
             <AppLayout>{children}</AppLayout>
-            <Toaster position="top-right" richColors />
+            <Toaster 
+              position="bottom-right" 
+              offset={8}
+              toastOptions={{
+                className: "toast-notification",
+                classNames: {
+                  toast: "toast-base",
+                  success: "toast-success",
+                  error: "toast-error",
+                  info: "toast-info",
+                  warning: "toast-warning",
+                },
+              }}
+            />
           </ReactQueryProvider>
         </ThemeProvider>
       </ErrorBoundary>
