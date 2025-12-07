@@ -226,16 +226,20 @@ const AppSidebar = memo(function AppSidebar({
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild tooltip="Healthcare CRM">
+            <SidebarMenuButton size="lg" asChild tooltip="Medico CRM">
               <Link href="/dashboard">
                 {state === "collapsed" ? (
                   <div className="flex items-center justify-center w-full">
-                    <span className="text-primary text-xl font-bold">HC</span>
+                    <img 
+                      src="/logo.webp" 
+                      alt="Medico" 
+                      className="h-8 w-8 object-contain"
+                    />
                   </div>
                 ) : (
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate text-primary text-base">
-                      Healthcare
+                      Medico
                     </span>
                     <span className="truncate text-xs text-muted-foreground">
                       CRM Platform
