@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from "axios";
 import { toast } from "sonner";
+import { formatError } from "./i18n/error-messages";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
@@ -90,8 +91,9 @@ apiClient.interceptors.response.use(
     const errorData = error.response.data;
 
     if (!errorData || !errorData.error) {
-      toast.error("An error occurred", {
-        description: "Unexpected error format",
+      const msg = formatError("backend", "invalidFormat");
+      toast.error(msg.title, {
+        description: msg.description,
       });
       return Promise.reject(error);
     }
@@ -103,18 +105,26 @@ apiClient.interceptors.response.use(
 
     // Handle specific error codes
     if (errorCode === "RESOURCE_ALREADY_EXISTS" || errorCode === "CONFLICT") {
-      // Handle duplicate email or other resource conflicts
+      // Handle duplicate email or other resource conflicts - lebih jelas dan awam
       if (errorDetails?.field === "email" && errorDetails?.resource === "user") {
-        toast.error("Email already exists", {
-          description: `The email "${errorDetails.value}" is already registered. Please use a different email.`,
+        const msg = formatError("backend", "emailExists", {
+          email: String(errorDetails.value || ""),
+        });
+        toast.error(msg.title, {
+          description: msg.description,
         });
       } else if (errorDetails?.field && errorDetails?.resource) {
-        toast.error("Resource already exists", {
-          description: `The ${errorDetails.field} "${errorDetails.value}" already exists for this ${errorDetails.resource}.`,
+        const msg = formatError("backend", "resourceExists", {
+          field: errorDetails.field,
+          value: String(errorDetails.value || ""),
+        });
+        toast.error(msg.title, {
+          description: msg.description,
         });
       } else {
-        toast.error("Conflict", {
-          description: errorMessage || "Resource already exists",
+        const msg = formatError("backend", "conflict");
+        toast.error(msg.title, {
+          description: msg.description,
         });
       }
       return Promise.reject(error);
