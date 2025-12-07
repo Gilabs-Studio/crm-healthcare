@@ -138,7 +138,50 @@ Tambahkan ke `.vscode/launch.json`:
 }
 ```
 
+## Internet Permissions
+
+Aplikasi sudah dikonfigurasi dengan permission yang diperlukan untuk akses internet:
+
+### Android
+- ✅ `INTERNET` permission - Diperlukan untuk semua network requests
+- ✅ `ACCESS_NETWORK_STATE` permission - Untuk check network availability
+- ✅ Network Security Config - Mengizinkan HTTPS untuk production API
+
+### iOS
+- ✅ NSAppTransportSecurity - Konfigurasi untuk HTTPS connections
+- ✅ Production API domain (api.gilabs.id) sudah di-whitelist
+
+**Catatan:** Jika aplikasi tidak bisa connect ke production API, pastikan:
+1. Build aplikasi dengan `--dart-define=API_BASE_URL=https://api.gilabs.id`
+2. Pastikan device memiliki koneksi internet aktif
+3. Pastikan tidak ada firewall atau VPN yang memblokir akses
+
 ## Troubleshooting
+
+### Cannot connect to Production API
+
+**Problem:** Error connection timeout atau "Unable to connect to server" saat login ke production API
+
+**Solutions:**
+1. **Pastikan permission internet sudah ada:**
+   - Check `android/app/src/main/AndroidManifest.xml` - harus ada `<uses-permission android:name="android.permission.INTERNET" />`
+   - Check `ios/Runner/Info.plist` - harus ada `NSAppTransportSecurity` config
+
+2. **Pastikan build dengan production URL:**
+   ```bash
+   flutter build apk --release --dart-define=API_BASE_URL=https://api.gilabs.id
+   ```
+
+3. **Test koneksi manual:**
+   - Buka browser di device dan test: `https://api.gilabs.id/api/v1/health`
+   - Jika tidak bisa, kemungkinan masalah network/firewall
+
+4. **Check network security config (Android):**
+   - File `android/app/src/main/res/xml/network_security_config.xml` harus ada
+   - Pastikan domain `api.gilabs.id` sudah dikonfigurasi
+
+5. **Check iOS App Transport Security:**
+   - Pastikan `Info.plist` memiliki `NSAppTransportSecurity` dengan domain `api.gilabs.id`
 
 ### Cannot connect to API dari Android emulator
 

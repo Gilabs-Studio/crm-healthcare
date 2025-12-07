@@ -46,7 +46,7 @@ class MyApp extends ConsumerWidget {
     );
 
     return MaterialApp(
-      title: 'CRM Healthcare Mobile',
+      title: 'Medico',
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: themeMode,
