@@ -10,6 +10,7 @@ import {
 } from "../schemas/deal.schema";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -277,12 +278,12 @@ export function DealForm({ deal, onSubmit, onCancel, isLoading }: DealFormProps)
       <div className="grid grid-cols-2 gap-4">
         <Field orientation="vertical">
           <FieldLabel>{t("valueRequired")}</FieldLabel>
-          <Input
-            type="number"
-            {...register("value", { valueAsNumber: true })}
+          <NumberInput
+            value={watch("value")}
+            onChange={(value) => setValue("value", value ?? 0, { shouldValidate: true })}
             placeholder={t("valuePlaceholder")}
-            min={0}
-            step="0.01"
+            allowDecimal
+            decimalPlaces={2}
           />
           {errors.value && <FieldError>{errors.value.message}</FieldError>}
         </Field>
