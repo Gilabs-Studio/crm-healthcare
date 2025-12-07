@@ -27,7 +27,7 @@ import { ContactDetailModal } from "@/features/sales-crm/account-management/comp
 import { TaskDetailModal } from "@/features/sales-crm/task-management/components/task-detail-modal";
 import { VisitReportDetailModal } from "@/features/sales-crm/visit-report/components/visit-report-detail-modal";
 import { DealDetailModal } from "@/features/sales-crm/pipeline-management/components/deal-detail-modal";
-import { chatTemplates, templateCategories, getTemplatesByCategory, type ChatTemplate } from "../data/chat-templates";
+import { templateCategories, getTemplatesByCategory, type ChatTemplate } from "../data/chat-templates";
 
 interface Message {
   id: string;
@@ -476,110 +476,35 @@ export function Chatbot() {
   }
 
   return (
-    <div className="flex flex-col h-full w-full bg-background relative min-h-0 overflow-hidden">
-      {/* Top Bar - Fixed at top */}
-      <div className="sticky top-0 z-10 border-b border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 shrink-0">
-        <div className="flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => {
-                setMessages([{
-                  id: "initial-greeting",
-                  role: "assistant",
-                  content: "Hello! How can I help you today?",
-                  timestamp: new Date(),
-                }]);
-                setInput("");
-              }}
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
-            <div className="h-6 w-px bg-border" />
-            <Select
-              value={selectedModel || settings.model || ""}
-              onValueChange={setUserSelectedModel}
-              disabled={isPending}
-            >
-              <SelectTrigger className="h-8 border-0 bg-transparent hover:bg-muted/50 px-2 text-sm font-medium">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="llama-3.1-8b">Llama 3.1 8B</SelectItem>
-                <SelectItem value="llama-3.1-70b">Llama 3.1 70B</SelectItem>
-                <SelectItem value="llama-3-8b">Llama 3 8B</SelectItem>
-                <SelectItem value="llama-3-70b">Llama 3 70B</SelectItem>
-                <SelectItem value="gpt-4">GPT-4</SelectItem>
-                <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex items-center gap-1">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-48 p-1" align="end">
-                <div className="flex flex-col">
-                  <button
-                    onClick={handleCopyChat}
-                    className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors text-left"
-                  >
-                    {copied ? (
-                      <>
-                        <Check className="h-4 w-4 text-green-500" />
-                        Copied!
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="h-4 w-4" />
-                        Copy conversation
-                      </>
-                    )}
-                  </button>
-                  <button className="flex items-center gap-2 px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors text-left">
-                    <Settings className="h-4 w-4" />
-                    Settings
-                  </button>
-                </div>
-              </PopoverContent>
-            </Popover>
-          </div>
-        </div>
-      </div>
-
-      {/* Messages Area - Scrollable with proper spacing */}
+    <div className="flex flex-col h-full w-full bg-background relative min-h-0">
+      {/* Messages Area - Full height with bottom padding for fixed input */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto w-full overscroll-contain"
+        className="flex-1 overflow-y-auto w-full overscroll-contain pb-52"
         style={{ 
-          scrollBehavior: 'smooth',
-          paddingBottom: '1rem'
+          scrollBehavior: 'smooth'
         }}
       >
         {messages.length === 1 && messages[0].id === "initial-greeting" ? (
-          // Empty state - centered welcome message with templates
-          <div className="flex flex-col items-center justify-center min-h-full px-4 py-12">
-            <div className="max-w-4xl w-full space-y-8">
-              <div className="text-center space-y-3">
-                <h1 className="text-4xl font-semibold bg-linear-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+          // Empty state - Modern minimalist welcome
+          <div className="flex flex-col items-center justify-center min-h-full px-6 py-16">
+            <div className="max-w-4xl w-full space-y-10">
+              {/* Welcome Message */}
+              <div className="text-center space-y-4">
+                <h1 className="text-4xl font-semibold text-foreground tracking-tight">
                   AI Assistant
                 </h1>
-                <p className="text-muted-foreground text-lg">
-                  Chat with AI assistant to get insights and answers about your CRM data
+                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                  Ask questions, get insights, and explore your CRM data
                 </p>
               </div>
 
               {/* Template Selector */}
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold">Quick Start Templates</h2>
+                  <h2 className="text-base font-medium text-foreground">Quick Templates</h2>
                   <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                    <SelectTrigger className="w-[200px]">
+                    <SelectTrigger className="w-[180px] border-border/50 rounded-lg">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -593,28 +518,28 @@ export function Chatbot() {
                 </div>
 
                 {/* Template Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[400px] overflow-y-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[450px] overflow-y-auto pr-2 scrollbar-thin">
                   {filteredTemplates.map((template) => (
                     <button
                       key={template.id}
                       onClick={() => handleSelectTemplate(template)}
-                      className="text-left p-4 rounded-lg border border-border bg-card hover:bg-muted/50 hover:border-primary/50 transition-all group"
+                      className="group relative text-left p-5 rounded-xl border border-border bg-card hover:bg-accent/5 hover:border-primary/40 hover:shadow-sm transition-all duration-200"
                     >
-                      <div className="space-y-2">
-                        <div className="flex items-start justify-between gap-2">
-                          <h3 className="font-medium text-sm group-hover:text-primary transition-colors">
+                      <div className="space-y-3">
+                        <div className="flex items-start justify-between gap-3">
+                          <h3 className="font-medium text-sm text-foreground group-hover:text-primary transition-colors line-clamp-1">
                             {template.name}
                           </h3>
-                          <span className="text-xs text-muted-foreground px-2 py-0.5 rounded bg-muted/50 shrink-0">
+                          <span className="text-xs text-muted-foreground px-2 py-1 rounded-md bg-muted/70 shrink-0">
                             {template.category}
                           </span>
                         </div>
                         {template.description && (
-                          <p className="text-xs text-muted-foreground line-clamp-2">
+                          <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
                             {template.description}
                           </p>
                         )}
-                        <p className="text-xs text-foreground/80 font-mono bg-muted/30 p-2 rounded line-clamp-2 mt-2">
+                        <p className="text-xs text-muted-foreground/90 font-mono bg-muted/40 px-3 py-2 rounded-lg line-clamp-2 leading-relaxed">
                           {template.content}
                         </p>
                       </div>
@@ -623,35 +548,35 @@ export function Chatbot() {
                 </div>
 
                 {filteredTemplates.length === 0 && (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <p>No templates found in this category.</p>
+                  <div className="text-center py-12 text-muted-foreground">
+                    <p className="text-sm">No templates found in this category.</p>
                   </div>
                 )}
               </div>
             </div>
           </div>
         ) : (
-          // Messages list
+          // Messages list - Clean modern layout with proper bottom spacing
           <div className="flex flex-col w-full">
             {messages.map((message) => (
               <div
                 key={message.id}
-                className={`group w-full transition-colors ${
-                  message.role === "user" ? "bg-muted/20" : "bg-background"
+                className={`group w-full ${
+                  message.role === "user" ? "bg-muted/10" : "bg-background"
                 }`}
               >
-                <div className="flex gap-4 px-4 py-6 max-w-3xl mx-auto">
+                <div className="flex gap-5 px-6 py-8 max-w-4xl mx-auto">
                   {/* Avatar/Icon */}
-                  <div className="shrink-0 w-8 h-8 mt-1">
+                  <div className="shrink-0 w-9 h-9 mt-0.5">
                     {message.role === "user" && userAvatarUrl && (
-                      <Avatar className="w-8 h-8">
+                      <Avatar className="w-9 h-9 ring-2 ring-border">
                         <AvatarImage src={userAvatarUrl} alt={user?.name || "User"} />
                       </Avatar>
                     )}
                     {message.role === "assistant" && (
-                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                      <div className="w-9 h-9 rounded-full bg-linear-to-br from-primary/20 to-primary/5 flex items-center justify-center ring-2 ring-primary/10">
                         <svg
-                          className="w-5 h-5 text-foreground"
+                          className="w-5 h-5 text-primary"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -668,33 +593,27 @@ export function Chatbot() {
                   </div>
                   
                   {/* Message Content */}
-                  <div className="flex-1 min-w-0 wrap-break-word">
+                  <div className="flex-1 min-w-0">
                     {message.role === "assistant" ? (
-                      <div className="markdown-content prose prose-sm dark:prose-invert max-w-none prose-headings:mt-4 prose-headings:mb-2 prose-p:my-2">
+                      <div className="markdown-content prose prose-sm dark:prose-invert max-w-none prose-headings:mt-5 prose-headings:mb-3 prose-p:my-3 prose-p:leading-relaxed">
                         {(() => {
-                          // Extract custom links from markdown before rendering
                           const customLinks = extractCustomLinks(message.content);
                           
-                          // Create markdownComponents with access to customLinks
                           const componentsWithLinks: Components = {
                             ...markdownComponents,
                             a: ({ children, href, node, ...props }) => {
-                              // Get link text from children
                               const linkText = typeof children === 'string' 
                                 ? children 
                                 : Array.isArray(children) 
                                   ? children.map(c => typeof c === 'string' ? c : '').join('')
                                   : '';
                               
-                              // Check if this link text exists in our custom links map
                               const customHref = customLinks.get(linkText);
                               const actualHref = customHref || href || (node as { properties?: { href?: string } })?.properties?.href || "";
                               
-                              // Match custom link format: type://uuid (UUID with hyphens)
                               const customLinkRegex = /^\w+:\/\/[a-f0-9-]+$/i;
                               const isCustomLink = actualHref ? customLinkRegex.test(actualHref) : false;
                               
-                              // For custom links, use button styled as link
                               if (isCustomLink && actualHref) {
                                 return (
                                   <button
@@ -717,7 +636,6 @@ export function Chatbot() {
                                 );
                               }
                               
-                              // Regular links
                               return (
                                 <a 
                                   href={actualHref || "#"} 
@@ -754,7 +672,7 @@ export function Chatbot() {
                         })()}
                       </div>
                     ) : (
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap wrap-break-word">
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap text-foreground">
                         {message.content}
                       </p>
                     )}
@@ -763,11 +681,11 @@ export function Chatbot() {
               </div>
             ))}
             {isPending && (
-              <div className="group w-full bg-background animate-pulse">
-                <div className="flex gap-4 px-4 py-6 max-w-3xl mx-auto">
-                  <div className="shrink-0 w-8 h-8 rounded-full bg-muted flex items-center justify-center mt-1">
+              <div className="group w-full bg-background">
+                <div className="flex gap-5 px-6 py-8 max-w-4xl mx-auto">
+                  <div className="shrink-0 w-9 h-9 rounded-full bg-linear-to-br from-primary/20 to-primary/5 flex items-center justify-center ring-2 ring-primary/10 mt-0.5">
                     <svg
-                      className="w-5 h-5 text-foreground"
+                      className="w-5 h-5 text-primary"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -780,9 +698,9 @@ export function Chatbot() {
                       />
                     </svg>
                   </div>
-                  <div className="flex-1 flex items-center gap-2">
+                  <div className="flex-1 flex items-center gap-3">
                     <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                    <span className="text-sm text-muted-foreground">AI is thinking...</span>
+                    <span className="text-sm text-muted-foreground">Thinking...</span>
                   </div>
                 </div>
               </div>
@@ -791,18 +709,89 @@ export function Chatbot() {
         )}
       </div>
 
-      {/* Input Area - Fixed at bottom, always visible */}
-      <div className="sticky bottom-0 z-10 border-t border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 shrink-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] dark:shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.3)]">
-        <div className="max-w-3xl mx-auto px-4 py-4">
-          <div className="relative flex items-center gap-2">
-            <div className="flex-1 relative">
+      {/* Input Area - Fixed at bottom with integrated controls like ChatGPT */}
+      <div className="fixed bottom-0 left-0 right-0 z-20">
+        <div className="max-w-4xl mx-auto px-6 py-5">
+          {/* Model Selector & Actions - Above textarea */}
+          <div className="flex items-center justify-between mb-3 px-1">
+            <Select
+              value={selectedModel || settings.model || ""}
+              onValueChange={setUserSelectedModel}
+              disabled={isPending}
+            >
+              <SelectTrigger className="h-8 w-auto border-0 bg-transparent hover:bg-muted/50 px-2 py-0 text-xs font-medium rounded-lg gap-1.5">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent align="start">
+                <SelectItem value="llama-3.1-8b">Llama 3.1 8B</SelectItem>
+                <SelectItem value="llama-3.1-70b">Llama 3.1 70B</SelectItem>
+                <SelectItem value="llama-3-8b">Llama 3 8B</SelectItem>
+                <SelectItem value="llama-3-70b">Llama 3 70B</SelectItem>
+                <SelectItem value="gpt-4">GPT-4</SelectItem>
+                <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <div className="flex items-center gap-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-muted/60">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-52 p-2" align="end">
+                  <div className="flex flex-col gap-1">
+                    <button
+                      onClick={() => {
+                        setMessages([{
+                          id: "initial-greeting",
+                          role: "assistant",
+                          content: "Hello! How can I help you today?",
+                          timestamp: new Date(),
+                        }]);
+                        setInput("");
+                      }}
+                      className="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors text-left"
+                    >
+                      <Plus className="h-4 w-4" />
+                      <span>New conversation</span>
+                    </button>
+                    <button
+                      onClick={handleCopyChat}
+                      className="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors text-left"
+                    >
+                      {copied ? (
+                        <>
+                          <Check className="h-4 w-4 text-primary" />
+                          <span>Copied!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-4 w-4" />
+                          <span>Copy conversation</span>
+                        </>
+                      )}
+                    </button>
+                    <button className="flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg hover:bg-muted transition-colors text-left">
+                      <Settings className="h-4 w-4" />
+                      <span>Settings</span>
+                    </button>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+
+          {/* Textarea & Send Button */}
+          <div className="relative flex items-end gap-3">
+            <div className="flex-1 relative min-w-0">
               <textarea
                 ref={inputRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Ask anything..."
-                className="w-full resize-none rounded-2xl border border-border bg-background px-4 py-3 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 disabled:opacity-50 disabled:cursor-not-allowed min-h-[52px] max-h-[200px] leading-relaxed shadow-sm"
+                className="w-full resize-none rounded-2xl border border-border bg-card px-5 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed min-h-14 max-h-40 leading-relaxed placeholder:text-muted-foreground/60 transition-all shadow-lg"
                 disabled={isPending || !settings.enabled}
                 rows={1}
               />
@@ -811,18 +800,15 @@ export function Chatbot() {
               onClick={handleSend}
               disabled={!input.trim() || isPending || !settings.enabled}
               size="icon"
-              className="h-[52px] w-[52px] rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-105 active:scale-95 shrink-0 shadow-md"
+              className="h-14 w-14 rounded-2xl bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-[1.02] active:scale-95 shrink-0 shadow-lg"
             >
               {isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-5 w-5 animate-spin" />
               ) : (
-                <Send className="h-4 w-4" />
+                <Send className="h-5 w-5" />
               )}
             </Button>
           </div>
-          <p className="text-xs text-muted-foreground text-center mt-2.5 px-4">
-            AI Assistant can make mistakes. Check important info.
-          </p>
         </div>
       </div>
 
