@@ -1353,9 +1353,10 @@ func (s *Service) parseVisitReportInsight(text string) (*ai.VisitReportInsight, 
 	// Extract JSON portion
 	jsonStr := cleaned[jsonStart : jsonEnd+1]
 	
-	// Clean up any remaining comment markers inside the JSON string
-	jsonStr = strings.ReplaceAll(jsonStr, "*/", "")
-	jsonStr = strings.ReplaceAll(jsonStr, "/*", "")
+	// Note: We don't remove comment markers from inside the JSON string
+	// because they might be valid parts of JSON string values (e.g., URLs).
+	// Comment markers should only appear outside the JSON boundaries, which
+	// we've already handled by extracting the JSON portion.
 	jsonStr = strings.TrimSpace(jsonStr)
 
 	// Try to parse as JSON

@@ -306,10 +306,11 @@ export function DealForm({ deal, onSubmit, onCancel, isLoading }: DealFormProps)
           date={expectedCloseDate}
           onDateChange={(date) => {
             if (date) {
-              // Convert Date to YYYY-MM-DD format
-              const year = date.getFullYear();
-              const month = String(date.getMonth() + 1).padStart(2, "0");
-              const day = String(date.getDate()).padStart(2, "0");
+              // Convert Date to YYYY-MM-DD format using UTC methods
+              // to avoid timezone issues when the date represents a UTC date
+              const year = date.getUTCFullYear();
+              const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+              const day = String(date.getUTCDate()).padStart(2, "0");
               setValue("expected_close_date", `${year}-${month}-${day}`);
             } else {
               setValue("expected_close_date", "");

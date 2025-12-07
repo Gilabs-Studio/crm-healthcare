@@ -1,8 +1,7 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-export interface InputProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {}
+export type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, onFocus, onKeyDown, ...props }, ref) => {
@@ -17,49 +16,75 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
     // Prevent non-numeric input for number type
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (type === "number") {
-        // Allow: backspace, delete, tab, escape, enter, decimal point, and navigation keys
-        const allowedKeys = [
-          "Backspace",
-          "Delete",
-          "Tab",
-          "Escape",
-          "Enter",
-          ".",
-          "ArrowLeft",
-          "ArrowRight",
-          "ArrowUp",
-          "ArrowDown",
-          "Home",
-          "End",
-        ];
-        
-        // Allow Ctrl/Cmd + A, C, V, X, Z
-        if (e.ctrlKey || e.metaKey) {
-          const allowedCtrlKeys = ["a", "c", "v", "x", "z"];
-          if (allowedCtrlKeys.includes(e.key.toLowerCase())) {
-            onKeyDown?.(e);
-            return;
-          }
-        }
-
-        // Allow minus sign only if it's at the start (for negative numbers)
-        if (e.key === "-" && (e.currentTarget.selectionStart === 0 || e.currentTarget.value === "")) {
-          onKeyDown?.(e);
-          return;
-        }
-
-        // Allow numbers and decimal point
-        if (allowedKeys.includes(e.key) || /^[0-9]$/.test(e.key)) {
-          onKeyDown?.(e);
-          return;
-        }
-
-        // Prevent all other keys
-        e.preventDefault();
+      if (type !== "number") {
+        onKeyDown?.(e);
         return;
       }
-      onKeyDown?.(e);
+
+      // Allow: backspace, delete, tab, escape, enter, and navigation keys
+      const allowedKeys = new Set([
+        "Backspace",
+        "Delete",
+        "Tab",
+        "Escape",
+        "Enter",
+        "ArrowLeft",
+        "ArrowRight",
+        "ArrowUp",
+        "ArrowDown",
+        "Home",
+        "End",
+      ]);
+
+      // Helper: Check if Ctrl/Cmd key combination is allowed
+      const isAllowedCtrlKey = (): boolean => {
+        if (!(e.ctrlKey || e.metaKey)) return false;
+        const allowedCtrlKeys = new Set(["a", "c", "v", "x", "z"]);
+        return allowedCtrlKeys.has(e.key.toLowerCase());
+      };
+
+      // Helper: Check if minus sign is at the start
+      const isMinusAtStart = (): boolean => {
+        return e.key === "-" && (e.currentTarget.selectionStart === 0 || e.currentTarget.value === "");
+      };
+
+      // Helper: Check if decimal point is allowed (only one allowed)
+      const isDecimalPointAllowed = (): boolean => {
+        if (e.key !== ".") return false;
+        return !e.currentTarget.value.includes(".");
+      };
+
+      // Helper: Check if key is in allowed list or is a number
+      const isAllowedKey = (): boolean => {
+        return allowedKeys.has(e.key) || /^\d$/.test(e.key);
+      };
+
+      // Allow Ctrl/Cmd + A, C, V, X, Z
+      if (isAllowedCtrlKey()) {
+        onKeyDown?.(e);
+        return;
+      }
+
+      // Allow minus sign only if it's at the start (for negative numbers)
+      if (isMinusAtStart()) {
+        onKeyDown?.(e);
+        return;
+      }
+
+      // Allow decimal point only if one doesn't already exist
+      if (isDecimalPointAllowed()) {
+        onKeyDown?.(e);
+        return;
+      }
+
+      // Allow numbers and other allowed keys
+      if (isAllowedKey()) {
+        onKeyDown?.(e);
+        return;
+      }
+
+      // Prevent all other keys
+      e.preventDefault();
     };
 
     return (
