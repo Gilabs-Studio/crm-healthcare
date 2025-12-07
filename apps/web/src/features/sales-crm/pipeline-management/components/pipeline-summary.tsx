@@ -85,8 +85,8 @@ export function PipelineSummary() {
       value: summary.won_deals,
       amount: summary.won_value_formatted || formatCurrency(summary.won_value),
       icon: CheckCircle2,
-      color: "text-emerald-600",
-      bgColor: "bg-emerald-50 dark:bg-emerald-950",
+      color: "text-chart-1",
+      bgColor: "bg-chart-1/10",
     },
     {
       label: t("lostDeals"),
