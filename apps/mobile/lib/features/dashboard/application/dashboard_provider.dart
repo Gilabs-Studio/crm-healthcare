@@ -98,6 +98,18 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
 
   String _extractErrorMessage(dynamic error) {
     if (error is DioException) {
+      // Handle timeout errors
+      if (error.type == DioExceptionType.receiveTimeout ||
+          error.type == DioExceptionType.sendTimeout ||
+          error.type == DioExceptionType.connectionTimeout) {
+        return 'Connection timeout. Please check your internet connection and try again.';
+      }
+      
+      // Handle connection errors
+      if (error.type == DioExceptionType.connectionError) {
+        return 'Unable to connect to server. Please check your internet connection.';
+      }
+      
       if (error.response != null) {
         final responseData = error.response!.data;
         if (responseData is Map<String, dynamic> && responseData['error'] != null) {
@@ -121,7 +133,20 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
           return 'Server error. Please try again later.';
         }
       }
-      return error.message ?? 'Network error occurred';
+      
+      // Handle error message from DioException
+      final errorMessage = error.message ?? '';
+      if (errorMessage.contains('timeout') || errorMessage.contains('Timeout')) {
+        return 'Connection timeout. Please check your internet connection and try again.';
+      }
+      if (errorMessage.contains('Failed host lookup') || 
+          errorMessage.contains('SocketException')) {
+        return 'Unable to connect to server. Please check your internet connection.';
+      }
+      
+      return errorMessage.isNotEmpty 
+          ? errorMessage 
+          : 'Network error occurred. Please try again.';
     }
     final errorString = error.toString();
     if (errorString.startsWith('Exception: ')) {

@@ -7,6 +7,8 @@ import '../application/contact_state.dart';
 import '../presentation/contact_form_screen.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/l10n/app_localizations.dart';
+import '../../../core/widgets/error_widget.dart';
+import '../../../core/widgets/loading_widget.dart';
 import 'widgets/contact_card.dart';
 
 class ContactListScreen extends ConsumerStatefulWidget {
@@ -166,36 +168,15 @@ class _ContactListScreenState extends ConsumerState<ContactListScreen> {
     ThemeData theme,
   ) {
     if (state.isLoading && state.contacts.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return const LoadingWidget();
     }
 
     if (state.errorMessage != null && state.contacts.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 48,
-              color: theme.colorScheme.error,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              state.errorMessage!,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            FilledButton(
-              onPressed: () {
-                ref.read(contactListProvider.notifier).refresh();
-              },
-              child: Text(AppLocalizations.of(context)!.retry),
-            ),
-          ],
-        ),
+      return ErrorStateWidget(
+        message: state.errorMessage!,
+        onRetry: () {
+          ref.read(contactListProvider.notifier).refresh();
+        },
       );
     }
 
@@ -228,7 +209,7 @@ class _ContactListScreenState extends ConsumerState<ContactListScreen> {
         if (index == state.contacts.length) {
           return const Padding(
             padding: EdgeInsets.all(16),
-            child: Center(child: CircularProgressIndicator()),
+            child: LoadingWidget(size: 24),
           );
         }
 

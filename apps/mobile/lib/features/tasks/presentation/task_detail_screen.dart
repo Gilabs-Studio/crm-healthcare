@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import '../application/task_provider.dart';
 import '../data/models/task.dart';
 import '../../../core/l10n/app_localizations.dart';
+import '../../../core/widgets/error_widget.dart';
+import '../../../core/widgets/loading_widget.dart';
 import '../presentation/task_form_screen.dart';
 
 class TaskDetailScreen extends ConsumerStatefulWidget {
@@ -35,31 +37,10 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
         elevation: 0,
       ),
       body: taskAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.error_outline,
-                color: colorScheme.error,
-                size: 48,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                error.toString().replaceFirst('Exception: ', ''),
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: colorScheme.error,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              FilledButton(
-                onPressed: () => ref.invalidate(taskDetailProvider(widget.taskId)),
-                child: Text(l10n.retry),
-              ),
-            ],
-          ),
+        loading: () => const LoadingWidget(),
+        error: (error, stack) => ErrorStateWidget(
+          message: error.toString().replaceFirst('Exception: ', ''),
+          onRetry: () => ref.invalidate(taskDetailProvider(widget.taskId)),
         ),
         data: (task) => _buildTaskDetail(context, task, theme, colorScheme, l10n),
       ),

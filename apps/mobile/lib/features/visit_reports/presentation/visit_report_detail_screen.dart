@@ -7,6 +7,8 @@ import 'package:image_picker/image_picker.dart';
 
 import '../application/visit_report_provider.dart';
 import '../../../core/l10n/app_localizations.dart';
+import '../../../core/widgets/error_widget.dart';
+import '../../../core/widgets/loading_widget.dart';
 
 class VisitReportDetailScreen extends ConsumerStatefulWidget {
   const VisitReportDetailScreen({
@@ -511,33 +513,10 @@ class _VisitReportDetailScreenState
             ],
           ),
         ),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.error_outline,
-                size: 48,
-                color: theme.colorScheme.error,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                error.toString().replaceFirst('Exception: ', ''),
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.error,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              FilledButton(
-                onPressed: () {
-                  ref.invalidate(visitReportDetailProvider(widget.visitReportId));
-                },
-                child: Text(l10n.retry),
-              ),
-            ],
-          ),
+        loading: () => const LoadingWidget(),
+        error: (error, stack) => ErrorStateWidget(
+          message: error.toString().replaceFirst('Exception: ', ''),
+          onRetry: () => ref.invalidate(visitReportDetailProvider(widget.visitReportId)),
         ),
       ),
     );

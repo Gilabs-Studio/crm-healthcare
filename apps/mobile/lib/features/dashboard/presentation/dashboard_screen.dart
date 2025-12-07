@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/l10n/app_localizations.dart';
+import '../../../core/widgets/error_widget.dart';
+import '../../../core/widgets/loading_widget.dart';
 import '../../../core/widgets/main_scaffold.dart';
 import '../../notifications/application/notification_provider.dart';
 import '../../notifications/presentation/notification_list_screen.dart';
@@ -128,34 +130,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       body: RefreshIndicator(
         onRefresh: _onRefresh,
         child: dashboardState.isLoading
-            ? const Center(child: CircularProgressIndicator())
+            ? const LoadingWidget()
             : dashboardState.errorMessage != null
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.error_outline,
-                          size: 48,
-                          color: Colors.red,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          dashboardState.errorMessage!,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: Colors.red,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: () {
-                            ref.read(dashboardProvider.notifier).refresh();
-                          },
-                          child: const Text('Retry'),
-                        ),
-                      ],
-                    ),
+                ? ErrorStateWidget(
+                    message: dashboardState.errorMessage!,
+                    onRetry: () {
+                      ref.read(dashboardProvider.notifier).refresh();
+                    },
                   )
                 : SingleChildScrollView(
                     padding: const EdgeInsets.all(20),

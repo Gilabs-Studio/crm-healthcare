@@ -9,9 +9,15 @@ import 'core/network/api_client.dart';
 import 'core/routing/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
+import 'core/utils/app_info.dart';
 import 'features/auth/application/auth_provider.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize app info
+  await AppInfo.initialize();
+  
   runApp(
     const ProviderScope(
       child: MyApp(),

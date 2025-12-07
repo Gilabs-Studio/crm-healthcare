@@ -6,6 +6,8 @@ import '../application/visit_report_provider.dart';
 import '../application/visit_report_state.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/l10n/app_localizations.dart';
+import '../../../core/widgets/error_widget.dart';
+import '../../../core/widgets/loading_widget.dart';
 import 'widgets/visit_report_card.dart';
 
 class VisitReportListScreen extends ConsumerStatefulWidget {
@@ -141,66 +143,25 @@ class _VisitReportListScreenState
     ThemeData theme,
   ) {
     final l10n = AppLocalizations.of(context)!;
+    
     if (state.isLoading && state.visitReports.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return const LoadingWidget();
     }
 
     if (state.errorMessage != null && state.visitReports.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 48,
-              color: theme.colorScheme.error,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              state.errorMessage!,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            FilledButton(
-              onPressed: () {
-                ref.read(visitReportListProvider.notifier).refresh();
-              },
-              child: Text(l10n.retry),
-            ),
-          ],
-        ),
+      return ErrorStateWidget(
+        message: state.errorMessage!,
+        onRetry: () {
+          ref.read(visitReportListProvider.notifier).refresh();
+        },
       );
     }
 
     if (state.visitReports.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.assignment_outlined,
-              size: 64,
-              color: theme.colorScheme.onSurface.withOpacity(0.3),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              l10n.noVisitReportsFound,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.6),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              l10n.tapToCreateVisitReport,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.5),
-              ),
-            ),
-          ],
-        ),
+      return EmptyStateWidget(
+        message: l10n.noVisitReportsFound,
+        subtitle: l10n.tapToCreateVisitReport,
+        icon: Icons.assignment_outlined,
       );
     }
 
@@ -211,7 +172,7 @@ class _VisitReportListScreenState
         if (index == state.visitReports.length) {
           return const Padding(
             padding: EdgeInsets.all(16),
-            child: Center(child: CircularProgressIndicator()),
+            child: LoadingWidget(size: 24),
           );
         }
 

@@ -8,6 +8,8 @@ import '../application/notification_provider.dart';
 import '../application/notification_state.dart';
 import '../data/models/notification.dart' as models;
 import '../../../core/l10n/app_localizations.dart';
+import '../../../core/widgets/error_widget.dart';
+import '../../../core/widgets/loading_widget.dart';
 import 'widgets/notification_card.dart';
 
 class NotificationListScreen extends ConsumerStatefulWidget {
@@ -139,7 +141,7 @@ class _NotificationListScreenState extends ConsumerState<NotificationListScreen>
     AppLocalizations l10n,
   ) {
     if (state.isLoading && state.notifications.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return const LoadingWidget();
     }
 
     if (state.errorMessage != null) {
@@ -147,57 +149,19 @@ class _NotificationListScreenState extends ConsumerState<NotificationListScreen>
                           state.errorMessage!.contains('not found') ||
                           state.errorMessage!.contains('endpoint not found');
       
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                is404Error ? Icons.wifi_off : Icons.error_outline,
-                color: colorScheme.error,
-                size: 48,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                is404Error 
-                  ? 'Notification endpoint not available.\nPlease ensure the backend server is running\nand notification routes are registered.'
-                  : state.errorMessage!,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: colorScheme.error,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              FilledButton(
-                onPressed: () => ref.read(notificationListProvider.notifier).refresh(),
-                child: Text(l10n.retry),
-              ),
-            ],
-          ),
-        ),
+      return ErrorStateWidget(
+        message: is404Error 
+          ? 'Notification endpoint not available.\nPlease ensure the backend server is running\nand notification routes are registered.'
+          : state.errorMessage!,
+        icon: is404Error ? Icons.wifi_off : null,
+        onRetry: () => ref.read(notificationListProvider.notifier).refresh(),
       );
     }
 
     if (state.notifications.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.notifications_none,
-              size: 64,
-              color: colorScheme.onSurface.withOpacity(0.3),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              l10n.noNotificationsFound,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: colorScheme.onSurface.withOpacity(0.6),
-              ),
-            ),
-          ],
-        ),
+      return EmptyStateWidget(
+        message: l10n.noNotificationsFound,
+        icon: Icons.notifications_none,
       );
     }
 
@@ -209,7 +173,7 @@ class _NotificationListScreenState extends ConsumerState<NotificationListScreen>
         if (index == state.notifications.length) {
           return const Padding(
             padding: EdgeInsets.all(16.0),
-            child: Center(child: CircularProgressIndicator()),
+            child: LoadingWidget(size: 24),
           );
         }
         final notification = state.notifications[index];

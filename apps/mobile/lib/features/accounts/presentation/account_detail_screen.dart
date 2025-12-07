@@ -6,6 +6,8 @@ import '../data/models/account.dart';
 import '../presentation/account_form_screen.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/routing/app_router.dart';
+import '../../../core/widgets/error_widget.dart';
+import '../../../core/widgets/loading_widget.dart';
 
 class AccountDetailScreen extends ConsumerStatefulWidget {
   const AccountDetailScreen({
@@ -305,33 +307,10 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
             ],
           ),
         ),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.error_outline,
-                size: 48,
-                color: theme.colorScheme.error,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                error.toString().replaceFirst('Exception: ', ''),
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.error,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              FilledButton(
-                onPressed: () {
-                  ref.invalidate(accountDetailProvider(widget.accountId));
-                },
-                child: Text(l10n.retry),
-              ),
-            ],
-          ),
+        loading: () => const LoadingWidget(),
+        error: (error, stack) => ErrorStateWidget(
+          message: error.toString().replaceFirst('Exception: ', ''),
+          onRetry: () => ref.invalidate(accountDetailProvider(widget.accountId)),
         ),
       ),
     );

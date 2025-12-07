@@ -6,6 +6,8 @@ import '../application/account_provider.dart';
 import '../application/account_state.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/l10n/app_localizations.dart';
+import '../../../core/widgets/error_widget.dart';
+import '../../../core/widgets/loading_widget.dart';
 import 'widgets/account_card.dart';
 
 class AccountListScreen extends ConsumerStatefulWidget {
@@ -110,59 +112,25 @@ class _AccountListScreenState extends ConsumerState<AccountListScreen> {
     AccountListState state,
     ThemeData theme,
   ) {
+    final l10n = AppLocalizations.of(context)!;
+
     if (state.isLoading && state.accounts.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return const LoadingWidget();
     }
 
     if (state.errorMessage != null && state.accounts.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 48,
-              color: theme.colorScheme.error,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              state.errorMessage!,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            FilledButton(
-              onPressed: () {
-                ref.read(accountListProvider.notifier).refresh();
-              },
-              child: Text(AppLocalizations.of(context)!.retry),
-            ),
-          ],
-        ),
+      return ErrorStateWidget(
+        message: state.errorMessage!,
+        onRetry: () {
+          ref.read(accountListProvider.notifier).refresh();
+        },
       );
     }
 
     if (state.accounts.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.business_outlined,
-              size: 64,
-              color: theme.colorScheme.onSurface.withOpacity(0.3),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              AppLocalizations.of(context)!.noAccountsFound,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.6),
-              ),
-            ),
-          ],
-        ),
+      return EmptyStateWidget(
+        message: l10n.noAccountsFound,
+        icon: Icons.business_outlined,
       );
     }
 
@@ -173,7 +141,7 @@ class _AccountListScreenState extends ConsumerState<AccountListScreen> {
         if (index == state.accounts.length) {
           return const Padding(
             padding: EdgeInsets.all(16),
-            child: Center(child: CircularProgressIndicator()),
+            child: LoadingWidget(size: 24),
           );
         }
 

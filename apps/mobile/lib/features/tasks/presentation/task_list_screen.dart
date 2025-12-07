@@ -6,6 +6,8 @@ import '../application/task_provider.dart';
 import '../application/task_state.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/l10n/app_localizations.dart';
+import '../../../core/widgets/error_widget.dart';
+import '../../../core/widgets/loading_widget.dart';
 import 'task_form_screen.dart';
 import 'widgets/task_card.dart';
 
@@ -232,66 +234,23 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
     ThemeData theme,
   ) {
     final l10n = AppLocalizations.of(context)!;
-    final colorScheme = theme.colorScheme;
 
     if (state.isLoading && state.tasks.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return const LoadingWidget();
     }
 
     if (state.errorMessage != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              color: colorScheme.error,
-              size: 48,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              state.errorMessage!,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: colorScheme.error,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            FilledButton(
-              onPressed: () => ref.read(taskListProvider.notifier).refresh(),
-              child: Text(l10n.retry),
-            ),
-          ],
-        ),
+      return ErrorStateWidget(
+        message: state.errorMessage!,
+        onRetry: () => ref.read(taskListProvider.notifier).refresh(),
       );
     }
 
     if (state.tasks.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.check_box,
-              size: 64,
-              color: colorScheme.onSurface.withOpacity(0.3),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              l10n.noTasksFound,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: colorScheme.onSurface.withOpacity(0.6),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              l10n.tapToCreateTask,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurface.withOpacity(0.5),
-              ),
-            ),
-          ],
-        ),
+      return EmptyStateWidget(
+        message: l10n.noTasksFound,
+        subtitle: l10n.tapToCreateTask,
+        icon: Icons.check_box,
       );
     }
 
@@ -303,7 +262,7 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
         if (index == state.tasks.length) {
           return const Padding(
             padding: EdgeInsets.all(16.0),
-            child: Center(child: CircularProgressIndicator()),
+            child: LoadingWidget(size: 24),
           );
         }
         final task = state.tasks[index];

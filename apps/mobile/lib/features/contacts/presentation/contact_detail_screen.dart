@@ -5,6 +5,8 @@ import '../application/contact_provider.dart';
 import '../data/models/contact.dart';
 import '../presentation/contact_form_screen.dart';
 import '../../../core/l10n/app_localizations.dart';
+import '../../../core/widgets/error_widget.dart';
+import '../../../core/widgets/loading_widget.dart';
 
 class ContactDetailScreen extends ConsumerStatefulWidget {
   const ContactDetailScreen({
@@ -108,6 +110,11 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
         elevation: 0,
       ),
       body: contactAsync.when(
+        loading: () => const LoadingWidget(),
+        error: (error, stack) => ErrorStateWidget(
+          message: error.toString().replaceFirst('Exception: ', ''),
+          onRetry: () => ref.invalidate(contactDetailProvider(widget.contactId)),
+        ),
         data: (contact) => SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -320,34 +327,6 @@ class _ContactDetailScreenState extends ConsumerState<ContactDetailScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.error_outline,
-                size: 48,
-                color: theme.colorScheme.error,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                error.toString().replaceFirst('Exception: ', ''),
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.error,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              FilledButton(
-                onPressed: () {
-                  ref.invalidate(contactDetailProvider(widget.contactId));
-                },
-                child: Text(l10n.retry),
               ),
             ],
           ),
