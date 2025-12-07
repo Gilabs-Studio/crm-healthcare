@@ -233,11 +233,18 @@ class TargetStats {
   });
 
   factory TargetStats.fromJson(Map<String, dynamic> json) {
+    final targetAmountFormatted = json['target_amount_formatted'] as String?;
+    final achievedAmountFormatted = json['achieved_amount_formatted'] as String?;
+    
     return TargetStats(
       targetAmount: (json['target_amount'] as num?)?.toInt() ?? 0,
-      targetAmountFormatted: json['target_amount_formatted'] as String? ?? 'Rp 0',
+      targetAmountFormatted: (targetAmountFormatted != null && targetAmountFormatted.isNotEmpty) 
+          ? targetAmountFormatted 
+          : 'Rp 0',
       achievedAmount: (json['achieved_amount'] as num?)?.toInt() ?? 0,
-      achievedAmountFormatted: json['achieved_amount_formatted'] as String? ?? 'Rp 0',
+      achievedAmountFormatted: (achievedAmountFormatted != null && achievedAmountFormatted.isNotEmpty) 
+          ? achievedAmountFormatted 
+          : 'Rp 0',
       progressPercent: (json['progress_percent'] as num?)?.toDouble() ?? 0.0,
       changePercent: (json['change_percent'] as num?)?.toDouble() ?? 0.0,
     );

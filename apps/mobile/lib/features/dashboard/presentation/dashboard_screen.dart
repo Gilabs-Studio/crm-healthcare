@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/widgets/main_scaffold.dart';
-import '../../../core/routing/app_router.dart';
 import '../../notifications/application/notification_provider.dart';
 import '../../notifications/presentation/notification_list_screen.dart';
 import '../application/dashboard_provider.dart';

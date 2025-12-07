@@ -62,56 +62,67 @@ class _AuthInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
-    // Check if error is 401 (Unauthorized) with TOKEN_EXPIRED
+    // Check if error is 401 (Unauthorized) - handle all 401 errors as potential token issues
     if (err.response?.statusCode == 401) {
       final responseData = err.response!.data;
+      String? errorCode;
+      String? errorMessage;
+
       if (responseData is Map<String, dynamic> &&
           responseData['error'] != null) {
         final error = responseData['error'] as Map<String, dynamic>;
-        final code = error['code'] as String?;
-        final message = error['message'] as String? ?? 'An error occurred';
+        errorCode = error['code'] as String?;
+        errorMessage = error['message'] as String? ?? 'An error occurred';
+      } else if (responseData is String) {
+        errorMessage = responseData;
+      }
 
-        // Check if it's a token expired error
-        if (code == 'TOKEN_EXPIRED' || message.contains('expired')) {
-          // Add request to pending queue
-          final pendingRequest = _PendingRequest(
-            options: err.requestOptions,
-            handler: handler,
-          );
-          _pendingRequests.add(pendingRequest);
+      // Check if it's a token-related error (expired, invalid, unauthorized)
+      final isTokenError = errorCode == 'TOKEN_EXPIRED' ||
+          errorCode == 'UNAUTHORIZED' ||
+          errorMessage?.toLowerCase().contains('expired') == true ||
+          errorMessage?.toLowerCase().contains('invalid token') == true ||
+          errorMessage?.toLowerCase().contains('unauthorized') == true;
 
-          // Try to refresh token if not already refreshing
-          if (!_isRefreshing) {
-            _isRefreshing = true;
-            final success = await _refreshToken();
+      if (isTokenError) {
+        // Add request to pending queue
+        final pendingRequest = _PendingRequest(
+          options: err.requestOptions,
+          handler: handler,
+        );
+        _pendingRequests.add(pendingRequest);
 
-            // Process all pending requests
-            final pending = List<_PendingRequest>.from(_pendingRequests);
-            _pendingRequests.clear();
+        // Try to refresh token if not already refreshing
+        if (!_isRefreshing) {
+          _isRefreshing = true;
+          final success = await _refreshToken();
 
-            if (success) {
-              // Retry all pending requests with new token
-              for (final request in pending) {
-                await _retryRequest(request);
-              }
-            } else {
-              // Refresh failed, reject all pending requests
-              for (final request in pending) {
-                request.handler.next(
-                  DioException(
-                    requestOptions: request.options,
-                    error: 'Token refresh failed. Please login again.',
-                  ),
-                );
-              }
+          // Process all pending requests
+          final pending = List<_PendingRequest>.from(_pendingRequests);
+          _pendingRequests.clear();
+
+          if (success) {
+            // Retry all pending requests with new token
+            for (final request in pending) {
+              await _retryRequest(request);
             }
-
-            _isRefreshing = false;
-            return;
+          } else {
+            // Refresh failed, reject all pending requests
+            for (final request in pending) {
+              request.handler.next(
+                DioException(
+                  requestOptions: request.options,
+                  error: 'Token refresh failed. Please login again.',
+                ),
+              );
+            }
           }
-          // If already refreshing, wait for it to complete
+
+          _isRefreshing = false;
           return;
         }
+        // If already refreshing, wait for it to complete
+        return;
       }
     }
 

@@ -40,11 +40,17 @@ class DashboardRepository {
           if (data is! Map<String, dynamic>) {
             throw Exception('Invalid dashboard data format');
           }
-          return DashboardOverview.fromJson(data);
+          try {
+            return DashboardOverview.fromJson(data);
+          } catch (e) {
+            // Log the parsing error for debugging
+            print('Error parsing dashboard overview: $e');
+            print('Data: $data');
+            rethrow;
+          }
         } else {
-          throw Exception(
-            responseData['error']?['message'] ?? 'Failed to fetch dashboard overview',
-          );
+          final errorMessage = responseData['error']?['message'] ?? 'Failed to fetch dashboard overview';
+          throw Exception(errorMessage);
         }
       } else if (response.data is Map) {
         // Handle direct data response
@@ -55,7 +61,14 @@ class DashboardRepository {
         if (data is! Map<String, dynamic>) {
           throw Exception('Invalid dashboard data format');
         }
-        return DashboardOverview.fromJson(data);
+        try {
+          return DashboardOverview.fromJson(data);
+        } catch (e) {
+          // Log the parsing error for debugging
+          print('Error parsing dashboard overview: $e');
+          print('Data: $data');
+          rethrow;
+        }
       } else {
         throw Exception('Invalid response format: ${response.data.runtimeType}');
       }
@@ -63,13 +76,23 @@ class DashboardRepository {
       if (e.response != null) {
         final errorData = e.response!.data;
         if (errorData is Map<String, dynamic> && errorData['error'] != null) {
-          throw Exception(
-            errorData['error']['message'] ?? 'Failed to fetch dashboard overview',
-          );
+          final errorObj = errorData['error'];
+          if (errorObj is Map<String, dynamic>) {
+            final errorMessage = errorObj['message'] as String? ?? 'Failed to fetch dashboard overview';
+            throw Exception(errorMessage);
+          }
+        }
+        // Handle non-JSON error responses
+        if (errorData is String && errorData.isNotEmpty) {
+          throw Exception(errorData);
         }
       }
-      throw Exception('Network error: ${e.message}');
+      throw Exception('Network error: ${e.message ?? 'Unknown error'}');
     } catch (e) {
+      // Re-throw if it's already an Exception
+      if (e is Exception) {
+        rethrow;
+      }
       throw Exception('Failed to fetch dashboard overview: $e');
     }
   }

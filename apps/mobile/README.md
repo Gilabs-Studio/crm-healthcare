@@ -89,22 +89,41 @@ pnpm dev --filter=@repo/mobile
 
 ## 🔗 Koneksi ke Backend API
 
-- Base URL API diatur di `lib/core/config/env.dart` melalui `Env.apiBaseUrl`.
-- **Default otomatis berdasarkan platform:**
-  - **Android Emulator**: `http://10.0.2.2:8080` (alias untuk host machine)
-  - **iOS Simulator**: `http://localhost:8080`
-  - **Device Fisik**: Harus set manual dengan IP address PC
+### Environment Variables
 
-- **Override dengan environment variable** (jika perlu):
-  ```bash
-  # Untuk device fisik Android, gunakan IP PC
-  flutter run --dart-define=API_BASE_URL=http://192.168.1.100:8080
-  ```
+Base URL API diatur di `lib/core/config/env.dart` melalui `Env.apiBaseUrl`.
 
-- **Pastikan backend API sudah running:**
-  - Jalankan API dari `apps/api` sesuai `apps/api/SETUP.md`.
-  - Untuk development, bisa pakai: `pnpm run dev:web-api-docker` (dari root repo).
-  - Pastikan endpoint dan skema respons sesuai standar di `docs/api-standart/`.
+**Default otomatis berdasarkan platform:**
+- **Android Emulator**: `http://10.0.2.2:8080` (alias untuk host machine)
+- **iOS Simulator**: `http://localhost:8080`
+- **Device Fisik**: Harus set manual dengan IP address PC
+
+**Override dengan environment variable:**
+```bash
+# Android Emulator
+npm run dev:android
+# atau
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8080
+
+# iOS Simulator
+npm run dev:ios
+# atau
+flutter run --dart-define=API_BASE_URL=http://localhost:8080
+
+# Device Fisik (ganti IP dengan IP PC Anda)
+npm run dev:device
+# atau
+flutter run --dart-define=API_BASE_URL=http://192.168.1.100:8080
+```
+
+**Dokumentasi lengkap:**
+- Lihat [docs/ENVIRONMENT_SETUP.md](docs/ENVIRONMENT_SETUP.md) untuk panduan lengkap
+- Lihat [.env.example](.env.example) untuk contoh konfigurasi
+
+**Pastikan backend API sudah running:**
+- Jalankan API dari `apps/api` sesuai `apps/api/SETUP.md`.
+- Untuk development, bisa pakai: `pnpm run dev:web-api-docker` (dari root repo).
+- Pastikan endpoint dan skema respons sesuai standar di `docs/api-standart/`.
 
 ## 🧩 Sprint 0 – Flutter Setup (Dev 3)
 
