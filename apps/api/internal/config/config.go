@@ -12,6 +12,7 @@ type Config struct {
 	Database DatabaseConfig
 	JWT      JWTConfig
 	Cerebras CerebrasConfig
+	Storage  StorageConfig
 }
 
 type ServerConfig struct {
@@ -38,6 +39,11 @@ type CerebrasConfig struct {
 	BaseURL string
 	APIKey  string
 	Model   string // Default model name
+}
+
+type StorageConfig struct {
+	UploadDir string // Directory for uploaded files
+	BaseURL   string // Base URL for serving files (e.g., /uploads or https://cdn.example.com)
 }
 
 var AppConfig *Config
@@ -71,6 +77,10 @@ func Load() error {
 			BaseURL: getEnv("CEREBRAS_BASE_URL", "https://api.cerebras.ai"),
 			APIKey:  getEnv("CEREBRAS_API_KEY", ""),
 			Model:   getEnv("CEREBRAS_MODEL", "llama-3.1-8b"), // Default model
+		},
+		Storage: StorageConfig{
+			UploadDir: getEnv("STORAGE_UPLOAD_DIR", "./uploads"),
+			BaseURL:   getEnv("STORAGE_BASE_URL", "/uploads"),
 		},
 	}
 

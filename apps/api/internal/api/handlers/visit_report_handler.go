@@ -1,7 +1,10 @@
 package handlers
 
 import (
+	"strings"
+
 	"github.com/gilabs/crm-healthcare/api/internal/domain/visit_report"
+	fileservice "github.com/gilabs/crm-healthcare/api/internal/service/file"
 	visitreportservice "github.com/gilabs/crm-healthcare/api/internal/service/visit_report"
 	"github.com/gilabs/crm-healthcare/api/pkg/errors"
 	"github.com/gilabs/crm-healthcare/api/pkg/response"
@@ -11,11 +14,13 @@ import (
 
 type VisitReportHandler struct {
 	visitReportService *visitreportservice.Service
+	fileService        *fileservice.Service
 }
 
-func NewVisitReportHandler(visitReportService *visitreportservice.Service) *VisitReportHandler {
+func NewVisitReportHandler(visitReportService *visitreportservice.Service, fileService *fileservice.Service) *VisitReportHandler {
 	return &VisitReportHandler{
 		visitReportService: visitReportService,
+		fileService:        fileService,
 	}
 }
 
@@ -379,17 +384,57 @@ func (h *VisitReportHandler) Reject(c *gin.Context) {
 }
 
 // UploadPhoto handles photo upload request
+// Supports both multipart/form-data (file upload) and JSON (photo_url)
 func (h *VisitReportHandler) UploadPhoto(c *gin.Context) {
 	id := c.Param("id")
-	var req visit_report.UploadPhotoRequest
+	var photoURL string
 
-	if err := c.ShouldBindJSON(&req); err != nil {
-		if validationErrors, ok := err.(validator.ValidationErrors); ok {
-			errors.HandleValidationError(c, validationErrors)
+	// Check if request is multipart (file upload)
+	contentType := c.GetHeader("Content-Type")
+	if strings.HasPrefix(contentType, "multipart/form-data") {
+		// Handle multipart file upload
+		file, err := c.FormFile("photo")
+		if err != nil {
+			// Try alternative field names
+			file, err = c.FormFile("file")
+			if err != nil {
+				file, err = c.FormFile("image")
+				if err != nil {
+					errors.ErrorResponse(c, "INVALID_REQUEST", map[string]interface{}{
+						"message": "No file provided. Use 'photo', 'file', or 'image' field name",
+					}, nil)
+					return
+				}
+			}
+		}
+
+		// Upload and compress image
+		uploadedURL, err := h.fileService.UploadImage(file)
+		if err != nil {
+			errors.ErrorResponse(c, "UPLOAD_FAILED", map[string]interface{}{
+				"message": err.Error(),
+			}, nil)
 			return
 		}
-		errors.InvalidRequestBodyResponse(c)
-		return
+
+		photoURL = uploadedURL
+	} else {
+		// Handle JSON request with photo_url
+		var req visit_report.UploadPhotoRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			if validationErrors, ok := err.(validator.ValidationErrors); ok {
+				errors.HandleValidationError(c, validationErrors)
+				return
+			}
+			errors.InvalidRequestBodyResponse(c)
+			return
+		}
+		photoURL = req.PhotoURL
+	}
+
+	// Create request for service
+	req := visit_report.UploadPhotoRequest{
+		PhotoURL: photoURL,
 	}
 
 	visitReport, err := h.visitReportService.UploadPhoto(id, &req)
