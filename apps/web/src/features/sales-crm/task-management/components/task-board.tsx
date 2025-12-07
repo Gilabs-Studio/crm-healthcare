@@ -9,8 +9,11 @@ import { DateRangePicker } from "@/components/ui/date-range-picker";
 import type { DateRange } from "react-day-picker";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import { useTaskList } from "../hooks/useTaskList";
-import type { Task, TaskStatus } from "../types";
+import { useKanbanBoard } from "../hooks/useKanbanBoard";
+import type { TaskStatus } from "../types";
 import { TaskForm } from "./task-form";
 import { TaskDetailModal } from "./task-detail-modal";
 import { useUsers } from "@/features/master-data/user-management/hooks/useUsers";
@@ -20,8 +23,6 @@ import { useHasPermission } from "@/features/master-data/user-management/hooks/u
 import { useTranslations } from "next-intl";
 import { ContactDetailModal } from "@/features/sales-crm/account-management/components/contact-detail-modal";
 import type { CreateTaskFormData, UpdateTaskFormData } from "../schemas/task.schema";
-
-const BOARD_STATUSES: TaskStatus[] = ["pending", "in_progress", "completed", "cancelled"];
 
 export function TaskBoard() {
   const tList = useTranslations("taskManagement.list");
@@ -44,6 +45,7 @@ export function TaskBoard() {
     setType,
     assignedTo,
     setAssignedTo,
+    accountId,
     setAccountId,
     startDueDate,
     setStartDueDate,
@@ -55,13 +57,12 @@ export function TaskBoard() {
     setEditingTaskId,
     deletingTaskId,
     setDeletingTaskId,
-    tasks,
     pagination,
     editingTaskData,
-    isLoading,
     handleCreate,
     handleUpdate,
     handleComplete,
+    handleUpdateStatus,
     handleDeleteClick,
     handleDeleteConfirm,
     createTask,
@@ -102,18 +103,38 @@ export function TaskBoard() {
           }
         : undefined;
 
-  const tasksByStatus: Record<TaskStatus, Task[]> = {
-    pending: [],
-    in_progress: [],
-    completed: [],
-    cancelled: [],
+  // Use kanban board hook for drag & drop
+  const {
+    tasksByStatus,
+    isLoading: isKanbanLoading,
+    boardStatuses,
+    handleDragStart,
+    handleDragOver,
+    handleDrop,
+  } = useKanbanBoard({
+    search,
+    status,
+    priority,
+    type,
+    assignedTo,
+    accountId,
+    startDueDate,
+    endDueDate,
+  });
+
+  const statusColors: Record<TaskStatus, string> = {
+    pending: "#F59E0B", // amber-500
+    in_progress: "#0EA5E9", // sky-500
+    completed: "#10B981", // emerald-500
+    cancelled: "#EF4444", // rose-500
   };
 
-  tasks.forEach((task) => {
-    if (BOARD_STATUSES.includes(task.status)) {
-      tasksByStatus[task.status].push(task);
-    }
-  });
+  const statusLabels: Record<TaskStatus, string> = {
+    pending: tBoard("columns.todo"),
+    in_progress: tBoard("columns.inProgress"),
+    completed: tBoard("columns.completed"),
+    cancelled: tBoard("columns.cancelled"),
+  };
 
   return (
     <div className="space-y-4">
@@ -261,64 +282,96 @@ export function TaskBoard() {
         </div>
       </div>
 
-      {/* Kanban Board - full width grid */}
-      <div className="relative">
-        <div className="grid gap-3 pb-2 grid-cols-1 md:grid-cols-2 xl:grid-cols-4">
-          {BOARD_STATUSES.map((boardStatus) => {
-            const tasksForStatus = tasksByStatus[boardStatus];
-            const columnTitleKey: Record<TaskStatus, string> = {
-              pending: "columns.todo",
-              in_progress: "columns.inProgress",
-              completed: "columns.completed",
-              cancelled: "columns.cancelled",
-            };
+      {/* Kanban Board - consistent with pipeline */}
+      {isKanbanLoading ? (
+        <div className="space-y-6">
+          <div>
+            <div className="h-8 bg-muted animate-pulse rounded w-64 mb-2" />
+            <div className="h-4 bg-muted animate-pulse rounded w-96" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {Array.from({ length: 4 }, (_, i) => (
+              <Card key={`skeleton-${i}`} className="p-4">
+                <div className="space-y-4">
+                  <div className="h-12 bg-muted animate-pulse rounded" />
+                  <div className="space-y-2">
+                    {Array.from({ length: 2 }, (_, j) => (
+                      <div key={`skeleton-item-${i}-${j}`} className="h-32 bg-muted animate-pulse rounded" />
+                    ))}
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {boardStatuses.map((boardStatus) => {
+            const tasksForStatus = tasksByStatus[boardStatus] ?? [];
 
             return (
               <div
                 key={boardStatus}
-                className="rounded-xl border bg-muted/40 backdrop-blur-sm p-2.5 flex flex-col gap-2.5"
+                className="bg-card border border-border rounded-lg p-4 h-full flex flex-col shadow-sm hover:shadow-md transition-shadow"
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, boardStatus)}
               >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full bg-primary" />
-                    <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      {tBoard(columnTitleKey[boardStatus])}
-                    </span>
-                  </div>
-                  <span className="rounded-full bg-background px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                <div className="flex items-center gap-2.5 mb-4 shrink-0 pb-3 border-b border-border">
+                  <div
+                    className="w-3 h-3 rounded-full shrink-0 ring-2 ring-offset-2 ring-offset-background"
+                    style={{
+                      backgroundColor: statusColors[boardStatus],
+                    }}
+                  />
+                  <h3 className="font-semibold text-base truncate flex-1">
+                    {statusLabels[boardStatus]}
+                  </h3>
+                  <Badge variant="secondary" className="shrink-0 text-xs font-semibold">
                     {tasksForStatus.length}
-                  </span>
+                  </Badge>
                 </div>
 
-                <div className="flex flex-col gap-2 max-h-[60vh] overflow-y-auto pr-1">
-                  {isLoading && tasks.length === 0 && (
-                    <div className="space-y-2">
-                      <div className="h-16 rounded-md bg-background/60 animate-pulse" />
-                      <div className="h-16 rounded-md bg-background/60 animate-pulse" />
+                <div className="space-y-3 min-h-[200px] flex-1 overflow-y-auto pr-1">
+                  {tasksForStatus.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                      <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-3">
+                        <Plus className="h-5 w-5 text-muted-foreground" />
+                      </div>
+                      <p className="text-sm text-muted-foreground font-medium">
+                        {tBoard("noTasks")}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {tBoard("noTasksHint")}
+                      </p>
                     </div>
+                  ) : (
+                    tasksForStatus.map((task) => (
+                      <div
+                        key={task.id}
+                        draggable
+                        onDragStart={() => handleDragStart(task)}
+                        className="cursor-grab active:cursor-grabbing"
+                      >
+                        <TaskCard
+                          task={task}
+                          onClick={() => handleViewTask(task.id)}
+                          onClickTitle={() => handleViewTask(task.id)}
+                          onEdit={hasEditPermission ? () => setEditingTaskId(task.id) : undefined}
+                          onDelete={hasDeletePermission ? () => handleDeleteClick(task.id) : undefined}
+                          onComplete={() => handleComplete(task.id)}
+                          onStart={() => handleUpdateStatus(task.id, "in_progress")}
+                          onCancel={() => handleUpdateStatus(task.id, "cancelled")}
+                          onClickContact={task.contact ? handleViewContact : undefined}
+                        />
+                      </div>
+                    ))
                   )}
-                  {!isLoading && tasksForStatus.length === 0 && (
-                    <p className="text-xs text-muted-foreground text-center py-4">
-                      {tBoard("emptyColumn")}
-                    </p>
-                  )}
-                  {tasksForStatus.map((task) => (
-                    <TaskCard
-                      key={task.id}
-                      task={task}
-                      onClickTitle={() => handleViewTask(task.id)}
-                      onEdit={hasEditPermission ? () => setEditingTaskId(task.id) : undefined}
-                      onDelete={hasDeletePermission ? () => handleDeleteClick(task.id) : undefined}
-                      onComplete={() => handleComplete(task.id)}
-                      onClickContact={task.contact ? handleViewContact : undefined}
-                    />
-                  ))}
                 </div>
               </div>
             );
           })}
         </div>
-      </div>
+      )}
 
       {/* Create Task Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>

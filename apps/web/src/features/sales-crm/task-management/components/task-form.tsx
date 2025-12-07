@@ -303,7 +303,7 @@ export function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFormProps)
               <SelectItem value="none">{t("accountNone")}</SelectItem>
               {accounts.map((account) => (
                 <SelectItem key={account.id} value={account.id}>
-                  {account.name}
+                  {account.name} {account.category && `(${account.category.name})`}
                 </SelectItem>
               ))}
             </SelectContent>
