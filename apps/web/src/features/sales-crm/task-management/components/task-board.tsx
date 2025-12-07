@@ -113,7 +113,6 @@ export function TaskBoard() {
     handleDrop,
   } = useKanbanBoard({
     search,
-    status,
     priority,
     type,
     assignedTo,

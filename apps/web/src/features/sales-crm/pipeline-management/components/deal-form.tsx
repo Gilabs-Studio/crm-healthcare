@@ -76,9 +76,13 @@ export function DealForm({ deal, onSubmit, onCancel, isLoading }: DealFormProps)
   });
 
   // Convert expected_close_date string to Date for DatePicker
+  // Create date as local midnight to avoid timezone issues
   const expectedCloseDateValue = watch("expected_close_date");
   const expectedCloseDate = expectedCloseDateValue 
-    ? new Date(expectedCloseDateValue + "T00:00:00")
+    ? (() => {
+        const [year, month, day] = expectedCloseDateValue.split("-").map(Number);
+        return new Date(year, month - 1, day);
+      })()
     : undefined;
 
   // Load contacts when account is selected
@@ -307,11 +311,11 @@ export function DealForm({ deal, onSubmit, onCancel, isLoading }: DealFormProps)
           date={expectedCloseDate}
           onDateChange={(date) => {
             if (date) {
-              // Convert Date to YYYY-MM-DD format using UTC methods
-              // to avoid timezone issues when the date represents a UTC date
-              const year = date.getUTCFullYear();
-              const month = String(date.getUTCMonth() + 1).padStart(2, "0");
-              const day = String(date.getUTCDate()).padStart(2, "0");
+              // Convert Date to YYYY-MM-DD format using local time methods
+              // Calendar component works with local dates, so we use local methods for consistency
+              const year = date.getFullYear();
+              const month = String(date.getMonth() + 1).padStart(2, "0");
+              const day = String(date.getDate()).padStart(2, "0");
               setValue("expected_close_date", `${year}-${month}-${day}`);
             } else {
               setValue("expected_close_date", "");
