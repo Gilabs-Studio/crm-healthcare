@@ -29,7 +29,7 @@ interface ErrorMessages {
   };
 }
 
-let cachedMessages: { en?: ErrorMessages; id?: ErrorMessages } = {};
+const cachedMessages: { en?: ErrorMessages; id?: ErrorMessages } = {};
 
 /**
  * Get current locale from URL or default to 'en'

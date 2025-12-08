@@ -4,6 +4,7 @@ import { authService } from "../services/authService";
 import type { LoginFormData } from "../schemas/login.schema";
 import type { AuthError } from "../types/errors";
 import { useState } from "react";
+import { setSecureCookie } from "@/lib/cookie";
 
 export function useLogin() {
   const router = useRouter();
@@ -21,8 +22,8 @@ export function useLogin() {
         if (typeof window !== "undefined") {
           localStorage.setItem("token", token);
           localStorage.setItem("refreshToken", refresh_token);
-          // Set cookie for middleware
-          document.cookie = `token=${token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
+          // Set secure cookie for WebSocket and middleware
+          setSecureCookie("token", token);
         }
         setUser(user);
         setToken(token);

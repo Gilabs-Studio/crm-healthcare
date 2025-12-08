@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from "axios";
 import { toast } from "sonner";
+import { setSecureCookie } from "./cookie";
 import { formatError } from "./i18n/error-messages";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -250,8 +251,8 @@ apiClient.interceptors.response.use(
               if (typeof window !== "undefined") {
                 localStorage.setItem("token", token);
                 localStorage.setItem("refreshToken", refresh_token);
-                // Update cookie
-                document.cookie = `token=${token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
+                // Update secure cookie
+                setSecureCookie("token", token);
               }
 
               // Update auth store with user data and tokens
