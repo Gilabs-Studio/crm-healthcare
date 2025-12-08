@@ -8,6 +8,7 @@ import '../../../core/routing/app_router.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/widgets/error_widget.dart';
 import '../../../core/widgets/loading_widget.dart';
+import '../../../core/widgets/skeleton_widget.dart';
 import 'task_form_screen.dart';
 import 'widgets/task_card.dart';
 
@@ -254,10 +255,19 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
       );
     }
 
+    // Show skeleton screens if loading first page
+    if (state.isLoading && state.tasks.isEmpty) {
+      return ListView.builder(
+        itemCount: 5, // Show 5 skeleton items
+        itemBuilder: (context, index) {
+          return const SkeletonListItem(height: 100);
+        },
+      );
+    }
+
     return ListView.builder(
       controller: _scrollController,
-      itemCount: state.tasks.length +
-          (state.pagination?.hasNextPage == true ? 1 : 0),
+      itemCount: state.tasks.length + (state.isLoadingMore ? 1 : 0),
       itemBuilder: (context, index) {
         if (index == state.tasks.length) {
           return const Padding(

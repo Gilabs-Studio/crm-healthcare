@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/cache/list_cache.dart';
 import '../../../core/network/api_client.dart';
 import '../data/account_repository.dart';
 import '../data/category_repository.dart';
@@ -35,24 +36,86 @@ class AccountListNotifier extends StateNotifier<AccountListState> {
   AccountListNotifier(this._repository) : super(const AccountListState());
 
   final AccountRepository _repository;
+  final ListCache _cache = ListCache();
 
   Future<void> loadAccounts({
     int page = 1,
     bool refresh = false,
     String? search,
+    bool forceRefresh = false,
   }) async {
-    if (refresh) {
-      state = state.copyWith(isLoading: true, errorMessage: null);
+    final searchQuery = search ?? state.searchQuery;
+    final cacheKey = ListCache.cacheKey(
+      'accounts',
+      page: page,
+      search: searchQuery.isNotEmpty ? searchQuery : null,
+    );
+
+    // Try to load from cache first (optimistic UI) - only for first page
+    if (!forceRefresh && !refresh && page == 1) {
+      final cachedAccounts = _cache.get<Account>(
+        cacheKey,
+        ttl: const Duration(seconds: 60),
+        expectedMetadata: searchQuery.isNotEmpty
+            ? {'search': searchQuery}
+            : null,
+      );
+
+      if (cachedAccounts != null && cachedAccounts.isNotEmpty) {
+        // Show cached data immediately
+        final cachedMetadata = _cache.getMetadata(cacheKey);
+        Pagination? cachedPagination;
+        if (cachedMetadata?['pagination'] != null) {
+          try {
+            cachedPagination = Pagination.fromJson(
+              cachedMetadata!['pagination'] as Map<String, dynamic>,
+            );
+          } catch (e) {
+            // Ignore pagination parsing error
+          }
+        }
+        state = state.copyWith(
+          accounts: cachedAccounts,
+          searchQuery: searchQuery,
+          isLoading: false,
+          isLoadingMore: false,
+          errorMessage: null,
+          pagination: cachedPagination,
+        );
+      }
+    }
+
+    // Set loading state
+    if (refresh || page == 1) {
+      state = state.copyWith(
+        isLoading: true,
+        isLoadingMore: false,
+        errorMessage: null,
+      );
     } else {
-      state = state.copyWith(isLoading: true);
+      state = state.copyWith(isLoadingMore: true);
     }
 
     try {
-      final searchQuery = search ?? state.searchQuery;
       final response = await _repository.getAccounts(
         page: page,
         perPage: 20,
         search: searchQuery.isNotEmpty ? searchQuery : null,
+      );
+
+      // Cache the response
+      _cache.set(
+        cacheKey,
+        response.items,
+        metadata: {
+          'pagination': {
+            'page': response.pagination.page,
+            'perPage': response.pagination.perPage,
+            'total': response.pagination.total,
+            'totalPages': response.pagination.totalPages,
+          },
+          'search': searchQuery,
+        },
       );
 
       if (refresh || page == 1) {
@@ -61,30 +124,48 @@ class AccountListNotifier extends StateNotifier<AccountListState> {
           pagination: response.pagination,
           searchQuery: searchQuery,
           isLoading: false,
+          isLoadingMore: false,
           errorMessage: null,
         );
       } else {
         state = state.copyWith(
           accounts: [...state.accounts, ...response.items],
           pagination: response.pagination,
-          isLoading: false,
+          isLoadingMore: false,
           errorMessage: null,
         );
       }
     } catch (e) {
+      // On error, try to use cached data as fallback
+      if (page == 1) {
+        final cachedAccounts = _cache.get<Account>(cacheKey);
+        if (cachedAccounts != null && cachedAccounts.isNotEmpty) {
+          state = state.copyWith(
+            accounts: cachedAccounts,
+            isLoading: false,
+            isLoadingMore: false,
+            errorMessage: null,
+          );
+          return;
+        }
+      }
+
       state = state.copyWith(
         isLoading: false,
+        isLoadingMore: false,
         errorMessage: e.toString().replaceFirst('Exception: ', ''),
       );
     }
   }
 
   Future<void> refresh() async {
-    await loadAccounts(page: 1, refresh: true);
+    // Clear cache for accounts
+    _cache.clearPrefix('list:accounts');
+    await loadAccounts(page: 1, refresh: true, forceRefresh: true);
   }
 
   Future<void> loadMore() async {
-    if (state.isLoading) return;
+    if (state.isLoading || state.isLoadingMore) return;
     final pagination = state.pagination;
     if (pagination == null || !pagination.hasNextPage) return;
 
@@ -120,8 +201,9 @@ class AccountListNotifier extends StateNotifier<AccountListState> {
         assignedTo: assignedTo,
       );
       state = state.copyWith(isLoading: false);
-      // Refresh list
-      await loadAccounts(page: 1, refresh: true);
+      // Clear cache and refresh list
+      _cache.clearPrefix('list:accounts');
+      await loadAccounts(page: 1, refresh: true, forceRefresh: true);
       return account;
     } catch (e) {
       state = state.copyWith(
@@ -159,8 +241,9 @@ class AccountListNotifier extends StateNotifier<AccountListState> {
         assignedTo: assignedTo,
       );
       state = state.copyWith(isLoading: false);
-      // Refresh list and detail
-      await loadAccounts(page: 1, refresh: true);
+      // Clear cache and refresh list
+      _cache.clearPrefix('list:accounts');
+      await loadAccounts(page: 1, refresh: true, forceRefresh: true);
       return account;
     } catch (e) {
       state = state.copyWith(
@@ -176,8 +259,9 @@ class AccountListNotifier extends StateNotifier<AccountListState> {
       state = state.copyWith(isLoading: true, errorMessage: null);
       await _repository.deleteAccount(id);
       state = state.copyWith(isLoading: false);
-      // Refresh list
-      await loadAccounts(page: 1, refresh: true);
+      // Clear cache and refresh list
+      _cache.clearPrefix('list:accounts');
+      await loadAccounts(page: 1, refresh: true, forceRefresh: true);
       return true;
     } catch (e) {
       state = state.copyWith(

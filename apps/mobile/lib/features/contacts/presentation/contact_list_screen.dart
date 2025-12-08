@@ -9,6 +9,7 @@ import '../../../core/routing/app_router.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/widgets/error_widget.dart';
 import '../../../core/widgets/loading_widget.dart';
+import '../../../core/widgets/skeleton_widget.dart';
 import 'widgets/contact_card.dart';
 
 class ContactListScreen extends ConsumerStatefulWidget {
@@ -202,9 +203,19 @@ class _ContactListScreenState extends ConsumerState<ContactListScreen> {
       );
     }
 
+    // Show skeleton screens if loading first page
+    if (state.isLoading && state.contacts.isEmpty) {
+      return ListView.builder(
+        itemCount: 5, // Show 5 skeleton items
+        itemBuilder: (context, index) {
+          return const SkeletonListItem(height: 80);
+        },
+      );
+    }
+
     return ListView.builder(
       controller: _scrollController,
-      itemCount: state.contacts.length + (state.isLoading ? 1 : 0),
+      itemCount: state.contacts.length + (state.isLoadingMore ? 1 : 0),
       itemBuilder: (context, index) {
         if (index == state.contacts.length) {
           return const Padding(

@@ -8,6 +8,8 @@ class DashboardState {
   final VisitStatistics? visitStatistics;
   final ActivityTrends? activityTrends;
   final bool isLoading;
+  final bool isLoadingOverview;
+  final bool isLoadingSecondary;
   final String? errorMessage;
   final String selectedPeriod;
 
@@ -19,6 +21,8 @@ class DashboardState {
     this.visitStatistics,
     this.activityTrends,
     this.isLoading = false,
+    this.isLoadingOverview = false,
+    this.isLoadingSecondary = false,
     this.errorMessage,
     this.selectedPeriod = 'today',
   });
@@ -31,17 +35,34 @@ class DashboardState {
     VisitStatistics? visitStatistics,
     ActivityTrends? activityTrends,
     bool? isLoading,
+    bool? isLoadingOverview,
+    bool? isLoadingSecondary,
     String? errorMessage,
     String? selectedPeriod,
+    bool clearOverview = false,
+    bool clearRecentActivities = false,
+    bool clearTopAccounts = false,
+    bool clearTopSalesReps = false,
+    bool clearVisitStatistics = false,
+    bool clearActivityTrends = false,
   }) {
     return DashboardState(
-      overview: overview ?? this.overview,
-      recentActivities: recentActivities ?? this.recentActivities,
-      topAccounts: topAccounts ?? this.topAccounts,
-      topSalesReps: topSalesReps ?? this.topSalesReps,
-      visitStatistics: visitStatistics ?? this.visitStatistics,
-      activityTrends: activityTrends ?? this.activityTrends,
+      overview: clearOverview ? null : (overview ?? this.overview),
+      recentActivities: clearRecentActivities
+          ? null
+          : (recentActivities ?? this.recentActivities),
+      topAccounts: clearTopAccounts ? null : (topAccounts ?? this.topAccounts),
+      topSalesReps:
+          clearTopSalesReps ? null : (topSalesReps ?? this.topSalesReps),
+      visitStatistics: clearVisitStatistics
+          ? null
+          : (visitStatistics ?? this.visitStatistics),
+      activityTrends: clearActivityTrends
+          ? null
+          : (activityTrends ?? this.activityTrends),
       isLoading: isLoading ?? this.isLoading,
+      isLoadingOverview: isLoadingOverview ?? this.isLoadingOverview,
+      isLoadingSecondary: isLoadingSecondary ?? this.isLoadingSecondary,
       errorMessage: errorMessage ?? this.errorMessage,
       selectedPeriod: selectedPeriod ?? this.selectedPeriod,
     );

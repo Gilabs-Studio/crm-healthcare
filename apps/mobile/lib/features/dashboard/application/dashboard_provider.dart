@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../data/dashboard_cache.dart';
 import '../data/dashboard_repository.dart';
 import '../data/models/dashboard.dart';
 import 'dashboard_state.dart';
@@ -17,71 +18,127 @@ final dashboardProvider =
 
 class DashboardNotifier extends StateNotifier<DashboardState> {
   final DashboardRepository _repository;
+  final DashboardCache _cache = DashboardCache();
 
   DashboardNotifier(this._repository) : super(DashboardState()) {
     loadDashboard();
   }
 
-  Future<void> loadDashboard({String? period}) async {
+  /// Load dashboard with optimizations:
+  /// 1. Check cache first (optimistic UI)
+  /// 2. Load overview first (progressive loading)
+  /// 3. Load secondary data in parallel
+  Future<void> loadDashboard({String? period, bool forceRefresh = false}) async {
     final selectedPeriod = period ?? state.selectedPeriod;
+    
+    // Clear cache if period changed
+    if (state.selectedPeriod != selectedPeriod) {
+      _cache.clearPeriod(state.selectedPeriod);
+    }
+
+    // Try to load from cache first (optimistic UI)
+    if (!forceRefresh) {
+      final cachedOverview = _cache.get<DashboardOverview>(
+        DashboardCache.cacheKey('overview', selectedPeriod),
+        ttl: const Duration(seconds: 30),
+      );
+      final cachedRecentActivities = _cache.get<List<RecentActivity>>(
+        DashboardCache.cacheKey('recent-activities', selectedPeriod),
+        ttl: const Duration(seconds: 60),
+      );
+      final cachedTopAccounts = _cache.get<List<TopAccount>>(
+        DashboardCache.cacheKey('top-accounts', selectedPeriod),
+        ttl: const Duration(seconds: 60),
+      );
+      final cachedTopSalesReps = _cache.get<List<TopSalesRep>>(
+        DashboardCache.cacheKey('top-sales-rep', selectedPeriod),
+        ttl: const Duration(seconds: 60),
+      );
+      final cachedVisitStatistics = _cache.get<VisitStatistics>(
+        DashboardCache.cacheKey('visit-statistics', selectedPeriod),
+        ttl: const Duration(seconds: 60),
+      );
+      final cachedActivityTrends = _cache.get<ActivityTrends>(
+        DashboardCache.cacheKey('activity-trends', selectedPeriod),
+        ttl: const Duration(seconds: 60),
+      );
+
+      // If we have cached data, show it immediately
+      if (cachedOverview != null) {
+        state = state.copyWith(
+          overview: cachedOverview,
+          recentActivities: cachedRecentActivities,
+          topAccounts: cachedTopAccounts,
+          topSalesReps: cachedTopSalesReps,
+          visitStatistics: cachedVisitStatistics,
+          activityTrends: cachedActivityTrends,
+          selectedPeriod: selectedPeriod,
+          isLoading: false,
+          isLoadingOverview: false,
+          isLoadingSecondary: false,
+        );
+      }
+    }
+
+    // Set loading state
     state = state.copyWith(
       isLoading: true,
+      isLoadingOverview: true,
+      isLoadingSecondary: true,
       errorMessage: null,
       selectedPeriod: selectedPeriod,
     );
 
     try {
-      // Load overview first as it's the most critical
-      final overview = await _repository.getOverview(period: selectedPeriod);
-      
-      // Load other data, handle errors individually so one failure doesn't break everything
-      List<RecentActivity>? recentActivities;
-      List<TopAccount>? topAccounts;
-      List<TopSalesRep>? topSalesReps;
-      VisitStatistics? visitStatistics;
-      ActivityTrends? activityTrends;
-
+      // Phase 1: Load overview first (critical data) - Progressive Loading
+      DashboardOverview? overview;
       try {
-        recentActivities = await _repository.getRecentActivities(limit: 10);
+        overview = await _repository.getOverview(period: selectedPeriod);
+        _cache.set(
+          DashboardCache.cacheKey('overview', selectedPeriod),
+          overview,
+        );
+        
+        // Update state with overview immediately
+        state = state.copyWith(
+          overview: overview,
+          isLoadingOverview: false,
+        );
       } catch (e) {
-        print('Error loading recent activities: $e');
-        recentActivities = [];
+        print('Error loading overview: $e');
+        // If overview fails, try to use cached data
+        final cachedOverview = _cache.get<DashboardOverview>(
+          DashboardCache.cacheKey('overview', selectedPeriod),
+        );
+        if (cachedOverview != null) {
+          overview = cachedOverview;
+          state = state.copyWith(
+            overview: cachedOverview,
+            isLoadingOverview: false,
+          );
+        } else {
+          throw e;
+        }
       }
 
-      try {
-        topAccounts = await _repository.getTopAccounts(period: selectedPeriod, limit: 5);
-      } catch (e) {
-        print('Error loading top accounts: $e');
-        topAccounts = [];
-      }
+      // Phase 2: Load secondary data in parallel - Parallel Loading
+      final secondaryDataResults = await Future.wait([
+        _loadRecentActivities(selectedPeriod),
+        _loadTopAccounts(selectedPeriod),
+        _loadTopSalesReps(selectedPeriod),
+        _loadVisitStatistics(selectedPeriod),
+        _loadActivityTrends(selectedPeriod),
+      ], eagerError: false);
 
-      try {
-        topSalesReps = await _repository.getTopSalesRep(period: selectedPeriod, limit: 5);
-      } catch (e) {
-        print('Error loading top sales rep: $e');
-        topSalesReps = [];
-      }
-
-      try {
-        visitStatistics = await _repository.getVisitStatistics(period: selectedPeriod);
-      } catch (e) {
-        print('Error loading visit statistics: $e');
-      }
-
-      try {
-        activityTrends = await _repository.getActivityTrends(period: selectedPeriod);
-      } catch (e) {
-        print('Error loading activity trends: $e');
-      }
-
+      // Update state with all secondary data
       state = state.copyWith(
-        overview: overview,
-        recentActivities: recentActivities,
-        topAccounts: topAccounts,
-        topSalesReps: topSalesReps,
-        visitStatistics: visitStatistics,
-        activityTrends: activityTrends,
+        recentActivities: secondaryDataResults[0] as List<RecentActivity>?,
+        topAccounts: secondaryDataResults[1] as List<TopAccount>?,
+        topSalesReps: secondaryDataResults[2] as List<TopSalesRep>?,
+        visitStatistics: secondaryDataResults[3] as VisitStatistics?,
+        activityTrends: secondaryDataResults[4] as ActivityTrends?,
         isLoading: false,
+        isLoadingSecondary: false,
         errorMessage: null,
       );
     } catch (e, stackTrace) {
@@ -91,7 +148,90 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
       print('Extracted error message: $errorMessage');
       state = state.copyWith(
         isLoading: false,
+        isLoadingOverview: false,
+        isLoadingSecondary: false,
         errorMessage: errorMessage,
+      );
+    }
+  }
+
+  Future<List<RecentActivity>?> _loadRecentActivities(String period) async {
+    try {
+      final data = await _repository.getRecentActivities(limit: 10);
+      _cache.set(
+        DashboardCache.cacheKey('recent-activities', period),
+        data,
+      );
+      return data;
+    } catch (e) {
+      print('Error loading recent activities: $e');
+      // Try cache as fallback
+      return _cache.get<List<RecentActivity>>(
+        DashboardCache.cacheKey('recent-activities', period),
+      );
+    }
+  }
+
+  Future<List<TopAccount>?> _loadTopAccounts(String period) async {
+    try {
+      final data = await _repository.getTopAccounts(period: period, limit: 5);
+      _cache.set(
+        DashboardCache.cacheKey('top-accounts', period),
+        data,
+      );
+      return data;
+    } catch (e) {
+      print('Error loading top accounts: $e');
+      return _cache.get<List<TopAccount>>(
+        DashboardCache.cacheKey('top-accounts', period),
+      );
+    }
+  }
+
+  Future<List<TopSalesRep>?> _loadTopSalesReps(String period) async {
+    try {
+      final data = await _repository.getTopSalesRep(period: period, limit: 5);
+      _cache.set(
+        DashboardCache.cacheKey('top-sales-rep', period),
+        data,
+      );
+      return data;
+    } catch (e) {
+      print('Error loading top sales rep: $e');
+      return _cache.get<List<TopSalesRep>>(
+        DashboardCache.cacheKey('top-sales-rep', period),
+      );
+    }
+  }
+
+  Future<VisitStatistics?> _loadVisitStatistics(String period) async {
+    try {
+      final data = await _repository.getVisitStatistics(period: period);
+      _cache.set(
+        DashboardCache.cacheKey('visit-statistics', period),
+        data,
+      );
+      return data;
+    } catch (e) {
+      print('Error loading visit statistics: $e');
+      return _cache.get<VisitStatistics>(
+        DashboardCache.cacheKey('visit-statistics', period),
+      );
+    }
+  }
+
+  Future<ActivityTrends?> _loadActivityTrends(String period) async {
+    try {
+      final data = await _repository.getActivityTrends(period: period);
+      _cache.set(
+        DashboardCache.cacheKey('activity-trends', period),
+        data,
+      );
+      return data;
+    } catch (e) {
+      print('Error loading activity trends: $e');
+      return _cache.get<ActivityTrends>(
+        DashboardCache.cacheKey('activity-trends', period),
       );
     }
   }
@@ -156,11 +296,11 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
   }
 
   Future<void> refresh() async {
-    await loadDashboard();
+    await loadDashboard(forceRefresh: true);
   }
 
   Future<void> changePeriod(String period) async {
-    await loadDashboard(period: period);
+    await loadDashboard(period: period, forceRefresh: true);
   }
 }
 

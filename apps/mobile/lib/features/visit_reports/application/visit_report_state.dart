@@ -4,6 +4,7 @@ class VisitReportListState {
   const VisitReportListState({
     this.visitReports = const [],
     this.isLoading = false,
+    this.isLoadingMore = false,
     this.errorMessage,
     this.pagination,
     this.searchQuery = '',
@@ -11,6 +12,7 @@ class VisitReportListState {
 
   final List<VisitReport> visitReports;
   final bool isLoading;
+  final bool isLoadingMore;
   final String? errorMessage;
   final Pagination? pagination;
   final String searchQuery;
@@ -18,13 +20,18 @@ class VisitReportListState {
   VisitReportListState copyWith({
     List<VisitReport>? visitReports,
     bool? isLoading,
+    bool? isLoadingMore,
     String? errorMessage,
     Pagination? pagination,
     String? searchQuery,
+    bool clearVisitReports = false,
   }) {
     return VisitReportListState(
-      visitReports: visitReports ?? this.visitReports,
+      visitReports: clearVisitReports
+          ? const []
+          : (visitReports ?? this.visitReports),
       isLoading: isLoading ?? this.isLoading,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       errorMessage: errorMessage,
       pagination: pagination ?? this.pagination,
       searchQuery: searchQuery ?? this.searchQuery,

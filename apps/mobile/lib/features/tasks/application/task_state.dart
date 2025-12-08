@@ -4,6 +4,7 @@ class TaskListState {
   const TaskListState({
     this.tasks = const [],
     this.isLoading = false,
+    this.isLoadingMore = false,
     this.errorMessage,
     this.pagination,
     this.searchQuery = '',
@@ -13,6 +14,7 @@ class TaskListState {
 
   final List<Task> tasks;
   final bool isLoading;
+  final bool isLoadingMore;
   final String? errorMessage;
   final Pagination? pagination;
   final String searchQuery;
@@ -22,15 +24,18 @@ class TaskListState {
   TaskListState copyWith({
     List<Task>? tasks,
     bool? isLoading,
+    bool? isLoadingMore,
     String? errorMessage,
     Pagination? pagination,
     String? searchQuery,
     String? selectedStatus,
     String? selectedPriority,
+    bool clearTasks = false,
   }) {
     return TaskListState(
-      tasks: tasks ?? this.tasks,
+      tasks: clearTasks ? const [] : (tasks ?? this.tasks),
       isLoading: isLoading ?? this.isLoading,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       errorMessage: errorMessage,
       pagination: pagination ?? this.pagination,
       searchQuery: searchQuery ?? this.searchQuery,

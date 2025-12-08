@@ -5,6 +5,7 @@ import '../../../core/l10n/app_localizations.dart';
 import '../../../core/widgets/error_widget.dart';
 import '../../../core/widgets/loading_widget.dart';
 import '../../../core/widgets/main_scaffold.dart';
+import '../../../core/widgets/skeleton_widget.dart';
 import '../../notifications/application/notification_provider.dart';
 import '../../notifications/presentation/notification_list_screen.dart';
 import '../application/dashboard_provider.dart';
@@ -129,16 +130,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       ],
       body: RefreshIndicator(
         onRefresh: _onRefresh,
-        child: dashboardState.isLoading
-            ? const LoadingWidget()
-            : dashboardState.errorMessage != null
-                ? ErrorStateWidget(
-                    message: dashboardState.errorMessage!,
-                    onRetry: () {
-                      ref.read(dashboardProvider.notifier).refresh();
-                    },
-                  )
-                : SingleChildScrollView(
+        child: dashboardState.errorMessage != null &&
+                dashboardState.overview == null
+            ? ErrorStateWidget(
+                message: dashboardState.errorMessage!,
+                onRetry: () {
+                  ref.read(dashboardProvider.notifier).refresh();
+                },
+              )
+            : SingleChildScrollView(
                     padding: const EdgeInsets.all(20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -176,7 +176,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         if (dashboardState.selectedPeriod != 'today')
                           const SizedBox(height: 16),
                         // Overview Stats - 2 Cards (Accounts, Revenue)
-                        if (dashboardState.overview != null) ...[
+                        // Show loading skeleton if overview is loading and not available
+                        if (dashboardState.isLoadingOverview &&
+                            dashboardState.overview == null)
+                          const LoadingWidget()
+                        else if (dashboardState.overview != null) ...[
                           GridView.count(
                             crossAxisCount: 2,
                             shrinkWrap: true,
@@ -261,7 +265,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                               dashboardState.overview != null)
                             const SizedBox(height: 24),
                           // Top Accounts - Full Width
-                          if (dashboardState.topAccounts != null &&
+                          if (dashboardState.isLoadingSecondary &&
+                              dashboardState.topAccounts == null)
+                            const SkeletonCard(height: 200)
+                          else if (dashboardState.topAccounts != null &&
                               dashboardState.topAccounts!.isNotEmpty)
                             TopAccountsWidget(
                               accounts: dashboardState.topAccounts!,
@@ -270,7 +277,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                               dashboardState.topAccounts!.isNotEmpty)
                             const SizedBox(height: 24),
                           // Top Sales Rep - Full Width
-                          if (dashboardState.topSalesReps != null &&
+                          if (dashboardState.isLoadingSecondary &&
+                              dashboardState.topSalesReps == null)
+                            const SkeletonCard(height: 200)
+                          else if (dashboardState.topSalesReps != null &&
                               dashboardState.topSalesReps!.isNotEmpty)
                             TopSalesRepWidget(
                               salesReps: dashboardState.topSalesReps!,
@@ -279,7 +289,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                               dashboardState.topSalesReps!.isNotEmpty)
                             const SizedBox(height: 24),
                           // Recent Activities - Full Width
-                          if (dashboardState.recentActivities != null &&
+                          if (dashboardState.isLoadingSecondary &&
+                              dashboardState.recentActivities == null)
+                            const SkeletonCard(height: 200)
+                          else if (dashboardState.recentActivities != null &&
                               dashboardState.recentActivities!.isNotEmpty)
                             RecentActivitiesWidget(
                               activities: dashboardState.recentActivities!,

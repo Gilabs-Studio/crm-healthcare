@@ -8,6 +8,7 @@ import '../../../core/routing/app_router.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/widgets/error_widget.dart';
 import '../../../core/widgets/loading_widget.dart';
+import '../../../core/widgets/skeleton_widget.dart';
 import 'widgets/account_card.dart';
 
 class AccountListScreen extends ConsumerStatefulWidget {
@@ -134,9 +135,19 @@ class _AccountListScreenState extends ConsumerState<AccountListScreen> {
       );
     }
 
+    // Show skeleton screens if loading first page
+    if (state.isLoading && state.accounts.isEmpty) {
+      return ListView.builder(
+        itemCount: 5, // Show 5 skeleton items
+        itemBuilder: (context, index) {
+          return const SkeletonListItem(height: 80);
+        },
+      );
+    }
+
     return ListView.builder(
       controller: _scrollController,
-      itemCount: state.accounts.length + (state.isLoading ? 1 : 0),
+      itemCount: state.accounts.length + (state.isLoadingMore ? 1 : 0),
       itemBuilder: (context, index) {
         if (index == state.accounts.length) {
           return const Padding(

@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/cache/list_cache.dart';
 import '../../../core/network/api_client.dart';
 import '../data/models/task.dart';
 import '../data/task_repository.dart';
@@ -31,6 +32,7 @@ class TaskListNotifier extends StateNotifier<TaskListState> {
   TaskListNotifier(this._repository) : super(const TaskListState());
 
   final TaskRepository _repository;
+  final ListCache _cache = ListCache();
 
   Future<void> loadTasks({
     int page = 1,
@@ -38,24 +40,95 @@ class TaskListNotifier extends StateNotifier<TaskListState> {
     String? search,
     String? status,
     String? priority,
+    bool forceRefresh = false,
   }) async {
+    final searchQuery = search ?? state.searchQuery;
+    final statusFilter = status ?? state.selectedStatus;
+    final priorityFilter = priority ?? state.selectedPriority;
+
+    final cacheKey = ListCache.cacheKey(
+      'tasks',
+      page: page,
+      search: searchQuery.isNotEmpty ? searchQuery : null,
+      filters: {
+        if (statusFilter != null) 'status': statusFilter,
+        if (priorityFilter != null) 'priority': priorityFilter,
+      },
+    );
+
+    // Try to load from cache first (optimistic UI) - only for first page
+    if (!forceRefresh && !refresh && page == 1) {
+      final cachedTasks = _cache.get<Task>(
+        cacheKey,
+        ttl: const Duration(seconds: 60),
+        expectedMetadata: {
+          if (searchQuery.isNotEmpty) 'search': searchQuery,
+          if (statusFilter != null) 'status': statusFilter,
+          if (priorityFilter != null) 'priority': priorityFilter,
+        },
+      );
+
+      if (cachedTasks != null && cachedTasks.isNotEmpty) {
+        // Show cached data immediately
+        final cachedMetadata = _cache.getMetadata(cacheKey);
+        Pagination? cachedPagination;
+        if (cachedMetadata?['pagination'] != null) {
+          try {
+            cachedPagination = Pagination.fromJson(
+              cachedMetadata!['pagination'] as Map<String, dynamic>,
+            );
+          } catch (e) {
+            // Ignore pagination parsing error
+          }
+        }
+        state = state.copyWith(
+          tasks: cachedTasks,
+          searchQuery: searchQuery,
+          selectedStatus: statusFilter,
+          selectedPriority: priorityFilter,
+          isLoading: false,
+          isLoadingMore: false,
+          errorMessage: null,
+          pagination: cachedPagination,
+        );
+      }
+    }
+
+    // Set loading state
     if (refresh || page == 1) {
-      state = state.copyWith(isLoading: true, errorMessage: null);
+      state = state.copyWith(
+        isLoading: true,
+        isLoadingMore: false,
+        errorMessage: null,
+      );
     } else {
-      state = state.copyWith(isLoading: true);
+      state = state.copyWith(isLoadingMore: true);
     }
 
     try {
-      final searchQuery = search ?? state.searchQuery;
-      final statusFilter = status ?? state.selectedStatus;
-      final priorityFilter = priority ?? state.selectedPriority;
-
       final response = await _repository.getTasks(
         page: page,
         perPage: 20,
         search: searchQuery.isNotEmpty ? searchQuery : null,
         status: statusFilter,
         priority: priorityFilter,
+      );
+
+      // Cache the response
+      _cache.set(
+        cacheKey,
+        response.items,
+        metadata: {
+          'pagination': {
+            'page': response.pagination.page,
+            'perPage': response.pagination.perPage,
+            'total': response.pagination.total,
+            'totalPages': response.pagination.totalPages,
+          },
+          'search': searchQuery,
+          if (statusFilter != null) 'status': statusFilter,
+          if (priorityFilter != null) 'priority': priorityFilter,
+        },
       );
 
       if (refresh || page == 1) {
@@ -66,30 +139,48 @@ class TaskListNotifier extends StateNotifier<TaskListState> {
           selectedStatus: statusFilter,
           selectedPriority: priorityFilter,
           isLoading: false,
+          isLoadingMore: false,
           errorMessage: null,
         );
       } else {
         state = state.copyWith(
           tasks: [...state.tasks, ...response.items],
           pagination: response.pagination,
-          isLoading: false,
+          isLoadingMore: false,
           errorMessage: null,
         );
       }
     } catch (e) {
+      // On error, try to use cached data as fallback
+      if (page == 1) {
+        final cachedTasks = _cache.get<Task>(cacheKey);
+        if (cachedTasks != null && cachedTasks.isNotEmpty) {
+          state = state.copyWith(
+            tasks: cachedTasks,
+            isLoading: false,
+            isLoadingMore: false,
+            errorMessage: null,
+          );
+          return;
+        }
+      }
+
       state = state.copyWith(
         isLoading: false,
+        isLoadingMore: false,
         errorMessage: e.toString().replaceFirst('Exception: ', ''),
       );
     }
   }
 
   Future<void> refresh() async {
-    await loadTasks(page: 1, refresh: true);
+    // Clear cache for tasks
+    _cache.clearPrefix('list:tasks');
+    await loadTasks(page: 1, refresh: true, forceRefresh: true);
   }
 
   Future<void> loadMore() async {
-    if (state.isLoading) return;
+    if (state.isLoading || state.isLoadingMore) return;
     final pagination = state.pagination;
     if (pagination == null || !pagination.hasNextPage) return;
 
@@ -102,12 +193,14 @@ class TaskListNotifier extends StateNotifier<TaskListState> {
 
   void updateStatusFilter(String? status) {
     state = state.copyWith(selectedStatus: status);
-    loadTasks(page: 1, refresh: true, status: status);
+    _cache.clearPrefix('list:tasks');
+    loadTasks(page: 1, refresh: true, status: status, forceRefresh: true);
   }
 
   void updatePriorityFilter(String? priority) {
     state = state.copyWith(selectedPriority: priority);
-    loadTasks(page: 1, refresh: true, priority: priority);
+    _cache.clearPrefix('list:tasks');
+    loadTasks(page: 1, refresh: true, priority: priority, forceRefresh: true);
   }
 
   void clearFilters() {
@@ -116,7 +209,13 @@ class TaskListNotifier extends StateNotifier<TaskListState> {
       selectedPriority: null,
       searchQuery: '',
     );
-    loadTasks(page: 1, refresh: true);
+    _cache.clearPrefix('list:tasks');
+    loadTasks(page: 1, refresh: true, forceRefresh: true);
+  }
+
+  /// Clear cache - exposed for TaskFormNotifier
+  void clearCache() {
+    _cache.clearPrefix('list:tasks');
   }
 }
 
@@ -148,7 +247,8 @@ class TaskFormNotifier extends StateNotifier<TaskFormState> {
         contactId: contactId,
       );
 
-      // Invalidate task list to refresh
+      // Clear cache and invalidate task list to refresh
+      _ref.read(taskListProvider.notifier).clearCache();
       _ref.invalidate(taskListProvider);
 
       state = state.copyWith(isLoading: false);
@@ -184,7 +284,8 @@ class TaskFormNotifier extends StateNotifier<TaskFormState> {
         dueDate: dueDate,
       );
 
-      // Invalidate providers to refresh
+      // Clear cache and invalidate providers to refresh
+      _ref.read(taskListProvider.notifier).clearCache();
       _ref.invalidate(taskDetailProvider(id));
       _ref.invalidate(taskListProvider);
 
@@ -205,7 +306,8 @@ class TaskFormNotifier extends StateNotifier<TaskFormState> {
     try {
       await _repository.completeTask(id);
 
-      // Invalidate providers to refresh
+      // Clear cache and invalidate providers to refresh
+      _ref.read(taskListProvider.notifier).clearCache();
       _ref.invalidate(taskDetailProvider(id));
       _ref.invalidate(taskListProvider);
 
@@ -226,7 +328,8 @@ class TaskFormNotifier extends StateNotifier<TaskFormState> {
     try {
       await _repository.deleteTask(id);
 
-      // Invalidate task list to refresh
+      // Clear cache and invalidate task list to refresh
+      _ref.read(taskListProvider.notifier).clearCache();
       _ref.invalidate(taskListProvider);
       
       // Also invalidate task detail if it exists
