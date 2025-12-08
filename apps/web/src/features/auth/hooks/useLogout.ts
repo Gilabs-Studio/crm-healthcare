@@ -4,6 +4,7 @@ import { useCallback } from "react";
 import { useRouter } from "@/i18n/routing";
 import { useAuthStore } from "../stores/useAuthStore";
 import { authService } from "../services/authService";
+import { deleteCookie } from "@/lib/cookie";
 
 export function useLogout() {
   const router = useRouter();
@@ -19,7 +20,7 @@ export function useLogout() {
         localStorage.removeItem("token");
         localStorage.removeItem("refreshToken");
         // Remove cookie
-        document.cookie = "token=; path=/; max-age=0";
+        deleteCookie("token");
       }
       setUser(null);
       setToken(null);

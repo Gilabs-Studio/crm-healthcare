@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/gin-gonic/gin"
 	"github.com/gilabs/crm-healthcare/api/internal/hub"
 	"github.com/gilabs/crm-healthcare/api/pkg/jwt"
+	"github.com/gin-gonic/gin"
 )
 
 type WebSocketHandler struct {
@@ -24,10 +24,18 @@ func NewWebSocketHandler(hub *hub.NotificationHub, jwtManager *jwt.JWTManager) *
 
 // HandleWebSocket handles WebSocket connections for notifications
 func (h *WebSocketHandler) HandleWebSocket(c *gin.Context) {
-	// Get token from query parameter or header
-	tokenString := c.Query("token")
+	var tokenString string
+
+	// Priority 1: Get token from cookie (most secure for production)
+	tokenString, _ = c.Cookie("token")
+
+	// Priority 2: Fallback to query parameter (for backward compatibility)
 	if tokenString == "" {
-		// Try to get from Authorization header
+		tokenString = c.Query("token")
+	}
+
+	// Priority 3: Fallback to Authorization header
+	if tokenString == "" {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader != "" {
 			parts := strings.Split(authHeader, " ")
