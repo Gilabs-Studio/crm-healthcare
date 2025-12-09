@@ -1729,7 +1729,7 @@
                         {"key": "id", "value": "lead_id"}
                       ]
                     },
-                    "description": "Convert a qualified lead to an opportunity (deal). Required fields: opportunity_title, stage_id. Optional: create_account (auto-create account from lead), create_contact (auto-create contact from lead), account_id (use existing account), contact_id (use existing contact). Value is in smallest currency unit (sen). Probability is 0-100 percentage."
+                    "description": "Convert a qualified lead to an opportunity (deal). Lead must be in 'qualified' status to be converted. Required fields: opportunity_title, stage_id. Optional: create_account (auto-create account from lead), create_contact (auto-create contact from lead), account_id (use existing account), contact_id (use existing contact). Value is in smallest currency unit (sen). Probability is 0-100 percentage. Upon conversion, lead status changes to 'converted', and all associated visit reports and activities are automatically migrated to the created account/deal."
                   },
                   "response": [
                     {
@@ -1854,7 +1854,7 @@
                         {"key": "id", "value": "lead_id"}
                       ]
                     },
-                    "description": "Create an account from a lead (pre-convert). The lead's company name will be used for the account name. Optionally create a contact person from the lead's details. Requires lead_id and lead must not already have an account. category_id is optional, if not provided, the first available category will be used."
+                    "description": "Create an account from a lead (pre-convert, before lead conversion). The lead's company_name will be used for the account name. Optionally create a contact person from the lead's details (first_name, last_name, email, phone, job_title). Requires lead_id and lead must not already have an account (account_id must be null). category_id is optional, if not provided, the first available category will be used. This is useful for creating accounts during the qualification phase before converting the lead to a deal."
                   },
                   "response": [
                     {
@@ -2113,7 +2113,7 @@
                             }
                           ],
                           "cookie": [],
-                          "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"stage_abc123\",\n      \"name\": \"Lead\",\n      \"code\": \"lead\",\n      \"order\": 1,\n      \"color\": \"#94A3B8\",\n      \"is_active\": true,\n      \"is_won\": false,\n      \"is_lost\": false,\n      \"description\": \"New lead that needs qualification\",\n      \"created_at\": \"2024-01-15T10:30:45+07:00\",\n      \"updated_at\": \"2024-01-15T10:30:45+07:00\"\n    },\n    {\n      \"id\": \"stage_def456\",\n      \"name\": \"Qualification\",\n      \"code\": \"qualification\",\n      \"order\": 2,\n      \"color\": \"#3B82F6\",\n      \"is_active\": true,\n      \"is_won\": false,\n      \"is_lost\": false,\n      \"description\": \"Qualifying the lead to determine if it's a good fit\",\n      \"created_at\": \"2024-01-15T10:30:45+07:00\",\n      \"updated_at\": \"2024-01-15T10:30:45+07:00\"\n    }\n  ],\n  \"meta\": {\n    \"filters\": {\n      \"is_active\": true\n    }\n  },\n  \"timestamp\": \"2024-01-15T10:30:45+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
+                          "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"stage_abc123\",\n      \"name\": \"Qualification\",\n      \"code\": \"qualification\",\n      \"order\": 1,\n      \"color\": \"#3B82F6\",\n      \"is_active\": true,\n      \"is_won\": false,\n      \"is_lost\": false,\n      \"description\": \"Qualifying the opportunity to determine if it's a good fit. Deals enter pipeline at this stage after lead conversion.\",\n      \"created_at\": \"2024-01-15T10:30:45+07:00\",\n      \"updated_at\": \"2024-01-15T10:30:45+07:00\"\n    },\n    {\n      \"id\": \"stage_def456\",\n      \"name\": \"Proposal\",\n      \"code\": \"proposal\",\n      \"order\": 2,\n      \"color\": \"#8B5CF6\",\n      \"is_active\": true,\n      \"is_won\": false,\n      \"is_lost\": false,\n      \"description\": \"Proposal stage - presenting solution to customer\",\n      \"created_at\": \"2024-01-15T10:30:45+07:00\",\n      \"updated_at\": \"2024-01-15T10:30:45+07:00\"\n    }\n  ],\n  \"meta\": {\n    \"filters\": {\n      \"is_active\": true\n    }\n  },\n  \"timestamp\": \"2024-01-15T10:30:45+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
                         }
                       ]
                     },
@@ -2185,7 +2185,7 @@
                             }
                           ],
                           "cookie": [],
-                          "body": "{\n  \"success\": true,\n  \"data\": {\n    \"total_deals\": 150,\n    \"total_value\": 5000000000,\n    \"total_value_formatted\": \"Rp 50.000.000\",\n    \"won_deals\": 45,\n    \"won_value\": 2000000000,\n    \"won_value_formatted\": \"Rp 20.000.000\",\n    \"lost_deals\": 20,\n    \"lost_value\": 500000000,\n    \"lost_value_formatted\": \"Rp 5.000.000\",\n    \"open_deals\": 85,\n    \"open_value\": 2500000000,\n    \"open_value_formatted\": \"Rp 25.000.000\",\n    \"by_stage\": [\n      {\n        \"stage_id\": \"stage_abc123\",\n        \"stage_name\": \"Lead\",\n        \"stage_code\": \"lead\",\n        \"deal_count\": 30,\n        \"total_value\": 1000000000,\n        \"total_value_formatted\": \"Rp 10.000.000\"\n      },\n      {\n        \"stage_id\": \"stage_def456\",\n        \"stage_name\": \"Qualification\",\n        \"stage_code\": \"qualification\",\n        \"deal_count\": 25,\n        \"total_value\": 800000000,\n        \"total_value_formatted\": \"Rp 8.000.000\"\n      }\n    ]\n  },\n  \"timestamp\": \"2024-01-15T10:30:45+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
+                          "body": "{\n  \"success\": true,\n  \"data\": {\n    \"total_deals\": 150,\n    \"total_value\": 5000000000,\n    \"total_value_formatted\": \"Rp 50.000.000\",\n    \"won_deals\": 45,\n    \"won_value\": 2000000000,\n    \"won_value_formatted\": \"Rp 20.000.000\",\n    \"lost_deals\": 20,\n    \"lost_value\": 500000000,\n    \"lost_value_formatted\": \"Rp 5.000.000\",\n    \"open_deals\": 85,\n    \"open_value\": 2500000000,\n    \"open_value_formatted\": \"Rp 25.000.000\",\n    \"by_stage\": [\n      {\n        \"stage_id\": \"stage_abc123\",\n        \"stage_name\": \"Qualification\",\n        \"stage_code\": \"qualification\",\n        \"deal_count\": 30,\n        \"total_value\": 1000000000,\n        \"total_value_formatted\": \"Rp 10.000.000\"\n      },\n      {\n        \"stage_id\": \"stage_def456\",\n        \"stage_name\": \"Qualification\",\n        \"stage_code\": \"qualification\",\n        \"deal_count\": 25,\n        \"total_value\": 800000000,\n        \"total_value_formatted\": \"Rp 8.000.000\"\n      }\n    ]\n  },\n  \"timestamp\": \"2024-01-15T10:30:45+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
                         }
                       ]
                     },
@@ -2338,7 +2338,7 @@
                       "response": []
                     }
                   ],
-                  "description": "Pipeline Stages endpoints untuk mengelola pipeline stages (Lead, Qualification, Proposal, Negotiation, Closed Won, Closed Lost)"
+                  "description": "Pipeline Stages endpoints untuk mengelola pipeline stages. Note: 'Lead' stage has been removed. Deals enter the pipeline starting from 'Qualification' stage after lead conversion. Standard stages: Qualification, Proposal, Negotiation, Closed Won, Closed Lost."
                 },
                 {
                   "name": "Deals",
@@ -2402,7 +2402,7 @@
                             }
                           ],
                           "cookie": [],
-                          "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"deal_abc123\",\n      \"title\": \"New Deal Opportunity\",\n      \"description\": \"Deal description here\",\n      \"account_id\": \"account_xyz789\",\n      \"account\": {\n        \"id\": \"account_xyz789\",\n        \"name\": \"Rumah Sakit Umum\"\n      },\n      \"contact_id\": \"contact_def456\",\n      \"contact\": {\n        \"id\": \"contact_def456\",\n        \"name\": \"Dr. John Doe\",\n        \"email\": \"doctor@example.com\",\n        \"phone\": \"081234567890\"\n      },\n      \"stage_id\": \"stage_abc123\",\n      \"stage\": {\n        \"id\": \"stage_abc123\",\n        \"name\": \"Lead\",\n        \"code\": \"lead\",\n        \"order\": 1,\n        \"color\": \"#94A3B8\",\n        \"is_active\": true,\n        \"is_won\": false,\n        \"is_lost\": false\n      },\n      \"value\": 50000000,\n      \"value_formatted\": \"Rp 500.000\",\n      \"probability\": 50,\n      \"expected_close_date\": \"2024-12-31T00:00:00+07:00\",\n      \"actual_close_date\": null,\n      \"assigned_to\": \"user_789\",\n      \"assigned_user\": {\n        \"id\": \"user_789\",\n        \"name\": \"Sales Rep Name\",\n        \"email\": \"sales@example.com\"\n      },\n      \"status\": \"open\",\n      \"source\": \"website\",\n      \"notes\": \"Additional notes\",\n      \"created_by\": \"user_789\",\n      \"created_at\": \"2024-01-15T10:30:45+07:00\",\n      \"updated_at\": \"2024-01-15T10:30:45+07:00\"\n    }\n  ],\n  \"meta\": {\n    \"pagination\": {\n      \"page\": 1,\n      \"per_page\": 20,\n      \"total\": 150,\n      \"total_pages\": 8,\n      \"has_next\": true,\n      \"has_prev\": false,\n      \"next_page\": 2,\n      \"prev_page\": null\n    },\n    \"filters\": {}\n  },\n  \"timestamp\": \"2024-01-15T10:30:45+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
+                          "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"deal_abc123\",\n      \"title\": \"New Deal Opportunity\",\n      \"description\": \"Deal description here\",\n      \"account_id\": \"account_xyz789\",\n      \"account\": {\n        \"id\": \"account_xyz789\",\n        \"name\": \"Rumah Sakit Umum\"\n      },\n      \"contact_id\": \"contact_def456\",\n      \"contact\": {\n        \"id\": \"contact_def456\",\n        \"name\": \"Dr. John Doe\",\n        \"email\": \"doctor@example.com\",\n        \"phone\": \"081234567890\"\n      },\n      \"stage_id\": \"stage_abc123\",\n      \"stage\": {\n        \"id\": \"stage_abc123\",\n        \"name\": \"Qualification\",\n        \"code\": \"qualification\",\n        \"order\": 1,\n        \"color\": \"#3B82F6\",\n        \"is_active\": true,\n        \"is_won\": false,\n        \"is_lost\": false\n      },\n      \"value\": 50000000,\n      \"value_formatted\": \"Rp 500.000\",\n      \"probability\": 50,\n      \"expected_close_date\": \"2024-12-31T00:00:00+07:00\",\n      \"actual_close_date\": null,\n      \"assigned_to\": \"user_789\",\n      \"assigned_user\": {\n        \"id\": \"user_789\",\n        \"name\": \"Sales Rep Name\",\n        \"email\": \"sales@example.com\"\n      },\n      \"status\": \"open\",\n      \"source\": \"website\",\n      \"notes\": \"Additional notes\",\n      \"created_by\": \"user_789\",\n      \"created_at\": \"2024-01-15T10:30:45+07:00\",\n      \"updated_at\": \"2024-01-15T10:30:45+07:00\"\n    }\n  ],\n  \"meta\": {\n    \"pagination\": {\n      \"page\": 1,\n      \"per_page\": 20,\n      \"total\": 150,\n      \"total_pages\": 8,\n      \"has_next\": true,\n      \"has_prev\": false,\n      \"next_page\": 2,\n      \"prev_page\": null\n    },\n    \"filters\": {}\n  },\n  \"timestamp\": \"2024-01-15T10:30:45+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
                         }
                       ]
                     },
@@ -2458,7 +2458,7 @@
                           "host": ["{{base_url}}"],
                           "path": ["api", "v1", "deals"]
                         },
-                        "description": "Create a new deal. Value is in smallest currency unit (sen). Probability is 0-100 percentage."
+                        "description": "Create a new deal. Note: In the CRM flow, deals should typically be created via Lead Conversion (POST /leads/:id/convert) rather than directly. This endpoint is available for edge cases. Required fields: title, account_id, stage_id. Value is in smallest currency unit (sen). Probability is 0-100 percentage. lead_id is optional and can be used to link a deal to its source lead."
                       },
                       "response": [
                         {
@@ -2737,7 +2737,7 @@
                         {"key": "end_date", "value": "", "disabled": true}
                       ]
                     },
-                    "description": "Get list of visit reports with pagination. Filter by deal_id to get visit reports for a specific deal."
+                    "description": "Get list of visit reports with pagination. Filter by deal_id to get visit reports for a specific deal. Filter by lead_id to get visit reports for a specific lead (during qualification phase). Filter by account_id to get visit reports for a specific account."
                   }
                 },
                 {
@@ -2791,7 +2791,7 @@
                       "host": ["{{base_url}}"],
                       "path": ["api", "v1", "visit-reports"]
                     },
-                    "description": "Create a new visit report. Business rules: Either lead_id OR account_id is required. If deal_id is provided, account_id must also be provided. account_id is optional when lead_id is provided (for pre-conversion visits)."
+                    "description": "Create a new visit report. Business rules: Either lead_id OR account_id is required. If deal_id is provided, account_id must also be provided (deals require accounts). account_id is optional when lead_id is provided (for pre-conversion visits during qualification phase). visit_date format: YYYY-MM-DD HH:mm (e.g., '2024-01-15 09:00')."
                   }
                 },
                 {
@@ -2826,7 +2826,7 @@
                         {"key": "id", "value": "visit_report_id"}
                       ]
                     },
-                    "description": "Update visit report information. Business rules: Either lead_id OR account_id is required. If deal_id is provided, account_id must also be provided."
+                    "description": "Update visit report information. Business rules: Either lead_id OR account_id is required. If deal_id is provided, account_id must also be provided (deals require accounts). visit_date format: YYYY-MM-DD HH:mm (e.g., '2024-01-15 09:00'). Status can only be updated to 'draft' or 'submitted'."
                   }
                 },
                 {
@@ -3421,7 +3421,7 @@
                         {"key": "end_date", "value": "", "disabled": true}
                       ]
                     },
-                    "description": "Get list of activities with pagination. Filter by deal_id to get activities for a specific deal."
+                    "description": "Get list of activities with pagination. Filter by deal_id to get activities for a specific deal. Filter by lead_id to get activities for a specific lead (during qualification phase). Filter by account_id to get activities for a specific account. Business rule: Activity must be linked to at least one of: lead_id, account_id, or deal_id."
                   }
                 },
                 {
@@ -3504,7 +3504,7 @@
                         {"key": "limit", "value": "50"}
                       ]
                     },
-                    "description": "Get activity timeline for account/contact/deal/user. Filter by deal_id to get timeline for a specific deal."
+                    "description": "Get activity timeline for account/contact/deal/lead/user. Filter by deal_id to get timeline for a specific deal. Filter by lead_id to get timeline for a specific lead (during qualification phase). Filter by account_id to get timeline for a specific account. At least one filter (account_id, contact_id, deal_id, lead_id, or user_id) is required."
                   }
                 }
               ],

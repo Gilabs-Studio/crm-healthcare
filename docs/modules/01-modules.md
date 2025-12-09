@@ -1,9 +1,10 @@
 # Modules Documentation
+
 ## CRM Healthcare/Pharmaceutical Platform - Sales CRM Modules
 
-**Versi**: 2.0  
+**Versi**: 2.1  
 **Status**: Active  
-**Last Updated**: 2025-01-15  
+**Last Updated**: 2025-01-20  
 **Product Type**: Sales CRM untuk Perusahaan Farmasi
 
 ---
@@ -66,17 +67,20 @@ apps/web/src/features/<moduleName>/
 **Purpose**: Handle user authentication and session management
 
 **Pages**:
+
 - `/login` - Login page
 - `/forgot-password` - Password reset request
 - `/reset-password` - Password reset form
 - `/verify-email` - Email verification
 
 **Components**:
+
 - `LoginForm` - Login form component
 - `PasswordResetForm` - Password reset form
 - `AuthGuard` - Route protection component
 
 **Services**:
+
 - `authService.login()`
 - `authService.logout()`
 - `authService.refreshToken()`
@@ -84,9 +88,11 @@ apps/web/src/features/<moduleName>/
 - `authService.resetPassword()`
 
 **Store**:
+
 - `useAuthStore` - Current user, token, session state
 
 **Relationships**:
+
 - → User Module (user profile)
 - → All modules (authentication required)
 
@@ -97,18 +103,21 @@ apps/web/src/features/<moduleName>/
 **Purpose**: Manage system users, roles, and permissions
 
 **Pages**:
+
 - `/users` - User list
 - `/users/new` - Create new user
 - `/users/[id]` - User detail/edit
 - `/users/[id]/permissions` - Manage user permissions
 
 **Components**:
+
 - `UserList` - User list table
 - `UserForm` - Create/edit user form
 - `UserRoleSelector` - Role assignment component
 - `PermissionMatrix` - Permission management
 
 **Services**:
+
 - `userService.list()`
 - `userService.getById()`
 - `userService.create()`
@@ -117,9 +126,11 @@ apps/web/src/features/<moduleName>/
 - `userService.updatePermissions()`
 
 **Store**:
+
 - `useUserStore` - User list, current user, permissions
 
 **Relationships**:
+
 - ← Authentication Module
 - → All modules (user context)
 
@@ -130,25 +141,30 @@ apps/web/src/features/<moduleName>/
 **Purpose**: System configuration and settings
 
 **Pages**:
+
 - `/settings` - Settings dashboard
 - `/settings/general` - General settings (company info, logo, branding)
 - `/settings/notifications` - Notification preferences
 - `/settings/pipeline` - Pipeline stages configuration
 
 **Components**:
+
 - `SettingsNav` - Settings navigation
 - `GeneralSettingsForm` - General settings form
 - `NotificationSettingsForm` - Notification settings
 - `PipelineSettingsForm` - Pipeline stages configuration
 
 **Services**:
+
 - `settingsService.getSettings()`
 - `settingsService.updateSettings()`
 
 **Store**:
+
 - `useSettingsStore` - System settings
 
 **Relationships**:
+
 - → All modules (settings affect all operations)
 
 ---
@@ -160,6 +176,7 @@ apps/web/src/features/<moduleName>/
 **Purpose**: Manage accounts (Rumah Sakit, Klinik, Apotek) dan contacts (Dokter, PIC, Manager)
 
 **Pages (Web)**:
+
 - `/accounts` - Account list
 - `/accounts/new` - Create new account
 - `/accounts/[id]` - Account detail/edit
@@ -169,12 +186,14 @@ apps/web/src/features/<moduleName>/
 - `/contacts/[id]` - Contact detail/edit
 
 **Pages (Mobile)**:
+
 - `/accounts` - Account list
 - `/accounts/[id]` - Account detail
 - `/contacts` - Contact list
 - `/contacts/[id]` - Contact detail
 
 **Components (Web)**:
+
 - `AccountList` - Account list table dengan search & filter
 - `AccountForm` - Create/edit account form
 - `AccountDetail` - Account detail view
@@ -185,12 +204,14 @@ apps/web/src/features/<moduleName>/
 - `ContactSelector` - Contact selector (untuk form lain)
 
 **Components (Mobile)**:
+
 - `AccountListScreen` - Account list dengan search
 - `AccountDetailScreen` - Account detail
 - `ContactListScreen` - Contact list
 - `ContactDetailScreen` - Contact detail
 
 **Services**:
+
 - `accountService.list()`
 - `accountService.getById()`
 - `accountService.create()`
@@ -205,21 +226,23 @@ apps/web/src/features/<moduleName>/
 - `contactService.search()`
 
 **Store**:
+
 - `useAccountStore` - Account list, current account
 - `useContactStore` - Contact list, current contact
 
 **Data Models**:
+
 ```typescript
 interface Account {
   id: string;
   name: string;
-  category: 'hospital' | 'clinic' | 'pharmacy';
+  category: "hospital" | "clinic" | "pharmacy";
   address?: string;
   city?: string;
   province?: string;
   phone?: string;
   email?: string;
-  status: 'active' | 'inactive';
+  status: "active" | "inactive";
   assignedTo?: string; // Sales rep ID
   createdAt: string;
   updatedAt: string;
@@ -229,7 +252,7 @@ interface Contact {
   id: string;
   accountId: string;
   name: string;
-  role: 'doctor' | 'pic' | 'manager' | 'other';
+  role: "doctor" | "pic" | "manager" | "other";
   phone?: string;
   email?: string;
   position?: string;
@@ -240,17 +263,19 @@ interface Contact {
 ```
 
 **Relationships**:
+
 - → Visit Report Module (visit reports linked ke account)
 - → Sales Pipeline Module (deals linked ke account)
 - → Task Module (tasks linked ke account/contact)
 
 ---
 
-### 5. Visit Report & Activity Tracking Module (`visit-reports`)
+### 6. Visit Report & Activity Tracking Module (`visit-reports`)
 
-**Purpose**: Track sales visits dengan check-in/out, GPS, dan dokumentasi foto
+**Purpose**: Track sales visits dengan check-in/out, GPS, dan dokumentasi foto. Visit reports dapat dikaitkan ke Lead, Deal, atau Account (via tabs)
 
 **Pages (Web)**:
+
 - `/visit-reports` - Visit report list
 - `/visit-reports/new` - Create new visit report
 - `/visit-reports/[id]` - Visit report detail
@@ -258,11 +283,13 @@ interface Contact {
 - `/accounts/[id]/activities` - Account activity timeline
 
 **Pages (Mobile)**:
+
 - `/visit-reports` - Visit report list
 - `/visit-reports/new` - Create visit report dengan GPS & foto
 - `/visit-reports/[id]` - Visit report detail
 
 **Components (Web)**:
+
 - `VisitReportList` - Visit report list dengan filter
 - `VisitReportForm` - Create/edit visit report form
 - `VisitReportDetail` - Visit report detail view
@@ -271,12 +298,14 @@ interface Contact {
 - `SupervisorReview` - Supervisor review component (approve/reject)
 
 **Components (Mobile)**:
+
 - `VisitReportListScreen` - Visit report list
 - `VisitReportFormScreen` - Create visit report dengan GPS & camera
 - `VisitReportDetailScreen` - Visit report detail
 - `CheckInOutButton` - Check-in/out button dengan GPS
 
 **Services**:
+
 - `visitReportService.list()`
 - `visitReportService.getById()`
 - `visitReportService.create()`
@@ -289,15 +318,19 @@ interface Contact {
 - `activityService.getTimeline()`
 
 **Store**:
+
 - `useVisitReportStore` - Visit report list, current visit report
 - `useActivityStore` - Activity timeline
 
 **Data Models**:
+
 ```typescript
 interface VisitReport {
   id: string;
-  accountId: string;
+  accountId?: string; // Optional - required if dealId is provided
   contactId?: string;
+  dealId?: string; // Optional - if provided, accountId is required
+  leadId?: string; // Optional - required if accountId is not provided
   salesRepId: string;
   visitDate: string;
   checkInTime?: string;
@@ -315,7 +348,7 @@ interface VisitReport {
   purpose: string;
   notes?: string;
   photos?: string[]; // Photo URLs
-  status: 'draft' | 'submitted' | 'approved' | 'rejected';
+  status: "draft" | "submitted" | "approved" | "rejected";
   approvedBy?: string;
   approvedAt?: string;
   createdAt: string;
@@ -324,9 +357,11 @@ interface VisitReport {
 
 interface Activity {
   id: string;
-  type: 'visit' | 'call' | 'email' | 'task' | 'deal';
-  accountId?: string;
+  type: "visit" | "call" | "email" | "task" | "deal";
+  accountId?: string; // Optional - at least one of accountId, dealId, or leadId required
   contactId?: string;
+  dealId?: string; // Optional - at least one of accountId, dealId, or leadId required
+  leadId?: string; // Optional - at least one of accountId, dealId, or leadId required
   userId: string;
   description: string;
   timestamp: string;
@@ -335,26 +370,32 @@ interface Activity {
 ```
 
 **Relationships**:
-- ← Account Module (visit report linked ke account)
-- ← Contact Module (visit report linked ke contact)
+
+- ← Account Module (visit report dapat dikaitkan ke account)
+- ← Contact Module (visit report dapat dikaitkan ke contact)
+- ← Deal Module (visit report dapat dikaitkan ke deal)
+- ← Lead Module (visit report dapat dikaitkan ke lead)
 - → Activity Module (visit report creates activity)
 
 ---
 
-### 6. Sales Pipeline Module (`pipeline`)
+### 7. Sales Pipeline Module (`pipeline`)
 
-**Purpose**: Manage sales pipeline dari lead hingga deal
+**Purpose**: Manage sales pipeline dari opportunity (deal). Deals dibuat melalui Lead Conversion, bukan langsung di pipeline
 
 **Pages (Web)**:
+
 - `/pipeline` - Pipeline kanban view
 - `/deals` - Deal list
 - `/deals/new` - Create new deal
 - `/deals/[id]` - Deal detail/edit
 
 **Pages (Mobile)**:
+
 - (Optional untuk MVP) - Basic deal list
 
 **Components (Web)**:
+
 - `PipelineKanban` - Kanban board untuk pipeline
 - `DealCard` - Deal card component
 - `DealForm` - Create/edit deal form
@@ -363,6 +404,7 @@ interface Activity {
 - `ForecastWidget` - Forecast widget
 
 **Services**:
+
 - `pipelineService.getPipeline()`
 - `pipelineService.getSummary()`
 - `pipelineService.getForecast()`
@@ -374,10 +416,12 @@ interface Activity {
 - `dealService.move()`
 
 **Store**:
+
 - `usePipelineStore` - Pipeline data, deals
 - `useDealStore` - Deal list, current deal
 
 **Data Models**:
+
 ```typescript
 interface PipelineStage {
   id: string;
@@ -399,7 +443,7 @@ interface Deal {
   probability: number; // 0-100
   products?: DealProduct[];
   notes?: string;
-  status: 'open' | 'won' | 'lost';
+  status: "open" | "won" | "lost";
   closedAt?: string;
   createdAt: string;
   updatedAt: string;
@@ -417,6 +461,7 @@ interface DealProduct {
 ```
 
 **Sales Funnel Report**:
+
 - Currently displays placeholder data for deal details
 - **Fields that need to be added in Sprint 2 (Dev2)**:
   - `GET /api/v1/deals` - Endpoint to fetch individual deals
@@ -429,39 +474,48 @@ interface DealProduct {
   - Forecast accuracy (expected vs actual close dates)
 
 **Relationships**:
-- ← Account Module (deal linked ke account)
-- ← Contact Module (deal linked ke contact)
+
+- ← Lead Module (deal dibuat melalui Lead Conversion)
+- ← Account Module (deal linked ke account - created from lead)
+- ← Contact Module (deal linked ke contact - created from lead, optional)
 - ← Product Module (deal linked ke products)
+- → Visit Report Module (visit reports dapat dikaitkan ke deal)
+- → Activity Module (activities dapat dikaitkan ke deal)
 
 ---
 
-### 7. Task & Reminder Module (`tasks`)
+### 8. Task & Reminder Module (`tasks`)
 
 **Purpose**: Manage tasks dan reminders untuk follow-up
 
 **Pages (Web)**:
+
 - `/tasks` - Task list
 - `/tasks/new` - Create new task
 - `/tasks/[id]` - Task detail/edit
 
 **Pages (Mobile)**:
+
 - `/tasks` - Task list
 - `/tasks/new` - Create new task
 - `/tasks/[id]` - Task detail
 
 **Components (Web)**:
+
 - `TaskList` - Task list dengan filter
 - `TaskForm` - Create/edit task form
 - `TaskCard` - Task card component
 - `TaskDetail` - Task detail view
 
 **Components (Mobile)**:
+
 - `TaskListScreen` - Task list
 - `TaskFormScreen` - Create task form
 - `TaskDetailScreen` - Task detail
 - `TaskReminderNotification` - Push notification untuk reminder
 
 **Services**:
+
 - `taskService.list()`
 - `taskService.getById()`
 - `taskService.create()`
@@ -472,9 +526,11 @@ interface DealProduct {
 - `taskService.getReminders()`
 
 **Store**:
+
 - `useTaskStore` - Task list, current task
 
 **Data Models**:
+
 ```typescript
 interface Task {
   id: string;
@@ -485,8 +541,8 @@ interface Task {
   assignedTo: string;
   assignedBy: string;
   dueDate?: string;
-  priority: 'low' | 'medium' | 'high';
-  status: 'open' | 'in-progress' | 'done' | 'cancelled';
+  priority: "low" | "medium" | "high";
+  status: "open" | "in-progress" | "done" | "cancelled";
   reminderAt?: string;
   completedAt?: string;
   createdAt: string;
@@ -495,30 +551,37 @@ interface Task {
 ```
 
 **Relationships**:
-- ← Account Module (task linked ke account)
-- ← Contact Module (task linked ke contact)
+
+- ← Account Module (task dapat dikaitkan ke account)
+- ← Contact Module (task dapat dikaitkan ke contact)
+- ← Deal Module (task dapat dikaitkan ke deal)
+- ← Lead Module (task dapat dikaitkan ke lead)
 
 ---
 
-### 8. Product Management Module (`products`)
+### 9. Product Management Module (`products`)
 
 **Purpose**: Manage product catalog
 
 **Pages (Web)**:
+
 - `/products` - Product list
 - `/products/new` - Create new product
 - `/products/[id]` - Product detail/edit
 
 **Pages (Mobile)**:
+
 - (Optional untuk MVP) - Basic product list
 
 **Components (Web)**:
+
 - `ProductList` - Product list dengan search
 - `ProductForm` - Create/edit product form
 - `ProductDetail` - Product detail view
 - `ProductSelector` - Product selector (untuk deal form)
 
 **Services**:
+
 - `productService.list()`
 - `productService.getById()`
 - `productService.create()`
@@ -527,9 +590,11 @@ interface Task {
 - `productService.search()`
 
 **Store**:
+
 - `useProductStore` - Product list, current product
 
 **Data Models**:
+
 ```typescript
 interface Product {
   id: string;
@@ -539,28 +604,32 @@ interface Product {
   description?: string;
   price: number;
   currency: string;
-  status: 'active' | 'inactive';
+  status: "active" | "inactive";
   createdAt: string;
   updatedAt: string;
 }
 ```
 
 **Relationships**:
+
 - → Sales Pipeline Module (products linked ke deals)
 
 ---
 
-### 9. Dashboard Module (`dashboard`)
+### 10. Dashboard Module (`dashboard`)
 
 **Purpose**: Dashboard dengan key metrics dan analytics
 
 **Pages (Web)**:
+
 - `/dashboard` - Main dashboard
 
 **Pages (Mobile)**:
+
 - `/dashboard` - Basic dashboard
 
 **Components (Web)**:
+
 - `DashboardOverview` - Overview widget
 - `VisitStatistics` - Visit statistics widget
 - `PipelineSummary` - Pipeline summary widget
@@ -570,11 +639,13 @@ interface Product {
 - `Charts` - Various charts (recharts atau similar)
 
 **Components (Mobile)**:
+
 - `DashboardScreen` - Basic dashboard dengan key metrics
 - `VisitStatsWidget` - Visit statistics
 - `RecentActivitiesWidget` - Recent activities
 
 **Services**:
+
 - `dashboardService.getOverview()`
 - `dashboardService.getVisitStats()`
 - `dashboardService.getPipelineSummary()`
@@ -583,18 +654,21 @@ interface Product {
 - `dashboardService.getRecentActivities()`
 
 **Store**:
+
 - `useDashboardStore` - Dashboard data
 
 **Relationships**:
+
 - ← All modules (dashboard aggregates data dari semua modules)
 
 ---
 
-### 10. Reports Module (`reports`)
+### 11. Reports Module (`reports`)
 
 **Purpose**: Generate reports untuk sales activities
 
 **Pages (Web)**:
+
 - `/reports` - Reports list
 - `/reports/visit-reports` - Visit report report
 - `/reports/pipeline` - Pipeline report
@@ -602,9 +676,11 @@ interface Product {
 - `/reports/account-activity` - Account activity report
 
 **Pages (Mobile)**:
+
 - (Optional untuk MVP)
 
 **Components (Web)**:
+
 - `ReportGenerator` - Report generator component
 - `ReportViewer` - Report viewer component
 - `DateRangePicker` - Date range picker
@@ -615,6 +691,7 @@ interface Product {
 - `SalesFunnelInsights` - Sales Funnel insights with charts and metrics
 
 **Services**:
+
 - `reportService.generateVisitReport()`
 - `reportService.generatePipelineReport()`
 - `reportService.generateSalesPerformanceReport()`
@@ -622,9 +699,11 @@ interface Product {
 - `reportService.export()`
 
 **Store**:
+
 - `useReportStore` - Report data
 
 **Relationships**:
+
 - ← All modules (reports aggregate data dari semua modules)
 
 ---
@@ -632,6 +711,7 @@ interface Product {
 ## Legacy Modules (ARCHIVED)
 
 > **Note**: Modules berikut di-archive karena tidak relevan untuk Sales CRM:
+>
 > - Diagnosis & Procedures (dapat digunakan sebagai optional module di future)
 > - Patient Management
 > - Doctor Management
@@ -670,6 +750,7 @@ Account & Contact ←→ Visit Report ←→ Sales Pipeline
 ## API Endpoints Summary
 
 ### Web APIs
+
 - `/api/v1/auth/*` - Authentication
 - `/api/v1/users/*` - User management
 - `/api/v1/accounts/*` - Account management
@@ -685,6 +766,7 @@ Account & Contact ←→ Visit Report ←→ Sales Pipeline
 - `/api/v1/settings/*` - Settings
 
 ### Mobile APIs
+
 - Same as Web APIs, dengan beberapa endpoints yang dioptimize untuk mobile
 - `/api/v1/mobile/visit-reports/check-in` - Check-in dengan GPS
 - `/api/v1/mobile/visit-reports/check-out` - Check-out dengan GPS
@@ -697,16 +779,19 @@ Account & Contact ←→ Visit Report ←→ Sales Pipeline
 **Purpose**: Manage medical procedures/tindakan
 
 **Pages**:
+
 - `/master-data/procedures` - Procedure list
 - `/master-data/procedures/new` - Add procedure
 - `/master-data/procedures/[id]` - Procedure detail
 
 **Components**:
+
 - `ProcedureList` - Procedure list
 - `ProcedureForm` - Add/edit procedure form
 - `ProcedureSelector` - Procedure selector
 
 **Services**:
+
 - `procedureService.list()`
 - `procedureService.getById()`
 - `procedureService.create()`
@@ -714,6 +799,7 @@ Account & Contact ←→ Visit Report ←→ Sales Pipeline
 - `procedureService.search()`
 
 **Data Model**:
+
 ```typescript
 interface Procedure {
   id: string;
@@ -724,119 +810,137 @@ interface Procedure {
   description?: string;
   duration?: number; // minutes
   price?: number; // Optional pricing
-  status: 'active' | 'inactive';
+  status: "active" | "inactive";
   createdAt: string;
   updatedAt: string;
 }
 ```
 
 **Relationships**:
+
 - → Medical Record Module (used in treatment plans)
 - → Transaction Module (if transaction recording is needed)
 
 ---
 
 #### 4.3 Insurance Provider Master (`insurance-providers`)
+
 **Purpose**: Manage insurance providers (BPJS, private insurance)
 
 **Pages**:
+
 - `/master-data/insurance-providers` - Insurance provider list
 - `/master-data/insurance-providers/new` - Add insurance provider
 - `/master-data/insurance-providers/[id]` - Insurance provider detail
 
 **Components**:
+
 - `InsuranceProviderList` - Insurance provider list
 - `InsuranceProviderForm` - Add/edit form
 - `InsuranceProviderSelector` - Insurance provider selector
 
 **Services**:
+
 - `insuranceProviderService.list()`
 - `insuranceProviderService.getById()`
 - `insuranceProviderService.create()`
 - `insuranceProviderService.update()`
 
 **Data Model**:
+
 ```typescript
 interface InsuranceProvider {
   id: string;
   code: string; // e.g., "BPJS", "PRIVATE_001"
   name: string;
-  type: 'bpjs' | 'private' | 'corporate';
+  type: "bpjs" | "private" | "corporate";
   apiEndpoint?: string; // For BPJS integration
   apiKey?: string;
-  status: 'active' | 'inactive';
+  status: "active" | "inactive";
   createdAt: string;
   updatedAt: string;
 }
 ```
 
 **Relationships**:
+
 - → Patient Module (patients can have insurance)
 
 ---
 
 #### 4.4 Location Master (`locations`)
+
 **Purpose**: Manage physical locations (pharmacy, warehouse, clinic rooms)
 
 **Pages**:
+
 - `/master-data/locations` - Location list
 - `/master-data/locations/new` - Add location
 - `/master-data/locations/[id]` - Location detail
 
 **Components**:
+
 - `LocationList` - Location list
 - `LocationForm` - Add/edit location form
 - `LocationSelector` - Location selector
 
 **Services**:
+
 - `locationService.list()`
 - `locationService.getById()`
 - `locationService.create()`
 - `locationService.update()`
 
 **Data Model**:
+
 ```typescript
 interface Location {
   id: string;
   code: string;
   name: string;
-  type: 'pharmacy' | 'warehouse' | 'clinic' | 'room';
+  type: "pharmacy" | "warehouse" | "clinic" | "room";
   address?: Address;
   phone?: string;
   email?: string;
   managerId?: string; // User ID of location manager
-  status: 'active' | 'inactive';
+  status: "active" | "inactive";
   createdAt: string;
   updatedAt: string;
 }
 ```
 
 **Relationships**:
+
 - → Inventory Module (stock per location)
 - → Appointment Module (appointments at location)
 
 ---
 
 #### 4.5 Category Master (`categories`)
+
 **Purpose**: Manage categories for medications
 
 **Pages**:
+
 - `/master-data/categories` - Category list
 - `/master-data/categories/new` - Add category
 - `/master-data/categories/[id]` - Category detail
 
 **Components**:
+
 - `CategoryList` - Category list (tree view if hierarchical)
 - `CategoryForm` - Add/edit category form
 - `CategorySelector` - Category selector
 
 **Services**:
+
 - `categoryService.list()`
 - `categoryService.getById()`
 - `categoryService.create()`
 - `categoryService.update()`
 
 **Data Model**:
+
 ```typescript
 interface Category {
   id: string;
@@ -845,77 +949,89 @@ interface Category {
   nameEn?: string;
   parentId?: string; // For hierarchical categories
   description?: string;
-  status: 'active' | 'inactive';
+  status: "active" | "inactive";
   createdAt: string;
   updatedAt: string;
 }
 ```
 
 **Relationships**:
+
 - → Medication Module (medications belong to category)
 
 ---
 
 #### 4.6 Unit Master (`units`)
+
 **Purpose**: Manage measurement units (tablet, bottle, ml, mg, etc.)
 
 **Pages**:
+
 - `/master-data/units` - Unit list
 - `/master-data/units/new` - Add unit
 - `/master-data/units/[id]` - Unit detail
 
 **Components**:
+
 - `UnitList` - Unit list
 - `UnitForm` - Add/edit unit form
 - `UnitSelector` - Unit selector
 
 **Services**:
+
 - `unitService.list()`
 - `unitService.getById()`
 - `unitService.create()`
 - `unitService.update()`
 
 **Data Model**:
+
 ```typescript
 interface Unit {
   id: string;
   code: string; // e.g., "TAB", "BTL", "ML", "MG"
   name: string; // e.g., "Tablet", "Bottle", "Milliliter", "Milligram"
   nameEn?: string;
-  type: 'count' | 'weight' | 'volume' | 'length';
+  type: "count" | "weight" | "volume" | "length";
   baseUnit?: string; // For conversions
   conversionFactor?: number;
-  status: 'active' | 'inactive';
+  status: "active" | "inactive";
   createdAt: string;
   updatedAt: string;
 }
 ```
 
 **Relationships**:
+
 - → Medication Module (medications use units)
 
 ---
 
 #### 4.7 Supplier Master (`suppliers`)
+
 **Purpose**: Manage suppliers/vendors for medications
 
 **Pages**:
+
 - `/master-data/suppliers` - Supplier list
 - `/master-data/suppliers/new` - Add supplier
 - `/master-data/suppliers/[id]` - Supplier detail
 
 **Components**:
+
 - `SupplierList` - Supplier list
 - `SupplierForm` - Add/edit supplier form
 - `SupplierSelector` - Supplier selector
 
 **Services**:
+
 - `supplierService.list()`
 - `supplierService.getById()`
 - `supplierService.create()`
 - `supplierService.update()`
 
 **Data Model**:
+
 ```typescript
 interface Supplier {
   id: string;
@@ -927,21 +1043,24 @@ interface Supplier {
   address: Address;
   taxId?: string; // NPWP
   paymentTerms?: string;
-  status: 'active' | 'inactive';
+  status: "active" | "inactive";
   createdAt: string;
   updatedAt: string;
 }
 ```
 
 **Relationships**:
+
 - → Purchase Module (purchases from suppliers)
 
 ---
 
 **Store**:
+
 - `useMasterDataStore` - All master data (diagnosis, procedures, etc.)
 
 **Relationships**:
+
 - → All modules (master data used throughout system)
 
 ---
@@ -953,6 +1072,7 @@ interface Supplier {
 **Purpose**: Manage patient registration, profiles, and data
 
 **Pages**:
+
 - `/patients` - Patient list
 - `/patients/new` - Register new patient
 - `/patients/[id]` - Patient detail/profile
@@ -962,6 +1082,7 @@ interface Supplier {
 - `/patients/[id]/transactions` - Patient transaction history
 
 **Components**:
+
 - `PatientList` - Patient list with search/filter
 - `PatientForm` - Patient registration/edit form
 - `PatientProfile` - Patient profile view
@@ -969,6 +1090,7 @@ interface Supplier {
 - `PatientSearch` - Quick patient search
 
 **Services**:
+
 - `patientService.list()`
 - `patientService.getById()`
 - `patientService.create()`
@@ -979,9 +1101,11 @@ interface Supplier {
 - `patientService.getPrescriptions()`
 
 **Store**:
+
 - `usePatientStore` - Patient list, current patient, search state
 
 **Data Model**:
+
 ```typescript
 interface Patient {
   id: string;
@@ -990,7 +1114,7 @@ interface Patient {
   firstName: string;
   lastName: string;
   dateOfBirth: string;
-  gender: 'male' | 'female';
+  gender: "male" | "female";
   phone: string;
   email?: string;
   address: Address;
@@ -1000,13 +1124,14 @@ interface Patient {
   chronicConditions?: string[];
   insuranceProviders?: InsuranceProvider[];
   photoUrl?: string;
-  status: 'active' | 'inactive';
+  status: "active" | "inactive";
   createdAt: string;
   updatedAt: string;
 }
 ```
 
 **Relationships**:
+
 - → Appointment Module (has many appointments)
 - → Medical Record Module (has many medical records)
 - → Prescription Module (has many prescriptions)
@@ -1022,6 +1147,7 @@ interface Patient {
 **Purpose**: Manage doctor/physician profiles and information
 
 **Pages**:
+
 - `/doctors` - Doctor list
 - `/doctors/new` - Register new doctor
 - `/doctors/[id]` - Doctor detail/profile
@@ -1029,6 +1155,7 @@ interface Patient {
 - `/doctors/[id]/appointments` - Doctor appointments
 
 **Components**:
+
 - `DoctorList` - Doctor list
 - `DoctorForm` - Doctor registration/edit form
 - `DoctorProfile` - Doctor profile view
@@ -1036,6 +1163,7 @@ interface Patient {
 - `DoctorAvailability` - Availability calendar
 
 **Services**:
+
 - `doctorService.list()`
 - `doctorService.getById()`
 - `doctorService.create()`
@@ -1045,9 +1173,11 @@ interface Patient {
 - `doctorService.getAvailability()`
 
 **Store**:
+
 - `useDoctorStore` - Doctor list, current doctor, schedules
 
 **Data Model**:
+
 ```typescript
 interface Doctor {
   id: string;
@@ -1058,7 +1188,7 @@ interface Doctor {
   phone: string;
   email: string;
   schedule: Schedule[];
-  status: 'active' | 'inactive';
+  status: "active" | "inactive";
   userId?: string; // Link to user account
   createdAt: string;
   updatedAt: string;
@@ -1066,6 +1196,7 @@ interface Doctor {
 ```
 
 **Relationships**:
+
 - → Appointment Module (has many appointments)
 - → Medical Record Module (creates medical records)
 - → Prescription Module (creates prescriptions)
@@ -1078,6 +1209,7 @@ interface Doctor {
 **Purpose**: Manage appointment scheduling and booking
 
 **Pages**:
+
 - `/appointments` - Appointment list/calendar
 - `/appointments/new` - Book new appointment
 - `/appointments/[id]` - Appointment detail
@@ -1085,6 +1217,7 @@ interface Doctor {
 - `/appointments/today` - Today's appointments
 
 **Components**:
+
 - `AppointmentList` - Appointment list
 - `AppointmentCalendar` - Calendar view
 - `AppointmentForm` - Book/edit appointment form
@@ -1093,6 +1226,7 @@ interface Doctor {
 - `TimeSlotSelector` - Time slot picker
 
 **Services**:
+
 - `appointmentService.list()`
 - `appointmentService.getById()`
 - `appointmentService.create()`
@@ -1103,9 +1237,11 @@ interface Doctor {
 - `appointmentService.sendReminder()`
 
 **Store**:
+
 - `useAppointmentStore` - Appointment list, calendar state, filters
 
 **Data Model**:
+
 ```typescript
 interface Appointment {
   id: string;
@@ -1114,8 +1250,14 @@ interface Appointment {
   appointmentDate: string;
   appointmentTime: string;
   duration: number; // minutes
-  type: 'consultation' | 'follow-up' | 'emergency' | 'check-up';
-  status: 'scheduled' | 'confirmed' | 'in-progress' | 'completed' | 'cancelled' | 'no-show';
+  type: "consultation" | "follow-up" | "emergency" | "check-up";
+  status:
+    | "scheduled"
+    | "confirmed"
+    | "in-progress"
+    | "completed"
+    | "cancelled"
+    | "no-show";
   notes?: string;
   reminderSent: boolean;
   createdAt: string;
@@ -1126,6 +1268,7 @@ interface Appointment {
 ```
 
 **Relationships**:
+
 - ← Patient Module (belongs to patient)
 - ← Doctor Module (belongs to doctor)
 - → Medical Record Module (creates medical record)
@@ -1138,12 +1281,14 @@ interface Appointment {
 **Purpose**: Manage patient medical records and history
 
 **Pages**:
+
 - `/medical-records` - Medical records list
 - `/medical-records/new` - Create new medical record
 - `/medical-records/[id]` - Medical record detail
 - `/patients/[patientId]/medical-records` - Patient's medical records
 
 **Components**:
+
 - `MedicalRecordList` - Medical records list
 - `MedicalRecordForm` - Create/edit medical record form
 - `MedicalRecordDetail` - Medical record detail view
@@ -1155,6 +1300,7 @@ interface Appointment {
 - `FileUploader` - Upload lab results, X-ray, etc.
 
 **Services**:
+
 - `medicalRecordService.list()`
 - `medicalRecordService.getById()`
 - `medicalRecordService.create()`
@@ -1163,9 +1309,11 @@ interface Appointment {
 - `medicalRecordService.uploadFile()`
 
 **Store**:
+
 - `useMedicalRecordStore` - Medical records list, current record
 
 **Data Model**:
+
 ```typescript
 interface MedicalRecord {
   id: string;
@@ -1200,7 +1348,7 @@ interface PhysicalExamination {
 interface Diagnosis {
   code: string; // ICD-10 code
   description: string;
-  type: 'primary' | 'secondary';
+  type: "primary" | "secondary";
 }
 
 interface TreatmentPlan {
@@ -1212,6 +1360,7 @@ interface TreatmentPlan {
 ```
 
 **Relationships**:
+
 - ← Patient Module (belongs to patient)
 - ← Doctor Module (created by doctor)
 - ← Appointment Module (linked to appointment)
@@ -1225,6 +1374,7 @@ interface TreatmentPlan {
 **Purpose**: Manage prescription creation and processing
 
 **Pages**:
+
 - `/prescriptions` - Prescription list
 - `/prescriptions/new` - Create new prescription
 - `/prescriptions/[id]` - Prescription detail
@@ -1232,6 +1382,7 @@ interface TreatmentPlan {
 - `/patients/[patientId]/prescriptions` - Patient's prescriptions
 
 **Components**:
+
 - `PrescriptionList` - Prescription list
 - `PrescriptionForm` - Create prescription form
 - `PrescriptionDetail` - Prescription detail view
@@ -1242,6 +1393,7 @@ interface TreatmentPlan {
 - `PrescriptionLabel` - Printable prescription label
 
 **Services**:
+
 - `prescriptionService.list()`
 - `prescriptionService.getById()`
 - `prescriptionService.create()`
@@ -1253,9 +1405,11 @@ interface TreatmentPlan {
 - `prescriptionService.checkStockAvailability()`
 
 **Store**:
+
 - `usePrescriptionStore` - Prescription list, current prescription
 
 **Data Model**:
+
 ```typescript
 interface Prescription {
   id: string;
@@ -1264,7 +1418,7 @@ interface Prescription {
   medicalRecordId?: string;
   medications: PrescriptionMedication[];
   notes?: string;
-  status: 'pending' | 'processing' | 'fulfilled' | 'cancelled' | 'partial';
+  status: "pending" | "processing" | "fulfilled" | "cancelled" | "partial";
   processedBy?: string; // Pharmacist user ID
   processedAt?: string;
   fulfilledAt?: string;
@@ -1289,6 +1443,7 @@ interface PrescriptionMedication {
 ```
 
 **Relationships**:
+
 - ← Patient Module (belongs to patient)
 - ← Doctor Module (created by doctor)
 - ← Medical Record Module (linked to medical record)
@@ -1304,12 +1459,14 @@ interface PrescriptionMedication {
 **Purpose**: Manage medication/medicine master data
 
 **Pages**:
+
 - `/medications` - Medication list
 - `/medications/new` - Add new medication
 - `/medications/[id]` - Medication detail
 - `/medications/[id]/stock` - Medication stock by location
 
 **Components**:
+
 - `MedicationList` - Medication list with search
 - `MedicationForm` - Add/edit medication form
 - `MedicationDetail` - Medication detail view
@@ -1317,6 +1474,7 @@ interface PrescriptionMedication {
 - `BPOMValidator` - BPOM registration validator
 
 **Services**:
+
 - `medicationService.list()`
 - `medicationService.getById()`
 - `medicationService.create()`
@@ -1326,9 +1484,11 @@ interface PrescriptionMedication {
 - `medicationService.validateBPOM()`
 
 **Store**:
+
 - `useMedicationStore` - Medication list, current medication
 
 **Data Model**:
+
 ```typescript
 interface Medication {
   id: string;
@@ -1342,7 +1502,7 @@ interface Medication {
   purchasePrice: number;
   sellingPrice: number;
   stock: StockInfo[];
-  status: 'active' | 'inactive' | 'discontinued';
+  status: "active" | "inactive" | "discontinued";
   createdAt: string;
   updatedAt: string;
 }
@@ -1361,6 +1521,7 @@ interface StockInfo {
 ```
 
 **Relationships**:
+
 - → Inventory Module (has stock)
 - → Prescription Module (used in prescriptions)
 - → Purchase Module (purchased from suppliers)
@@ -1372,6 +1533,7 @@ interface StockInfo {
 **Purpose**: Manage stock movements and inventory operations
 
 **Pages**:
+
 - `/inventory` - Inventory dashboard
 - `/inventory/stock` - Stock list by location
 - `/inventory/movements` - Stock movement history
@@ -1380,6 +1542,7 @@ interface StockInfo {
 - `/inventory/alerts` - Low stock & expiry alerts
 
 **Components**:
+
 - `InventoryDashboard` - Inventory overview
 - `StockList` - Stock list with filters
 - `StockMovementList` - Movement history
@@ -1389,6 +1552,7 @@ interface StockInfo {
 - `StockLevelIndicator` - Visual stock level indicator
 
 **Services**:
+
 - `inventoryService.getStock()`
 - `inventoryService.getStockByLocation()`
 - `inventoryService.getMovements()`
@@ -1398,19 +1562,21 @@ interface StockInfo {
 - `inventoryService.checkStockAvailability()`
 
 **Store**:
+
 - `useInventoryStore` - Stock data, movements, alerts
 
 **Data Model**:
+
 ```typescript
 interface StockMovement {
   id: string;
   medicationId: string;
   locationId: string;
-  type: 'in' | 'out' | 'adjustment' | 'transfer' | 'sale' | 'purchase';
+  type: "in" | "out" | "adjustment" | "transfer" | "sale" | "purchase";
   quantity: number; // Positive for 'in', negative for 'out'
   balanceBefore: number;
   balanceAfter: number;
-  referenceType?: 'prescription' | 'purchase' | 'adjustment' | 'transfer';
+  referenceType?: "prescription" | "purchase" | "adjustment" | "transfer";
   referenceId?: string;
   notes?: string;
   createdBy: string;
@@ -1421,6 +1587,7 @@ interface StockMovement {
 ```
 
 **Relationships**:
+
 - ← Medication Module (tracks stock for medications)
 - → Prescription Module (reduces stock on fulfillment)
 - → Purchase Module (increases stock on purchase)
@@ -1433,6 +1600,7 @@ interface StockMovement {
 **Purpose**: Manage purchase orders and supplier management
 
 **Pages**:
+
 - `/purchases` - Purchase order list
 - `/purchases/new` - Create purchase order
 - `/purchases/[id]` - Purchase order detail
@@ -1441,6 +1609,7 @@ interface StockMovement {
 - `/suppliers/new` - Add supplier
 
 **Components**:
+
 - `PurchaseOrderList` - PO list
 - `PurchaseOrderForm` - Create/edit PO form
 - `GoodsReceiptForm` - Goods receipt form
@@ -1448,6 +1617,7 @@ interface StockMovement {
 - `SupplierForm` - Supplier form
 
 **Services**:
+
 - `purchaseService.list()`
 - `purchaseService.getById()`
 - `purchaseService.create()`
@@ -1458,9 +1628,11 @@ interface StockMovement {
 - `supplierService.update()`
 
 **Store**:
+
 - `usePurchaseStore` - Purchase orders, suppliers
 
 **Data Model**:
+
 ```typescript
 interface PurchaseOrder {
   id: string;
@@ -1468,7 +1640,7 @@ interface PurchaseOrder {
   orderNumber: string;
   items: PurchaseOrderItem[];
   totalAmount: number;
-  status: 'draft' | 'sent' | 'confirmed' | 'received' | 'cancelled';
+  status: "draft" | "sent" | "confirmed" | "received" | "cancelled";
   expectedDeliveryDate?: string;
   receivedAt?: string;
   createdAt: string;
@@ -1487,6 +1659,7 @@ interface PurchaseOrderItem {
 ```
 
 **Relationships**:
+
 - → Supplier Module (purchased from supplier)
 - → Medication Module (purchases medications)
 - → Inventory Module (increases stock on receipt)
@@ -1503,17 +1676,20 @@ interface PurchaseOrderItem {
 **Note**: Since this is an internal system for a single company, we use a simplified transaction model instead of complex invoicing/billing. This records transactions for services and medications.
 
 **Pages**:
+
 - `/transactions` - Transaction list
 - `/transactions/new` - Record new transaction
 - `/transactions/[id]` - Transaction detail
 
 **Components**:
+
 - `TransactionList` - Transaction list
 - `TransactionForm` - Record transaction form
 - `TransactionDetail` - Transaction detail view
 - `TransactionReceipt` - Simple receipt view/print
 
 **Services**:
+
 - `transactionService.list()`
 - `transactionService.getById()`
 - `transactionService.create()`
@@ -1521,9 +1697,11 @@ interface PurchaseOrderItem {
 - `transactionService.printReceipt()`
 
 **Store**:
+
 - `useTransactionStore` - Transactions list
 
 **Data Model**:
+
 ```typescript
 interface Transaction {
   id: string;
@@ -1533,7 +1711,7 @@ interface Transaction {
   prescriptionId?: string;
   items: TransactionItem[];
   total: number;
-  paymentMethod: 'cash' | 'transfer' | 'bpjs' | 'insurance';
+  paymentMethod: "cash" | "transfer" | "bpjs" | "insurance";
   notes?: string;
   createdBy: string;
   createdAt: string;
@@ -1544,7 +1722,7 @@ interface Transaction {
 }
 
 interface TransactionItem {
-  type: 'service' | 'medication' | 'procedure';
+  type: "service" | "medication" | "procedure";
   description: string;
   quantity: number;
   unitPrice: number;
@@ -1555,6 +1733,7 @@ interface TransactionItem {
 ```
 
 **Relationships**:
+
 - ← Patient Module (transaction for patient)
 - ← Appointment Module (transaction for appointment)
 - ← Prescription Module (transaction for prescription)
@@ -1569,12 +1748,14 @@ interface TransactionItem {
 **Purpose**: Provide overview and key metrics
 
 **Pages**:
+
 - `/dashboard` - Main dashboard
 - `/dashboard/appointments` - Appointment analytics
 - `/dashboard/revenue` - Revenue analytics
 - `/dashboard/inventory` - Inventory analytics
 
 **Components**:
+
 - `DashboardOverview` - Main dashboard view
 - `AppointmentStats` - Appointment statistics
 - `RevenueChart` - Revenue charts
@@ -1584,6 +1765,7 @@ interface TransactionItem {
 - `QuickActions` - Quick action buttons
 
 **Services**:
+
 - `dashboardService.getOverview()`
 - `dashboardService.getAppointmentStats()`
 - `dashboardService.getRevenueStats()`
@@ -1592,9 +1774,11 @@ interface TransactionItem {
 - `dashboardService.getTopMedications()`
 
 **Store**:
+
 - `useDashboardStore` - Dashboard data, filters, date range
 
 **Relationships**:
+
 - Aggregates data from all modules
 
 ---
@@ -1604,6 +1788,7 @@ interface TransactionItem {
 **Purpose**: Generate and export reports
 
 **Pages**:
+
 - `/reports` - Reports list
 - `/reports/patients` - Patient reports
 - `/reports/appointments` - Appointment reports
@@ -1612,6 +1797,7 @@ interface TransactionItem {
 - `/reports/financial` - Financial reports
 
 **Components**:
+
 - `ReportList` - Available reports list
 - `ReportGenerator` - Report generation form
 - `ReportViewer` - Report viewer
@@ -1620,6 +1806,7 @@ interface TransactionItem {
 - `ReportFilters` - Report filters
 
 **Services**:
+
 - `reportService.list()`
 - `reportService.generate()`
 - `reportService.export()`
@@ -1630,9 +1817,11 @@ interface TransactionItem {
 - `reportService.getFinancialReport()`
 
 **Store**:
+
 - `useReportStore` - Report data, filters, export state
 
 **Relationships**:
+
 - Aggregates data from all modules
 
 ---
@@ -1848,6 +2037,7 @@ interface TransactionItem {
 ## API Endpoints Summary
 
 ### Authentication
+
 - `POST /api/v1/auth/login`
 - `POST /api/v1/auth/logout`
 - `POST /api/v1/auth/refresh`
@@ -1855,6 +2045,7 @@ interface TransactionItem {
 - `POST /api/v1/auth/reset-password`
 
 ### Users
+
 - `GET /api/v1/users`
 - `GET /api/v1/users/:id`
 - `POST /api/v1/users`
@@ -1863,6 +2054,7 @@ interface TransactionItem {
 - `PUT /api/v1/users/:id/permissions`
 
 ### Patients
+
 - `GET /api/v1/patients`
 - `GET /api/v1/patients/:id`
 - `POST /api/v1/patients`
@@ -1872,6 +2064,7 @@ interface TransactionItem {
 - `GET /api/v1/patients/:id/prescriptions`
 
 ### Doctors
+
 - `GET /api/v1/doctors`
 - `GET /api/v1/doctors/:id`
 - `POST /api/v1/doctors`
@@ -1881,6 +2074,7 @@ interface TransactionItem {
 - `GET /api/v1/doctors/:id/availability`
 
 ### Appointments
+
 - `GET /api/v1/appointments`
 - `GET /api/v1/appointments/:id`
 - `POST /api/v1/appointments`
@@ -1890,6 +2084,7 @@ interface TransactionItem {
 - `GET /api/v1/appointments/available-slots`
 
 ### Medical Records
+
 - `GET /api/v1/medical-records`
 - `GET /api/v1/medical-records/:id`
 - `POST /api/v1/medical-records`
@@ -1897,6 +2092,7 @@ interface TransactionItem {
 - `GET /api/v1/medical-records/patient/:patientId`
 
 ### Prescriptions
+
 - `GET /api/v1/prescriptions`
 - `GET /api/v1/prescriptions/:id`
 - `POST /api/v1/prescriptions`
@@ -1906,6 +2102,7 @@ interface TransactionItem {
 - `POST /api/v1/prescriptions/check-interactions`
 
 ### Medications
+
 - `GET /api/v1/medications`
 - `GET /api/v1/medications/:id`
 - `POST /api/v1/medications`
@@ -1913,6 +2110,7 @@ interface TransactionItem {
 - `GET /api/v1/medications/:id/stock`
 
 ### Inventory
+
 - `GET /api/v1/inventory/stock`
 - `GET /api/v1/inventory/movements`
 - `POST /api/v1/inventory/adjustments`
@@ -1920,6 +2118,7 @@ interface TransactionItem {
 - `GET /api/v1/inventory/alerts`
 
 ### Purchases
+
 - `GET /api/v1/purchases`
 - `GET /api/v1/purchases/:id`
 - `POST /api/v1/purchases`
@@ -1927,6 +2126,7 @@ interface TransactionItem {
 - `POST /api/v1/purchases/:id/receive`
 
 ### Transactions
+
 - `GET /api/v1/transactions`
 - `GET /api/v1/transactions/:id`
 - `POST /api/v1/transactions`
@@ -1934,6 +2134,7 @@ interface TransactionItem {
 - `GET /api/v1/transactions/:id/receipt`
 
 ### Master Data
+
 - `GET /api/v1/master-data/diagnosis`
 - `GET /api/v1/master-data/diagnosis/:id`
 - `POST /api/v1/master-data/diagnosis`
@@ -1964,12 +2165,14 @@ interface TransactionItem {
 - `PUT /api/v1/master-data/suppliers/:id`
 
 ### Dashboard
+
 - `GET /api/v1/dashboard/overview`
 - `GET /api/v1/dashboard/appointments`
 - `GET /api/v1/dashboard/revenue`
 - `GET /api/v1/dashboard/inventory`
 
 ### Reports
+
 - `GET /api/v1/reports/patients`
 - `GET /api/v1/reports/appointments`
 - `GET /api/v1/reports/sales`
@@ -1982,6 +2185,7 @@ interface TransactionItem {
 ## Implementation Priority
 
 ### Phase 1: MVP Core (Months 1-2)
+
 1. Authentication Module
 2. User Management Module
 3. Settings Module
@@ -1991,17 +2195,20 @@ interface TransactionItem {
 7. Appointment Module
 
 ### Phase 2: Healthcare Operations (Month 2-3)
+
 8. Medical Record Module
 9. Prescription Module
 10. Dashboard Module
 
 ### Phase 3: Pharmacy & Transactions (Month 3)
+
 11. Medication Module
 12. Inventory Module
 13. Transaction Module (simplified)
 14. Reports Module
 
 ### Phase 4: Enhancement (Month 4+)
+
 15. Purchase Module
 16. Advanced Reports
 17. Integrations (BPJS, if needed)
@@ -2009,4 +2216,3 @@ interface TransactionItem {
 ---
 
 **Dokumen ini akan diupdate sesuai dengan perkembangan development dan perubahan requirements.**
-
