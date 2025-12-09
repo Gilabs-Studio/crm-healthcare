@@ -6,6 +6,7 @@ import '../../features/auth/presentation/login_screen.dart';
 import '../../features/contacts/presentation/contact_detail_screen.dart';
 import '../../features/contacts/presentation/contact_list_screen.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
+import '../../features/dashboard/presentation/recent_activities_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/tasks/presentation/task_detail_screen.dart';
 import '../../features/tasks/presentation/task_form_screen.dart';
@@ -30,6 +31,7 @@ class AppRoutes {
   static const tasksEdit = '/tasks/edit';
   static const notifications = '/notifications';
   static const profile = '/profile';
+  static const recentActivities = '/recent-activities';
 }
 
 class AppRouter {
@@ -65,6 +67,8 @@ class AppRouter {
         },
         AppRoutes.notifications: (_) =>
             const AuthGate(child: NotificationListScreen()),
+        AppRoutes.recentActivities: (_) =>
+            const AuthGate(child: RecentActivitiesScreen()),
       };
 
   static Route<dynamic>? onGenerateRoute(RouteSettings settings) {

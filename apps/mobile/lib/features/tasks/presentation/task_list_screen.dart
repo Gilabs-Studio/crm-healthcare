@@ -278,18 +278,15 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
         final task = state.tasks[index];
         return TaskCard(
           task: task,
-          onTap: () {
-            Navigator.of(context).pushNamed(
+          onTap: () async {
+            await Navigator.of(context).pushNamed(
               '${AppRoutes.tasks}/${task.id}',
-            ).then((result) {
-              // Refresh list after returning from detail screen
-              if (result != null && mounted) {
-                ref.read(taskListProvider.notifier).refresh();
-              } else if (mounted) {
-                // Also refresh if we just came back (might have been deleted)
-                ref.read(taskListProvider.notifier).refresh();
-              }
-            });
+            );
+            // Refresh list after returning from detail screen
+            // This ensures list is updated if task was deleted, completed, or updated
+            if (mounted) {
+              ref.read(taskListProvider.notifier).refresh();
+            }
           },
         );
       },

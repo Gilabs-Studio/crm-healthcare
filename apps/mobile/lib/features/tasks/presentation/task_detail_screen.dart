@@ -391,13 +391,17 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
               setState(() => _isDeleting = false);
               if (mounted) {
                 if (success) {
+                  // Refresh task list before going back
+                  ref.read(taskListProvider.notifier).refresh();
+                  // Show success message before navigation
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(l10n.taskDeletedSuccessfully),
                       backgroundColor: Colors.green,
                     ),
                   );
-                  Navigator.pop(context); // Go back to list
+                  // Return true to indicate task was deleted and navigate back
+                  Navigator.pop(context, true);
                 } else {
                   final error = ref.read(taskFormProvider).errorMessage;
                   ScaffoldMessenger.of(context).showSnackBar(

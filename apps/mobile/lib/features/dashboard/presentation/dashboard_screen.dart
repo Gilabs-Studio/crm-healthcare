@@ -5,20 +5,17 @@ import '../../../core/l10n/app_localizations.dart';
 import '../../../core/widgets/error_widget.dart';
 import '../../../core/widgets/loading_widget.dart';
 import '../../../core/widgets/main_scaffold.dart';
-import '../../../core/widgets/skeleton_widget.dart';
 import '../../notifications/application/notification_provider.dart';
 import '../../notifications/presentation/notification_list_screen.dart';
+import '../../tasks/presentation/task_list_screen.dart';
+import '../../tasks/presentation/task_form_screen.dart';
+import '../../tasks/application/task_provider.dart';
 import '../application/dashboard_provider.dart';
+import 'recent_activities_screen.dart';
 import 'widgets/activity_trends_widget.dart';
 import 'widgets/deals_overview_widget.dart';
-import 'widgets/leads_by_source_widget.dart';
 import 'widgets/overview_stat_card.dart';
-import 'widgets/pipeline_summary_widget.dart';
-import 'widgets/recent_activities_widget.dart';
 import 'widgets/target_progress_widget.dart';
-import 'widgets/top_accounts_widget.dart';
-import 'widgets/top_sales_rep_widget.dart';
-import 'widgets/upcoming_tasks_widget.dart';
 import 'widgets/visit_statistics_widget.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
@@ -28,14 +25,28 @@ class DashboardScreen extends ConsumerStatefulWidget {
   ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+class _DashboardScreenState extends ConsumerState<DashboardScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      // Update UI when tab changes to show/hide FloatingActionButton
+      setState(() {});
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(dashboardProvider.notifier).loadDashboard();
       ref.read(notificationCountProvider.notifier).loadUnreadCount();
     });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   Future<void> _onRefresh() async {
@@ -54,7 +65,38 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     return MainScaffold(
       currentIndex: 0,
       title: l10n.dashboard,
+      floatingActionButton: _tabController.index == 1
+          ? FloatingActionButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const TaskFormScreen(),
+                  ),
+                ).then((result) {
+                  // Refresh task list after creating task
+                  if (result != null && mounted) {
+                    ref.read(taskListProvider.notifier).refresh();
+                  }
+                });
+              },
+              child: const Icon(Icons.add),
+            )
+          : null,
       actions: [
+        // Recent Activities button
+        IconButton(
+          icon: const Icon(Icons.history),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const RecentActivitiesScreen(),
+              ),
+            );
+          },
+          tooltip: l10n.recentActivities,
+        ),
         // Notification badge
         Stack(
           children: [
@@ -102,43 +144,69 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               ),
           ],
         ),
-        // Period selector
-        PopupMenuButton<String>(
-          icon: const Icon(Icons.calendar_today),
-          onSelected: (period) {
-            ref.read(dashboardProvider.notifier).changePeriod(period);
-          },
-          itemBuilder: (context) => [
-            PopupMenuItem(
-              value: 'today',
-              child: Text(l10n.today),
-            ),
-            PopupMenuItem(
-              value: 'week',
-              child: Text(l10n.thisWeek),
-            ),
-            PopupMenuItem(
-              value: 'month',
-              child: Text(l10n.thisMonth),
-            ),
-            PopupMenuItem(
-              value: 'year',
-              child: Text(l10n.thisYear),
-            ),
-          ],
-        ),
+        // Period selector (only show on Overview tab)
+        if (_tabController.index == 0)
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.calendar_today),
+            onSelected: (period) {
+              ref.read(dashboardProvider.notifier).changePeriod(period);
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'today',
+                child: Text(l10n.today),
+              ),
+              PopupMenuItem(
+                value: 'week',
+                child: Text(l10n.thisWeek),
+              ),
+              PopupMenuItem(
+                value: 'month',
+                child: Text(l10n.thisMonth),
+              ),
+              PopupMenuItem(
+                value: 'year',
+                child: Text(l10n.thisYear),
+              ),
+            ],
+          ),
       ],
-      body: RefreshIndicator(
-        onRefresh: _onRefresh,
-        child: dashboardState.errorMessage != null &&
-                dashboardState.overview == null
-            ? ErrorStateWidget(
-                message: dashboardState.errorMessage!,
-                onRetry: () {
-                  ref.read(dashboardProvider.notifier).refresh();
-                },
-              )
-            : SingleChildScrollView(
+      body: Column(
+        children: [
+          // Tab Bar
+          Container(
+            color: colorScheme.surface,
+            child: TabBar(
+              controller: _tabController,
+              onTap: (index) {
+                setState(() {});
+              },
+              labelColor: colorScheme.primary,
+              unselectedLabelColor: colorScheme.onSurface.withOpacity(0.7),
+              indicatorColor: colorScheme.primary,
+              tabs: [
+                Tab(text: 'Overview'),
+                Tab(text: l10n.tasks),
+              ],
+            ),
+          ),
+          // Tab Views
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                // Overview Tab
+                RefreshIndicator(
+            onRefresh: _onRefresh,
+            child: dashboardState.errorMessage != null &&
+                    dashboardState.overview == null
+                ? ErrorStateWidget(
+                    message: dashboardState.errorMessage!,
+                    onRetry: () {
+                      ref.read(dashboardProvider.notifier).refresh();
+                    },
+                  )
+                : SingleChildScrollView(
                     padding: const EdgeInsets.all(20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -221,32 +289,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                             deals: dashboardState.overview!.deals,
                           ),
                           const SizedBox(height: 24),
-                          // Bento Layout - Row 2: Leads by Source & Upcoming Tasks
-                          Row(
-                            children: [
-                              Expanded(
-                                child: LeadsBySourceWidget(
-                                  leadsBySource: dashboardState.overview!.leadsBySource,
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: UpcomingTasksWidget(
-                                  tasks: dashboardState.overview!.upcomingTasks,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 24),
-                          // Pipeline Summary - Full Width
-                          if (dashboardState.overview!.pipelineStages.isNotEmpty)
-                            PipelineSummaryWidget(
-                              pipelineStages:
-                                  dashboardState.overview!.pipelineStages,
-                              dealsStats: dashboardState.overview!.deals,
-                            ),
-                          if (dashboardState.overview!.pipelineStages.isNotEmpty)
-                            const SizedBox(height: 24),
                           // Visit Statistics - Full Width
                           if (dashboardState.visitStatistics != null)
                             VisitStatisticsWidget(
@@ -264,46 +306,17 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           if (dashboardState.activityTrends != null &&
                               dashboardState.overview != null)
                             const SizedBox(height: 24),
-                          // Top Accounts - Full Width
-                          if (dashboardState.isLoadingSecondary &&
-                              dashboardState.topAccounts == null)
-                            const SkeletonCard(height: 200)
-                          else if (dashboardState.topAccounts != null &&
-                              dashboardState.topAccounts!.isNotEmpty)
-                            TopAccountsWidget(
-                              accounts: dashboardState.topAccounts!,
-                            ),
-                          if (dashboardState.topAccounts != null &&
-                              dashboardState.topAccounts!.isNotEmpty)
-                            const SizedBox(height: 24),
-                          // Top Sales Rep - Full Width
-                          if (dashboardState.isLoadingSecondary &&
-                              dashboardState.topSalesReps == null)
-                            const SkeletonCard(height: 200)
-                          else if (dashboardState.topSalesReps != null &&
-                              dashboardState.topSalesReps!.isNotEmpty)
-                            TopSalesRepWidget(
-                              salesReps: dashboardState.topSalesReps!,
-                            ),
-                          if (dashboardState.topSalesReps != null &&
-                              dashboardState.topSalesReps!.isNotEmpty)
-                            const SizedBox(height: 24),
-                          // Recent Activities - Full Width
-                          if (dashboardState.isLoadingSecondary &&
-                              dashboardState.recentActivities == null)
-                            const SkeletonCard(height: 200)
-                          else if (dashboardState.recentActivities != null &&
-                              dashboardState.recentActivities!.isNotEmpty)
-                            RecentActivitiesWidget(
-                              activities: dashboardState.recentActivities!,
-                            ),
-                          if (dashboardState.recentActivities != null &&
-                              dashboardState.recentActivities!.isNotEmpty)
-                            const SizedBox(height: 24),
                         ],
                       ],
                     ),
                   ),
+                ),
+                // Tasks Tab
+                const TaskListScreen(hideAppBar: true),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
