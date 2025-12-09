@@ -4,22 +4,34 @@ import 'dart:async';
 
 import '../application/contact_provider.dart';
 import '../application/contact_state.dart';
+import '../presentation/contact_form_screen.dart';
 import '../../../core/routing/app_router.dart';
+import '../../../core/l10n/app_localizations.dart';
+import '../../../core/widgets/error_widget.dart';
+import '../../../core/widgets/loading_widget.dart';
+import '../../../core/widgets/skeleton_widget.dart';
 import 'widgets/contact_card.dart';
 
 class ContactListScreen extends ConsumerStatefulWidget {
-  const ContactListScreen({super.key, this.accountId});
+  const ContactListScreen({
+    super.key,
+    this.accountId,
+    this.hideAppBar = false,
+    this.searchController,
+  });
 
   final String? accountId;
+  final bool hideAppBar;
+  final TextEditingController? searchController;
 
   @override
   ConsumerState<ContactListScreen> createState() => _ContactListScreenState();
 }
 
 class _ContactListScreenState extends ConsumerState<ContactListScreen> {
-  final TextEditingController _searchController = TextEditingController();
   Timer? _debounceTimer;
   final ScrollController _scrollController = ScrollController();
+  bool _contactWasDeleted = false;
 
   @override
   void initState() {
@@ -27,10 +39,16 @@ class _ContactListScreenState extends ConsumerState<ContactListScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.accountId != null) {
         ref.read(contactListProvider.notifier).setAccountFilter(widget.accountId);
+        ref.read(contactListProvider.notifier).loadContacts(
+              accountId: widget.accountId,
+            );
+      } else {
+        // Clear account filter to show all contacts
+        ref.read(contactListProvider.notifier).setAccountFilter(null);
+        ref.read(contactListProvider.notifier).loadContacts(
+              accountId: null,
+            );
       }
-      ref.read(contactListProvider.notifier).loadContacts(
-            accountId: widget.accountId,
-          );
     });
 
     _scrollController.addListener(_onScroll);
@@ -38,7 +56,6 @@ class _ContactListScreenState extends ConsumerState<ContactListScreen> {
 
   @override
   void dispose() {
-    _searchController.dispose();
     _debounceTimer?.cancel();
     _scrollController.dispose();
     super.dispose();
@@ -52,16 +69,8 @@ class _ContactListScreenState extends ConsumerState<ContactListScreen> {
   }
 
   void _onSearchChanged(String query) {
-    _debounceTimer?.cancel();
-    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
-      ref.read(contactListProvider.notifier).updateSearchQuery(query);
-      ref.read(contactListProvider.notifier).loadContacts(
-            page: 1,
-            refresh: true,
-            search: query,
-            accountId: widget.accountId,
-          );
-    });
+    // Search is handled by parent (AccountsScreen)
+    // This method is kept for compatibility but not used when searchController is provided
   }
 
   Future<void> _onRefresh() async {
@@ -73,44 +82,85 @@ class _ContactListScreenState extends ConsumerState<ContactListScreen> {
     final state = ref.watch(contactListProvider);
     final theme = Theme.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.accountId != null ? 'Contacts' : 'All Contacts'),
-        elevation: 0,
-      ),
-      body: Column(
-        children: [
-          // Search Bar
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: TextField(
-              controller: _searchController,
-              onChanged: _onSearchChanged,
-              decoration: InputDecoration(
-                hintText: 'Search contacts...',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          _onSearchChanged('');
-                        },
-                      )
-                    : null,
+    final body = widget.searchController != null
+        ? RefreshIndicator(
+            onRefresh: _onRefresh,
+            child: _buildContent(context, state, theme),
+          )
+        : Column(
+            children: [
+              // Search Bar (only if not provided by parent)
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: TextField(
+                  onChanged: _onSearchChanged,
+                  decoration: const InputDecoration(
+                    hintText: 'Search contacts...',
+                    prefixIcon: Icon(Icons.search),
+                  ),
+                ),
               ),
-            ),
-          ),
-          // Content
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: _onRefresh,
-              child: _buildContent(context, state, theme),
-            ),
-          ),
-        ],
-      ),
+              // Content
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: _onRefresh,
+                  child: _buildContent(context, state, theme),
+                ),
+              ),
+            ],
+          );
+
+    if (widget.hideAppBar) {
+      return body;
+    }
+
+    // Wrap with PopScope to handle back navigation when contact is deleted
+    Widget scaffold = Scaffold(
+        appBar: AppBar(
+          title: Text(widget.accountId != null ? 'Contacts' : 'All Contacts'),
+          elevation: 0,
+        ),
+        body: body,
+        floatingActionButton: widget.accountId != null
+            ? FloatingActionButton(
+                onPressed: () async {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ContactFormScreen(
+                        defaultAccountId: widget.accountId,
+                      ),
+                    ),
+                  );
+                  if (result != null && mounted) {
+                    await ref.read(contactListProvider.notifier).refresh();
+                  }
+                },
+                child: const Icon(Icons.add),
+              )
+            : null,
     );
+
+    // If opened from account detail and contact was deleted, wrap with PopScope
+    if (widget.accountId != null) {
+      return PopScope(
+        canPop: true,
+        onPopInvokedWithResult: (didPop, result) {
+          // If contact was deleted, return true to trigger refresh in parent
+          if (didPop && _contactWasDeleted) {
+            // Use a post-frame callback to ensure navigation is complete
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                Navigator.of(context).pop(true);
+              }
+            });
+          }
+        },
+        child: scaffold,
+      );
+    }
+
+    return scaffold;
   }
 
   Widget _buildContent(
@@ -119,36 +169,15 @@ class _ContactListScreenState extends ConsumerState<ContactListScreen> {
     ThemeData theme,
   ) {
     if (state.isLoading && state.contacts.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return const LoadingWidget();
     }
 
     if (state.errorMessage != null && state.contacts.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 48,
-              color: theme.colorScheme.error,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              state.errorMessage!,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            FilledButton(
-              onPressed: () {
-                ref.read(contactListProvider.notifier).refresh();
-              },
-              child: const Text('Retry'),
-            ),
-          ],
-        ),
+      return ErrorStateWidget(
+        message: state.errorMessage!,
+        onRetry: () {
+          ref.read(contactListProvider.notifier).refresh();
+        },
       );
     }
 
@@ -164,7 +193,7 @@ class _ContactListScreenState extends ConsumerState<ContactListScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'No contacts found',
+              AppLocalizations.of(context)!.noContactsFound,
               style: theme.textTheme.titleMedium?.copyWith(
                 color: theme.colorScheme.onSurface.withOpacity(0.6),
               ),
@@ -174,26 +203,41 @@ class _ContactListScreenState extends ConsumerState<ContactListScreen> {
       );
     }
 
+    // Show skeleton screens if loading first page
+    if (state.isLoading && state.contacts.isEmpty) {
+      return ListView.builder(
+        itemCount: 5, // Show 5 skeleton items
+        itemBuilder: (context, index) {
+          return const SkeletonListItem(height: 80);
+        },
+      );
+    }
+
     return ListView.builder(
       controller: _scrollController,
-      itemCount: state.contacts.length + (state.isLoading ? 1 : 0),
+      itemCount: state.contacts.length + (state.isLoadingMore ? 1 : 0),
       itemBuilder: (context, index) {
         if (index == state.contacts.length) {
           return const Padding(
             padding: EdgeInsets.all(16),
-            child: Center(child: CircularProgressIndicator()),
+            child: LoadingWidget(size: 24),
           );
         }
 
         final contact = state.contacts[index];
         return ContactCard(
           contact: contact,
-          onTap: () {
-            Navigator.pushNamed(
+          onTap: () async {
+            final result = await Navigator.pushNamed(
               context,
               '${AppRoutes.contacts}/${contact.id}',
               arguments: contact.id,
             );
+            // Refresh list if contact was deleted or updated
+            if (result == true && mounted) {
+              _contactWasDeleted = true;
+              await ref.read(contactListProvider.notifier).refresh();
+            }
           },
         );
       },

@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/l10n/locale_provider.dart';
 import '../../../core/theme/theme_provider.dart';
+import '../../../core/utils/app_info.dart';
 import '../../../core/widgets/main_scaffold.dart';
 import '../../auth/application/auth_provider.dart';
 
@@ -288,7 +289,7 @@ class ProfileScreen extends ConsumerWidget {
                 child: _SettingsTile(
                   icon: Icons.info_outline,
                   title: l10n.appVersion,
-                  subtitle: '1.0.0',
+                  subtitle: AppInfo.versionString,
                   onTap: null,
                 ),
               ),

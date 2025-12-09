@@ -265,7 +265,8 @@
       "rememberMe": "Remember me",
       "submit": "Sign in",
       "submitting": "Signing in...",
-      "genericError": "Login failed. Please try again."
+      "genericError": "Login failed. Please try again.",
+      "rateLimitMessage": "Too many login attempts. Please try again in {countdown}."
     }
   },
   "block": {

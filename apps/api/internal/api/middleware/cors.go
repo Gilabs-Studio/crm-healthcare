@@ -16,15 +16,29 @@ func CORSMiddleware() gin.HandlerFunc {
 	allowedOrigins := []string{
 		"http://localhost:3000",
 		"http://localhost:3001",
+		// Production origins (add more if needed)
+		"https://api.gilabs.id",
+		"https://crm-demo.gilabs.id",
 	}
 	
-	// Add production origins from environment
+	// Add production origins from environment variable
+	// Format: comma-separated list, e.g., "https://gilabs.id,https://www.gilabs.id"
 	if envOrigins := os.Getenv("CORS_ALLOWED_ORIGINS"); envOrigins != "" {
 		origins := strings.Split(envOrigins, ",")
 		for _, origin := range origins {
 			trimmed := strings.TrimSpace(origin)
 			if trimmed != "" {
-				allowedOrigins = append(allowedOrigins, trimmed)
+				// Check if already exists to avoid duplicates
+				exists := false
+				for _, existing := range allowedOrigins {
+					if existing == trimmed {
+						exists = true
+						break
+					}
+				}
+				if !exists {
+					allowedOrigins = append(allowedOrigins, trimmed)
+				}
 			}
 		}
 	}
@@ -43,7 +57,14 @@ func CORSMiddleware() gin.HandlerFunc {
 		"X-Request-ID",
 	}
 	config.AllowCredentials = true
-	config.ExposeHeaders = []string{"X-Request-ID"}
+	config.ExposeHeaders = []string{
+		"X-Request-ID",
+		"X-RateLimit-Limit",
+		"X-RateLimit-Remaining",
+		"X-RateLimit-Reset",
+	}
+	// Set max age for preflight requests (24 hours)
+	config.MaxAge = 86400
 
 	return cors.New(config)
 }

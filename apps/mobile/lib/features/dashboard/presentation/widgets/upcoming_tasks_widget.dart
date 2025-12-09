@@ -133,19 +133,22 @@ class _TaskItem extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.only(bottom: 12),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
               width: 8,
               height: 8,
+              margin: const EdgeInsets.only(top: 6),
               decoration: BoxDecoration(
                 color: _getPriorityColor(task.priority),
                 shape: BoxShape.circle,
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 8),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     task.title,
@@ -153,28 +156,33 @@ class _TaskItem extends StatelessWidget {
                       fontWeight: FontWeight.w500,
                       color: theme.colorScheme.onSurface,
                     ),
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   if (task.dueDate != null) ...[
                     const SizedBox(height: 4),
                     Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
                           Icons.calendar_today,
-                          size: 12,
+                          size: 11,
                           color: isOverdue
                               ? Colors.red
                               : theme.colorScheme.onSurface.withOpacity(0.7),
                         ),
                         const SizedBox(width: 4),
-                        Text(
-                          DateFormat('MMM dd, yyyy').format(task.dueDate!),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: isOverdue
-                                ? Colors.red
-                                : theme.colorScheme.onSurface.withOpacity(0.7),
-                            fontSize: 11,
+                        Flexible(
+                          child: Text(
+                            DateFormat('MMM dd, yyyy').format(task.dueDate!),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: isOverdue
+                                  ? Colors.red
+                                  : theme.colorScheme.onSurface.withOpacity(0.7),
+                              fontSize: 10,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
@@ -183,18 +191,24 @@ class _TaskItem extends StatelessWidget {
                 ],
               ),
             ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: _getStatusColor(task.status).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                task.status.toUpperCase().replaceAll('_', ' '),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: _getStatusColor(task.status),
-                  fontWeight: FontWeight.w600,
-                  fontSize: 10,
+            const SizedBox(width: 8),
+            Flexible(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                decoration: BoxDecoration(
+                  color: _getStatusColor(task.status).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  task.status.toUpperCase().replaceAll('_', ' '),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: _getStatusColor(task.status),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 9,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
                 ),
               ),
             ),

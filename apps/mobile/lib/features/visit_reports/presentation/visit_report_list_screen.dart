@@ -5,6 +5,10 @@ import 'dart:async';
 import '../application/visit_report_provider.dart';
 import '../application/visit_report_state.dart';
 import '../../../core/routing/app_router.dart';
+import '../../../core/l10n/app_localizations.dart';
+import '../../../core/widgets/error_widget.dart';
+import '../../../core/widgets/loading_widget.dart';
+import '../../../core/widgets/skeleton_widget.dart';
 import 'widgets/visit_report_card.dart';
 
 class VisitReportListScreen extends ConsumerStatefulWidget {
@@ -71,6 +75,7 @@ class _VisitReportListScreenState
   Widget build(BuildContext context) {
     final state = ref.watch(visitReportListProvider);
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     final body = Column(
         children: [
@@ -81,7 +86,7 @@ class _VisitReportListScreenState
               controller: _searchController,
               onChanged: _onSearchChanged,
               decoration: InputDecoration(
-                hintText: 'Search visit reports...',
+                hintText: l10n.searchVisitReports,
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
@@ -92,6 +97,12 @@ class _VisitReportListScreenState
                         },
                       )
                     : null,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor: theme.colorScheme.surfaceContainerHighest,
               ),
             ),
           ),
@@ -111,7 +122,7 @@ class _VisitReportListScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Visit Reports'),
+        title: Text(l10n.visitReports),
         elevation: 0,
         actions: [
           IconButton(
@@ -119,7 +130,7 @@ class _VisitReportListScreenState
             onPressed: () {
               Navigator.pushNamed(context, '${AppRoutes.visitReports}/create');
             },
-            tooltip: 'Create Visit Report',
+            tooltip: l10n.createVisitReport,
           ),
         ],
       ),
@@ -132,77 +143,47 @@ class _VisitReportListScreenState
     VisitReportListState state,
     ThemeData theme,
   ) {
+    final l10n = AppLocalizations.of(context)!;
+    
     if (state.isLoading && state.visitReports.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return const LoadingWidget();
     }
 
     if (state.errorMessage != null && state.visitReports.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 48,
-              color: theme.colorScheme.error,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              state.errorMessage!,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            FilledButton(
-              onPressed: () {
-                ref.read(visitReportListProvider.notifier).refresh();
-              },
-              child: const Text('Retry'),
-            ),
-          ],
-        ),
+      return ErrorStateWidget(
+        message: state.errorMessage!,
+        onRetry: () {
+          ref.read(visitReportListProvider.notifier).refresh();
+        },
       );
     }
 
     if (state.visitReports.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.assignment_outlined,
-              size: 64,
-              color: theme.colorScheme.onSurface.withOpacity(0.3),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'No visit reports found',
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.6),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Tap + to create a new visit report',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.5),
-              ),
-            ),
-          ],
-        ),
+      return EmptyStateWidget(
+        message: l10n.noVisitReportsFound,
+        subtitle: l10n.tapToCreateVisitReport,
+        icon: Icons.assignment_outlined,
+      );
+    }
+
+    // Show skeleton screens if loading first page
+    if (state.isLoading && state.visitReports.isEmpty) {
+      return ListView.builder(
+        itemCount: 5, // Show 5 skeleton items
+        itemBuilder: (context, index) {
+          return const SkeletonListItem(height: 100);
+        },
       );
     }
 
     return ListView.builder(
       controller: _scrollController,
-      itemCount: state.visitReports.length + (state.isLoading ? 1 : 0),
+      itemCount: state.visitReports.length + (state.isLoadingMore ? 1 : 0),
       itemBuilder: (context, index) {
         if (index == state.visitReports.length) {
           return const Padding(
             padding: EdgeInsets.all(16),
-            child: Center(child: CircularProgressIndicator()),
+            child: LoadingWidget(size: 24),
           );
         }
 

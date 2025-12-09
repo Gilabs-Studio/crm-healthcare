@@ -29,7 +29,7 @@ interface ErrorMessages {
   };
 }
 
-let cachedMessages: { en?: ErrorMessages; id?: ErrorMessages } = {};
+const cachedMessages: { en?: ErrorMessages; id?: ErrorMessages } = {};
 
 /**
  * Get current locale from URL or default to 'en'
@@ -154,7 +154,7 @@ export function getErrorMessagesSync(): ErrorMessages {
       resourceExists: { title: "Duplicate Entry", description: "The {field} \"{value}\" already exists. Please use a different value." },
       serverError: { title: "Server Error", description: "An error occurred on the server. Our team has been notified. Please try again later or contact support if the problem persists." },
       serviceUnavailable: { title: "Service Unavailable", description: "The service is temporarily unavailable. Please try again in a few moments." },
-      rateLimit: { title: "Too Many Requests", description: "You have made too many requests. Please wait a moment before trying again." },
+      rateLimit: { title: "Too Many Requests", description: "You have made too many requests. Please try again in {countdown}." },
       unexpectedError: { title: "Unexpected Error", description: "An unexpected error occurred. Please try again or contact support if the problem persists." },
       invalidFormat: { title: "Invalid Response Format", description: "The server returned an unexpected response format. Please contact support." },
     },

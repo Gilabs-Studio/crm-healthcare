@@ -6,6 +6,7 @@ import '../../features/auth/presentation/login_screen.dart';
 import '../../features/contacts/presentation/contact_detail_screen.dart';
 import '../../features/contacts/presentation/contact_list_screen.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
+import '../../features/dashboard/presentation/recent_activities_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/tasks/presentation/task_detail_screen.dart';
 import '../../features/tasks/presentation/task_form_screen.dart';
@@ -13,6 +14,7 @@ import '../../features/tasks/presentation/task_list_screen.dart';
 import '../../features/visit_reports/presentation/reports_screen.dart';
 import '../../features/visit_reports/presentation/visit_report_detail_screen.dart';
 import '../../features/visit_reports/presentation/visit_report_form_screen.dart';
+import '../../features/notifications/presentation/notification_list_screen.dart';
 import '../widgets/auth_gate.dart';
 
 class AppRoutes {
@@ -27,7 +29,9 @@ class AppRoutes {
   static const tasks = '/tasks';
   static const tasksCreate = '/tasks/create';
   static const tasksEdit = '/tasks/edit';
+  static const notifications = '/notifications';
   static const profile = '/profile';
+  static const recentActivities = '/recent-activities';
 }
 
 class AppRouter {
@@ -44,7 +48,7 @@ class AppRouter {
         AppRoutes.profile: (_) =>
             const AuthGate(child: ProfileScreen()),
         AppRoutes.contacts: (context) {
-          final args = ModalRoute.of(context)!.settings.arguments;
+          final args = ModalRoute.of(context)?.settings.arguments;
           final accountId = args is Map ? args['accountId'] as String? : null;
           return AuthGate(child: ContactListScreen(accountId: accountId));
         },
@@ -61,6 +65,10 @@ class AppRouter {
           final taskId = args is Map ? args['taskId'] as String? : null;
           return AuthGate(child: TaskFormScreen(taskId: taskId));
         },
+        AppRoutes.notifications: (_) =>
+            const AuthGate(child: NotificationListScreen()),
+        AppRoutes.recentActivities: (_) =>
+            const AuthGate(child: RecentActivitiesScreen()),
       };
 
   static Route<dynamic>? onGenerateRoute(RouteSettings settings) {

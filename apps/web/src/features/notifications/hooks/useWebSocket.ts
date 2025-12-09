@@ -4,20 +4,36 @@ import { useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useAuthStore } from "@/features/auth/stores/useAuthStore";
+import { useRefreshSession } from "@/features/auth/hooks/useRefreshSession";
 import type { WebSocketMessage, Notification } from "../types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 const WS_URL = API_BASE_URL.replace(/^http/, "ws");
+
+// Helper function to check if JWT token is expired
+function isTokenExpired(token: string): boolean {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    const exp = payload.exp * 1000; // Convert to milliseconds
+    const now = Date.now();
+    // Consider token expired if it expires within 1 minute (buffer for clock skew)
+    return exp < now + 60000;
+  } catch {
+    return true; // If we can't parse, consider it expired
+  }
+}
 
 export function useWebSocket() {
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef(0);
   const isConnectingRef = useRef(false);
+  const isRefreshingRef = useRef(false);
   const queryClient = useQueryClient();
   const queryClientRef = useRef(queryClient);
   const { token } = useAuthStore();
   const tokenRef = useRef<string | null>(token);
+  const { refreshSession } = useRefreshSession();
 
   // Update refs when values change
   useEffect(() => {
@@ -38,6 +54,32 @@ export function useWebSocket() {
         wsRef.current = null;
       }
       return;
+    }
+
+    // Check if token is expired and try to refresh
+    if (isTokenExpired(token)) {
+      if (!isRefreshingRef.current) {
+        isRefreshingRef.current = true;
+        refreshSession()
+          .then(() => {
+            // Token refreshed, effect will re-run with new token
+            isRefreshingRef.current = false;
+          })
+          .catch((error) => {
+            console.error("Failed to refresh token for WebSocket:", error);
+            isRefreshingRef.current = false;
+            // Close connection if refresh fails
+            if (wsRef.current && wsRef.current.readyState !== WebSocket.CLOSED) {
+              try {
+                wsRef.current.close(1000, "Token refresh failed");
+              } catch {
+                // Ignore errors
+              }
+              wsRef.current = null;
+            }
+          });
+      }
+      return; // Wait for token refresh
     }
 
     // Don't connect if already connecting
@@ -79,8 +121,12 @@ export function useWebSocket() {
     // Reset reconnect attempts on new connection attempt
     reconnectAttemptsRef.current = 0;
 
-    // Build WebSocket URL with token
-    const wsUrl = `${WS_URL}/api/v1/ws/notifications?token=${encodeURIComponent(token)}`;
+    // Build WebSocket URL
+    // Try cookie first (more secure), but fallback to query parameter if needed
+    // Note: WebSocket doesn't always send cookies, so we include token in query as fallback
+    const wsUrl = tokenRef.current
+      ? `${WS_URL}/api/v1/ws/notifications?token=${encodeURIComponent(tokenRef.current)}`
+      : `${WS_URL}/api/v1/ws/notifications`;
 
     // Store message handler for reuse
     const messageHandler = (event: MessageEvent) => {
@@ -123,7 +169,6 @@ export function useWebSocket() {
       const ws = new WebSocket(wsUrl);
 
       ws.onopen = () => {
-        console.log("WebSocket connected");
         isConnectingRef.current = false;
         reconnectAttemptsRef.current = 0;
         
@@ -137,13 +182,11 @@ export function useWebSocket() {
 
       ws.onmessage = messageHandler;
 
-      ws.onerror = (error) => {
-        console.error("WebSocket error:", error);
+      ws.onerror = () => {
         isConnectingRef.current = false;
       };
 
-      ws.onclose = (event) => {
-        console.log("WebSocket disconnected", event.code, event.reason);
+      ws.onclose = async (event) => {
         isConnectingRef.current = false;
         
         // Clear ref only if this is the current connection
@@ -151,9 +194,27 @@ export function useWebSocket() {
           wsRef.current = null;
         }
 
+        // If connection closed due to authentication error (401), try to refresh token
+        // Code 1006 (Abnormal Closure) often indicates server rejected connection
+        if ((event.code === 1006 || event.code === 1008) && tokenRef.current && !isRefreshingRef.current) {
+          // Check if token might be expired
+          if (isTokenExpired(tokenRef.current)) {
+            isRefreshingRef.current = true;
+            try {
+              await refreshSession();
+              // Token refreshed, effect will re-run with new token
+              isRefreshingRef.current = false;
+              return; // Don't attempt reconnect, let effect handle it
+            } catch (error) {
+              console.error("Failed to refresh token:", error);
+              isRefreshingRef.current = false;
+            }
+          }
+        }
+
         // Only reconnect if not a normal closure (1000) and we have a token
         // Don't reconnect if it was closed intentionally (code 1000)
-        if (event.code !== 1000 && tokenRef.current) {
+        if (event.code !== 1000 && tokenRef.current && !isRefreshingRef.current) {
           // Exponential backoff: 1s, 2s, 4s, 8s, max 30s
           const maxAttempts = 5;
           if (reconnectAttemptsRef.current < maxAttempts) {
@@ -161,10 +222,6 @@ export function useWebSocket() {
             const delay = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current - 1), 30000);
             
             reconnectTimeoutRef.current = setTimeout(() => {
-              console.log(`Attempting to reconnect WebSocket... (attempt ${reconnectAttemptsRef.current})`);
-              // Don't manually reconnect here - let the effect handle it
-              // This prevents duplicate connections and handler issues
-              // The effect will check if connection is needed and create it
             }, delay);
           } else {
             console.warn("Max reconnection attempts reached. Stopping reconnection.");

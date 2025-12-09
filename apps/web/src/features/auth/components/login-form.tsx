@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
+import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -26,11 +27,54 @@ import { useAuthStore } from "../stores/useAuthStore";
 import { loginSchema, type LoginFormData } from "../schemas/login.schema";
 import { useLogin } from "../hooks/useLogin";
 import type { AuthError } from "../types/errors";
+import { useRateLimitCountdown } from "@/lib/hooks/useRateLimitCountdown";
+import { useRateLimitStore } from "@/lib/stores/useRateLimitStore";
 
 export function LoginForm() {
   const t = useTranslations("auth.login");
   const { isAuthenticated } = useAuthStore();
   const { handleLogin, isLoading, error, clearError } = useLogin();
+  const [showPassword, setShowPassword] = useState(false);
+  
+  // Rate limit countdown hook - shows toast notification with countdown
+  useRateLimitCountdown();
+  
+  // Get countdown text for display in form - update every second
+  const resetTime = useRateLimitStore((state) => state.resetTime);
+  const getCountdownText = useRateLimitStore((state) => state.getCountdownText);
+  
+  // Use tick state to trigger re-render every second for countdown updates
+  // This avoids calling Date.now() during render and avoids synchronous setState in effects
+  // The tick value is not used, only setTick is used to trigger re-renders
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [tick, setTick] = useState(0);
+  
+  useEffect(() => {
+    if (!resetTime) {
+      return;
+    }
+    
+    // Update tick every second to trigger re-render and recalculate countdown
+    // setTick from useState is stable and doesn't need to be in dependencies
+    const interval = setInterval(() => {
+      setTick((prev) => prev + 1);
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, [resetTime]);
+  
+  // Calculate countdown text and rate limited status
+  // getCountdownText() is safe to call here because it's called during render
+  // and the tick state ensures it updates every second
+  const countdownText = resetTime ? (() => {
+    const text = getCountdownText();
+    if (text === "a moment") {
+      return null;
+    }
+    return text;
+  })() : null;
+  
+  const isRateLimited = countdownText !== null;
 
   const {
     register,
@@ -123,15 +167,30 @@ export function LoginForm() {
                       {t("forgotPassword")}
                     </button>
                   </div>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder={t("passwordPlaceholder")}
-                    {...register("password")}
-                    disabled={isFormLoading}
-                    aria-invalid={!!errors.password}
-                    className="h-11"
-                  />
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder={t("passwordPlaceholder")}
+                      {...register("password")}
+                      disabled={isFormLoading}
+                      aria-invalid={!!errors.password}
+                      className="h-11 pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      disabled={isFormLoading}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
                   {errors.password && (
                     <FieldError>{errors.password.message}</FieldError>
                   )}
@@ -155,10 +214,22 @@ export function LoginForm() {
                   </Field>
                 )}
 
+                {/* Rate limit countdown display */}
+                {countdownText && resetTime && (
+                  <Field>
+                    <div className="rounded-md bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
+                      <p className="font-medium">
+                        {t("rateLimitMessage", { countdown: countdownText }) || 
+                         `Too many login attempts. Please try again in ${countdownText}.`}
+                      </p>
+                    </div>
+                  </Field>
+                )}
+
                 <Field className="pt-1">
                   <Button
                     type="submit"
-                    disabled={isFormLoading}
+                    disabled={isFormLoading || isRateLimited}
                     className="h-11 w-full text-sm font-semibold tracking-wide"
                   >
                     {isFormLoading ? t("submitting") : t("submit")}

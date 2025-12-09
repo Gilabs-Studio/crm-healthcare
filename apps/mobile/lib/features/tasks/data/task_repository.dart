@@ -337,14 +337,32 @@ class TaskRepository {
     String? message,
   }) async {
     try {
+      // Format remind_at in ISO8601 format with timezone offset
+      // Example: "2024-01-20T10:00:00+07:00"
+      final localDate = remindAt.toLocal();
+      final offset = localDate.timeZoneOffset;
+      
+      final year = localDate.year.toString().padLeft(4, '0');
+      final month = localDate.month.toString().padLeft(2, '0');
+      final day = localDate.day.toString().padLeft(2, '0');
+      final hour = localDate.hour.toString().padLeft(2, '0');
+      final minute = localDate.minute.toString().padLeft(2, '0');
+      final second = localDate.second.toString().padLeft(2, '0');
+      
+      final offsetHours = offset.inHours.abs().toString().padLeft(2, '0');
+      final offsetMinutes = (offset.inMinutes.abs() % 60).toString().padLeft(2, '0');
+      final offsetSign = offset.isNegative ? '-' : '+';
+      
+      final remindAtFormatted = '$year-$month-${day}T$hour:$minute:$second$offsetSign$offsetHours:$offsetMinutes';
+
       final data = <String, dynamic>{
         'task_id': taskId,
-        'remind_at': remindAt.toIso8601String(),
+        'remind_at': remindAtFormatted,
         'reminder_type': reminderType,
       };
 
-      if (message != null && message.isNotEmpty) {
-        data['message'] = message;
+      if (message != null && message.trim().isNotEmpty) {
+        data['message'] = message.trim();
       }
 
       final response = await _dio.post('/api/v1/tasks/reminders', data: data);

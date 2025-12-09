@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../../../core/theme/app_theme.dart';
 import '../../data/models/task.dart';
 
 class TaskCard extends StatelessWidget {
@@ -17,19 +16,29 @@ class TaskCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Card(
+    final colorScheme = theme.colorScheme;
+
+    return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: AppTheme.borderColor),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      elevation: 0,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
@@ -39,8 +48,8 @@ class TaskCard extends StatelessWidget {
                     child: Text(
                       task.title,
                       style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.textPrimary,
+                        fontWeight: FontWeight.w600,
+                        color: colorScheme.onSurface,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -63,7 +72,7 @@ class TaskCard extends StatelessWidget {
                 Text(
                   task.description!,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: AppTheme.textSecondary,
+                    color: colorScheme.onSurface.withOpacity(0.7),
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -72,55 +81,64 @@ class TaskCard extends StatelessWidget {
               const SizedBox(height: 12),
               if (task.dueDate != null)
                 _buildInfoRow(
-                  theme,
-                  Icons.calendar_today,
+                  context,
+                  Icons.calendar_today_outlined,
                   _formatDueDate(task.dueDate!),
-                  task.isOverdue ? Colors.red : (task.isDueToday ? Colors.orange : null),
+                  task.isOverdue ? colorScheme.error : (task.isDueToday ? Colors.orange : null),
                 ),
-              if (task.account != null)
+              if (task.account != null) ...[
+                const SizedBox(height: 8),
                 _buildInfoRow(
-                  theme,
-                  Icons.business,
+                  context,
+                  Icons.business_outlined,
                   task.account!.name,
                 ),
-              if (task.contact != null)
+              ],
+              if (task.contact != null) ...[
+                const SizedBox(height: 8),
                 _buildInfoRow(
-                  theme,
-                  Icons.person,
+                  context,
+                  Icons.person_outline,
                   task.contact!.name,
                 ),
+              ],
             ],
           ),
         ),
+      ),
       ),
     );
   }
 
   Widget _buildInfoRow(
-    ThemeData theme,
+    BuildContext context,
     IconData icon,
     String text, [
     Color? textColor,
   ]) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        children: [
-          Icon(icon, size: 18, color: AppTheme.textSecondary),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              text,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: textColor ?? AppTheme.textSecondary,
-                fontWeight: textColor != null ? FontWeight.w600 : null,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 16,
+          color: colorScheme.onSurface.withOpacity(0.7),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: textColor ?? colorScheme.onSurface.withOpacity(0.7),
+              fontWeight: textColor != null ? FontWeight.w500 : null,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -147,38 +165,41 @@ class _StatusBadge extends StatelessWidget {
 
   final String status;
 
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'completed':
-        return Colors.green;
-      case 'in_progress':
-        return Colors.blue;
-      case 'pending':
-        return Colors.orange;
-      case 'cancelled':
-        return Colors.grey;
-      default:
-        return Colors.grey;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final color = _getStatusColor(status);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final color = _getStatusColor(status, colorScheme);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
         status.toUpperCase().replaceAll('_', ' '),
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: color,
-              fontWeight: FontWeight.w600,
-            ),
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: color,
+          fontWeight: FontWeight.w600,
+          fontSize: 10,
+        ),
       ),
     );
+  }
+
+  Color _getStatusColor(String status, ColorScheme colorScheme) {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return Colors.green;
+      case 'in_progress':
+        return colorScheme.primary;
+      case 'pending':
+        return Colors.orange;
+      case 'cancelled':
+        return colorScheme.onSurface.withOpacity(0.7);
+      default:
+        return colorScheme.onSurface.withOpacity(0.7);
+    }
   }
 }
 
@@ -187,7 +208,7 @@ class _PriorityBadge extends StatelessWidget {
 
   final String priority;
 
-  Color _getPriorityColor(String priority) {
+  Color _getPriorityColor(String priority, ColorScheme colorScheme) {
     switch (priority.toLowerCase()) {
       case 'urgent':
         return Colors.red;
@@ -196,20 +217,22 @@ class _PriorityBadge extends StatelessWidget {
       case 'medium':
         return Colors.blue;
       case 'low':
-        return Colors.grey;
+        return colorScheme.onSurface.withOpacity(0.7);
       default:
-        return Colors.grey;
+        return colorScheme.onSurface.withOpacity(0.7);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final color = _getPriorityColor(priority);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final color = _getPriorityColor(priority, colorScheme);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -255,12 +278,14 @@ class _TypeBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final icon = _getTypeIcon(type);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: AppTheme.primaryColor.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
+        color: colorScheme.primary.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -268,15 +293,16 @@ class _TypeBadge extends StatelessWidget {
           Icon(
             icon,
             size: 12,
-            color: AppTheme.primaryColorDark,
+            color: colorScheme.primary,
           ),
           const SizedBox(width: 4),
           Text(
             type.toUpperCase().replaceAll('_', ' '),
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppTheme.primaryColorDark,
-                  fontWeight: FontWeight.w600,
-                ),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: colorScheme.primary,
+              fontWeight: FontWeight.w500,
+              fontSize: 10,
+            ),
           ),
         ],
       ),

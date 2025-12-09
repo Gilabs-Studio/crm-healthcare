@@ -214,7 +214,7 @@ function NotificationItem({ notification, onMarkAsRead, onDelete }: Notification
         !notification.is_read ? "border-primary/20 bg-primary/5" : ""
       }`}
     >
-      <CardContent className="p-4">
+      <CardContent className="px4">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 space-y-1" onClick={handleMarkAsRead}>
             <div className="flex items-start gap-2">

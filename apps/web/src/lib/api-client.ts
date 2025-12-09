@@ -1,6 +1,8 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from "axios";
 import { toast } from "sonner";
+import { setSecureCookie } from "./cookie";
 import { formatError } from "./i18n/error-messages";
+import { useRateLimitStore } from "./stores/useRateLimitStore";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
@@ -66,7 +68,22 @@ interface ApiErrorResponse {
 
 // Response interceptor untuk handle errors
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Extract rate limit headers from successful responses
+    // Axios normalizes headers to lowercase, but check both cases for safety
+    const resetHeader = response.headers["x-ratelimit-reset"] || 
+                        response.headers["X-RateLimit-Reset"];
+    if (resetHeader) {
+      const resetTime = typeof resetHeader === "string" 
+        ? parseInt(resetHeader, 10) 
+        : resetHeader;
+      if (!isNaN(resetTime) && resetTime > 0) {
+        // Store reset time for countdown display
+        useRateLimitStore.getState().setResetTime(resetTime);
+      }
+    }
+    return response;
+  },
   async (error: AxiosError<ApiErrorResponse>) => {
     // Network error (tidak terhubung ke server) - lebih jelas dan awam
     if (!error.response) {
@@ -172,9 +189,19 @@ apiClient.interceptors.response.use(
     // Handle HTTP status codes
     if (status === 401) {
       const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+      const requestUrl = originalRequest?.url || "";
 
-      // Skip refresh if this is already a retry or if it's a refresh token request
-      if (originalRequest?._retry || originalRequest?.url?.includes("/auth/refresh")) {
+      // Skip token refresh for authentication endpoints (login, refresh)
+      // These endpoints return 401 for invalid credentials, not expired session
+      if (requestUrl.includes("/auth/login") || requestUrl.includes("/auth/refresh")) {
+        // For login/refresh endpoints, 401 means invalid credentials
+        // Don't try to refresh token, don't show toast, just reject the error
+        // Error message will be handled by the login form component
+        return Promise.reject(error);
+      }
+
+      // Skip refresh if this is already a retry
+      if (originalRequest?._retry) {
         // Refresh failed or already retried, logout user
         if (typeof window !== "undefined") {
           localStorage.removeItem("token");
@@ -250,8 +277,8 @@ apiClient.interceptors.response.use(
               if (typeof window !== "undefined") {
                 localStorage.setItem("token", token);
                 localStorage.setItem("refreshToken", refresh_token);
-                // Update cookie
-                document.cookie = `token=${token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
+                // Update secure cookie
+                setSecureCookie("token", token);
               }
 
               // Update auth store with user data and tokens
@@ -338,10 +365,59 @@ apiClient.interceptors.response.use(
         description: msg.description,
       });
     } else if (status === 429) {
-      const msg = formatError("backend", "rateLimit");
-      toast.error(msg.title, {
-        description: msg.description,
-      });
+      // Extract rate limit reset time from response headers
+      // Axios normalizes headers to lowercase, but check both cases for safety
+      const headers = error.response?.headers || {};
+      const resetHeader = headers["x-ratelimit-reset"] || 
+                          headers["X-RateLimit-Reset"];
+      
+      if (resetHeader) {
+        const resetTimeValue = typeof resetHeader === "string" 
+          ? parseInt(resetHeader, 10) 
+          : (typeof resetHeader === "number" ? resetHeader : null);
+        
+        if (resetTimeValue !== null && !isNaN(resetTimeValue) && resetTimeValue > 0) {
+          // Store reset time for countdown display
+          // The useRateLimitCountdown hook will show toast with countdown
+          useRateLimitStore.getState().setResetTime(resetTimeValue);
+          
+          // Debug: Log in development
+          if (process.env.NODE_ENV === "development") {
+            console.log("Rate limit detected - Reset time:", resetTimeValue, "Headers:", Object.keys(headers));
+          }
+        }
+      } else {
+        // Debug: Log if header not found
+        if (process.env.NODE_ENV === "development") {
+          console.warn("Rate limit header not found. Available headers:", Object.keys(headers));
+        }
+      }
+      
+      // Override error message to prevent default axios message
+      // The useRateLimitCountdown hook will show toast with countdown
+      // Set a custom error message that will be shown in form
+      const rateLimitMessage = errorData?.error?.message || 
+                               "Too many login attempts. Please wait before trying again.";
+      
+      // Override the error message to prevent "Request failed with status code 429"
+      // Create new error object to ensure message is properly set
+      const customError = { ...error } as AxiosError<ApiErrorResponse>;
+      customError.message = rateLimitMessage;
+      
+      if (customError.response?.data) {
+        if (!customError.response.data.error) {
+          customError.response.data.error = { 
+            code: "RATE_LIMIT_EXCEEDED", 
+            message: rateLimitMessage 
+          };
+        } else {
+          customError.response.data.error.message = rateLimitMessage;
+        }
+      }
+      
+      // Don't show generic toast here - useRateLimitCountdown hook will show countdown toast
+      // Just reject the error so it can be handled by the component
+      return Promise.reject(customError);
     } else if (status >= 500) {
       const msg = formatError("backend", "serverError");
       toast.error(msg.title, {
@@ -349,10 +425,14 @@ apiClient.interceptors.response.use(
       });
     } else {
       // Other 4xx errors
-      const msg = formatError("backend", "unexpectedError");
-      toast.error(msg.title, {
-        description: msg.description,
-      });
+      // Skip toast for login endpoint - error will be shown in form
+      const requestUrl = error.config?.url || "";
+      if (!requestUrl.includes("/auth/login")) {
+        const msg = formatError("backend", "unexpectedError");
+        toast.error(msg.title, {
+          description: msg.description,
+        });
+      }
     }
 
     return Promise.reject(error);

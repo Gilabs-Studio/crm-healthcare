@@ -5,7 +5,11 @@ import 'dart:async';
 import '../application/task_provider.dart';
 import '../application/task_state.dart';
 import '../../../core/routing/app_router.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../../core/l10n/app_localizations.dart';
+import '../../../core/widgets/error_widget.dart';
+import '../../../core/widgets/loading_widget.dart';
+import '../../../core/widgets/skeleton_widget.dart';
+import 'task_form_screen.dart';
 import 'widgets/task_card.dart';
 
 class TaskListScreen extends ConsumerStatefulWidget {
@@ -71,6 +75,7 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(taskListProvider);
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     final body = Column(
       children: [
@@ -81,7 +86,7 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
             controller: _searchController,
             onChanged: _onSearchChanged,
             decoration: InputDecoration(
-              hintText: 'Search tasks...',
+              hintText: l10n.searchTasks,
               prefixIcon: const Icon(Icons.search),
               suffixIcon: _searchController.text.isNotEmpty
                   ? IconButton(
@@ -97,7 +102,7 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
                 borderSide: BorderSide.none,
               ),
               filled: true,
-              fillColor: theme.colorScheme.surface,
+              fillColor: theme.colorScheme.surfaceContainerHighest,
             ),
           ),
         ),
@@ -119,28 +124,40 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tasks'),
+        title: Text(l10n.tasks),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: () async {
-              await Navigator.of(context).pushNamed(AppRoutes.tasksCreate);
-              // Refresh list after returning from create screen
-              if (mounted) {
-                ref.read(taskListProvider.notifier).refresh();
-              }
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const TaskFormScreen(),
+                ),
+              ).then((result) {
+                // Refresh list after creating task
+                if (result != null && mounted) {
+                  ref.read(taskListProvider.notifier).refresh();
+                }
+              });
             },
           ),
         ],
       ),
       body: body,
       floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          await Navigator.of(context).pushNamed(AppRoutes.tasksCreate);
-          // Refresh list after returning from create screen
-          if (mounted) {
-            ref.read(taskListProvider.notifier).refresh();
-          }
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const TaskFormScreen(),
+            ),
+          ).then((result) {
+            // Refresh list after creating task
+            if (result != null && mounted) {
+              ref.read(taskListProvider.notifier).refresh();
+            }
+          });
         },
         child: const Icon(Icons.add),
       ),
@@ -148,6 +165,7 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
   }
 
   Widget _buildFilters(BuildContext context, TaskListState state) {
+    final l10n = AppLocalizations.of(context)!;
     final hasActiveFilters = state.selectedStatus != null ||
         state.selectedPriority != null;
 
@@ -157,16 +175,16 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
         children: [
           Expanded(
             child: _FilterChip(
-              label: 'Status',
-              value: state.selectedStatus ?? 'All',
+              label: l10n.status,
+              value: state.selectedStatus ?? l10n.all,
               onTap: () => _showStatusFilter(context),
             ),
           ),
           const SizedBox(width: 8),
           Expanded(
             child: _FilterChip(
-              label: 'Priority',
-              value: state.selectedPriority ?? 'All',
+              label: l10n.priority,
+              value: state.selectedPriority ?? l10n.all,
               onTap: () => _showPriorityFilter(context),
             ),
           ),
@@ -177,7 +195,7 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
               onPressed: () {
                 ref.read(taskListProvider.notifier).clearFilters();
               },
-              tooltip: 'Clear filters',
+              tooltip: l10n.clearFilters,
             ),
           ],
         ],
@@ -216,64 +234,45 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
     TaskListState state,
     ThemeData theme,
   ) {
+    final l10n = AppLocalizations.of(context)!;
+
     if (state.isLoading && state.tasks.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return const LoadingWidget();
     }
 
     if (state.errorMessage != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, color: Colors.red, size: 48),
-            const SizedBox(height: 16),
-            Text(
-              state.errorMessage!,
-              style: theme.textTheme.titleMedium?.copyWith(color: Colors.red),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            FilledButton(
-              onPressed: () => ref.read(taskListProvider.notifier).refresh(),
-              child: const Text('Retry'),
-            ),
-          ],
-        ),
+      return ErrorStateWidget(
+        message: state.errorMessage!,
+        onRetry: () => ref.read(taskListProvider.notifier).refresh(),
       );
     }
 
     if (state.tasks.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.check_box, size: 64, color: AppTheme.textSecondary),
-            const SizedBox(height: 16),
-            Text(
-              'No tasks found',
-              style: theme.textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Create a new task to get started',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: AppTheme.textSecondary,
-              ),
-            ),
-          ],
-        ),
+      return EmptyStateWidget(
+        message: l10n.noTasksFound,
+        subtitle: l10n.tapToCreateTask,
+        icon: Icons.check_box,
+      );
+    }
+
+    // Show skeleton screens if loading first page
+    if (state.isLoading && state.tasks.isEmpty) {
+      return ListView.builder(
+        itemCount: 5, // Show 5 skeleton items
+        itemBuilder: (context, index) {
+          return const SkeletonListItem(height: 100);
+        },
       );
     }
 
     return ListView.builder(
       controller: _scrollController,
-      itemCount: state.tasks.length +
-          (state.pagination?.hasNextPage == true ? 1 : 0),
+      itemCount: state.tasks.length + (state.isLoadingMore ? 1 : 0),
       itemBuilder: (context, index) {
         if (index == state.tasks.length) {
           return const Padding(
             padding: EdgeInsets.all(16.0),
-            child: Center(child: CircularProgressIndicator()),
+            child: LoadingWidget(size: 24),
           );
         }
         final task = state.tasks[index];
@@ -284,6 +283,7 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
               '${AppRoutes.tasks}/${task.id}',
             );
             // Refresh list after returning from detail screen
+            // This ensures list is updated if task was deleted, completed, or updated
             if (mounted) {
               ref.read(taskListProvider.notifier).refresh();
             }
@@ -308,15 +308,18 @@ class _FilterChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
+          color: colorScheme.surface,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: AppTheme.borderColor),
+          border: Border.all(
+            color: colorScheme.outline.withOpacity(0.2),
+          ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -324,21 +327,21 @@ class _FilterChip extends StatelessWidget {
             Text(
               '$label: ',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: AppTheme.textSecondary,
+                color: colorScheme.onSurface.withOpacity(0.7),
               ),
             ),
             Text(
               value,
               style: theme.textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.w600,
-                color: AppTheme.textPrimary,
+                color: colorScheme.onSurface,
               ),
             ),
             const SizedBox(width: 4),
             Icon(
               Icons.keyboard_arrow_down,
               size: 16,
-              color: AppTheme.textSecondary,
+              color: colorScheme.onSurface.withOpacity(0.7),
             ),
           ],
         ),
@@ -359,6 +362,8 @@ class _StatusFilterSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    final colorScheme = theme.colorScheme;
     final statuses = [
       null,
       'pending',
@@ -374,19 +379,20 @@ class _StatusFilterSheet extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Filter by Status',
+            l10n.filterByStatus,
             style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
+              color: colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 16),
           ...statuses.map((status) {
-            final label = status == null ? 'All' : status.toUpperCase().replaceAll('_', ' ');
+            final label = status == null ? l10n.all : status.toUpperCase().replaceAll('_', ' ');
             final isSelected = selectedStatus == status;
             return ListTile(
               title: Text(label),
               trailing: isSelected
-                  ? Icon(Icons.check, color: theme.colorScheme.primary)
+                  ? Icon(Icons.check, color: colorScheme.primary)
                   : null,
               onTap: () => onSelect(status),
             );
@@ -409,6 +415,8 @@ class _PriorityFilterSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    final colorScheme = theme.colorScheme;
     final priorities = [
       null,
       'low',
@@ -424,19 +432,20 @@ class _PriorityFilterSheet extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Filter by Priority',
+            l10n.filterByPriority,
             style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
+              color: colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 16),
           ...priorities.map((priority) {
-            final label = priority == null ? 'All' : priority.toUpperCase();
+            final label = priority == null ? l10n.all : priority.toUpperCase();
             final isSelected = selectedPriority == priority;
             return ListTile(
               title: Text(label),
               trailing: isSelected
-                  ? Icon(Icons.check, color: theme.colorScheme.primary)
+                  ? Icon(Icons.check, color: colorScheme.primary)
                   : null,
               onTap: () => onSelect(priority),
             );

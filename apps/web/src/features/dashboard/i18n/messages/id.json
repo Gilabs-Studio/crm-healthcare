@@ -257,7 +257,8 @@
       "rememberMe": "Ingat saya",
       "submit": "Masuk",
       "submitting": "Sedang masuk...",
-      "genericError": "Login gagal. Silakan coba lagi."
+      "genericError": "Login gagal. Silakan coba lagi.",
+      "rateLimitMessage": "Terlalu banyak percobaan login. Silakan coba lagi dalam {countdown}."
     }
   },
   "block": {

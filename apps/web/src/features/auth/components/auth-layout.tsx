@@ -1,11 +1,10 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { ShoppingCart } from "lucide-react";
 import Image from "next/image";
 
 interface AuthLayoutProps {
-  children: ReactNode;
+  readonly children: ReactNode;
 }
 
 export function AuthLayout({ children }: AuthLayoutProps) {
@@ -16,7 +15,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
         <div className="relative h-full w-full overflow-hidden rounded-3xl shadow-2xl">
           <Image
             src="/login.webp"
-            alt="GiPos POS System"
+            alt="Medico CRM Platform"
             fill
             className="object-cover"
             priority
@@ -29,12 +28,18 @@ export function AuthLayout({ children }: AuthLayoutProps) {
         <div className="w-full max-w-md space-y-8">
           {/* Mobile Logo */}
           <div className="mb-8 flex items-center justify-center gap-3 lg:hidden">
-            <div className="bg-primary text-primary-foreground flex size-10 aspect-square items-center justify-center rounded-xl shadow-lg">
-              <ShoppingCart className="size-5" />
+            <div className="flex size-10 aspect-square items-center justify-center rounded-xl shadow-lg overflow-hidden">
+              <Image
+                src="/logo.webp"
+                alt="Medico"
+                width={40}
+                height={40}
+                className="object-contain"
+              />
             </div>
             <div className="flex flex-col gap-0.5 leading-none">
-              <span className="text-xl font-bold">GiPos</span>
-              <span className="text-xs text-muted-foreground">Point of Sale</span>
+              <span className="text-xl font-bold text-primary">Medico</span>
+              <span className="text-xs text-muted-foreground">CRM Platform</span>
             </div>
           </div>
 
