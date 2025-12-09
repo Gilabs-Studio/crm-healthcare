@@ -297,6 +297,7 @@ func setupRouter(
 	// Global middleware
 	router.Use(middleware.LoggerMiddleware())
 	router.Use(middleware.CORSMiddleware())
+	router.Use(middleware.HSTSMiddleware())
 	router.Use(middleware.RequestIDMiddleware())
 
 	// Health check endpoints

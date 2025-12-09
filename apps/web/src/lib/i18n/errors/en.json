@@ -60,7 +60,7 @@
     },
     "rateLimit": {
       "title": "Too Many Requests",
-      "description": "You have made too many requests. Please wait a moment before trying again."
+      "description": "You have made too many requests. Please try again in {countdown}."
     },
     "unexpectedError": {
       "title": "Unexpected Error",

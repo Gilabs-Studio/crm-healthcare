@@ -60,7 +60,7 @@
     },
     "rateLimit": {
       "title": "Terlalu Banyak Permintaan",
-      "description": "Anda telah membuat terlalu banyak permintaan. Silakan tunggu sebentar sebelum mencoba lagi."
+      "description": "Anda telah membuat terlalu banyak permintaan. Silakan coba lagi dalam {countdown}."
     },
     "unexpectedError": {
       "title": "Error Tidak Terduga",

@@ -57,7 +57,12 @@ func CORSMiddleware() gin.HandlerFunc {
 		"X-Request-ID",
 	}
 	config.AllowCredentials = true
-	config.ExposeHeaders = []string{"X-Request-ID"}
+	config.ExposeHeaders = []string{
+		"X-Request-ID",
+		"X-RateLimit-Limit",
+		"X-RateLimit-Remaining",
+		"X-RateLimit-Reset",
+	}
 	// Set max age for preflight requests (24 hours)
 	config.MaxAge = 86400
 
