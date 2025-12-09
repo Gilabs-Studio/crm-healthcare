@@ -46,6 +46,7 @@ func (h *WebSocketHandler) HandleWebSocket(c *gin.Context) {
 	}
 
 	if tokenString == "" {
+		log.Printf("WebSocket connection rejected: no token provided (Origin: %s)", c.GetHeader("Origin"))
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "token required"})
 		return
 	}
@@ -53,6 +54,7 @@ func (h *WebSocketHandler) HandleWebSocket(c *gin.Context) {
 	// Validate token
 	claims, err := h.jwtManager.ValidateToken(tokenString)
 	if err != nil {
+		log.Printf("WebSocket connection rejected: invalid token - %v (Origin: %s)", err, c.GetHeader("Origin"))
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
 		return
 	}
@@ -61,10 +63,12 @@ func (h *WebSocketHandler) HandleWebSocket(c *gin.Context) {
 	upgrader := hub.GetUpgrader()
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
-		log.Printf("WebSocket upgrade error: %v", err)
+		log.Printf("WebSocket upgrade error: %v (Origin: %s, UserID: %s)", err, c.GetHeader("Origin"), claims.UserID)
 		return
 	}
 
+	log.Printf("WebSocket connection established for user: %s (Origin: %s)", claims.UserID, c.GetHeader("Origin"))
+	
 	// Register client with hub
 	h.hub.ServeWS(conn, claims.UserID)
 }

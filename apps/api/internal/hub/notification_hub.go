@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -26,14 +28,85 @@ const (
 	maxMessageSize = 512
 )
 
-// GetUpgrader returns the WebSocket upgrader
+// getAllowedOrigins returns the list of allowed origins from environment variable
+func getAllowedOrigins() []string {
+	allowedOrigins := []string{
+		"http://localhost:3000",
+		"http://localhost:3001",
+		"http://localhost:8081", // Frontend dev server
+		// Production origins
+		"https://api.gilabs.id",
+		"https://crm-demo.gilabs.id",
+	}
+
+	// Add origins from environment variable
+	// Format: comma-separated list, e.g., "https://gilabs.id,https://www.gilabs.id"
+	if envOrigins := os.Getenv("CORS_ALLOWED_ORIGINS"); envOrigins != "" {
+		origins := strings.Split(envOrigins, ",")
+		for _, origin := range origins {
+			trimmed := strings.TrimSpace(origin)
+			if trimmed != "" {
+				// Check if already exists to avoid duplicates
+				exists := false
+				for _, existing := range allowedOrigins {
+					if existing == trimmed {
+						exists = true
+						break
+					}
+				}
+				if !exists {
+					allowedOrigins = append(allowedOrigins, trimmed)
+				}
+			}
+		}
+	}
+
+	return allowedOrigins
+}
+
+// GetUpgrader returns the WebSocket upgrader with origin validation
 func GetUpgrader() websocket.Upgrader {
+	allowedOrigins := getAllowedOrigins()
+	isDevelopment := os.Getenv("ENV") != "production"
+	
+	// Log allowed origins for debugging (only in development)
+	if isDevelopment {
+		log.Printf("WebSocket allowed origins: %v", allowedOrigins)
+	}
+
 	return websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 		CheckOrigin: func(r *http.Request) bool {
-			// Allow all origins for now - in production, validate origin
-			return true
+			origin := r.Header.Get("Origin")
+			if origin == "" {
+				// Allow requests without Origin header (same-origin or non-browser clients)
+				if isDevelopment {
+					log.Printf("WebSocket connection: no Origin header, allowing")
+				}
+				return true
+			}
+
+			// Check if origin is in allowed list
+			for _, allowed := range allowedOrigins {
+				if origin == allowed {
+					if isDevelopment {
+						log.Printf("WebSocket connection allowed: origin %s", origin)
+					}
+					return true
+				}
+			}
+
+			// In development, allow localhost origins even if not explicitly listed
+			if isDevelopment {
+				if strings.HasPrefix(origin, "http://localhost:") || strings.HasPrefix(origin, "https://localhost:") {
+					log.Printf("WebSocket connection allowed (dev mode): origin %s", origin)
+					return true
+				}
+			}
+
+			log.Printf("WebSocket connection rejected: origin %s not in allowed list %v", origin, allowedOrigins)
+			return false
 		},
 	}
 }
