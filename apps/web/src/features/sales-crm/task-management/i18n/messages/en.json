@@ -64,11 +64,18 @@
         "cancelled": "Cancelled"
       },
       "emptyColumn": "No tasks in this column yet.",
+      "noTasks": "No tasks",
+      "noTasksHint": "Drag tasks here or create a new one",
       "moreFilters": "More filters",
       "filtersTitle": "Filter tasks",
       "dueDateRange": "Due date range",
       "resetFilters": "Reset",
-      "applyFilters": "Apply"
+      "applyFilters": "Apply",
+      "statusPending": "Pending",
+      "statusInProgress": "In Progress",
+      "statusCompleted": "Completed",
+      "statusCancelled": "Cancelled",
+      "toastTaskMoved": "Task moved to {status}"
     },
     "detail": {
       "drawerTitle": "Task Details",
@@ -115,6 +122,8 @@
       "contactLabel": "Contact:",
       "duePrefix": "Due {date}",
       "markCompletedTooltip": "Mark as completed",
+      "markInProgressTooltip": "Mark as in progress",
+      "markCancelledTooltip": "Cancel task",
       "editTooltip": "Edit task",
       "deleteTooltip": "Delete task",
       "unknownAccount": "Unknown Account",

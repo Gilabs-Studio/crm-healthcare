@@ -38,6 +38,10 @@ services:
       - JWT_SECRET=${JWT_SECRET:-your-secret-key-change-in-production-min-32-chars}
       - JWT_ACCESS_TTL=24
       - JWT_REFRESH_TTL=7
+      - STORAGE_UPLOAD_DIR=${STORAGE_UPLOAD_DIR:-/app/uploads}
+      - STORAGE_BASE_URL=${STORAGE_BASE_URL:-/uploads}
+    volumes:
+      - uploads_data:/app/uploads
     depends_on:
       postgres:
         condition: service_healthy
@@ -51,3 +55,4 @@ networks:
 
 volumes:
   postgres_data:
+  uploads_data:

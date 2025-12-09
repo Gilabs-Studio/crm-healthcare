@@ -1,5 +1,7 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from "axios";
 import { toast } from "sonner";
+import { setSecureCookie } from "./cookie";
+import { formatError } from "./i18n/error-messages";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
@@ -67,19 +69,22 @@ interface ApiErrorResponse {
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError<ApiErrorResponse>) => {
-    // Network error (tidak terhubung ke server)
+    // Network error (tidak terhubung ke server) - lebih jelas dan awam
     if (!error.response) {
-      if (error.code === "ECONNABORTED" || error.message === "Network Error") {
-        toast.error("Cannot connect to server", {
-          description: "Please ensure the backend server is running",
+      if (error.code === "ECONNABORTED") {
+        const msg = formatError("network", "timeout");
+        toast.error(msg.title, {
+          description: msg.description,
         });
-      } else if (error.code === "ERR_NETWORK") {
-        toast.error("Connection failed", {
-          description: "Unable to connect to backend. Please check your internet connection or ensure the server is running.",
+      } else if (error.code === "ERR_NETWORK" || error.message === "Network Error") {
+        const msg = formatError("network", "connectionFailed");
+        toast.error(msg.title, {
+          description: msg.description,
         });
       } else {
-        toast.error("An error occurred", {
-          description: error.message || "Failed to complete request",
+        const msg = formatError("network", "generic");
+        toast.error(msg.title, {
+          description: msg.description,
         });
       }
       return Promise.reject(error);
@@ -90,31 +95,39 @@ apiClient.interceptors.response.use(
     const errorData = error.response.data;
 
     if (!errorData || !errorData.error) {
-      toast.error("An error occurred", {
-        description: "Unexpected error format",
+      const msg = formatError("backend", "invalidFormat");
+      toast.error(msg.title, {
+        description: msg.description,
       });
       return Promise.reject(error);
     }
 
     const errorCode = errorData.error.code;
-    const errorMessage = errorData.error.message;
     const errorDetails = errorData.error.details;
     const fieldErrors = errorData.error.field_errors;
 
     // Handle specific error codes
     if (errorCode === "RESOURCE_ALREADY_EXISTS" || errorCode === "CONFLICT") {
-      // Handle duplicate email or other resource conflicts
+      // Handle duplicate email or other resource conflicts - lebih jelas dan awam
       if (errorDetails?.field === "email" && errorDetails?.resource === "user") {
-        toast.error("Email already exists", {
-          description: `The email "${errorDetails.value}" is already registered. Please use a different email.`,
+        const msg = formatError("backend", "emailExists", {
+          email: String(errorDetails.value || ""),
+        });
+        toast.error(msg.title, {
+          description: msg.description,
         });
       } else if (errorDetails?.field && errorDetails?.resource) {
-        toast.error("Resource already exists", {
-          description: `The ${errorDetails.field} "${errorDetails.value}" already exists for this ${errorDetails.resource}.`,
+        const msg = formatError("backend", "resourceExists", {
+          field: errorDetails.field,
+          value: String(errorDetails.value || ""),
+        });
+        toast.error(msg.title, {
+          description: msg.description,
         });
       } else {
-        toast.error("Conflict", {
-          description: errorMessage || "Resource already exists",
+        const msg = formatError("backend", "conflict");
+        toast.error(msg.title, {
+          description: msg.description,
         });
       }
       return Promise.reject(error);
@@ -123,15 +136,22 @@ apiClient.interceptors.response.use(
     // Handle INTERNAL_SERVER_ERROR with details (e.g., duplicate email from database constraint)
     if (errorCode === "INTERNAL_SERVER_ERROR" && errorDetails) {
       if (errorDetails.field === "email" && errorDetails.resource === "user") {
-        toast.error("Email already exists", {
-          description: `The email "${errorDetails.value}" is already registered. Please use a different email.`,
+        const msg = formatError("backend", "emailExists", {
+          email: String(errorDetails.value || ""),
+        });
+        toast.error(msg.title, {
+          description: msg.description,
         });
         return Promise.reject(error);
       }
       // Other internal errors with details
       if (errorDetails.field && errorDetails.resource) {
-        toast.error("Validation error", {
-          description: `The ${errorDetails.field} "${errorDetails.value}" is invalid or already exists for this ${errorDetails.resource}.`,
+        const msg = formatError("backend", "resourceExists", {
+          field: errorDetails.field,
+          value: String(errorDetails.value || ""),
+        });
+        toast.error(msg.title, {
+          description: msg.description,
         });
         return Promise.reject(error);
       }
@@ -140,8 +160,12 @@ apiClient.interceptors.response.use(
     // Handle validation errors
     if (errorCode === "VALIDATION_ERROR" && fieldErrors && fieldErrors.length > 0) {
       const firstError = fieldErrors[0];
-      toast.error("Validation error", {
-        description: `${firstError.field}: ${firstError.message}`,
+      const msg = formatError("backend", "fieldError", {
+        field: firstError.field,
+        message: firstError.message,
+      });
+      toast.error(msg.title, {
+        description: msg.description,
       });
       return Promise.reject(error);
     }
@@ -156,8 +180,9 @@ apiClient.interceptors.response.use(
         if (typeof window !== "undefined") {
           localStorage.removeItem("token");
           localStorage.removeItem("refreshToken");
-          toast.error("Session expired", {
-            description: "Please login again",
+          const msg = formatError("backend", "unauthorized");
+          toast.error(msg.title, {
+            description: msg.description,
           });
           setTimeout(() => {
             window.location.href = "/";
@@ -177,8 +202,9 @@ apiClient.interceptors.response.use(
           if (typeof window !== "undefined") {
             localStorage.removeItem("token");
             localStorage.removeItem("refreshToken");
-            toast.error("Session expired", {
-              description: "Please login again",
+            const msg = formatError("backend", "unauthorized");
+            toast.error(msg.title, {
+              description: msg.description,
             });
             setTimeout(() => {
               window.location.href = "/";
@@ -225,8 +251,8 @@ apiClient.interceptors.response.use(
               if (typeof window !== "undefined") {
                 localStorage.setItem("token", token);
                 localStorage.setItem("refreshToken", refresh_token);
-                // Update cookie
-                document.cookie = `token=${token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
+                // Update secure cookie
+                setSecureCookie("token", token);
               }
 
               // Update auth store with user data and tokens
@@ -260,8 +286,9 @@ apiClient.interceptors.response.use(
             if (typeof window !== "undefined") {
               localStorage.removeItem("token");
               localStorage.removeItem("refreshToken");
-              toast.error("Session expired", {
-                description: "Please login again",
+              const msg = formatError("backend", "unauthorized");
+              toast.error(msg.title, {
+                description: msg.description,
               });
               setTimeout(() => {
                 window.location.href = "/";
@@ -287,30 +314,45 @@ apiClient.interceptors.response.use(
           });
       }
     } else if (status === 403) {
-      toast.error("Access denied", {
-        description: errorMessage || "You do not have permission to perform this action",
+      const msg = formatError("backend", "forbidden");
+      toast.error(msg.title, {
+        description: msg.description,
       });
     } else if (status === 404) {
       // Only show 404 toast for mutations, not queries (to avoid showing on page refresh)
       const isMutation = error.config?.method && ["post", "put", "patch", "delete"].includes(error.config.method.toLowerCase());
       if (isMutation) {
-        toast.error("Not found", {
-          description: errorMessage || "The requested resource was not found",
+        const msg = formatError("backend", "notFound");
+        toast.error(msg.title, {
+          description: msg.description,
         });
       }
     } else if (status === 409) {
       // Conflict - already handled above but keep as fallback
-      toast.error("Conflict", {
-        description: errorMessage || "Resource conflict occurred",
+      const msg = formatError("backend", "conflict");
+      toast.error(msg.title, {
+        description: msg.description,
+      });
+    } else if (status === 503) {
+      const msg = formatError("backend", "serviceUnavailable");
+      toast.error(msg.title, {
+        description: msg.description,
+      });
+    } else if (status === 429) {
+      const msg = formatError("backend", "rateLimit");
+      toast.error(msg.title, {
+        description: msg.description,
       });
     } else if (status >= 500) {
-      toast.error("Server error", {
-        description: errorMessage || "An error occurred on the server",
+      const msg = formatError("backend", "serverError");
+      toast.error(msg.title, {
+        description: msg.description,
       });
     } else {
       // Other 4xx errors
-      toast.error("Request failed", {
-        description: errorMessage || "An error occurred",
+      const msg = formatError("backend", "unexpectedError");
+      toast.error(msg.title, {
+        description: msg.description,
       });
     }
 

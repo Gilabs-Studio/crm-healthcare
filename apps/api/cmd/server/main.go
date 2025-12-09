@@ -10,25 +10,26 @@ import (
 	"github.com/gilabs/crm-healthcare/api/internal/api/routes"
 	"github.com/gilabs/crm-healthcare/api/internal/config"
 	"github.com/gilabs/crm-healthcare/api/internal/database"
+	"github.com/gilabs/crm-healthcare/api/internal/hub"
 	accountrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/account"
 	activityrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/activity"
 	activitytyperepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/activity_type"
+	aisettingsrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/ai_settings"
 	"github.com/gilabs/crm-healthcare/api/internal/repository/postgres/auth"
 	categoryrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/category"
 	contactrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/contact"
 	contactrolerepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/contact_role"
 	dealrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/deal"
+	notificationrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/notification"
 	permissionrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/permission"
 	pipelinerepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/pipeline"
 	productrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/product"
 	productcategoryrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/product_category"
 	reminderrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/reminder"
-	notificationrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/notification"
 	rolerepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/role"
 	taskrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/task"
 	userrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/user"
-	visitreportrepo 	"github.com/gilabs/crm-healthcare/api/internal/repository/postgres/visit_report"
-	aisettingsrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/ai_settings"
+	visitreportrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/visit_report"
 	accountservice "github.com/gilabs/crm-healthcare/api/internal/service/account"
 	activityservice "github.com/gilabs/crm-healthcare/api/internal/service/activity"
 	activitytypeservice "github.com/gilabs/crm-healthcare/api/internal/service/activity_type"
@@ -39,16 +40,16 @@ import (
 	contactservice "github.com/gilabs/crm-healthcare/api/internal/service/contact"
 	contactroleservice "github.com/gilabs/crm-healthcare/api/internal/service/contact_role"
 	dashboardservice "github.com/gilabs/crm-healthcare/api/internal/service/dashboard"
+	fileservice "github.com/gilabs/crm-healthcare/api/internal/service/file"
+	notificationservice "github.com/gilabs/crm-healthcare/api/internal/service/notification"
 	permissionservice "github.com/gilabs/crm-healthcare/api/internal/service/permission"
 	pipelineservice "github.com/gilabs/crm-healthcare/api/internal/service/pipeline"
 	productservice "github.com/gilabs/crm-healthcare/api/internal/service/product"
 	reportservice "github.com/gilabs/crm-healthcare/api/internal/service/report"
 	roleservice "github.com/gilabs/crm-healthcare/api/internal/service/role"
 	taskservice "github.com/gilabs/crm-healthcare/api/internal/service/task"
-	notificationservice "github.com/gilabs/crm-healthcare/api/internal/service/notification"
 	userservice "github.com/gilabs/crm-healthcare/api/internal/service/user"
 	visitreportservice "github.com/gilabs/crm-healthcare/api/internal/service/visit_report"
-	"github.com/gilabs/crm-healthcare/api/internal/hub"
 	"github.com/gilabs/crm-healthcare/api/internal/worker"
 	"github.com/gilabs/crm-healthcare/api/pkg/cerebras"
 	"github.com/gilabs/crm-healthcare/api/pkg/jwt"
@@ -126,6 +127,34 @@ func main() {
 	activityTypeService := activitytypeservice.NewService(activityTypeRepo)
 	visitReportService := visitreportservice.NewService(visitReportRepo, accountRepo, contactRepo, userRepo, activityRepo)
 	dashboardService := dashboardservice.NewService(visitReportRepo, accountRepo, activityRepo, userRepo, dealRepo, taskRepo, pipelineRepo)
+	
+	// Setup file service with storage provider
+	var storageProvider fileservice.StorageProvider
+	storageConfig := config.AppConfig.Storage
+	
+	if storageConfig.Type == "r2" {
+		// Initialize R2 storage
+		r2Storage, err := fileservice.NewR2Storage(
+			storageConfig.R2Endpoint,
+			storageConfig.R2AccessKeyID,
+			storageConfig.R2SecretAccessKey,
+			storageConfig.R2Bucket,
+			storageConfig.R2PublicURL,
+			storageConfig.BaseURL,
+		)
+		if err != nil {
+			log.Fatalf("Failed to initialize R2 storage: %v", err)
+		}
+		storageProvider = r2Storage
+	} else {
+		// Initialize local storage (default)
+		storageProvider = fileservice.NewLocalStorage(
+			storageConfig.UploadDir,
+			storageConfig.BaseURL,
+		)
+	}
+	
+	fileService := fileservice.NewService(storageProvider)
 	reportService := reportservice.NewService(visitReportRepo, accountRepo, activityRepo, userRepo, dealRepo)
 	productService := productservice.NewService(productRepo, productCategoryRepo)
 	taskService := taskservice.NewService(taskRepo, reminderRepo, userRepo, accountRepo, contactRepo, dealRepo)
@@ -176,7 +205,7 @@ func main() {
 	dealHandler := handlers.NewDealHandler(pipelineService)
 	activityHandler := handlers.NewActivityHandler(activityService)
 	activityTypeHandler := handlers.NewActivityTypeHandler(activityTypeService)
-	visitReportHandler := handlers.NewVisitReportHandler(visitReportService)
+	visitReportHandler := handlers.NewVisitReportHandler(visitReportService, fileService)
 	dashboardHandler := handlers.NewDashboardHandler(dashboardService)
 	reportHandler := handlers.NewReportHandler(reportService)
 	productHandler := handlers.NewProductHandler(productService)
@@ -262,6 +291,9 @@ func setupRouter(
 
 	router := gin.Default()
 
+	// Configure max body size (50MB for file uploads)
+	router.MaxMultipartMemory = 50 << 20 // 50 MB
+
 	// Global middleware
 	router.Use(middleware.LoggerMiddleware())
 	router.Use(middleware.CORSMiddleware())
@@ -280,6 +312,11 @@ func setupRouter(
 			"message": "pong",
 		})
 	})
+
+	// Serve uploaded files statically (only for local storage)
+	if config.AppConfig.Storage.Type != "r2" {
+		router.Static(config.AppConfig.Storage.BaseURL, config.AppConfig.Storage.UploadDir)
+	}
 
 	// API v1 routes
 	v1 := router.Group("/api/v1")

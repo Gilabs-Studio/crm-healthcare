@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { createProductSchema, updateProductSchema, type CreateProductFormData, type UpdateProductFormData } from "../schemas/product.schema";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -108,22 +109,24 @@ export function ProductForm({ product, onSubmit, onCancel, isLoading }: ProductF
       <div className="grid grid-cols-2 gap-4">
         <Field orientation="vertical">
           <FieldLabel>{t("priceLabel")}</FieldLabel>
-          <Input
-            type="number"
-            {...register("price", { valueAsNumber: true })}
+          <NumberInput
+            value={watch("price")}
+            onChange={(value) => setValue("price", value ?? 0, { shouldValidate: true })}
             placeholder={t("pricePlaceholder")}
-            step="0.01"
+            allowDecimal
+            decimalPlaces={2}
           />
           {errors.price && <FieldError>{errors.price.message}</FieldError>}
         </Field>
 
         <Field orientation="vertical">
           <FieldLabel>{t("costLabel")}</FieldLabel>
-          <Input
-            type="number"
-            {...register("cost", { valueAsNumber: true })}
+          <NumberInput
+            value={watch("cost")}
+            onChange={(value) => setValue("cost", value ?? 0, { shouldValidate: true })}
             placeholder={t("costPlaceholder")}
-            step="0.01"
+            allowDecimal
+            decimalPlaces={2}
           />
           {errors.cost && <FieldError>{errors.cost.message}</FieldError>}
         </Field>
@@ -166,7 +169,7 @@ export function ProductForm({ product, onSubmit, onCancel, isLoading }: ProductF
           onValueChange={(value) => setValue("status", value as "active" | "inactive")}
         >
           <SelectTrigger>
-            <SelectValue />
+            <SelectValue placeholder={t("statusLabel")} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="active">{t("statusActive")}</SelectItem>

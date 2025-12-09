@@ -6,6 +6,13 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { createRoleSchema, updateRoleSchema, type CreateRoleFormData, type UpdateRoleFormData } from "../schemas/role.schema";
 import type { Role } from "../types";
 
@@ -24,6 +31,8 @@ export function RoleForm({ role, onSubmit, onCancel, isLoading = false }: RoleFo
   const {
     register,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<CreateRoleFormData | UpdateRoleFormData>({
     resolver: zodResolver(schema),
@@ -81,15 +90,19 @@ export function RoleForm({ role, onSubmit, onCancel, isLoading = false }: RoleFo
 
       <Field>
         <FieldLabel htmlFor="status">{t("statusLabel")}</FieldLabel>
-        <select
-          id="status"
-          {...register("status")}
+        <Select
+          value={watch("status") || "active"}
+          onValueChange={(value) => setValue("status", value as "active" | "inactive")}
           disabled={isLoading}
-          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <option value="active">{t("statusActive")}</option>
-          <option value="inactive">{t("statusInactive")}</option>
-        </select>
+          <SelectTrigger className="h-10">
+            <SelectValue placeholder={t("statusLabel")} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="active">{t("statusActive")}</SelectItem>
+            <SelectItem value="inactive">{t("statusInactive")}</SelectItem>
+          </SelectContent>
+        </Select>
         {errors.status && <FieldError>{errors.status.message}</FieldError>}
       </Field>
 

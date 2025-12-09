@@ -10,8 +10,10 @@ import {
 } from "../schemas/deal.schema";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/number-input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Select,
   SelectContent,
@@ -72,6 +74,16 @@ export function DealForm({ deal, onSubmit, onCancel, isLoading }: DealFormProps)
           probability: 0,
         },
   });
+
+  // Convert expected_close_date string to Date for DatePicker
+  // Create date as local midnight to avoid timezone issues
+  const expectedCloseDateValue = watch("expected_close_date");
+  const expectedCloseDate = expectedCloseDateValue 
+    ? (() => {
+        const [year, month, day] = expectedCloseDateValue.split("-").map(Number);
+        return new Date(year, month - 1, day);
+      })()
+    : undefined;
 
   // Load contacts when account is selected
   const accountId = watch("account_id");
@@ -214,7 +226,7 @@ export function DealForm({ deal, onSubmit, onCancel, isLoading }: DealFormProps)
           <SelectContent>
             {accounts.map((account) => (
               <SelectItem key={account.id} value={account.id}>
-                {account.name}
+                {account.name} {account.category && `(${account.category.name})`}
               </SelectItem>
             ))}
           </SelectContent>
@@ -270,12 +282,12 @@ export function DealForm({ deal, onSubmit, onCancel, isLoading }: DealFormProps)
       <div className="grid grid-cols-2 gap-4">
         <Field orientation="vertical">
           <FieldLabel>{t("valueRequired")}</FieldLabel>
-          <Input
-            type="number"
-            {...register("value", { valueAsNumber: true })}
+          <NumberInput
+            value={watch("value")}
+            onChange={(value) => setValue("value", value ?? 0, { shouldValidate: true })}
             placeholder={t("valuePlaceholder")}
-            min={0}
-            step="0.01"
+            allowDecimal
+            decimalPlaces={2}
           />
           {errors.value && <FieldError>{errors.value.message}</FieldError>}
         </Field>
@@ -295,7 +307,22 @@ export function DealForm({ deal, onSubmit, onCancel, isLoading }: DealFormProps)
 
       <Field orientation="vertical">
         <FieldLabel>{t("expectedCloseDateLabel")}</FieldLabel>
-        <Input type="date" {...register("expected_close_date")} />
+        <DatePicker
+          date={expectedCloseDate}
+          onDateChange={(date) => {
+            if (date) {
+              // Convert Date to YYYY-MM-DD format using local time methods
+              // Calendar component works with local dates, so we use local methods for consistency
+              const year = date.getFullYear();
+              const month = String(date.getMonth() + 1).padStart(2, "0");
+              const day = String(date.getDate()).padStart(2, "0");
+              setValue("expected_close_date", `${year}-${month}-${day}`);
+            } else {
+              setValue("expected_close_date", "");
+            }
+          }}
+          placeholder={t("expectedCloseDateLabel")}
+        />
         {errors.expected_close_date && <FieldError>{errors.expected_close_date.message}</FieldError>}
       </Field>
 

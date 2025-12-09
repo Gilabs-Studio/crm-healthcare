@@ -129,7 +129,7 @@ export function UserForm({ user, onSubmit, onCancel, isLoading }: UserFormProps)
           onValueChange={(value) => setValue("status", value as "active" | "inactive")}
         >
           <SelectTrigger>
-            <SelectValue />
+            <SelectValue placeholder={t("statusLabel")} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="active">{t("statusActive")}</SelectItem>

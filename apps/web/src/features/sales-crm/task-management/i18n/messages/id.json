@@ -64,11 +64,18 @@
         "cancelled": "Dibatalkan"
       },
       "emptyColumn": "Belum ada task di kolom ini.",
+      "noTasks": "Tidak ada task",
+      "noTasksHint": "Seret task ke sini atau buat yang baru",
       "moreFilters": "Filter lainnya",
       "filtersTitle": "Filter task",
       "dueDateRange": "Rentang tanggal jatuh tempo",
       "resetFilters": "Reset",
-      "applyFilters": "Terapkan"
+      "applyFilters": "Terapkan",
+      "statusPending": "Pending",
+      "statusInProgress": "Dalam Proses",
+      "statusCompleted": "Selesai",
+      "statusCancelled": "Dibatalkan",
+      "toastTaskMoved": "Task dipindahkan ke {status}"
     },
     "detail": {
       "drawerTitle": "Detail Task",
@@ -115,6 +122,8 @@
       "contactLabel": "Kontak:",
       "duePrefix": "Jatuh tempo {date}",
       "markCompletedTooltip": "Tandai selesai",
+      "markInProgressTooltip": "Tandai dalam proses",
+      "markCancelledTooltip": "Batalkan task",
       "editTooltip": "Edit task",
       "deleteTooltip": "Hapus task",
       "unknownAccount": "Akun Tidak Dikenal",

@@ -14,14 +14,18 @@ import { useAnalyzeVisitReport } from "../hooks/useAnalyzeVisitReport";
 import type { VisitReportInsight } from "../types";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, XCircle, AlertCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface VisitReportInsightsButtonProps {
   visitReportId: string;
+  iconOnly?: boolean;
 }
 
 export function VisitReportInsightsButton({
   visitReportId,
+  iconOnly = false,
 }: VisitReportInsightsButtonProps) {
+  const t = useTranslations("visitReportInsights");
   const [open, setOpen] = useState(false);
   const [insight, setInsight] = useState<VisitReportInsight | null>(null);
   const { mutate: analyze, isPending } = useAnalyzeVisitReport();
@@ -60,24 +64,35 @@ export function VisitReportInsightsButton({
     }
   };
 
+  const getSentimentLabel = (sentiment: string) => {
+    switch (sentiment) {
+      case "positive":
+        return t("sentiment.positive");
+      case "negative":
+        return t("sentiment.negative");
+      default:
+        return t("sentiment.neutral");
+    }
+  };
+
   return (
     <>
       <Button
         onClick={handleAnalyze}
         disabled={isPending}
         variant="outline"
-        size="sm"
-        className="gap-2"
+        size={iconOnly ? "icon" : "sm"}
+        className={iconOnly ? "" : "gap-2"}
+        title={iconOnly ? t("button.getInsights") : undefined}
       >
         {isPending ? (
-          <>
-            <Loader2 className="h-4 w-4 animate-spin" />
-            Analyzing...
-          </>
+          <Loader2 className="h-4 w-4 animate-spin" />
         ) : (
+          <Sparkles className="h-4 w-4" />
+        )}
+        {!iconOnly && (
           <>
-            <Sparkles className="h-4 w-4" />
-            Get AI Insights
+            {isPending ? t("button.analyzing") : t("button.getInsights")}
           </>
         )}
       </Button>
@@ -85,9 +100,9 @@ export function VisitReportInsightsButton({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>AI Insights</DialogTitle>
+            <DialogTitle>{t("dialog.title")}</DialogTitle>
             <DialogDescription>
-              AI-generated analysis of this visit report
+              {t("dialog.description")}
             </DialogDescription>
           </DialogHeader>
 
@@ -95,20 +110,22 @@ export function VisitReportInsightsButton({
             <div className="space-y-6">
               {/* Summary */}
               <div>
-                <h3 className="text-sm font-semibold mb-2">Summary</h3>
-                <p className="text-sm text-muted-foreground">{insight.summary || "No summary available"}</p>
+                <h3 className="text-sm font-semibold mb-2">{t("sections.summary")}</h3>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                  {insight.summary || t("empty.summary")}
+                </p>
               </div>
 
               {/* Sentiment */}
               {insight.sentiment && (
                 <div>
-                  <h3 className="text-sm font-semibold mb-2">Sentiment</h3>
+                  <h3 className="text-sm font-semibold mb-2">{t("sections.sentiment")}</h3>
                   <Badge
                     className={getSentimentColor(insight.sentiment)}
                     variant="outline"
                   >
                     {getSentimentIcon(insight.sentiment)}
-                    <span className="ml-1 capitalize">{insight.sentiment}</span>
+                    <span className="ml-1">{getSentimentLabel(insight.sentiment)}</span>
                   </Badge>
                 </div>
               )}
@@ -116,7 +133,7 @@ export function VisitReportInsightsButton({
               {/* Key Points */}
               {insight.key_points && insight.key_points.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-semibold mb-2">Key Points</h3>
+                  <h3 className="text-sm font-semibold mb-2">{t("sections.keyPoints")}</h3>
                   <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
                     {insight.key_points.map((point, idx) => (
                       <li key={idx}>{point}</li>
@@ -128,7 +145,7 @@ export function VisitReportInsightsButton({
               {/* Action Items */}
               {insight.action_items && insight.action_items.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-semibold mb-2">Action Items</h3>
+                  <h3 className="text-sm font-semibold mb-2">{t("sections.actionItems")}</h3>
                   <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
                     {insight.action_items.map((item, idx) => (
                       <li key={idx}>{item}</li>
@@ -140,7 +157,7 @@ export function VisitReportInsightsButton({
               {/* Recommendations */}
               {insight.recommendations && insight.recommendations.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-semibold mb-2">Recommendations</h3>
+                  <h3 className="text-sm font-semibold mb-2">{t("sections.recommendations")}</h3>
                   <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
                     {insight.recommendations.map((rec, idx) => (
                       <li key={idx}>{rec}</li>

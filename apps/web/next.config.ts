@@ -5,6 +5,7 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   /* config options here */
+  output: "standalone", // Enable standalone output for Docker optimization
 };
 
 export default withNextIntl(nextConfig);

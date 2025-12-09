@@ -1332,21 +1332,91 @@ func (s *Service) formatAccountsForAI(accounts []account.Account) []AccountForma
 
 // parseVisitReportInsight parses AI response into VisitReportInsight
 func (s *Service) parseVisitReportInsight(text string) (*ai.VisitReportInsight, error) {
-	// Try to extract JSON from response
-	jsonStart := strings.Index(text, "{")
-	jsonEnd := strings.LastIndex(text, "}")
+	// Clean up the text: remove comment markers and extra whitespace
+	cleaned := strings.TrimSpace(text)
+	
+	// Remove common comment markers that might appear before/after JSON
+	cleaned = strings.TrimPrefix(cleaned, "*/")
+	cleaned = strings.TrimPrefix(cleaned, "/*")
+	cleaned = strings.TrimPrefix(cleaned, "//")
+	cleaned = strings.TrimSpace(cleaned)
+	
+	// Remove trailing comments (like "// Output format in JSON format.")
+	// Find the last closing brace and remove everything after it that's not part of JSON
+	jsonStart := strings.Index(cleaned, "{")
+	jsonEnd := strings.LastIndex(cleaned, "}")
 
 	if jsonStart == -1 || jsonEnd == -1 {
 		return nil, fmt.Errorf("no JSON found in response")
 	}
 
-	jsonStr := text[jsonStart : jsonEnd+1]
+	// Extract JSON portion
+	jsonStr := cleaned[jsonStart : jsonEnd+1]
+	
+	// Note: We don't remove comment markers from inside the JSON string
+	// because they might be valid parts of JSON string values (e.g., URLs).
+	// Comment markers should only appear outside the JSON boundaries, which
+	// we've already handled by extracting the JSON portion.
+	jsonStr = strings.TrimSpace(jsonStr)
 
-	var insight ai.VisitReportInsight
-	if err := json.Unmarshal([]byte(jsonStr), &insight); err != nil {
+	// Try to parse as JSON
+	var rawInsight map[string]interface{}
+	if err := json.Unmarshal([]byte(jsonStr), &rawInsight); err != nil {
 		return nil, fmt.Errorf("failed to parse JSON: %w", err)
 	}
 
-	return &insight, nil
+	// Build the insight struct, handling different data types
+	insight := &ai.VisitReportInsight{
+		Summary:     "",
+		ActionItems: []string{},
+		Sentiment:   "neutral",
+		KeyPoints:   []string{},
+		Recommendations: []string{},
+	}
+
+	// Extract summary
+	if summary, ok := rawInsight["summary"].(string); ok {
+		insight.Summary = summary
+	}
+
+	// Extract sentiment
+	if sentiment, ok := rawInsight["sentiment"].(string); ok {
+		insight.Sentiment = sentiment
+	}
+
+	// Extract key_points (array of strings)
+	if keyPoints, ok := rawInsight["key_points"].([]interface{}); ok {
+		for _, point := range keyPoints {
+			if str, ok := point.(string); ok {
+				insight.KeyPoints = append(insight.KeyPoints, str)
+			}
+		}
+	}
+
+	// Extract action_items (can be array of strings or array of objects)
+	if actionItems, ok := rawInsight["action_items"].([]interface{}); ok {
+		for _, item := range actionItems {
+			if str, ok := item.(string); ok {
+				// Simple string
+				insight.ActionItems = append(insight.ActionItems, str)
+			} else if obj, ok := item.(map[string]interface{}); ok {
+				// Object with description and urgency - convert to string
+				if desc, ok := obj["description"].(string); ok {
+					insight.ActionItems = append(insight.ActionItems, desc)
+				}
+			}
+		}
+	}
+
+	// Extract recommendations (array of strings)
+	if recommendations, ok := rawInsight["recommendations"].([]interface{}); ok {
+		for _, rec := range recommendations {
+			if str, ok := rec.(string); ok {
+				insight.Recommendations = append(insight.Recommendations, str)
+			}
+		}
+	}
+
+	return insight, nil
 }
 

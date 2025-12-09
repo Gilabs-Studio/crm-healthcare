@@ -15,10 +15,12 @@ const (
 	writeWait = 10
 
 	// Time allowed to read the next pong message from the peer
-	pongWait = 60
+	// Reduced to 30s for better compatibility with Cloudflare Proxied (timeout ~100s)
+	pongWait = 30
 
 	// Send pings to peer with this period (must be less than pongWait)
-	pingPeriod = (pongWait * 9) / 10
+	// More aggressive ping (25s) to keep connection alive through Cloudflare proxy
+	pingPeriod = 25
 
 	// Maximum message size allowed from peer
 	maxMessageSize = 512

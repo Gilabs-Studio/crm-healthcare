@@ -12,6 +12,7 @@ type Config struct {
 	Database DatabaseConfig
 	JWT      JWTConfig
 	Cerebras CerebrasConfig
+	Storage  StorageConfig
 }
 
 type ServerConfig struct {
@@ -40,11 +41,26 @@ type CerebrasConfig struct {
 	Model   string // Default model name
 }
 
+type StorageConfig struct {
+	Type      string // Storage type: "local" or "r2"
+	UploadDir string // Directory for uploaded files (local storage only)
+	BaseURL   string // Base URL for serving files (e.g., /uploads or https://cdn.example.com)
+	// R2 Configuration
+	R2Endpoint       string // R2 endpoint URL (e.g., https://<account-id>.r2.cloudflarestorage.com)
+	R2AccessKeyID    string // R2 Access Key ID
+	R2SecretAccessKey string // R2 Secret Access Key
+	R2Bucket         string // R2 Bucket name
+	R2PublicURL      string // Public URL for R2 bucket (e.g., https://<bucket>.<domain>.com or custom domain)
+}
+
 var AppConfig *Config
 
 func Load() error {
-	// Load .env file if exists (for local development)
-	_ = godotenv.Load()
+	// Load .env file if exists (for local development only)
+	// Skip .env loading in production to use Docker environment variables
+	if os.Getenv("ENV") != "production" {
+		_ = godotenv.Load()
+	}
 
 	AppConfig = &Config{
 		Server: ServerConfig{
@@ -68,6 +84,16 @@ func Load() error {
 			BaseURL: getEnv("CEREBRAS_BASE_URL", "https://api.cerebras.ai"),
 			APIKey:  getEnv("CEREBRAS_API_KEY", ""),
 			Model:   getEnv("CEREBRAS_MODEL", "llama-3.1-8b"), // Default model
+		},
+		Storage: StorageConfig{
+			Type:            getEnv("STORAGE_TYPE", "local"), // "local" or "r2"
+			UploadDir:       getEnv("STORAGE_UPLOAD_DIR", "./uploads"),
+			BaseURL:         getEnv("STORAGE_BASE_URL", "/uploads"),
+			R2Endpoint:      getEnv("R2_ENDPOINT", ""),
+			R2AccessKeyID:   getEnv("R2_ACCESS_KEY_ID", ""),
+			R2SecretAccessKey: getEnv("R2_SECRET_ACCESS_KEY", ""),
+			R2Bucket:        getEnv("R2_BUCKET", ""),
+			R2PublicURL:     getEnv("R2_PUBLIC_URL", ""),
 		},
 	}
 
@@ -96,9 +122,14 @@ func getEnvAsInt(key string, defaultValue int) int {
 
 func GetDSN() string {
 	db := AppConfig.Database
+	// Ensure sslmode is set, default to disable if empty
+	sslmode := db.SSLMode
+	if sslmode == "" {
+		sslmode = "disable"
+	}
 	return fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-		db.Host, db.Port, db.User, db.Password, db.DBName, db.SSLMode,
+		db.Host, db.Port, db.User, db.Password, db.DBName, sslmode,
 	)
 }
 

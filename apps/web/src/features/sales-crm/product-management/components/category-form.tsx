@@ -94,7 +94,7 @@ export function CategoryForm({ category, onSubmit, onCancel, isLoading }: Catego
           onValueChange={(value) => setValue("status", value as "active" | "inactive")}
         >
           <SelectTrigger>
-            <SelectValue />
+            <SelectValue placeholder={t("statusLabel")} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="active">{t("statusActive")}</SelectItem>

@@ -54,6 +54,8 @@
   --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
   --tracking-normal: 0em;
   --spacing: 0.25rem;
+  --expo-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --expo-in: cubic-bezier(0.7, 0, 0.84, 0);
 }
 
 .dark {
@@ -164,6 +166,31 @@
 
 * {
   border-color: var(--border);
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--border);
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--muted-foreground);
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 html {
@@ -202,8 +229,94 @@ h6,
   }
 }
 
-/* Expo easing for smooth transitions */
-:root {
-  --expo-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --expo-in: cubic-bezier(0.7, 0, 0.84, 0);
+/* Toast Notification Styles - Consistent with Design System */
+/* Position toast below header (64px from top) */
+[data-sonner-toaster] {
+  z-index: 100;
+}
+
+/* Base toast styling */
+[data-sonner-toast] {
+  background-color: var(--card) !important;
+  color: var(--card-foreground) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius) !important;
+  box-shadow: var(--shadow-lg) !important;
+  backdrop-filter: blur(8px);
+  font-family: var(--font-sans) !important;
+}
+
+/* Base toast - ensure description has same color as title */
+[data-sonner-toast] [data-description],
+[data-sonner-toast] .description {
+  color: var(--card-foreground) !important;
+  opacity: 1 !important;
+}
+
+/* Success toast */
+[data-sonner-toast][data-type="success"] {
+  background-color: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+  border-color: var(--primary) !important;
+}
+
+/* Success toast - ensure description has same color as title */
+[data-sonner-toast][data-type="success"] [data-description],
+[data-sonner-toast][data-type="success"] .description {
+  color: var(--primary-foreground) !important;
+  opacity: 1 !important;
+}
+
+/* Error toast */
+[data-sonner-toast][data-type="error"] {
+  background-color: var(--destructive) !important;
+  color: var(--destructive-foreground) !important;
+  border-color: var(--destructive) !important;
+}
+
+/* Error toast - ensure description has same color as title */
+[data-sonner-toast][data-type="error"] [data-description],
+[data-sonner-toast][data-type="error"] .description {
+  color: var(--destructive-foreground) !important;
+  opacity: 1 !important;
+}
+
+/* Info toast */
+[data-sonner-toast][data-type="info"] {
+  background-color: var(--accent) !important;
+  color: var(--accent-foreground) !important;
+  border-color: var(--accent) !important;
+}
+
+/* Info toast - ensure description has same color as title */
+[data-sonner-toast][data-type="info"] [data-description],
+[data-sonner-toast][data-type="info"] .description {
+  color: var(--accent-foreground) !important;
+  opacity: 1 !important;
+}
+
+/* Warning toast */
+[data-sonner-toast][data-type="warning"] {
+  background-color: oklch(0.75 0.15 80) !important;
+  color: oklch(0.25 0.05 80) !important;
+  border-color: oklch(0.75 0.15 80) !important;
+}
+
+.dark [data-sonner-toast][data-type="warning"] {
+  background-color: oklch(0.65 0.15 80) !important;
+  color: oklch(0.95 0.05 80) !important;
+  border-color: oklch(0.65 0.15 80) !important;
+}
+
+/* Warning toast - ensure description has same color as title */
+[data-sonner-toast][data-type="warning"] [data-description],
+[data-sonner-toast][data-type="warning"] .description {
+  color: oklch(0.25 0.05 80) !important;
+  opacity: 1 !important;
+}
+
+.dark [data-sonner-toast][data-type="warning"] [data-description],
+.dark [data-sonner-toast][data-type="warning"] .description {
+  color: oklch(0.95 0.05 80) !important;
+  opacity: 1 !important;
 }

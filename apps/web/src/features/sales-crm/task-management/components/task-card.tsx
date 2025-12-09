@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Contact, Factory, CheckCircle2, Edit2, Trash2 } from "lucide-react";
+import { Calendar, Contact, Factory, CheckCircle2, Edit2, Trash2, Play, X } from "lucide-react";
 import type { Task } from "../types";
 import { useTranslations } from "next-intl";
 
@@ -11,7 +11,10 @@ interface TaskCardProps {
   readonly onEdit?: () => void;
   readonly onDelete?: () => void;
   readonly onComplete?: () => void;
+  readonly onStart?: () => void;
+  readonly onCancel?: () => void;
   readonly onClickTitle?: () => void;
+  readonly onClick?: () => void;
   readonly onClickContact?: (contactId: string) => void;
 }
 
@@ -22,7 +25,7 @@ const statusColorMap: Record<Task["status"], string> = {
   cancelled: "bg-rose-400",
 };
 
-export function TaskCard({ task, onEdit, onDelete, onComplete, onClickTitle, onClickContact }: TaskCardProps) {
+export function TaskCard({ task, onEdit, onDelete, onComplete, onStart, onCancel, onClickTitle, onClick, onClickContact }: TaskCardProps) {
   const t = useTranslations("taskManagement.card");
 
   const dueLabel =
@@ -33,8 +36,25 @@ export function TaskCard({ task, onEdit, onDelete, onComplete, onClickTitle, onC
       day: "numeric",
     });
 
+  const handleCardClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    // Don't trigger card click if clicking on interactive elements or during drag
+    const target = event.target as HTMLElement;
+    if (
+      target.closest("button") ||
+      target.closest("a") ||
+      target.closest("[role='button']") ||
+      (event.nativeEvent as MouseEvent & { dataTransfer?: DataTransfer }).dataTransfer
+    ) {
+      return;
+    }
+    onClick?.();
+  };
+
   return (
-    <div className="group relative flex flex-col gap-2 rounded-xl border border-border/60 bg-card/80 p-3 hover:border-primary/40 hover:bg-card transition-colors">
+    <div 
+      className={`group relative flex flex-col gap-2 rounded-xl border border-border/60 bg-card/80 p-3 hover:border-primary/40 hover:bg-card transition-colors ${onClick ? "cursor-pointer" : ""}`}
+      onClick={handleCardClick}
+    >
       {/* Status dot + title */}
       <div className="flex items-start gap-2">
         <span
@@ -44,7 +64,10 @@ export function TaskCard({ task, onEdit, onDelete, onComplete, onClickTitle, onC
         <div className="min-w-0 flex-1 space-y-1">
           <button
             type="button"
-            onClick={onClickTitle}
+            onClick={(e) => {
+              e.stopPropagation();
+              onClickTitle?.();
+            }}
             className="text-left text-sm font-medium text-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-xs"
           >
             {task.title}
@@ -99,13 +122,46 @@ export function TaskCard({ task, onEdit, onDelete, onComplete, onClickTitle, onC
 
       {/* Actions */}
       <div className="flex items-center justify-end gap-1 pt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        {onStart && task.status === "pending" && (
+          <Button
+            type="button"
+            size="icon-sm"
+            variant="ghost"
+            className="h-7 w-7 text-sky-500 hover:text-sky-600 hover:bg-sky-500/10"
+            onClick={(e) => {
+              e.stopPropagation();
+              onStart();
+            }}
+            title={t("markInProgressTooltip")}
+          >
+            <Play className="h-3.5 w-3.5" />
+          </Button>
+        )}
+        {onCancel && task.status !== "completed" && task.status !== "cancelled" && (
+          <Button
+            type="button"
+            size="icon-sm"
+            variant="ghost"
+            className="h-7 w-7 text-rose-500 hover:text-rose-600 hover:bg-rose-500/10"
+            onClick={(e) => {
+              e.stopPropagation();
+              onCancel();
+            }}
+            title={t("markCancelledTooltip")}
+          >
+            <X className="h-3.5 w-3.5" />
+          </Button>
+        )}
         {onComplete && task.status !== "completed" && task.status !== "cancelled" && (
           <Button
             type="button"
             size="icon-sm"
             variant="ghost"
             className="h-7 w-7 text-primary hover:text-primary hover:bg-primary/10"
-            onClick={onComplete}
+            onClick={(e) => {
+              e.stopPropagation();
+              onComplete();
+            }}
             title={t("markCompletedTooltip")}
           >
             <CheckCircle2 className="h-3.5 w-3.5" />
@@ -117,7 +173,10 @@ export function TaskCard({ task, onEdit, onDelete, onComplete, onClickTitle, onC
             size="icon-sm"
             variant="ghost"
             className="h-7 w-7"
-            onClick={onEdit}
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit();
+            }}
             title={t("editTooltip")}
           >
             <Edit2 className="h-3.5 w-3.5" />
@@ -129,7 +188,10 @@ export function TaskCard({ task, onEdit, onDelete, onComplete, onClickTitle, onC
             size="icon-sm"
             variant="ghost"
             className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
-            onClick={onDelete}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
             title={t("deleteTooltip")}
           >
             <Trash2 className="h-3.5 w-3.5" />

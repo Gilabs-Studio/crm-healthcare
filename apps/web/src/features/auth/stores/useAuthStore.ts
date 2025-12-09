@@ -3,6 +3,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { User, AuthState } from "../types";
+import { setSecureCookie } from "@/lib/cookie";
 
 interface AuthStore extends AuthState {
   setUser: (user: User | null) => void;
@@ -28,7 +29,7 @@ export const useAuthStore = create<AuthStore>()(
         set({ token });
         if (typeof window !== "undefined" && token) {
           localStorage.setItem("token", token);
-          document.cookie = `token=${token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
+          setSecureCookie("token", token);
         }
       },
 
@@ -66,7 +67,7 @@ export const useAuthStore = create<AuthStore>()(
             }
             // Set cookie if not exists
             if (!document.cookie.includes("token=")) {
-              document.cookie = `token=${state.token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
+              setSecureCookie("token", state.token);
             }
           } else if (token) {
             // No Zustand token but localStorage has it, restore from localStorage

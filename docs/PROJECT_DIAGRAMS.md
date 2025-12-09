@@ -1,8 +1,8 @@
 # Project Diagrams - Sales CRM
 ## CRM Healthcare/Pharmaceutical Platform
 
-**Versi**: 1.0  
-**Last Updated**: 2025-01-15  
+**Versi**: 1.1  
+**Last Updated**: 2025-12-07  
 **Purpose**: Visualisasi scope, fitur, dan user flow untuk Developer 1, 2, dan 3
 
 ---
@@ -623,7 +623,7 @@ graph TB
     
     subgraph "Data Layer"
         DB[(PostgreSQL<br/>Database)]
-        FILE_STORAGE[File Storage<br/>Photos/Documents]
+        FILE_STORAGE[File Storage<br/>Local or Cloudflare R2<br/>Photos/Documents]
     end
     
     WEB_APP --> API_GATEWAY
@@ -693,7 +693,7 @@ sequenceDiagram
     API-->>M: Success
     
     M->>API: POST /api/v1/mobile/visit-reports/upload-photo<br/>{visitReportId, photo}
-    API->>FS: Store Photo
+    API->>FS: Store Photo<br/>(Local Storage or R2)
     FS-->>API: Photo URL
     API->>DB: Update Visit Report (photo URL)
     DB-->>API: Updated
@@ -720,6 +720,81 @@ sequenceDiagram
     API->>DB: Update Visit Report (status: approved)
     DB-->>API: Updated
     API-->>W: Success
+```
+
+### Storage Architecture
+
+```mermaid
+graph TB
+    subgraph "Storage Provider Interface"
+        STORAGE_IFACE[StorageProvider Interface<br/>- UploadImage<br/>- DeleteFile<br/>- GetFileURL]
+    end
+    
+    subgraph "Storage Implementations"
+        LOCAL_STORAGE[Local Storage<br/>- File System<br/>- Static Serving<br/>- Development/Testing]
+        R2_STORAGE[Cloudflare R2<br/>- S3-Compatible API<br/>- Public CDN<br/>- Production]
+    end
+    
+    subgraph "File Service"
+        FILE_SVC[File Service<br/>- Image Compression<br/>- Resize<br/>- Format Conversion]
+    end
+    
+    subgraph "Configuration"
+        CONFIG[Storage Config<br/>- STORAGE_TYPE<br/>- Local: UploadDir, BaseURL<br/>- R2: Endpoint, Keys, Bucket, PublicURL]
+    end
+    
+    subgraph "External Services"
+        R2_CLOUDFLARE[Cloudflare R2<br/>Object Storage<br/>- No Egress Fees<br/>- S3-Compatible]
+    end
+    
+    CONFIG --> STORAGE_IFACE
+    STORAGE_IFACE --> LOCAL_STORAGE
+    STORAGE_IFACE --> R2_STORAGE
+    FILE_SVC --> STORAGE_IFACE
+    R2_STORAGE --> R2_CLOUDFLARE
+    
+    style STORAGE_IFACE fill:#3b82f6
+    style LOCAL_STORAGE fill:#10b981
+    style R2_STORAGE fill:#f59e0b
+    style FILE_SVC fill:#8b5cf6
+    style R2_CLOUDFLARE fill:#ef4444
+```
+
+### File Upload Flow (with Storage Abstraction)
+
+```mermaid
+sequenceDiagram
+    participant CLIENT as Client<br/>(Web/Mobile)
+    participant API as Backend API
+    participant FILE_SVC as File Service
+    participant STORAGE as Storage Provider<br/>(Local or R2)
+    participant R2 as Cloudflare R2<br/>(if R2)
+    participant DB as Database
+    
+    CLIENT->>API: POST /api/v1/visit-reports/:id/photos<br/>{file: multipart/form-data}
+    API->>FILE_SVC: UploadImage(file)
+    
+    Note over FILE_SVC: Validate file size<br/>& format
+    
+    FILE_SVC->>FILE_SVC: Decode & Resize Image<br/>(max 1920x1920)
+    FILE_SVC->>FILE_SVC: Compress Image<br/>(JPEG 85% or PNG level 6)
+    FILE_SVC->>FILE_SVC: Generate Unique Filename<br/>(timestamp-uuid.ext)
+    
+    alt Storage Type = "local"
+        FILE_SVC->>STORAGE: UploadImage(file)
+        STORAGE->>STORAGE: Save to Local Filesystem
+        STORAGE-->>FILE_SVC: Local URL (/uploads/filename.jpg)
+    else Storage Type = "r2"
+        FILE_SVC->>STORAGE: UploadImage(file)
+        STORAGE->>R2: PutObject(bucket, key, body)
+        R2-->>STORAGE: Success
+        STORAGE-->>FILE_SVC: Public URL (https://cdn.domain.com/filename.jpg)
+    end
+    
+    FILE_SVC-->>API: Photo URL
+    API->>DB: Update Visit Report<br/>(add photo_url)
+    DB-->>API: Success
+    API-->>CLIENT: Success Response<br/>{photo_url}
 ```
 
 ---
@@ -772,6 +847,10 @@ sequenceDiagram
 - Database Models & Migrations
 - Authentication Service
 - File Storage Service
+  - Storage Provider Interface (Local/R2 abstraction)
+  - Local Storage Implementation
+  - Cloudflare R2 Storage Implementation
+  - Image Compression & Resize
 - AI Service (Cerebras/OpenAI/Anthropic)
 - AI Settings & Privacy Management
 - Data Validation
@@ -849,6 +928,56 @@ sequenceDiagram
 
 ---
 
-**Last Updated**: 2025-01-15  
+---
+
+## Storage System
+
+### Storage Types
+
+1. **Local Storage** (Default)
+   - Stores files in local filesystem
+   - Served via static file serving
+   - Best for: Development, Testing, Small deployments
+   - Configuration: `STORAGE_TYPE=local`
+
+2. **Cloudflare R2** (Production)
+   - S3-compatible object storage
+   - No egress fees
+   - Public CDN access
+   - Best for: Production, Scalability, Global distribution
+   - Configuration: `STORAGE_TYPE=r2`
+
+### Storage Features
+
+- **Image Processing**: Automatic compression and resize (max 1920x1920)
+- **Format Support**: JPEG, PNG (auto-convert to optimal format)
+- **Unique Filenames**: Timestamp + UUID for collision prevention
+- **Storage Abstraction**: Easy switch between Local and R2
+- **Public URLs**: Automatic URL generation for uploaded files
+
+### Configuration
+
+**Local Storage:**
+```env
+STORAGE_TYPE=local
+STORAGE_UPLOAD_DIR=/app/uploads
+STORAGE_BASE_URL=/uploads
+```
+
+**Cloudflare R2:**
+```env
+STORAGE_TYPE=r2
+R2_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
+R2_ACCESS_KEY_ID=<access-key>
+R2_SECRET_ACCESS_KEY=<secret-key>
+R2_BUCKET=<bucket-name>
+R2_PUBLIC_URL=https://cdn.yourdomain.com
+```
+
+For detailed setup instructions, see [apps/api/STORAGE_SETUP.md](../../apps/api/STORAGE_SETUP.md)
+
+---
+
+**Last Updated**: 2025-12-07  
 **Maintained By**: Development Team
 

@@ -1,6 +1,7 @@
 import { useAuthStore } from "../stores/useAuthStore";
 import { authService } from "../services/authService";
 import { useLogout } from "./useLogout";
+import { setSecureCookie } from "@/lib/cookie";
 
 export function useRefreshSession() {
   const { refreshToken, setUser, setToken } = useAuthStore();
@@ -18,8 +19,8 @@ export function useRefreshSession() {
         if (typeof window !== "undefined") {
           localStorage.setItem("token", token);
           localStorage.setItem("refreshToken", refresh_token);
-          // Update cookie
-          document.cookie = `token=${token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
+          // Update secure cookie
+          setSecureCookie("token", token);
         }
         setUser(user);
         setToken(token);

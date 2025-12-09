@@ -79,8 +79,9 @@ export function useWebSocket() {
     // Reset reconnect attempts on new connection attempt
     reconnectAttemptsRef.current = 0;
 
-    // Build WebSocket URL with token
-    const wsUrl = `${WS_URL}/api/v1/ws/notifications?token=${encodeURIComponent(token)}`;
+    // Build WebSocket URL without token in query parameter
+    // Token will be sent automatically via cookie (more secure)
+    const wsUrl = `${WS_URL}/api/v1/ws/notifications`;
 
     // Store message handler for reuse
     const messageHandler = (event: MessageEvent) => {
