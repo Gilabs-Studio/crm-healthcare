@@ -93,3 +93,55 @@ export function useMoveDeal() {
   });
 }
 
+export function useDealVisitReports(
+  dealId: string,
+  params?: {
+    page?: number;
+    per_page?: number;
+    status?: string;
+    start_date?: string;
+    end_date?: string;
+  }
+) {
+  return useQuery({
+    queryKey: ["deals", dealId, "visit-reports", params],
+    queryFn: () => dealService.getVisitReports(dealId, params),
+    enabled: !!dealId,
+    retry: (failureCount, error) => {
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as { response?: { status?: number } };
+        if (axiosError.response?.status === 404) {
+          return false;
+        }
+      }
+      return failureCount < 1;
+    },
+  });
+}
+
+export function useDealActivities(
+  dealId: string,
+  params?: {
+    page?: number;
+    per_page?: number;
+    type?: string;
+    start_date?: string;
+    end_date?: string;
+  }
+) {
+  return useQuery({
+    queryKey: ["deals", dealId, "activities", params],
+    queryFn: () => dealService.getActivities(dealId, params),
+    enabled: !!dealId,
+    retry: (failureCount, error) => {
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as { response?: { status?: number } };
+        if (axiosError.response?.status === 404) {
+          return false;
+        }
+      }
+      return failureCount < 1;
+    },
+  });
+}
+

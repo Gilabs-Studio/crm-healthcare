@@ -31,6 +31,8 @@ interface CreateActivityDialogProps {
   readonly onOpenChange: (open: boolean) => void;
   readonly accountId?: string;
   readonly contactId?: string;
+  readonly dealId?: string;
+  readonly leadId?: string;
   readonly onSuccess?: () => void;
 }
 
@@ -39,6 +41,8 @@ export function CreateActivityDialog({
   onOpenChange,
   accountId,
   contactId,
+  dealId,
+  leadId,
   onSuccess,
 }: CreateActivityDialogProps) {
   const createActivity = useCreateActivity();
@@ -61,6 +65,8 @@ export function CreateActivityDialog({
       activity_type_id: "",
       account_id: accountId,
       contact_id: contactId,
+      deal_id: dealId,
+      lead_id: leadId,
       description: "",
       timestamp: new Date().toISOString(),
     },
@@ -75,11 +81,13 @@ export function CreateActivityDialog({
         activity_type_id: defaultTypeId,
         account_id: accountId,
         contact_id: contactId,
+        deal_id: dealId,
+        lead_id: leadId,
         description: "",
         timestamp: new Date().toISOString(),
       });
     }
-  }, [open, accountId, contactId, reset, activityTypes]);
+  }, [open, accountId, contactId, dealId, leadId, reset, activityTypes]);
 
   // Warn if accountId is missing (should not happen when called from visit report)
   useEffect(() => {
@@ -104,22 +112,40 @@ export function CreateActivityDialog({
       // Prepare request payload
       const payload: {
         activity_type_id: string;
-        account_id: string;
+        account_id?: string;
         contact_id?: string;
+        deal_id?: string;
+        lead_id?: string;
         description: string;
         timestamp: string;
         metadata?: Record<string, unknown>;
       } = {
         activity_type_id: data.activity_type_id,
-        account_id: finalAccountId, // Always include account_id
         description: data.description,
         timestamp: data.timestamp,
         metadata: {},
       };
 
+      // Include account_id if available
+      if (finalAccountId) {
+        payload.account_id = finalAccountId;
+      }
+
       // Include contact_id if available
       if (finalContactId) {
         payload.contact_id = finalContactId;
+      }
+
+      // Include deal_id if available
+      const finalDealId = dealId || data.deal_id;
+      if (finalDealId) {
+        payload.deal_id = finalDealId;
+      }
+
+      // Include lead_id if available
+      const finalLeadId = leadId || data.lead_id;
+      if (finalLeadId) {
+        payload.lead_id = finalLeadId;
       }
 
       await createActivity.mutateAsync(payload);
@@ -129,6 +155,8 @@ export function CreateActivityDialog({
         activity_type_id: defaultTypeId,
         account_id: accountId,
         contact_id: contactId,
+        deal_id: dealId,
+        lead_id: leadId,
         description: "",
         timestamp: new Date().toISOString(),
       });

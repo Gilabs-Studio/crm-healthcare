@@ -13,6 +13,8 @@ export const activityService = {
     type?: string;
     account_id?: string;
     contact_id?: string;
+    deal_id?: string;
+    lead_id?: string;
     user_id?: string;
     start_date?: string;
     end_date?: string;
@@ -29,6 +31,8 @@ export const activityService = {
   async getTimeline(params?: {
     account_id?: string;
     contact_id?: string;
+    deal_id?: string;
+    lead_id?: string;
     user_id?: string;
     start_date?: string;
     end_date?: string;
@@ -40,8 +44,10 @@ export const activityService = {
 
   async create(data: {
     activity_type_id: string;
-    account_id: string; // Required - activity must be linked to an account
+    account_id?: string;
     contact_id?: string;
+    deal_id?: string;
+    lead_id?: string;
     description: string;
     timestamp: string;
     metadata?: Record<string, unknown>;

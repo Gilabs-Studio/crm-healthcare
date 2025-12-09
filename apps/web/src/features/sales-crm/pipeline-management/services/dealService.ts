@@ -43,5 +43,33 @@ export const dealService = {
     const response = await apiClient.post<DealResponse>(`/deals/${id}/move`, data);
     return response.data;
   },
+
+  async getVisitReports(dealId: string, params?: {
+    page?: number;
+    per_page?: number;
+    status?: string;
+    start_date?: string;
+    end_date?: string;
+  }): Promise<import("@/features/sales-crm/visit-report/types").ListVisitReportsResponse> {
+    const response = await apiClient.get<import("@/features/sales-crm/visit-report/types").ListVisitReportsResponse>(
+      `/deals/${dealId}/visit-reports`,
+      { params }
+    );
+    return response.data;
+  },
+
+  async getActivities(dealId: string, params?: {
+    page?: number;
+    per_page?: number;
+    type?: string;
+    start_date?: string;
+    end_date?: string;
+  }): Promise<import("@/features/sales-crm/visit-report/types/activity").ListActivitiesResponse> {
+    const response = await apiClient.get<import("@/features/sales-crm/visit-report/types/activity").ListActivitiesResponse>(
+      `/deals/${dealId}/activities`,
+      { params }
+    );
+    return response.data;
+  },
 };
 

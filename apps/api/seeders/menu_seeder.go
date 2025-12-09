@@ -88,13 +88,27 @@ func SeedMenus() error {
 	}
 	log.Printf("Created menu: %s", accountsMenu.Name)
 
+	// Create Leads menu under Sales CRM
+	leadsMenu := permission.Menu{
+		Name:     "Lead Management",
+		Icon:     "user-plus",
+		URL:      basePath + "/leads",
+		ParentID: &salesCRMMenu.ID,
+		Order:    2,
+		Status:   "active",
+	}
+	if err := database.DB.Create(&leadsMenu).Error; err != nil {
+		return err
+	}
+	log.Printf("Created menu: %s", leadsMenu.Name)
+
 	// Create Pipeline menu under Sales CRM
 	pipelineMenu := permission.Menu{
 		Name:     "Pipeline",
 		Icon:     "trending-up",
 		URL:      basePath + "/pipeline",
 		ParentID: &salesCRMMenu.ID,
-		Order:    2,
+		Order:    3,
 		Status:   "active",
 	}
 	if err := database.DB.Create(&pipelineMenu).Error; err != nil {
@@ -108,7 +122,7 @@ func SeedMenus() error {
 		Icon:     "map-pin",
 		URL:      basePath + "/visit-reports",
 		ParentID: &salesCRMMenu.ID,
-		Order:    3,
+		Order:    4,
 		Status:   "active",
 	}
 	if err := database.DB.Create(&visitReportsMenu).Error; err != nil {
@@ -122,7 +136,7 @@ func SeedMenus() error {
 		Icon:     "clipboard-list",
 		URL:      basePath + "/tasks",
 		ParentID: &salesCRMMenu.ID,
-		Order:    4,
+		Order:    5,
 		Status:   "active",
 	}
 	if err := database.DB.Create(&tasksMenu).Error; err != nil {
@@ -294,6 +308,28 @@ func UpdateMenuStructure() error {
 		}
 	}
 
+	// Add Leads menu if it doesn't exist
+	var leadsMenu permission.Menu
+	if err := database.DB.Where("url = ?", "/leads").First(&leadsMenu).Error; err != nil {
+		// Leads menu doesn't exist, create it
+		var salesCRMMenu permission.Menu
+		if err := database.DB.Where("url = ?", "/sales-crm").First(&salesCRMMenu).Error; err == nil {
+			leadsMenu = permission.Menu{
+				Name:     "Lead Management",
+				Icon:     "user-plus",
+				URL:      "/leads",
+				ParentID: &salesCRMMenu.ID,
+				Order:    2,
+				Status:   "active",
+			}
+			if err := database.DB.Create(&leadsMenu).Error; err != nil {
+				log.Printf("Warning: Failed to create Leads menu: %v", err)
+			} else {
+				log.Printf("Created Leads menu")
+			}
+		}
+	}
+
 	// Add Pipeline menu if it doesn't exist
 	var pipelineMenu permission.Menu
 	if err := database.DB.Where("url = ?", "/pipeline").First(&pipelineMenu).Error; err != nil {
@@ -305,7 +341,7 @@ func UpdateMenuStructure() error {
 				Icon:     "trending-up",
 				URL:      "/pipeline",
 				ParentID: &salesCRMMenu.ID,
-				Order:    2,
+				Order:    3,
 				Status:   "active",
 			}
 			if err := database.DB.Create(&pipelineMenu).Error; err != nil {

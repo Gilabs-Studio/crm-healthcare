@@ -624,9 +624,11 @@ func (s *Service) GetTopAccounts(req *dashboard.DashboardRequest) ([]dashboard.T
 	accountLastVisit := make(map[string]time.Time)
 
 	for _, vr := range visitReports {
-		accountVisitCount[vr.AccountID]++
-		if lastVisit, exists := accountLastVisit[vr.AccountID]; !exists || vr.VisitDate.After(lastVisit) {
-			accountLastVisit[vr.AccountID] = vr.VisitDate
+		if vr.AccountID != nil && *vr.AccountID != "" {
+			accountVisitCount[*vr.AccountID]++
+			if lastVisit, exists := accountLastVisit[*vr.AccountID]; !exists || vr.VisitDate.After(lastVisit) {
+				accountLastVisit[*vr.AccountID] = vr.VisitDate
+			}
 		}
 	}
 
@@ -710,7 +712,9 @@ func (s *Service) GetTopSalesRep(req *dashboard.DashboardRequest) ([]dashboard.T
 		if salesRepAccountSet[vr.SalesRepID] == nil {
 			salesRepAccountSet[vr.SalesRepID] = make(map[string]bool)
 		}
-		salesRepAccountSet[vr.SalesRepID][vr.AccountID] = true
+		if vr.AccountID != nil && *vr.AccountID != "" {
+			salesRepAccountSet[vr.SalesRepID][*vr.AccountID] = true
+		}
 	}
 
 	// Get activities per sales rep

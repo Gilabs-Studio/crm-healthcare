@@ -98,10 +98,13 @@
 | `CATEGORY_NOT_FOUND`      | 404         | Kategori tidak ditemukan                     |
 | `WAREHOUSE_NOT_FOUND`     | 404         | Gudang tidak ditemukan                       |
 | `SHIFT_NOT_FOUND`         | 404         | Shift tidak ditemukan                        |
-| `CONFLICT`                | 409         | Konflik dengan state saat ini                |
+| `LEAD_NOT_FOUND`           | 404         | Lead tidak ditemukan                         |
+| `STAGE_NOT_FOUND`          | 404         | Pipeline stage tidak ditemukan               |
+| `CONFLICT`                 | 409         | Konflik dengan state saat ini                |
 | `RESOURCE_ALREADY_EXISTS` | 409         | Resource sudah ada                           |
-| `RESOURCE_IN_USE`         | 409         | Resource sedang digunakan                    |
-| `CANNOT_DELETE`           | 409         | Resource tidak bisa dihapus (ada dependency) |
+| `RESOURCE_IN_USE`          | 409         | Resource sedang digunakan                    |
+| `CANNOT_DELETE`            | 409         | Resource tidak bisa dihapus (ada dependency) |
+| `LEAD_ALREADY_CONVERTED`  | 409         | Lead sudah dikonversi menjadi opportunity    |
 
 ---
 
@@ -158,6 +161,17 @@
 | `STOCK_TRANSFER_PENDING`          | 409         | Transfer stok masih pending   |
 | `STOCK_TRANSFER_ALREADY_APPROVED` | 409         | Transfer stok sudah disetujui |
 | `STOCK_TRANSFER_ALREADY_REJECTED` | 409         | Transfer stok sudah ditolak   |
+
+### Lead Management
+
+| Code                      | HTTP Status | Description                                          |
+| ------------------------- | ----------- | ---------------------------------------------------- |
+| `LEAD_CANNOT_CONVERT`     | 422         | Lead tidak bisa dikonversi (status tidak qualified) |
+| `INVALID_LEAD_STATUS`     | 400         | Status lead tidak valid                              |
+| `INVALID_LEAD_SOURCE`     | 400         | Source lead tidak valid                              |
+| `ACCOUNT_CREATION_FAILED` | 422         | Gagal membuat account dari lead                      |
+| `CONTACT_CREATION_FAILED` | 422         | Gagal membuat contact dari lead                      |
+| `OPPORTUNITY_CREATION_FAILED` | 422      | Gagal membuat opportunity dari lead                 |
 
 ---
 

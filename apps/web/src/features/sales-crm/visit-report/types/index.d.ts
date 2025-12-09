@@ -6,8 +6,10 @@ export interface Location {
 
 export interface VisitReport {
   id: string;
-  account_id: string;
+  account_id?: string;
   contact_id?: string;
+  deal_id?: string;
+  lead_id?: string;
   sales_rep_id: string;
   visit_date: string;
   check_in_time?: string;
@@ -30,6 +32,10 @@ export interface VisitReport {
   contact?: {
     id: string;
     name: string;
+  };
+  deal?: {
+    id: string;
+    title: string;
   };
   sales_rep?: {
     id: string;
@@ -63,8 +69,10 @@ export interface VisitReportResponse {
 }
 
 export interface CreateVisitReportFormData {
-  account_id: string;
+  account_id?: string;
   contact_id?: string;
+  deal_id?: string;
+  lead_id?: string;
   visit_date: string;
   purpose: string;
   notes?: string;
@@ -76,6 +84,8 @@ export interface CreateVisitReportFormData {
 export interface UpdateVisitReportFormData {
   account_id?: string;
   contact_id?: string;
+  deal_id?: string;
+  lead_id?: string;
   visit_date?: string;
   purpose?: string;
   notes?: string;

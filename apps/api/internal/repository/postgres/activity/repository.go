@@ -45,6 +45,14 @@ func (r *repository) List(req *activity.ListActivitiesRequest) ([]activity.Activ
 		query = query.Where("contact_id = ?", req.ContactID)
 	}
 
+	if req.DealID != "" {
+		query = query.Where("deal_id = ?", req.DealID)
+	}
+
+	if req.LeadID != "" {
+		query = query.Where("lead_id = ?", req.LeadID)
+	}
+
 	if req.UserID != "" {
 		query = query.Where("user_id = ?", req.UserID)
 	}
@@ -119,6 +127,14 @@ func (r *repository) GetTimeline(req *activity.ActivityTimelineRequest) ([]activ
 
 	if req.ContactID != "" {
 		query = query.Where("contact_id = ?", req.ContactID)
+	}
+
+	if req.DealID != "" {
+		query = query.Where("deal_id = ?", req.DealID)
+	}
+
+	if req.LeadID != "" {
+		query = query.Where("lead_id = ?", req.LeadID)
 	}
 
 	if req.UserID != "" {

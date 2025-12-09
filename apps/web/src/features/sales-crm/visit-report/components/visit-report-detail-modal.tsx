@@ -345,7 +345,18 @@ export function VisitReportDetailModal({
                         </div>
                         <div className="flex items-center gap-2">
                           <User className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">{visitReport.contact?.name || t("sections.notAvailable")}</span>
+                          <span className="font-medium">{visitReport.contact?.name ?? t("sections.notAvailable")}</span>
+                        </div>
+                      </div>
+                    )}
+                    {visitReport.deal && (
+                      <div>
+                        <div className="text-sm text-muted-foreground mb-1">
+                          {t("sections.dealLabel")}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">{visitReport.deal?.title ?? t("sections.notAvailable")}</span>
                         </div>
                       </div>
                     )}
@@ -601,6 +612,8 @@ export function VisitReportDetailModal({
           onOpenChange={setIsCreateActivityDialogOpen}
           accountId={visitReport.account_id}
           contactId={visitReport.contact_id || undefined}
+          dealId={visitReport.deal_id || undefined}
+          leadId={visitReport.lead_id || undefined}
           onSuccess={() => {
             // Refresh timeline - query will auto-refresh due to invalidation in hook
             onVisitReportUpdated?.();

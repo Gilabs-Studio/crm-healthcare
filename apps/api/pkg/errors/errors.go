@@ -2,6 +2,7 @@ package errors
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gilabs/crm-healthcare/api/pkg/response"
@@ -103,9 +104,45 @@ var ErrorCodeMap = map[string]ErrorInfo{
 		HTTPStatus: http.StatusNotFound,
 		Message:    "Category not found",
 	},
+	"LEAD_NOT_FOUND": {
+		HTTPStatus: http.StatusNotFound,
+		Message:    "Lead not found",
+	},
+	"STAGE_NOT_FOUND": {
+		HTTPStatus: http.StatusNotFound,
+		Message:    "Pipeline stage not found",
+	},
 	"CONFLICT": {
 		HTTPStatus: http.StatusConflict,
 		Message:    "Conflict with current state",
+	},
+	"LEAD_ALREADY_CONVERTED": {
+		HTTPStatus: http.StatusConflict,
+		Message:    "Lead already converted",
+	},
+	"LEAD_CANNOT_CONVERT": {
+		HTTPStatus: http.StatusUnprocessableEntity,
+		Message:    "Lead cannot convert. Lead status must be 'qualified'",
+	},
+	"INVALID_LEAD_STATUS": {
+		HTTPStatus: http.StatusBadRequest,
+		Message:    "Invalid lead status",
+	},
+	"INVALID_LEAD_SOURCE": {
+		HTTPStatus: http.StatusBadRequest,
+		Message:    "Invalid lead source",
+	},
+	"ACCOUNT_CREATION_FAILED": {
+		HTTPStatus: http.StatusUnprocessableEntity,
+		Message:    "Failed to create account",
+	},
+	"CONTACT_CREATION_FAILED": {
+		HTTPStatus: http.StatusUnprocessableEntity,
+		Message:    "Failed to create contact",
+	},
+	"OPPORTUNITY_CREATION_FAILED": {
+		HTTPStatus: http.StatusUnprocessableEntity,
+		Message:    "Failed to create opportunity",
 	},
 
 	// System Errors
@@ -197,7 +234,7 @@ func UnauthorizedResponse(c *gin.Context, reason string) {
 func ForbiddenResponse(c *gin.Context, requiredPermission string, userPermissions []string) {
 	details := map[string]interface{}{
 		"required_permission": requiredPermission,
-		"user_permissions":     userPermissions,
+		"user_permissions":    userPermissions,
 	}
 	ErrorResponse(c, "FORBIDDEN", details, nil)
 }
@@ -217,16 +254,108 @@ func HandleValidationError(c *gin.Context, err error) {
 	if validationErrors, ok := err.(validator.ValidationErrors); ok {
 		for _, fieldError := range validationErrors {
 			errorInfo := getFieldErrorInfo(fieldError.Tag())
+
+			// Get JSON tag name from struct field
+			jsonFieldName := getJSONFieldName(fieldError)
+
 			fieldErr := response.FieldError{
-				Field:     fieldError.Field(),
-				Code:      fieldError.Tag(),
-				Message:   errorInfo.Message,
+				Field:   jsonFieldName,
+				Code:    fieldError.Tag(),
+				Message: errorInfo.Message,
 			}
 			fieldErrors = append(fieldErrors, fieldErr)
 		}
 	}
 
 	ValidationErrorResponse(c, fieldErrors)
+}
+
+// getJSONFieldName extracts JSON tag name from validator field error
+func getJSONFieldName(fieldError validator.FieldError) string {
+	// Get struct namespace (e.g., "CreateLeadRequest.LeadSource")
+	namespace := fieldError.StructNamespace()
+
+	// Split namespace to get struct name and field path
+	parts := strings.Split(namespace, ".")
+	if len(parts) < 2 {
+		// Fallback: convert struct field name to snake_case
+		return toSnakeCase(fieldError.StructField())
+	}
+
+	// Get the struct type from the first part
+	structTypeName := parts[0]
+	fieldPath := parts[1:]
+
+	// Try to get JSON tag using reflection
+	jsonName := getJSONTagFromStructType(structTypeName, fieldPath)
+	if jsonName != "" {
+		return jsonName
+	}
+
+	// Fallback: convert struct field name to snake_case
+	return toSnakeCase(fieldError.StructField())
+}
+
+// getJSONTagFromStructType uses reflection to get JSON tag from struct
+func getJSONTagFromStructType(structTypeName string, fieldPath []string) string {
+	// For CreateLeadRequest and UpdateLeadRequest
+	if structTypeName == "CreateLeadRequest" || structTypeName == "UpdateLeadRequest" {
+		if len(fieldPath) > 0 {
+			return getJSONTagFromLeadRequest(structTypeName, fieldPath[0])
+		}
+	}
+
+	// Add more struct types as needed
+	// For now, return empty to fallback to snake_case conversion
+	return ""
+}
+
+// getJSONTagFromLeadRequest returns JSON tag name for lead request fields
+func getJSONTagFromLeadRequest(structTypeName, fieldName string) string {
+	// Map of struct field names to JSON tag names for lead requests
+	fieldMap := map[string]string{
+		"FirstName":   "first_name",
+		"LastName":    "last_name",
+		"CompanyName": "company_name",
+		"Email":       "email",
+		"Phone":       "phone",
+		"JobTitle":    "job_title",
+		"Industry":    "industry",
+		"LeadSource":  "lead_source",
+		"LeadStatus":  "lead_status",
+		"LeadScore":   "lead_score",
+		"AssignedTo":  "assigned_to",
+		"Notes":       "notes",
+		"Address":     "address",
+		"City":        "city",
+		"Province":    "province",
+		"PostalCode":  "postal_code",
+		"Country":     "country",
+		"Website":     "website",
+	}
+
+	if jsonName, exists := fieldMap[fieldName]; exists {
+		return jsonName
+	}
+
+	// Fallback to snake_case conversion
+	return toSnakeCase(fieldName)
+}
+
+// toSnakeCase converts PascalCase to snake_case
+func toSnakeCase(str string) string {
+	if str == "" {
+		return str
+	}
+
+	var result strings.Builder
+	for i, r := range str {
+		if i > 0 && r >= 'A' && r <= 'Z' {
+			result.WriteByte('_')
+		}
+		result.WriteRune(r)
+	}
+	return strings.ToLower(result.String())
 }
 
 // HandleDatabaseError converts database errors to appropriate API errors
@@ -254,7 +383,6 @@ func getFieldErrorInfo(tag string) ErrorInfo {
 	}
 }
 
-
 // getRequestID extracts request ID from context
 func getRequestID(c *gin.Context) string {
 	if requestID, exists := c.Get("request_id"); exists {
@@ -274,4 +402,3 @@ func InvalidRequestBodyResponse(c *gin.Context) {
 func InvalidQueryParamResponse(c *gin.Context) {
 	ErrorResponse(c, "INVALID_QUERY_PARAM", nil, nil)
 }
-

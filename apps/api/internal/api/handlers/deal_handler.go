@@ -1,8 +1,12 @@
 package handlers
 
 import (
+	"github.com/gilabs/crm-healthcare/api/internal/domain/activity"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/pipeline"
+	"github.com/gilabs/crm-healthcare/api/internal/domain/visit_report"
+	activityservice "github.com/gilabs/crm-healthcare/api/internal/service/activity"
 	pipelineservice "github.com/gilabs/crm-healthcare/api/internal/service/pipeline"
+	visitreportservice "github.com/gilabs/crm-healthcare/api/internal/service/visit_report"
 	"github.com/gilabs/crm-healthcare/api/pkg/errors"
 	"github.com/gilabs/crm-healthcare/api/pkg/response"
 	"github.com/gin-gonic/gin"
@@ -10,12 +14,16 @@ import (
 )
 
 type DealHandler struct {
-	dealService *pipelineservice.Service
+	dealService        *pipelineservice.Service
+	visitReportService *visitreportservice.Service
+	activityService    *activityservice.Service
 }
 
-func NewDealHandler(dealService *pipelineservice.Service) *DealHandler {
+func NewDealHandler(dealService *pipelineservice.Service, visitReportService *visitreportservice.Service, activityService *activityservice.Service) *DealHandler {
 	return &DealHandler{
-		dealService: dealService,
+		dealService:        dealService,
+		visitReportService: visitReportService,
+		activityService:    activityService,
 	}
 }
 
@@ -260,5 +268,133 @@ func (h *DealHandler) Delete(c *gin.Context) {
 	}
 
 	response.SuccessResponseNoContent(c)
+}
+
+// GetVisitReportsByDeal handles get visit reports by deal ID request
+func (h *DealHandler) GetVisitReportsByDeal(c *gin.Context) {
+	dealID := c.Param("id")
+
+	// Verify deal exists
+	_, err := h.dealService.GetDealByID(dealID)
+	if err != nil {
+		if err == pipelineservice.ErrDealNotFound {
+			errors.ErrorResponse(c, "NOT_FOUND", map[string]interface{}{
+				"resource":    "deal",
+				"resource_id": dealID,
+			}, nil)
+			return
+		}
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	var req visit_report.ListVisitReportsRequest
+	if err := c.ShouldBindQuery(&req); err != nil {
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			errors.HandleValidationError(c, validationErrors)
+			return
+		}
+		errors.InvalidQueryParamResponse(c)
+		return
+	}
+
+	// Set deal_id filter
+	req.DealID = dealID
+
+	visitReports, pagination, err := h.visitReportService.List(&req)
+	if err != nil {
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	meta := &response.Meta{
+		Pagination: &response.PaginationMeta{
+			Page:       pagination.Page,
+			PerPage:    pagination.PerPage,
+			Total:      pagination.Total,
+			TotalPages: pagination.TotalPages,
+			HasNext:    pagination.Page < pagination.TotalPages,
+			HasPrev:    pagination.Page > 1,
+		},
+		Filters: map[string]interface{}{
+			"deal_id": dealID,
+		},
+	}
+
+	if req.Status != "" {
+		meta.Filters["status"] = req.Status
+	}
+	if req.StartDate != "" {
+		meta.Filters["start_date"] = req.StartDate
+	}
+	if req.EndDate != "" {
+		meta.Filters["end_date"] = req.EndDate
+	}
+
+	response.SuccessResponse(c, visitReports, meta)
+}
+
+// GetActivitiesByDeal handles get activities by deal ID request
+func (h *DealHandler) GetActivitiesByDeal(c *gin.Context) {
+	dealID := c.Param("id")
+
+	// Verify deal exists
+	_, err := h.dealService.GetDealByID(dealID)
+	if err != nil {
+		if err == pipelineservice.ErrDealNotFound {
+			errors.ErrorResponse(c, "NOT_FOUND", map[string]interface{}{
+				"resource":    "deal",
+				"resource_id": dealID,
+			}, nil)
+			return
+		}
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	var req activity.ListActivitiesRequest
+	if err := c.ShouldBindQuery(&req); err != nil {
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			errors.HandleValidationError(c, validationErrors)
+			return
+		}
+		errors.InvalidQueryParamResponse(c)
+		return
+	}
+
+	// Set deal_id filter
+	req.DealID = dealID
+
+	activities, pagination, err := h.activityService.List(&req)
+	if err != nil {
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	meta := &response.Meta{
+		Pagination: &response.PaginationMeta{
+			Page:       pagination.Page,
+			PerPage:    pagination.PerPage,
+			Total:      pagination.Total,
+			TotalPages: pagination.TotalPages,
+			HasNext:    pagination.Page < pagination.TotalPages,
+			HasPrev:    pagination.Page > 1,
+		},
+		Filters: map[string]interface{}{
+			"deal_id": dealID,
+		},
+	}
+
+	if req.Type != "" {
+		meta.Filters["type"] = req.Type
+	}
+	if req.StartDate != "" {
+		meta.Filters["start_date"] = req.StartDate
+	}
+	if req.EndDate != "" {
+		meta.Filters["end_date"] = req.EndDate
+	}
+
+	response.SuccessResponse(c, activities, meta)
 }
 

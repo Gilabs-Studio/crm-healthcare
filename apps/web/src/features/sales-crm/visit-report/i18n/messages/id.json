@@ -10,11 +10,23 @@
     }
   },
   "visitReportForm": {
+    "tabs": {
+      "account": "Akun",
+      "deal": "Deal",
+      "lead": "Lead"
+    },
     "fields": {
       "accountLabel": "Akun",
       "accountPlaceholder": "Pilih akun",
       "contactLabel": "Kontak",
       "contactPlaceholder": "Pilih kontak (opsional)",
+      "dealLabel": "Deal",
+      "dealPlaceholder": "Pilih deal (opsional)",
+      "noDeal": "Tidak Ada Deal",
+      "leadLabel": "Lead",
+      "leadPlaceholder": "Pilih lead (opsional)",
+      "noLead": "Tidak Ada Lead",
+      "noLeadsAvailable": "Tidak ada lead tersedia",
       "visitDateTimeLabel": "Tanggal & Waktu Kunjungan",
       "purposeLabel": "Tujuan",
       "purposePlaceholder": "Jelaskan tujuan kunjungan ini",

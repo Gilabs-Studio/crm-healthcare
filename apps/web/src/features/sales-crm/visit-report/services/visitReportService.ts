@@ -18,6 +18,8 @@ export const visitReportService = {
     search?: string;
     status?: string;
     account_id?: string;
+    deal_id?: string;
+    lead_id?: string;
     sales_rep_id?: string;
     start_date?: string;
     end_date?: string;

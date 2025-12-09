@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, Clock, User, Building2, Contact } from "lucide-react";
+import { Activity, Clock, User, Building2, Contact, FileText } from "lucide-react";
 import { DataTable, type Column } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -125,6 +125,25 @@ export function ActivityTimeline({ activities, isLoading, accountId }: ActivityT
             <span className="text-sm text-muted-foreground">
               {typeof row.contact === "object" && "name" in row.contact
                 ? row.contact.name
+                : "N/A"}
+            </span>
+          </div>
+        ) : (
+          <span className="text-sm text-muted-foreground">-</span>
+        )
+      ),
+      className: "w-[150px]",
+    },
+    {
+      id: "deal",
+      header: t("table.deal"),
+      accessor: (row) => (
+        row.deal ? (
+          <div className="flex items-center gap-2">
+            <FileText className="h-3 w-3 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">
+              {typeof row.deal === "object" && "title" in row.deal
+                ? row.deal.title
                 : "N/A"}
             </span>
           </div>

@@ -94,6 +94,11 @@ func SeedAll() error {
 		return err
 	}
 
+	// Seed leads (requires users for assigned_to and created_by)
+	if err := SeedLeads(); err != nil {
+		return err
+	}
+
 	return nil
 }
 

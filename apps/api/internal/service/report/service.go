@@ -111,7 +111,9 @@ func (s *Service) GetVisitReportReport(req *report.ReportRequest) (*report.Visit
 			summary.Rejected++
 		}
 
-		byAccount[vr.AccountID]++
+		if vr.AccountID != nil && *vr.AccountID != "" {
+			byAccount[*vr.AccountID]++
+		}
 		bySalesRep[vr.SalesRepID]++
 		dateKey := vr.VisitDate.Format("2006-01-02")
 		byDate[dateKey]++
@@ -445,7 +447,9 @@ func (s *Service) GetSalesPerformanceReport(req *report.ReportRequest) (*report.
 		if salesRepAccountSet[vr.SalesRepID] == nil {
 			salesRepAccountSet[vr.SalesRepID] = make(map[string]bool)
 		}
-		salesRepAccountSet[vr.SalesRepID][vr.AccountID] = true
+		if vr.AccountID != nil && *vr.AccountID != "" {
+			salesRepAccountSet[vr.SalesRepID][*vr.AccountID] = true
+		}
 	}
 
 	for _, act := range activities {
@@ -495,7 +499,9 @@ func (s *Service) GetSalesPerformanceReport(req *report.ReportRequest) (*report.
 	totalAccounts := 0
 	accountSet := make(map[string]bool)
 	for _, vr := range visitReports {
-		accountSet[vr.AccountID] = true
+		if vr.AccountID != nil && *vr.AccountID != "" {
+			accountSet[*vr.AccountID] = true
+		}
 	}
 	totalAccounts = len(accountSet)
 

@@ -229,7 +229,15 @@
         "notes": "Notes",
         "metadata": "Metadata",
         "createdAt": "Created:",
-        "updatedAt": "Last Updated:"
+        "updatedAt": "Last Updated:",
+        "relatedActivities": "Related Activities",
+        "relatedActivitiesDescription": "Visit reports and activities linked to this deal",
+        "visitReports": "Visit Reports",
+        "activities": "Activities",
+        "noVisitReports": "No visit reports found for this deal",
+        "noActivities": "No activities found for this deal",
+        "showing": "Showing",
+        "of": "of"
       },
       "deleteDialog": {
         "title": "Delete Deal",

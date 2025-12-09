@@ -81,8 +81,9 @@ func SeedVisitReports() error {
 		if len(contacts) > 0 {
 			contactID = &contacts[0].ID
 		}
+		accountID := accounts[0].ID
 		visitReports = append(visitReports, visit_report.VisitReport{
-			AccountID:  accounts[0].ID,
+			AccountID:  &accountID, // Convert string to *string
 			ContactID: contactID,
 			SalesRepID: users[0].ID,
 			VisitDate:  today,
@@ -99,8 +100,9 @@ func SeedVisitReports() error {
 			contactID = &contacts[1].ID
 		}
 		checkInTime := yesterday.Add(9 * time.Hour) // 9 AM yesterday
+		accountID := accounts[0].ID
 		visitReports = append(visitReports, visit_report.VisitReport{
-			AccountID:       accounts[0].ID,
+			AccountID:       &accountID, // Convert string to *string
 			ContactID:      contactID,
 			SalesRepID:     users[0].ID,
 			VisitDate:       yesterday,
@@ -125,8 +127,9 @@ func SeedVisitReports() error {
 		if len(users) > 0 {
 			approvedBy = &users[0].ID
 		}
+		accountID := accounts[1].ID
 		visitReports = append(visitReports, visit_report.VisitReport{
-			AccountID:        accounts[1].ID,
+			AccountID:        &accountID, // Convert string to *string
 			ContactID:       contactID,
 			SalesRepID:      users[0].ID,
 			VisitDate:        twoDaysAgo,
@@ -156,8 +159,9 @@ func SeedVisitReports() error {
 			rejectedBy = &users[0].ID
 		}
 		rejectionReason := "Incomplete documentation. Missing required photos and detailed notes."
+		accountID := accounts[2].ID
 		visitReports = append(visitReports, visit_report.VisitReport{
-			AccountID:       accounts[2].ID,
+			AccountID:       &accountID, // Convert string to *string
 			ContactID:      contactID,
 			SalesRepID:     users[0].ID,
 			VisitDate:       oneDayAgo,
@@ -179,8 +183,9 @@ func SeedVisitReports() error {
 			contactID = &contacts[4].ID
 		}
 		checkInTime := yesterday.Add(14 * time.Hour) // 2 PM yesterday
+		accountID := accounts[3].ID
 		visitReports = append(visitReports, visit_report.VisitReport{
-			AccountID:       accounts[3].ID,
+			AccountID:       &accountID, // Convert string to *string
 			ContactID:      contactID,
 			SalesRepID:     users[0].ID,
 			VisitDate:       yesterday,
@@ -199,8 +204,9 @@ func SeedVisitReports() error {
 		if len(contacts) > 5 {
 			contactID = &contacts[5].ID
 		}
+		accountID := accounts[4].ID
 		visitReports = append(visitReports, visit_report.VisitReport{
-			AccountID:  accounts[4].ID,
+			AccountID:  &accountID, // Convert string to *string
 			ContactID:  contactID,
 			SalesRepID: users[0].ID,
 			VisitDate:  today,
@@ -215,7 +221,11 @@ func SeedVisitReports() error {
 		if err := database.DB.Create(&vr).Error; err != nil {
 			return err
 		}
-		log.Printf("Created visit report: %s (id: %s, account_id: %s, status: %s)", vr.Purpose, vr.ID, vr.AccountID, vr.Status)
+		accountIDStr := "nil"
+		if vr.AccountID != nil {
+			accountIDStr = *vr.AccountID
+		}
+		log.Printf("Created visit report: %s (id: %s, account_id: %s, status: %s)", vr.Purpose, vr.ID, accountIDStr, vr.Status)
 	}
 
 	log.Printf("Visit reports seeded successfully (%d visit reports created)", len(visitReports))

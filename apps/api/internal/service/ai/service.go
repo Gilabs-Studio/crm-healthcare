@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gilabs/crm-healthcare/api/internal/domain/account"
+	"github.com/gilabs/crm-healthcare/api/internal/domain/activity"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/ai"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/ai_settings"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/contact"
@@ -84,10 +85,14 @@ func (s *Service) AnalyzeVisitReport(visitReportID string) (*ai.VisitReportInsig
 		return nil, 0, fmt.Errorf("visit report not found: %w", err)
 	}
 
-	// Get account
-	account, err := s.accountRepo.FindByID(visitReport.AccountID)
-	if err != nil {
-		return nil, 0, fmt.Errorf("account not found: %w", err)
+	// Get account (if AccountID is provided)
+	var accountEntity *account.Account
+	if visitReport.AccountID != nil && *visitReport.AccountID != "" {
+		acc, err := s.accountRepo.FindByID(*visitReport.AccountID)
+		if err != nil {
+			return nil, 0, fmt.Errorf("account not found: %w", err)
+		}
+		accountEntity = acc
 	}
 
 	// Get contact if exists
@@ -99,8 +104,11 @@ func (s *Service) AnalyzeVisitReport(visitReportID string) (*ai.VisitReportInsig
 		}
 	}
 
-	// Get recent activities for context
-	activities, _ := s.activityRepo.FindByAccountID(visitReport.AccountID)
+	// Get recent activities for context (if AccountID is provided)
+	var activities []activity.Activity
+	if visitReport.AccountID != nil && *visitReport.AccountID != "" {
+		activities, _ = s.activityRepo.FindByAccountID(*visitReport.AccountID)
+	}
 	// Limit to 5 most recent
 	if len(activities) > 5 {
 		activities = activities[:5]
@@ -112,7 +120,7 @@ func (s *Service) AnalyzeVisitReport(visitReportID string) (*ai.VisitReportInsig
 	}
 
 	// Build context for AI
-	context := BuildVisitReportContext(visitReport, account, contactName, activities)
+	context := BuildVisitReportContext(visitReport, accountEntity, contactName, activities)
 
 	// Build prompt
 	prompt := BuildVisitReportPrompt(context)
@@ -1171,8 +1179,10 @@ func (s *Service) formatVisitReportsForAI(visitReports []visit_report.VisitRepor
 	for _, vr := range visitReports {
 		// Fetch account name
 		accountName := "N/A"
-		if account, err := s.accountRepo.FindByID(vr.AccountID); err == nil && account != nil {
-			accountName = account.Name
+		if vr.AccountID != nil && *vr.AccountID != "" {
+			if account, err := s.accountRepo.FindByID(*vr.AccountID); err == nil && account != nil {
+				accountName = account.Name
+			}
 		}
 		
 		// Fetch contact name if available

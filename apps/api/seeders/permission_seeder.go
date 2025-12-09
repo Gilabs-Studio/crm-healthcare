@@ -21,7 +21,7 @@ func SeedPermissions() error {
 	// Get menus
 	var dashboardMenu permission.Menu
 	var userPageMenu permission.Menu
-	var salesCRMMenu, accountsMenu, pipelineMenu, tasksMenu, productsMenu permission.Menu
+	var salesCRMMenu, accountsMenu, leadsMenu, pipelineMenu, tasksMenu, productsMenu permission.Menu
 	var visitReportsMenu permission.Menu
 	var reportsMenu permission.Menu
 	var aiMenu, aiChatbotMenu, aiSettingsMenu permission.Menu
@@ -38,6 +38,24 @@ func SeedPermissions() error {
 	database.DB.Where("url = ?", basePath+"/ai-chatbot").First(&aiChatbotMenu)
 	database.DB.Where("url = ?", basePath+"/ai-settings").First(&aiSettingsMenu)
 
+	// Get or create Leads menu
+	if err := database.DB.Where("url = ?", basePath+"/leads").First(&leadsMenu).Error; err != nil {
+		// Leads menu doesn't exist, create it (salesCRMMenu already loaded above)
+		leadsMenu = permission.Menu{
+			Name:     "Lead Management",
+			Icon:     "user-plus",
+			URL:      basePath + "/leads",
+			ParentID: &salesCRMMenu.ID,
+			Order:    2,
+			Status:   "active",
+		}
+		if err := database.DB.Create(&leadsMenu).Error; err != nil {
+			log.Printf("Warning: Failed to create Leads menu: %v", err)
+		} else {
+			log.Printf("Created Leads menu in permission seeder")
+		}
+	}
+
 	// Get or create Pipeline menu
 	if err := database.DB.Where("url = ?", basePath+"/pipeline").First(&pipelineMenu).Error; err != nil {
 		// Pipeline menu doesn't exist, create it (salesCRMMenu already loaded above)
@@ -46,7 +64,7 @@ func SeedPermissions() error {
 			Icon:     "trending-up",
 			URL:      basePath + "/pipeline",
 			ParentID: &salesCRMMenu.ID,
-			Order:    2,
+			Order:    3,
 			Status:   "active",
 		}
 		if err := database.DB.Create(&pipelineMenu).Error; err != nil {
@@ -61,11 +79,11 @@ func SeedPermissions() error {
 
 	// Define actions for each menu
 	actions := []struct {
-		menuID   string
-		code     string
-		name     string
-		action   string
-		menu     *permission.Menu
+		menuID string
+		code   string
+		name   string
+		action string
+		menu   *permission.Menu
 	}{
 		// Dashboard actions
 		{dashboardMenu.ID, "VIEW_DASHBOARD", "View Dashboard", "VIEW", &dashboardMenu},
@@ -89,6 +107,15 @@ func SeedPermissions() error {
 		{accountsMenu.ID, "DETAIL_ACCOUNTS", "Detail Accounts", "DETAIL", &accountsMenu},
 		{accountsMenu.ID, "CATEGORY", "Manage Categories", "CATEGORY", &accountsMenu},
 		{accountsMenu.ID, "ROLE", "Manage Contact Roles", "ROLE", &accountsMenu},
+
+		// Leads actions
+		{leadsMenu.ID, "VIEW_LEADS", "View Leads", "VIEW", &leadsMenu},
+		{leadsMenu.ID, "CREATE_LEADS", "Create Leads", "CREATE", &leadsMenu},
+		{leadsMenu.ID, "EDIT_LEADS", "Edit Leads", "EDIT", &leadsMenu},
+		{leadsMenu.ID, "DELETE_LEADS", "Delete Leads", "DELETE", &leadsMenu},
+		{leadsMenu.ID, "CONVERT_LEADS", "Convert Leads", "CONVERT", &leadsMenu},
+		{leadsMenu.ID, "CREATE_ACCOUNT_FROM_LEAD", "Create Account From Lead", "CREATE_ACCOUNT", &leadsMenu},
+		{leadsMenu.ID, "VIEW_ANALYTICS", "View Lead Analytics", "ANALYTICS", &leadsMenu},
 
 		// Pipeline actions
 		{pipelineMenu.ID, "VIEW_PIPELINE", "View Pipeline", "VIEW", &pipelineMenu},
@@ -175,12 +202,12 @@ func SeedPermissions() error {
 	}
 
 	log.Printf("Assigned %d permissions to admin role", len(permissionIDs))
-	
+
 	// Always sync all permissions to admin role (even if permissions already exist)
 	if err := SyncAdminPermissions(); err != nil {
 		log.Printf("Warning: Failed to sync admin permissions: %v", err)
 	}
-	
+
 	// Assign VIEW permissions only to viewer role (read-only access)
 	var viewerRole role.Role
 	if err := database.DB.Where("code = ?", "viewer").First(&viewerRole).Error; err == nil {
@@ -203,7 +230,7 @@ func SeedPermissions() error {
 	} else {
 		log.Printf("Warning: Viewer role not found, skipping viewer permission assignment: %v", err)
 	}
-	
+
 	log.Println("Permissions seeded successfully")
 	return nil
 }
@@ -238,4 +265,3 @@ func SyncAdminPermissions() error {
 	log.Printf("Synced %d permissions to admin role (total: %d)", assignedCount, len(allPermissions))
 	return nil
 }
-

@@ -32,6 +32,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useAccounts } from "../../account-management/hooks/useAccounts";
+import { useDeals } from "../../pipeline-management/hooks/useDeals";
 import { useHasPermission } from "@/features/master-data/user-management/hooks/useHasPermission";
 import type { VisitReport } from "../types";
 import type { CreateVisitReportFormData } from "../schemas/visit-report.schema";
@@ -65,6 +66,8 @@ export function VisitReportList() {
     setStatus,
     accountId,
     setAccountId,
+    dealId,
+    setDealId,
     startDate,
     setStartDate,
     endDate,
@@ -101,6 +104,8 @@ export function VisitReportList() {
 
   const { data: accountsData } = useAccounts({ per_page: 100 });
   const accounts = accountsData?.data || [];
+  const { data: dealsData } = useDeals({ per_page: 100, status: "open" });
+  const deals = dealsData?.data || [];
 
   const [viewingVisitReportId, setViewingVisitReportId] = useState<string | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -139,10 +144,20 @@ export function VisitReportList() {
           onClick={() => handleViewVisitReport(row.id)}
           className="font-medium text-primary hover:underline text-left"
         >
-          {row.account?.name || "N/A"}
+          {row.account?.name ?? "N/A"}
         </button>
       ),
       className: "w-[200px]",
+    },
+    {
+      id: "deal",
+      header: t("table.deal"),
+      accessor: (row) => (
+        <span className="text-sm text-muted-foreground">
+          {row.deal?.title ?? "-"}
+        </span>
+      ),
+      className: "w-[180px]",
     },
     {
       id: "purpose",
@@ -319,6 +334,22 @@ export function VisitReportList() {
               ))}
             </SelectContent>
           </Select>
+          <Select 
+            value={dealId || "all"} 
+            onValueChange={(value) => setDealId(value === "all" ? "" : value)}
+          >
+            <SelectTrigger className="w-[180px] h-9">
+              <SelectValue placeholder={t("filters.allDeals")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("filters.allDeals")}</SelectItem>
+              {deals.map((deal) => (
+                <SelectItem key={deal.id} value={deal.id}>
+                  {deal.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <DateRangePicker
             dateRange={(() => {
               if (startDate && endDate) {
@@ -404,6 +435,8 @@ export function VisitReportList() {
             <DialogTitle>{t("dialogs.createTitle")}</DialogTitle>
           </DialogHeader>
           <VisitReportForm
+            key="create-visit-report-form"
+            open={isCreateDialogOpen}
             onSubmit={async (data) => {
               await handleCreate(data as CreateVisitReportFormData);
             }}

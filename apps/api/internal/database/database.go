@@ -13,6 +13,7 @@ import (
 	"github.com/gilabs/crm-healthcare/api/internal/domain/category"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/contact"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/contact_role"
+	"github.com/gilabs/crm-healthcare/api/internal/domain/lead"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/permission"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/pipeline"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/product"
@@ -82,6 +83,7 @@ func AutoMigrate() error {
 		&contact_role.ContactRole{},
 		&account.Account{},
 		&contact.Contact{},
+		&lead.Lead{},
 		&pipeline.PipelineStage{},
 		&pipeline.Deal{},
 		&product.ProductCategory{},

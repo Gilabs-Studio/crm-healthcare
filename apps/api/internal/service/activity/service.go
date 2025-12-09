@@ -154,6 +154,15 @@ func (s *Service) Create(req *activity.CreateActivityRequest) (*activity.Activit
 		return nil, errors.New("either activity_type_id or type is required")
 	}
 
+	// Business rule validation: Activity must be linked to at least one entity (Lead, Account, or Deal)
+	hasLeadID := req.LeadID != nil && *req.LeadID != ""
+	hasAccountID := req.AccountID != nil && *req.AccountID != ""
+	hasDealID := req.DealID != nil && *req.DealID != ""
+
+	if !hasLeadID && !hasAccountID && !hasDealID {
+		return nil, errors.New("activity must be linked to lead, account, or deal")
+	}
+
 	// Parse timestamp
 	timestamp, err := time.Parse(time.RFC3339, req.Timestamp)
 	if err != nil {
@@ -195,6 +204,8 @@ func (s *Service) Create(req *activity.CreateActivityRequest) (*activity.Activit
 		ActivityTypeID: req.ActivityTypeID,
 		AccountID:     req.AccountID,
 		ContactID:     req.ContactID,
+		DealID:        req.DealID,
+		LeadID:        req.LeadID,
 		UserID:        req.UserID,
 		Description:   req.Description,
 		Timestamp:     timestamp,

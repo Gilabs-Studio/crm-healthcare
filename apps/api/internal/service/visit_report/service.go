@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/gilabs/crm-healthcare/api/internal/domain/activity"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/visit_report"
 	"github.com/gilabs/crm-healthcare/api/internal/repository/interfaces"
 	"gorm.io/datatypes"
@@ -45,11 +46,13 @@ type PaginationResult struct {
 
 // loadRelations loads Account, Contact, and SalesRep relations into response
 func (s *Service) loadRelations(response *visit_report.VisitReportResponse, vr *visit_report.VisitReport) {
-	// Load Account
-	if account, err := s.accountRepo.FindByID(vr.AccountID); err == nil {
-		response.Account = map[string]interface{}{
-			"id":   account.ID,
-			"name": account.Name,
+	// Load Account (if AccountID is provided)
+	if vr.AccountID != nil && *vr.AccountID != "" {
+		if account, err := s.accountRepo.FindByID(*vr.AccountID); err == nil {
+			response.Account = map[string]interface{}{
+				"id":   account.ID,
+				"name": account.Name,
+			}
 		}
 	}
 	// Load Contact
@@ -173,13 +176,30 @@ func (s *Service) Create(req *visit_report.CreateVisitReportRequest) (*visit_rep
 		return nil, errors.New("sales_rep_id is required")
 	}
 
-	// Verify account exists
-	_, err := s.accountRepo.FindByID(req.AccountID)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, ErrAccountNotFound
+	// Business rule validation: Either LeadID or AccountID is required
+	hasLeadID := req.LeadID != nil && *req.LeadID != ""
+	hasAccountID := req.AccountID != nil && *req.AccountID != ""
+	hasDealID := req.DealID != nil && *req.DealID != ""
+
+	if !hasLeadID && !hasAccountID {
+		return nil, errors.New("either lead_id or account_id is required")
+	}
+
+	// If DealID is provided, AccountID must be provided (post-conversion phase)
+	if hasDealID && !hasAccountID {
+		return nil, errors.New("account_id is required when deal_id is provided")
+	}
+
+	// Verify account exists if provided
+	var err error
+	if hasAccountID {
+		_, err = s.accountRepo.FindByID(*req.AccountID)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, ErrAccountNotFound
+			}
+			return nil, err
 		}
-		return nil, err
 	}
 
 	// Parse visit date (support both "YYYY-MM-DD" and "YYYY-MM-DD HH:mm" formats)
@@ -235,9 +255,17 @@ func (s *Service) Create(req *visit_report.CreateVisitReportRequest) (*visit_rep
 		checkOutLocationJSON = locationBytes
 	}
 
+	// Validate deal exists if provided
+	if req.DealID != nil && *req.DealID != "" {
+		// Note: We'll need to inject dealRepo if we want to validate
+		// For now, we'll just set it and let database foreign key handle validation
+	}
+
 	vr := &visit_report.VisitReport{
 		AccountID:        req.AccountID,
 		ContactID:        req.ContactID,
+		DealID:           req.DealID,
+		LeadID:           req.LeadID,
 		SalesRepID:       req.SalesRepID,
 		VisitDate:        visitDate,
 		Purpose:          req.Purpose,
@@ -303,10 +331,32 @@ func (s *Service) Update(id string, req *visit_report.UpdateVisitReportRequest) 
 		return nil, ErrInvalidStatus
 	}
 
+	// Business rule validation for update
+	hasLeadID := req.LeadID != nil && *req.LeadID != ""
+	hasAccountID := req.AccountID != nil && *req.AccountID != ""
+	hasDealID := req.DealID != nil && *req.DealID != ""
+
+	// Determine current state
+	currentHasLeadID := vr.LeadID != nil && *vr.LeadID != ""
+	currentHasAccountID := vr.AccountID != nil && *vr.AccountID != ""
+
+	// After update, must have either LeadID or AccountID
+	finalHasLeadID := hasLeadID || (!hasLeadID && currentHasLeadID)
+	finalHasAccountID := hasAccountID || (!hasAccountID && currentHasAccountID)
+
+	if !finalHasLeadID && !finalHasAccountID {
+		return nil, errors.New("either lead_id or account_id is required")
+	}
+
+	// If DealID is provided, AccountID must be provided
+	if hasDealID && !finalHasAccountID {
+		return nil, errors.New("account_id is required when deal_id is provided")
+	}
+
 	// Update fields if provided
-	if req.AccountID != "" {
+	if req.AccountID != nil {
 		// Verify account exists
-		_, err := s.accountRepo.FindByID(req.AccountID)
+		_, err := s.accountRepo.FindByID(*req.AccountID)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return nil, ErrAccountNotFound
@@ -318,6 +368,14 @@ func (s *Service) Update(id string, req *visit_report.UpdateVisitReportRequest) 
 
 	if req.ContactID != nil {
 		vr.ContactID = req.ContactID
+	}
+
+	if req.DealID != nil {
+		vr.DealID = req.DealID
+	}
+
+	if req.LeadID != nil {
+		vr.LeadID = req.LeadID
 	}
 
 	if req.VisitDate != "" {
@@ -767,8 +825,30 @@ func (s *Service) UploadPhoto(id string, req *visit_report.UploadPhotoRequest) (
 
 // createActivity creates an activity record for a visit report
 func (s *Service) createActivity(vr *visit_report.VisitReport, activityType, description string) {
-	// This will be implemented when activity service is ready
-	// For now, we'll skip it to avoid circular dependency
-	// Activity creation should be handled in the handler layer
+	if s.activityRepo == nil {
+		return // Skip if activity repo not available
+	}
+
+	activity := &activity.Activity{
+		Type:        activityType,
+		AccountID:   vr.AccountID, // Already *string, can be nil
+		ContactID:   vr.ContactID,
+		DealID:      vr.DealID,
+		LeadID:      vr.LeadID,
+		UserID:      vr.SalesRepID,
+		Description: description,
+		Timestamp:   time.Now(),
+	}
+
+	// Add metadata with visit report ID
+	metadata := map[string]interface{}{
+		"visit_report_id": vr.ID,
+		"visit_date":      vr.VisitDate.Format("2006-01-02"),
+	}
+	if metadataBytes, err := json.Marshal(metadata); err == nil {
+		activity.Metadata = datatypes.JSON(metadataBytes)
+	}
+
+	_ = s.activityRepo.Create(activity) // Ignore error for now
 }
 

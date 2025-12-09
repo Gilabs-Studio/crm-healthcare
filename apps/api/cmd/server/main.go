@@ -20,6 +20,7 @@ import (
 	contactrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/contact"
 	contactrolerepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/contact_role"
 	dealrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/deal"
+	leadrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/lead"
 	notificationrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/notification"
 	permissionrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/permission"
 	pipelinerepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/pipeline"
@@ -41,6 +42,7 @@ import (
 	contactroleservice "github.com/gilabs/crm-healthcare/api/internal/service/contact_role"
 	dashboardservice "github.com/gilabs/crm-healthcare/api/internal/service/dashboard"
 	fileservice "github.com/gilabs/crm-healthcare/api/internal/service/file"
+	leadservice "github.com/gilabs/crm-healthcare/api/internal/service/lead"
 	notificationservice "github.com/gilabs/crm-healthcare/api/internal/service/notification"
 	permissionservice "github.com/gilabs/crm-healthcare/api/internal/service/permission"
 	pipelineservice "github.com/gilabs/crm-healthcare/api/internal/service/pipeline"
@@ -102,6 +104,7 @@ func main() {
 	contactRepo := contactrepo.NewRepository(database.DB)
 	pipelineRepo := pipelinerepo.NewRepository(database.DB)
 	dealRepo := dealrepo.NewRepository(database.DB)
+	leadRepo := leadrepo.NewRepository(database.DB)
 	visitReportRepo := visitreportrepo.NewRepository(database.DB)
 	activityRepo := activityrepo.NewRepository(database.DB)
 	activityTypeRepo := activitytyperepo.NewRepository(database.DB)
@@ -123,15 +126,16 @@ func main() {
 	accountService := accountservice.NewService(accountRepo, categoryRepo)
 	contactService := contactservice.NewService(contactRepo, accountRepo, contactRoleRepo)
 	pipelineService := pipelineservice.NewService(pipelineRepo, dealRepo, accountRepo)
+	leadService := leadservice.NewService(leadRepo, dealRepo, pipelineRepo, accountRepo, contactRepo, categoryRepo, contactRoleRepo, userRepo, activityRepo, visitReportRepo)
 	activityService := activityservice.NewService(activityRepo, activityTypeRepo, accountRepo, contactRepo, userRepo)
 	activityTypeService := activitytypeservice.NewService(activityTypeRepo)
 	visitReportService := visitreportservice.NewService(visitReportRepo, accountRepo, contactRepo, userRepo, activityRepo)
 	dashboardService := dashboardservice.NewService(visitReportRepo, accountRepo, activityRepo, userRepo, dealRepo, taskRepo, pipelineRepo)
-	
+
 	// Setup file service with storage provider
 	var storageProvider fileservice.StorageProvider
 	storageConfig := config.AppConfig.Storage
-	
+
 	if storageConfig.Type == "r2" {
 		// Initialize R2 storage
 		r2Storage, err := fileservice.NewR2Storage(
@@ -153,16 +157,16 @@ func main() {
 			storageConfig.BaseURL,
 		)
 	}
-	
+
 	fileService := fileservice.NewService(storageProvider)
 	reportService := reportservice.NewService(visitReportRepo, accountRepo, activityRepo, userRepo, dealRepo)
 	productService := productservice.NewService(productRepo, productCategoryRepo)
 	taskService := taskservice.NewService(taskRepo, reminderRepo, userRepo, accountRepo, contactRepo, dealRepo)
-	
+
 	// Setup WebSocket hub
 	notificationHub := hub.NewNotificationHub()
 	go notificationHub.Run()
-	
+
 	// Setup notification service with hub
 	notificationService := notificationservice.NewService(notificationRepo)
 	notificationService.SetHub(notificationHub)
@@ -202,7 +206,8 @@ func main() {
 	accountHandler := handlers.NewAccountHandler(accountService)
 	contactHandler := handlers.NewContactHandler(contactService)
 	pipelineHandler := handlers.NewPipelineHandler(pipelineService)
-	dealHandler := handlers.NewDealHandler(pipelineService)
+	dealHandler := handlers.NewDealHandler(pipelineService, visitReportService, activityService)
+	leadHandler := handlers.NewLeadHandler(leadService, visitReportService, activityService)
 	activityHandler := handlers.NewActivityHandler(activityService)
 	activityTypeHandler := handlers.NewActivityTypeHandler(activityTypeService)
 	visitReportHandler := handlers.NewVisitReportHandler(visitReportService, fileService)
@@ -239,6 +244,7 @@ func main() {
 		contactHandler,
 		pipelineHandler,
 		dealHandler,
+		leadHandler,
 		activityHandler,
 		activityTypeHandler,
 		visitReportHandler,
@@ -272,6 +278,7 @@ func setupRouter(
 	contactHandler *handlers.ContactHandler,
 	pipelineHandler *handlers.PipelineHandler,
 	dealHandler *handlers.DealHandler,
+	leadHandler *handlers.LeadHandler,
 	activityHandler *handlers.ActivityHandler,
 	activityTypeHandler *handlers.ActivityTypeHandler,
 	visitReportHandler *handlers.VisitReportHandler,
@@ -330,43 +337,46 @@ func setupRouter(
 
 		// Auth routes
 		routes.SetupAuthRoutes(v1, authHandler, jwtManager)
-		
+
 		// User routes
 		routes.SetupUserRoutes(v1, userHandler, permissionHandler, jwtManager)
-		
+
 		// Role routes
 		routes.SetupRoleRoutes(v1, roleHandler, jwtManager)
-		
+
 		// Permission routes
 		routes.SetupPermissionRoutes(v1, permissionHandler, jwtManager)
-		
+
 		// Category routes
 		routes.SetupCategoryRoutes(v1, categoryHandler, jwtManager)
-		
+
 		// Contact Role routes
 		routes.SetupContactRoleRoutes(v1, contactRoleHandler, jwtManager)
-		
+
 		// Account routes
 		routes.SetupAccountRoutes(v1, accountHandler, jwtManager)
-		
+
 		// Contact routes
 		routes.SetupContactRoutes(v1, contactHandler, jwtManager)
-		
+
 		// Visit Report routes
 		routes.SetupVisitReportRoutes(v1, visitReportHandler, activityTypeHandler, jwtManager)
-		
+
 		// Activity routes
 		routes.SetupActivityRoutes(v1, activityHandler, jwtManager)
 
 		// Pipeline & Deals routes
 		routes.SetupPipelineRoutes(v1, pipelineHandler, dealHandler, jwtManager)
-		
+
+		// Lead routes
+		routes.SetupLeadRoutes(v1, leadHandler, jwtManager)
+
 		// Dashboard routes
 		routes.SetupDashboardRoutes(v1, dashboardHandler, jwtManager)
-		
+
 		// Report routes
 		routes.SetupReportRoutes(v1, reportHandler, jwtManager)
-		
+
 		// Master Data routes
 		routes.SetupMasterDataRoutes(v1, jwtManager)
 

@@ -87,8 +87,10 @@ func SeedActivities() error {
 		activities = append(activities, activity.Activity{
 			Type:           "visit",
 			ActivityTypeID: &visitTypeID,
-			AccountID:      &vr.AccountID,
+			AccountID:      vr.AccountID, // Already *string, no need for &
 			ContactID:      vr.ContactID,
+			DealID:         vr.DealID,    // Include DealID if exists
+			LeadID:         vr.LeadID,    // Include LeadID if exists
 			UserID:         vr.SalesRepID,
 			Description:    "Visit report created: " + vr.Purpose,
 			Timestamp:      vr.CreatedAt,
@@ -104,8 +106,10 @@ func SeedActivities() error {
 			activities = append(activities, activity.Activity{
 				Type:           "visit",
 				ActivityTypeID: &visitTypeID,
-				AccountID:      &vr.AccountID,
+				AccountID:      vr.AccountID, // Already *string, no need for &
 				ContactID:      vr.ContactID,
+				DealID:         vr.DealID,    // Include DealID if exists
+				LeadID:         vr.LeadID,   // Include LeadID if exists
 				UserID:         vr.SalesRepID,
 				Description:    "Checked in for visit: " + vr.Purpose,
 				Timestamp:      *vr.CheckInTime,
@@ -122,8 +126,10 @@ func SeedActivities() error {
 			activities = append(activities, activity.Activity{
 				Type:           "visit",
 				ActivityTypeID: &visitTypeID,
-				AccountID:      &vr.AccountID,
+				AccountID:      vr.AccountID, // Already *string, no need for &
 				ContactID:      vr.ContactID,
+				DealID:         vr.DealID,    // Include DealID if exists
+				LeadID:         vr.LeadID,    // Include LeadID if exists
 				UserID:         vr.SalesRepID,
 				Description:    "Checked out from visit: " + vr.Purpose,
 				Timestamp:      *vr.CheckOutTime,
@@ -140,8 +146,10 @@ func SeedActivities() error {
 			activities = append(activities, activity.Activity{
 				Type:           "visit",
 				ActivityTypeID: &visitTypeID,
-				AccountID:      &vr.AccountID,
+				AccountID:      vr.AccountID, // Already *string, no need for &
 				ContactID:      vr.ContactID,
+				DealID:         vr.DealID,     // Include DealID if exists
+				LeadID:         vr.LeadID,     // Include LeadID if exists
 				UserID:         vr.SalesRepID,
 				Description:    "Visit report approved: " + vr.Purpose,
 				Timestamp:      *vr.ApprovedAt,
@@ -158,8 +166,10 @@ func SeedActivities() error {
 			activities = append(activities, activity.Activity{
 				Type:           "visit",
 				ActivityTypeID: &visitTypeID,
-				AccountID:      &vr.AccountID,
+				AccountID:      vr.AccountID, // Already *string, no need for &
 				ContactID:      vr.ContactID,
+				DealID:         vr.DealID,    // Include DealID if exists
+				LeadID:         vr.LeadID,    // Include LeadID if exists
 				UserID:         vr.SalesRepID,
 				Description:    "Visit report rejected: " + vr.Purpose,
 				Timestamp:      *vr.ApprovedAt,

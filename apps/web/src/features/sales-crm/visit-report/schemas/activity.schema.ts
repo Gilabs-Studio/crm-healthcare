@@ -4,6 +4,8 @@ export const createActivitySchema = z.object({
   activity_type_id: z.string().uuid("Invalid activity type ID"),
   account_id: z.string().uuid("Invalid account ID").optional(),
   contact_id: z.string().uuid("Invalid contact ID").optional(),
+  deal_id: z.string().uuid("Invalid deal ID").optional(),
+  lead_id: z.string().uuid("Invalid lead ID").optional(),
   description: z.string().min(3, "Description must be at least 3 characters"),
   timestamp: z.string().refine(
     (val) => {
