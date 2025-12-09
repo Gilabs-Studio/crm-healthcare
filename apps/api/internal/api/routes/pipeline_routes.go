@@ -35,6 +35,9 @@ func SetupPipelineRoutes(router *gin.RouterGroup, pipelineHandler *handlers.Pipe
 		deals.PUT("/:id", dealHandler.Update)
 		deals.DELETE("/:id", dealHandler.Delete)
 		deals.POST("/:id/move", dealHandler.Move)
+		// Deal related resources
+		deals.GET("/:id/visit-reports", dealHandler.GetVisitReportsByDeal)
+		deals.GET("/:id/activities", dealHandler.GetActivitiesByDeal)
 	}
 }
 

@@ -51,6 +51,7 @@ export interface Deal {
   actual_close_date?: string;
   assigned_to?: string;
   assigned_user?: UserRef;
+  lead_id?: string;
   status: "open" | "won" | "lost";
   source?: string;
   notes?: string;

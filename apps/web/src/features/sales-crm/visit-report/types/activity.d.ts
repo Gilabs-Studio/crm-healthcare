@@ -6,6 +6,8 @@ export interface Activity {
   activity_type_id?: string;
   account_id?: string;
   contact_id?: string;
+  deal_id?: string;
+  lead_id?: string;
   user_id: string;
   description: string;
   timestamp: string;
@@ -19,6 +21,10 @@ export interface Activity {
   contact?: {
     id: string;
     name: string;
+  };
+  deal?: {
+    id: string;
+    title: string;
   };
   user?: {
     id: string;

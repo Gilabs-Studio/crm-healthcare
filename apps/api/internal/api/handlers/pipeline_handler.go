@@ -166,7 +166,15 @@ func (h *PipelineHandler) DeleteStage(c *gin.Context) {
 		return
 	}
 
-	response.SuccessResponseNoContent(c)
+	// Get user ID for meta
+	meta := &response.Meta{}
+	if userIDVal, exists := c.Get("user_id"); exists {
+		if id, ok := userIDVal.(string); ok {
+			meta.DeletedBy = id
+		}
+	}
+
+	response.SuccessResponseDeleted(c, "pipeline_stage", id, meta)
 }
 
 // UpdateStagesOrder handles update stages order request
@@ -401,7 +409,15 @@ func (h *PipelineHandler) DeleteFlowRule(c *gin.Context) {
 		return
 	}
 
-	response.SuccessResponseNoContent(c)
+	// Get user ID for meta
+	meta := &response.Meta{}
+	if userIDVal, exists := c.Get("user_id"); exists {
+		if id, ok := userIDVal.(string); ok {
+			meta.DeletedBy = id
+		}
+	}
+
+	response.SuccessResponseDeleted(c, "flow_rule", id, meta)
 }
 
 // ValidateTransition handles validate transition request

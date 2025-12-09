@@ -1,12 +1,12 @@
 "use client";
 
-import { User, Building2, FileText, Edit, Trash2, DollarSign, TrendingUp, Calendar, Circle } from "lucide-react";
+import { User, Building2, FileText, Edit, Trash2, DollarSign, TrendingUp, Calendar, Circle, Activity, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { useDeal, useUpdateDeal, useDeleteDeal } from "../hooks/useDeals";
+import { useDeal, useUpdateDeal, useDeleteDeal, useDealVisitReports, useDealActivities } from "../hooks/useDeals";
 import { DealForm } from "./deal-form";
 import { formatCurrency } from "../utils/format";
 import { toast } from "sonner";
@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useTranslations } from "next-intl";
 import { AccountDetailModal } from "@/features/sales-crm/account-management/components/account-detail-modal";
 import { ContactDetailModal } from "@/features/sales-crm/account-management/components/contact-detail-modal";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const statusVariantMap: Record<string, "default" | "secondary" | "outline" | "destructive"> = {
   open: "secondary",
@@ -317,6 +318,36 @@ export function DealDetailModal({
                 </Card>
               )}
 
+              {/* Visit Reports & Activities */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>{t("sections.relatedActivities")}</CardTitle>
+                  <CardDescription>
+                    {t("sections.relatedActivitiesDescription")}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Tabs defaultValue="visit-reports" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="visit-reports">
+                        <MapPin className="h-4 w-4 mr-2" />
+                        {t("sections.visitReports")}
+                      </TabsTrigger>
+                      <TabsTrigger value="activities">
+                        <Activity className="h-4 w-4 mr-2" />
+                        {t("sections.activities")}
+                      </TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="visit-reports" className="mt-4">
+                      <DealVisitReportsList dealId={dealId || ""} />
+                    </TabsContent>
+                    <TabsContent value="activities" className="mt-4">
+                      <DealActivitiesList dealId={dealId || ""} />
+                    </TabsContent>
+                  </Tabs>
+                </CardContent>
+              </Card>
+
               {/* Metadata */}
               <Card>
                 <CardHeader>
@@ -379,6 +410,128 @@ export function DealDetailModal({
         onOpenChange={(open) => !open && setViewingContactId(null)}
       />
     </>
+  );
+}
+
+// Visit Reports List Component for Deal
+function DealVisitReportsList({ dealId }: { readonly dealId: string }) {
+  const { data, isLoading } = useDealVisitReports(dealId, { per_page: 10 });
+  const t = useTranslations("deals.detail");
+
+  if (isLoading) {
+    return (
+      <div className="space-y-3">
+        {[...Array(3)].map((_, i) => (
+          <Skeleton key={i} className="h-16 w-full" />
+        ))}
+      </div>
+    );
+  }
+
+  const visitReports = data?.data ?? [];
+
+  if (visitReports.length === 0) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        <p className="text-sm">{t("sections.noVisitReports")}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {visitReports.map((vr) => (
+        <div key={vr.id} className="flex items-start gap-3 p-3 border rounded-lg hover:bg-accent/50 transition-colors">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <Badge variant={vr.status === "approved" ? "default" : vr.status === "rejected" ? "destructive" : "secondary"}>
+                {vr.status}
+              </Badge>
+              <span className="text-sm text-muted-foreground">
+                {vr.visit_date ? new Date(vr.visit_date).toLocaleDateString("id-ID") : ""}
+              </span>
+            </div>
+            <p className="text-sm font-medium line-clamp-1">{vr.purpose}</p>
+            {vr.account && (
+              <p className="text-xs text-muted-foreground mt-1">
+                {vr.account.name}
+              </p>
+            )}
+          </div>
+        </div>
+      ))}
+      {data?.meta?.pagination && data.meta.pagination.total > 10 && (
+        <div className="text-center pt-2">
+          <p className="text-xs text-muted-foreground">
+            {t("sections.showing")} {visitReports.length} {t("sections.of")} {data.meta.pagination.total} {t("sections.visitReports")}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Activities List Component for Deal
+function DealActivitiesList({ dealId }: { readonly dealId: string }) {
+  const { data, isLoading } = useDealActivities(dealId, { per_page: 10 });
+  const t = useTranslations("deals.detail");
+
+  if (isLoading) {
+    return (
+      <div className="space-y-3">
+        {[...Array(3)].map((_, i) => (
+          <Skeleton key={i} className="h-16 w-full" />
+        ))}
+      </div>
+    );
+  }
+
+  const activities = data?.data ?? [];
+
+  if (activities.length === 0) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        <p className="text-sm">{t("sections.noActivities")}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {activities.map((activity) => (
+        <div key={activity.id} className="flex items-start gap-3 p-3 border rounded-lg hover:bg-accent/50 transition-colors">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <Badge variant="outline" className="capitalize">
+                {activity.type}
+              </Badge>
+              <span className="text-sm text-muted-foreground">
+                {activity.timestamp ? new Date(activity.timestamp).toLocaleDateString("id-ID", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                }) : ""}
+              </span>
+            </div>
+            <p className="text-sm font-medium line-clamp-2">{activity.description}</p>
+            {activity.account && (
+              <p className="text-xs text-muted-foreground mt-1">
+                {activity.account.name}
+              </p>
+            )}
+          </div>
+        </div>
+      ))}
+      {data?.meta?.pagination && data.meta.pagination.total > 10 && (
+        <div className="text-center pt-2">
+          <p className="text-xs text-muted-foreground">
+            {t("sections.showing")} {activities.length} {t("sections.of")} {data.meta.pagination.total} {t("sections.activities")}
+          </p>
+        </div>
+      )}
+    </div>
   );
 }
 

@@ -169,6 +169,14 @@ func (h *AccountHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	response.SuccessResponseNoContent(c)
+	// Get user ID for meta
+	meta := &response.Meta{}
+	if userIDVal, exists := c.Get("user_id"); exists {
+		if id, ok := userIDVal.(string); ok {
+			meta.DeletedBy = id
+		}
+	}
+
+	response.SuccessResponseDeleted(c, "account", id, meta)
 }
 

@@ -15,6 +15,8 @@ type Activity struct {
 	ActivityTypeID *string        `gorm:"type:uuid;index" json:"activity_type_id,omitempty"` // Reference to activity_types table
 	AccountID      *string        `gorm:"type:uuid;index" json:"account_id,omitempty"`
 	ContactID      *string        `gorm:"type:uuid;index" json:"contact_id,omitempty"`
+	DealID         *string        `gorm:"type:uuid;index" json:"deal_id,omitempty"` // Optional link to deal
+	LeadID         *string        `gorm:"type:uuid;index" json:"lead_id,omitempty"` // Optional link to lead
 	UserID         string         `gorm:"type:uuid;not null;index" json:"user_id"`
 	Description    string         `gorm:"type:text;not null" json:"description"`
 	Timestamp      time.Time      `gorm:"type:timestamp;not null;index" json:"timestamp"`
@@ -50,6 +52,8 @@ type ActivityResponse struct {
 	ActivityTypeID *string    `json:"activity_type_id,omitempty"`
 	AccountID     *string     `json:"account_id,omitempty"`
 	ContactID     *string     `json:"contact_id,omitempty"`
+	DealID        *string     `json:"deal_id,omitempty"`
+	LeadID        *string     `json:"lead_id,omitempty"`
 	UserID        string      `json:"user_id"`
 	Description   string      `json:"description"`
 	Timestamp     time.Time   `json:"timestamp"`
@@ -76,6 +80,8 @@ func (a *Activity) ToActivityResponse() *ActivityResponse {
 		ActivityTypeID: a.ActivityTypeID,
 		AccountID:     a.AccountID,
 		ContactID:     a.ContactID,
+		DealID:        a.DealID,
+		LeadID:        a.LeadID,
 		UserID:        a.UserID,
 		Description:   a.Description,
 		Timestamp:     a.Timestamp,
@@ -96,6 +102,8 @@ type CreateActivityRequest struct {
 	ActivityTypeID *string    `json:"activity_type_id" binding:"omitempty,uuid"`                // New field for dynamic activity types
 	AccountID     *string     `json:"account_id" binding:"omitempty,uuid"`
 	ContactID     *string     `json:"contact_id" binding:"omitempty,uuid"`
+	DealID        *string     `json:"deal_id" binding:"omitempty,uuid"` // Optional link to deal
+	LeadID        *string     `json:"lead_id" binding:"omitempty,uuid"` // Optional link to lead
 	UserID        string      `json:"user_id" binding:"omitempty,uuid"` // Will be set from context
 	Description   string      `json:"description" binding:"required,min=3"`
 	Timestamp     string      `json:"timestamp" binding:"required"`
@@ -109,6 +117,8 @@ type ListActivitiesRequest struct {
 	Type      string `form:"type" binding:"omitempty,oneof=visit call email task deal"`
 	AccountID string `form:"account_id" binding:"omitempty,uuid"`
 	ContactID string `form:"contact_id" binding:"omitempty,uuid"`
+	DealID    string `form:"deal_id" binding:"omitempty,uuid"` // Filter by deal
+	LeadID    string `form:"lead_id" binding:"omitempty,uuid"`  // Filter by lead
 	UserID    string `form:"user_id" binding:"omitempty,uuid"`
 	StartDate string `form:"start_date" binding:"omitempty"`
 	EndDate   string `form:"end_date" binding:"omitempty"`
@@ -118,6 +128,8 @@ type ListActivitiesRequest struct {
 type ActivityTimelineRequest struct {
 	AccountID string `form:"account_id" binding:"omitempty,uuid"`
 	ContactID string `form:"contact_id" binding:"omitempty,uuid"`
+	DealID    string `form:"deal_id" binding:"omitempty,uuid"` // Filter by deal
+	LeadID    string `form:"lead_id" binding:"omitempty,uuid"`  // Filter by lead
 	UserID    string `form:"user_id" binding:"omitempty,uuid"`
 	StartDate string `form:"start_date" binding:"omitempty"`
 	EndDate   string `form:"end_date" binding:"omitempty"`

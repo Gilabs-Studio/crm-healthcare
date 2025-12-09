@@ -11,8 +11,10 @@ import (
 // VisitReport represents a visit report entity
 type VisitReport struct {
 	ID              string         `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
-	AccountID       string         `gorm:"type:uuid;not null;index" json:"account_id"`
+	AccountID       *string        `gorm:"type:uuid;index" json:"account_id,omitempty"` // Optional: required if DealID exists, optional if LeadID exists
 	ContactID       *string        `gorm:"type:uuid;index" json:"contact_id,omitempty"`
+	DealID          *string        `gorm:"type:uuid;index" json:"deal_id,omitempty"` // Optional link to deal
+	LeadID          *string        `gorm:"type:uuid;index" json:"lead_id,omitempty"` // Optional link to lead
 	SalesRepID      string         `gorm:"type:uuid;not null;index" json:"sales_rep_id"`
 	VisitDate       time.Time      `gorm:"type:date;not null" json:"visit_date"`
 	CheckInTime     *time.Time     `gorm:"type:timestamp" json:"check_in_time,omitempty"`
@@ -59,8 +61,10 @@ func (vr *VisitReport) BeforeCreate(tx *gorm.DB) error {
 // VisitReportResponse represents visit report response DTO
 type VisitReportResponse struct {
 	ID               string         `json:"id"`
-	AccountID        string         `json:"account_id"`
+	AccountID        *string        `json:"account_id,omitempty"`
 	ContactID        *string        `json:"contact_id,omitempty"`
+	DealID           *string        `json:"deal_id,omitempty"`
+	LeadID           *string        `json:"lead_id,omitempty"`
 	SalesRepID       string         `json:"sales_rep_id"`
 	VisitDate        time.Time      `json:"visit_date"`
 	CheckInTime      *time.Time     `json:"check_in_time,omitempty"`
@@ -92,8 +96,10 @@ func (vr *VisitReport) ToVisitReportResponse() *VisitReportResponse {
 
 	resp := &VisitReportResponse{
 		ID:               vr.ID,
-		AccountID:        vr.AccountID,
+		AccountID:        vr.AccountID, // Already *string
 		ContactID:        vr.ContactID,
+		DealID:           vr.DealID,
+		LeadID:           vr.LeadID,
 		SalesRepID:       vr.SalesRepID,
 		VisitDate:        vr.VisitDate,
 		CheckInTime:      vr.CheckInTime,
@@ -119,8 +125,10 @@ func (vr *VisitReport) ToVisitReportResponse() *VisitReportResponse {
 
 // CreateVisitReportRequest represents create visit report request DTO
 type CreateVisitReportRequest struct {
-	AccountID        string     `json:"account_id" binding:"required,uuid"`
+	AccountID        *string    `json:"account_id" binding:"omitempty,uuid"` // Optional: required if DealID exists
 	ContactID        *string    `json:"contact_id" binding:"omitempty,uuid"`
+	DealID           *string    `json:"deal_id" binding:"omitempty,uuid"` // Optional link to deal
+	LeadID           *string    `json:"lead_id" binding:"omitempty,uuid"` // Optional link to lead
 	SalesRepID       string     `json:"sales_rep_id" binding:"omitempty,uuid"` // Will be set from context
 	VisitDate        string     `json:"visit_date" binding:"required"`
 	Purpose          string     `json:"purpose" binding:"required,min=3"`
@@ -132,8 +140,10 @@ type CreateVisitReportRequest struct {
 
 // UpdateVisitReportRequest represents update visit report request DTO
 type UpdateVisitReportRequest struct {
-	AccountID        string     `json:"account_id" binding:"omitempty,uuid"`
+	AccountID        *string    `json:"account_id" binding:"omitempty,uuid"` // Optional: required if DealID exists
 	ContactID        *string    `json:"contact_id" binding:"omitempty,uuid"`
+	DealID           *string    `json:"deal_id" binding:"omitempty,uuid"` // Optional link to deal
+	LeadID           *string    `json:"lead_id" binding:"omitempty,uuid"` // Optional link to lead
 	VisitDate        string     `json:"visit_date" binding:"omitempty"`
 	Purpose          string     `json:"purpose" binding:"omitempty,min=3"`
 	Notes            string     `json:"notes" binding:"omitempty"`
@@ -175,6 +185,8 @@ type ListVisitReportsRequest struct {
 	Search      string `form:"search" binding:"omitempty"`
 	Status      string `form:"status" binding:"omitempty,oneof=draft submitted approved rejected"`
 	AccountID   string `form:"account_id" binding:"omitempty,uuid"`
+	DealID      string `form:"deal_id" binding:"omitempty,uuid"` // Filter by deal
+	LeadID      string `form:"lead_id" binding:"omitempty,uuid"` // Filter by lead
 	SalesRepID string `form:"sales_rep_id" binding:"omitempty,uuid"`
 	StartDate   string `form:"start_date" binding:"omitempty"`
 	EndDate     string `form:"end_date" binding:"omitempty"`

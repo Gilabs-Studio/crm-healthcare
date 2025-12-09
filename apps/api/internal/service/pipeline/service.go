@@ -145,6 +145,7 @@ func (s *Service) CreateDeal(req *pipeline.CreateDealRequest, createdBy string) 
 		Probability:       req.Probability,
 		ExpectedCloseDate: req.ExpectedCloseDate,
 		AssignedTo:        req.AssignedTo,
+		LeadID:            req.LeadID,
 		Status:            status,
 		Source:            req.Source,
 		Notes:             req.Notes,
@@ -230,6 +231,9 @@ func (s *Service) UpdateDeal(id string, req *pipeline.UpdateDealRequest) (*pipel
 	}
 	if req.AssignedTo != "" {
 		deal.AssignedTo = req.AssignedTo
+	}
+	if req.LeadID != nil {
+		deal.LeadID = req.LeadID
 	}
 	if req.Status != "" {
 		deal.Status = req.Status

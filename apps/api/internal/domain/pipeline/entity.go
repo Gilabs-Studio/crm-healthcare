@@ -87,6 +87,7 @@ type Deal struct {
 	ActualCloseDate   *time.Time     `gorm:"type:date" json:"actual_close_date"`
 	AssignedTo        string         `gorm:"type:uuid;index" json:"assigned_to"` // Sales rep ID
 	AssignedUser      *UserRef       `gorm:"foreignKey:AssignedTo" json:"assigned_user,omitempty"`
+	LeadID            *string        `gorm:"type:uuid;index" json:"lead_id,omitempty"` // Optional: track source lead
 	Status            string         `gorm:"type:varchar(20);not null;default:'open'" json:"status"` // open, won, lost
 	Source            string         `gorm:"type:varchar(100)" json:"source"`                        // e.g., "website", "referral", "cold_call"
 	Notes             string         `gorm:"type:text" json:"notes"`
@@ -164,6 +165,7 @@ type DealResponse struct {
 	ActualCloseDate   *time.Time             `json:"actual_close_date"`
 	AssignedTo        string                 `json:"assigned_to"`
 	AssignedUser      *UserRefResponse       `json:"assigned_user,omitempty"`
+	LeadID            *string                `json:"lead_id,omitempty"`
 	Status            string                 `json:"status"`
 	Source            string                 `json:"source"`
 	Notes             string                 `json:"notes"`
@@ -208,6 +210,7 @@ func (d *Deal) ToDealResponse() *DealResponse {
 		ExpectedCloseDate: d.ExpectedCloseDate,
 		ActualCloseDate:   d.ActualCloseDate,
 		AssignedTo:        d.AssignedTo,
+		LeadID:            d.LeadID,
 		Status:            d.Status,
 		Source:            d.Source,
 		Notes:             d.Notes,
@@ -311,6 +314,7 @@ type CreateDealRequest struct {
 	Probability       int        `json:"probability" binding:"omitempty,min=0,max=100"`
 	ExpectedCloseDate *time.Time `json:"expected_close_date" binding:"omitempty"`
 	AssignedTo        string     `json:"assigned_to" binding:"omitempty,uuid"`
+	LeadID            *string    `json:"lead_id" binding:"omitempty,uuid"` // Optional: track source lead
 	Source            string     `json:"source" binding:"omitempty,max=100"`
 	Notes             string     `json:"notes" binding:"omitempty"`
 }
@@ -326,6 +330,7 @@ type UpdateDealRequest struct {
 	Probability       *int       `json:"probability" binding:"omitempty,min=0,max=100"`
 	ExpectedCloseDate *time.Time `json:"expected_close_date" binding:"omitempty"`
 	AssignedTo        string     `json:"assigned_to" binding:"omitempty,uuid"`
+	LeadID            *string    `json:"lead_id" binding:"omitempty,uuid"` // Optional: track source lead
 	Status            string     `json:"status" binding:"omitempty,oneof=open won lost"`
 	Source            string     `json:"source" binding:"omitempty,max=100"`
 	Notes             string     `json:"notes" binding:"omitempty"`

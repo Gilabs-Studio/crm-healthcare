@@ -24,6 +24,7 @@ export function useVisitReportList() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<string>("");
   const [accountId, setAccountId] = useState<string>("");
+  const [dealId, setDealId] = useState<string>("");
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -39,6 +40,7 @@ export function useVisitReportList() {
     search,
     status,
     account_id: accountId,
+    deal_id: dealId,
     start_date: startDate,
     end_date: endDate,
   });
@@ -150,6 +152,8 @@ export function useVisitReportList() {
     setStatus,
     accountId,
     setAccountId,
+    dealId,
+    setDealId,
     startDate,
     setStartDate,
     endDate,

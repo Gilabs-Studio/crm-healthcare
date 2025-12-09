@@ -48,6 +48,17 @@ func (r *repository) List(req *visit_report.ListVisitReportsRequest) ([]visit_re
 
 	if req.AccountID != "" {
 		query = query.Where("account_id = ?", req.AccountID)
+	} else {
+		// If AccountID is empty, we need to handle NULL values correctly
+		// This allows filtering for visit reports without account (qualification phase)
+	}
+
+	if req.DealID != "" {
+		query = query.Where("deal_id = ?", req.DealID)
+	}
+
+	if req.LeadID != "" {
+		query = query.Where("lead_id = ?", req.LeadID)
 	}
 
 	if req.SalesRepID != "" {

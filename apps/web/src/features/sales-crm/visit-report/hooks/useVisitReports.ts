@@ -18,6 +18,7 @@ export function useVisitReports(params?: {
   search?: string;
   status?: string;
   account_id?: string;
+  deal_id?: string;
   sales_rep_id?: string;
   start_date?: string;
   end_date?: string;
@@ -158,6 +159,7 @@ export function useActivities(params?: {
   type?: string;
   account_id?: string;
   contact_id?: string;
+  deal_id?: string;
   user_id?: string;
   start_date?: string;
   end_date?: string;
@@ -180,6 +182,7 @@ export function useActivities(params?: {
 export function useActivityTimeline(params?: {
   account_id?: string;
   contact_id?: string;
+  deal_id?: string;
   user_id?: string;
   start_date?: string;
   end_date?: string;
@@ -206,8 +209,9 @@ export function useCreateActivity() {
   return useMutation({
     mutationFn: (data: {
       activity_type_id: string;
-      account_id: string; // Required - activity must be linked to an account
+      account_id?: string;
       contact_id?: string;
+      deal_id?: string;
       description: string;
       timestamp: string;
       metadata?: Record<string, unknown>;
@@ -221,6 +225,16 @@ export function useCreateActivity() {
       if (variables.account_id) {
         queryClient.invalidateQueries({
           queryKey: ["activities", "timeline", { account_id: variables.account_id }],
+        });
+      }
+      
+      // If deal_id is provided, invalidate timeline for that deal
+      if (variables.deal_id) {
+        queryClient.invalidateQueries({
+          queryKey: ["activities", "timeline", { deal_id: variables.deal_id }],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["deals", variables.deal_id, "activities"],
         });
       }
     },
