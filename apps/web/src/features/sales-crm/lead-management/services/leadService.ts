@@ -6,6 +6,7 @@ import type {
   LeadFormDataResponse,
   LeadAnalyticsResponse,
   ConvertLeadResponse,
+  CreateAccountFromLeadResponse,
 } from "../types";
 import type { CreateLeadFormData, UpdateLeadFormData, ConvertLeadFormData } from "../schemas/lead.schema";
 import type { ListVisitReportsResponse } from "@/features/sales-crm/visit-report/types";

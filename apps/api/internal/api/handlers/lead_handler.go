@@ -201,7 +201,15 @@ func (h *LeadHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	response.SuccessResponseNoContent(c)
+	// Get user ID for meta
+	meta := &response.Meta{}
+	if userIDVal, exists := c.Get("user_id"); exists {
+		if id, ok := userIDVal.(string); ok {
+			meta.DeletedBy = id
+		}
+	}
+
+	response.SuccessResponseDeleted(c, "lead", id, meta)
 }
 
 // Convert handles convert lead to opportunity request

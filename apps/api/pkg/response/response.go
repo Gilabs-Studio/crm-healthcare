@@ -15,7 +15,6 @@ func GetTimezoneWIB() *time.Location {
 	return timezoneWIB
 }
 
-
 // APIResponse represents the standard API response structure
 type APIResponse struct {
 	Success   bool        `json:"success"`
@@ -112,6 +111,68 @@ func SuccessResponseNoContent(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// SuccessResponseDeleted creates a success response for deleted resource
+// resourceType: type of resource (e.g., "lead", "account", "deal")
+// resourceID: ID of the deleted resource
+// meta: optional metadata (can include deleted_by)
+func SuccessResponseDeleted(c *gin.Context, resourceType string, resourceID string, meta *Meta) {
+	if meta == nil {
+		meta = &Meta{}
+	}
+
+	// Get user ID from context for deleted_by
+	if meta.DeletedBy == "" {
+		if userIDVal, exists := c.Get("user_id"); exists {
+			if id, ok := userIDVal.(string); ok {
+				meta.DeletedBy = id
+			}
+		}
+	}
+
+	data := map[string]interface{}{
+		"id":      resourceID,
+		"deleted": true,
+		"message": getDeleteMessage(resourceType),
+	}
+
+	response := &APIResponse{
+		Success:   true,
+		Data:      data,
+		Meta:      meta,
+		Timestamp: time.Now().In(timezoneWIB).Format(time.RFC3339),
+		RequestID: getRequestID(c),
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+// getDeleteMessage returns appropriate delete message based on resource type
+func getDeleteMessage(resourceType string) string {
+	messages := map[string]string{
+		"lead":             "Lead berhasil dihapus",
+		"account":          "Account berhasil dihapus",
+		"contact":          "Contact berhasil dihapus",
+		"deal":             "Deal berhasil dihapus",
+		"visit_report":     "Visit report berhasil dihapus",
+		"user":             "User berhasil dihapus",
+		"task":             "Task berhasil dihapus",
+		"product":          "Product berhasil dihapus",
+		"category":         "Category berhasil dihapus",
+		"role":             "Role berhasil dihapus",
+		"contact_role":     "Contact role berhasil dihapus",
+		"activity_type":    "Activity type berhasil dihapus",
+		"pipeline_stage":   "Pipeline stage berhasil dihapus",
+		"flow_rule":        "Flow rule berhasil dihapus",
+		"reminder":         "Reminder berhasil dihapus",
+		"product_category": "Product category berhasil dihapus",
+	}
+
+	if msg, ok := messages[resourceType]; ok {
+		return msg
+	}
+	return "Resource berhasil dihapus"
+}
+
 // getRequestID extracts request ID from context or generates new one
 func getRequestID(c *gin.Context) string {
 	if requestID, exists := c.Get("request_id"); exists {
@@ -169,4 +230,3 @@ func NewPaginationMeta(page, perPage, total int) *PaginationMeta {
 		PrevPage:   prevPage,
 	}
 }
-

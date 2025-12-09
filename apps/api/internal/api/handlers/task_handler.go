@@ -248,7 +248,15 @@ func (h *TaskHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	response.SuccessResponseNoContent(c)
+	// Get user ID for meta
+	meta := &response.Meta{}
+	if userIDVal, exists := c.Get("user_id"); exists {
+		if id, ok := userIDVal.(string); ok {
+			meta.DeletedBy = id
+		}
+	}
+
+	response.SuccessResponseDeleted(c, "task", id, meta)
 }
 
 // Assign handles assign task request
@@ -487,7 +495,15 @@ func (h *TaskHandler) DeleteReminder(c *gin.Context) {
 		return
 	}
 
-	response.SuccessResponseNoContent(c)
+	// Get user ID for meta
+	meta := &response.Meta{}
+	if userIDVal, exists := c.Get("user_id"); exists {
+		if id, ok := userIDVal.(string); ok {
+			meta.DeletedBy = id
+		}
+	}
+
+	response.SuccessResponseDeleted(c, "reminder", id, meta)
 }
 
 

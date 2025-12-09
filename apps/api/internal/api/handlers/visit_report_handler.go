@@ -202,7 +202,15 @@ func (h *VisitReportHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	response.SuccessResponseNoContent(c)
+	// Get user ID for meta
+	meta := &response.Meta{}
+	if userIDVal, exists := c.Get("user_id"); exists {
+		if id, ok := userIDVal.(string); ok {
+			meta.DeletedBy = id
+		}
+	}
+
+	response.SuccessResponseDeleted(c, "visit_report", id, meta)
 }
 
 // CheckIn handles check-in request

@@ -201,7 +201,7 @@ export function ConvertLeadDialog({
           <Field orientation="vertical">
             <FieldLabel>{t("fields.expectedCloseDate")}</FieldLabel>
             <DatePicker
-              value={watch("expected_close_date") ? new Date(watch("expected_close_date")!) : undefined}
+              date={watch("expected_close_date") ? new Date(watch("expected_close_date")!) : undefined}
               onDateChange={(date) =>
                 setValue("expected_close_date", date ? date.toISOString() : undefined)
               }

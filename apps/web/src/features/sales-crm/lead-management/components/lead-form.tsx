@@ -66,7 +66,7 @@ export function LeadForm({ lead, onSubmit, onCancel, isLoading }: LeadFormProps)
           job_title: lead.job_title || "",
           industry: lead.industry || "",
           lead_source: lead.lead_source,
-          lead_status: lead.lead_status,
+          lead_status: lead.lead_status as CreateLeadFormData["lead_status"],
           lead_score: lead.lead_score,
           assigned_to: lead.assigned_to || "",
           notes: lead.notes || "",
@@ -78,7 +78,7 @@ export function LeadForm({ lead, onSubmit, onCancel, isLoading }: LeadFormProps)
           website: lead.website || "",
         }
       : {
-          lead_status: defaults?.lead_status || "new",
+          lead_status: (defaults?.lead_status as CreateLeadFormData["lead_status"]) || "new",
           lead_score: defaults?.lead_score || 0,
           country: defaults?.country || "Indonesia",
         },
@@ -86,7 +86,7 @@ export function LeadForm({ lead, onSubmit, onCancel, isLoading }: LeadFormProps)
 
   useEffect(() => {
     if (!isEdit && defaults) {
-      setValue("lead_status", defaults.lead_status);
+      setValue("lead_status", defaults.lead_status as CreateLeadFormData["lead_status"]);
       setValue("lead_score", defaults.lead_score);
       setValue("country", defaults.country);
     }
