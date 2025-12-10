@@ -101,37 +101,37 @@ Dokumen ini berisi rencana sprint untuk memperbaiki semua security vulnerabiliti
 
 **Backend Tasks**:
 
-- [ ] Create refresh token repository interface (`internal/repository/interfaces/refresh_token_repository.go`)
-- [ ] Create refresh token repository implementation (`internal/repository/postgres/refresh_token/repository.go`)
-- [ ] Create refresh token entity (`internal/domain/refresh_token/entity.go`)
-- [ ] Create database migration untuk refresh_tokens table:
-  - [ ] `id` (UUID, primary key)
-  - [ ] `user_id` (UUID, foreign key)
-  - [ ] `token_id` (string, unique) - dari JWT ID claim
-  - [ ] `expires_at` (timestamp)
-  - [ ] `revoked` (boolean, default false)
-  - [ ] `revoked_at` (timestamp, nullable)
-  - [ ] `created_at` (timestamp)
-  - [ ] `updated_at` (timestamp)
-  - [ ] Index on `user_id` dan `token_id`
-- [ ] Update JWT manager untuk include `token_id` (jti) di refresh token claims
-- [ ] Update auth service `RefreshToken` method:
-  - [ ] Validate refresh token signature
-  - [ ] Check if token exists in database
-  - [ ] Check if token is revoked
-  - [ ] Check if token is expired
-  - [ ] Revoke old refresh token (set revoked = true)
-  - [ ] Generate new access token
-  - [ ] Generate new refresh token dengan new token_id
-  - [ ] Store new refresh token in database
-  - [ ] Return new tokens
-- [ ] Update auth service `Login` method:
-  - [ ] Store refresh token in database setelah generate
-- [ ] Create logout endpoint yang revokes refresh token:
-  - [ ] Extract token_id dari refresh token
-  - [ ] Mark token as revoked in database
-- [ ] Create cleanup job untuk delete expired refresh tokens (optional, bisa di background worker)
-- [ ] Update auth handler untuk handle token rotation errors
+- [x] Create refresh token repository interface (`internal/repository/interfaces/refresh_token_repository.go`)
+- [x] Create refresh token repository implementation (`internal/repository/postgres/refresh_token/repository.go`)
+- [x] Create refresh token entity (`internal/domain/refresh_token/entity.go`)
+- [x] Create database migration untuk refresh_tokens table:
+  - [x] `id` (UUID, primary key)
+  - [x] `user_id` (UUID, foreign key)
+  - [x] `token_id` (string, unique) - dari JWT ID claim
+  - [x] `expires_at` (timestamp)
+  - [x] `revoked` (boolean, default false)
+  - [x] `revoked_at` (timestamp, nullable)
+  - [x] `created_at` (timestamp)
+  - [x] `updated_at` (timestamp)
+  - [x] Index on `user_id` dan `token_id` (via GORM tags)
+- [x] Update JWT manager untuk include `token_id` (jti) di refresh token claims (sudah ada di `GenerateRefreshToken`)
+- [x] Update auth service `RefreshToken` method:
+  - [x] Validate refresh token signature
+  - [x] Check if token exists in database
+  - [x] Check if token is revoked
+  - [x] Check if token is expired
+  - [x] Revoke old refresh token (set revoked = true)
+  - [x] Generate new access token
+  - [x] Generate new refresh token dengan new token_id
+  - [x] Store new refresh token in database
+  - [x] Return new tokens
+- [x] Update auth service `Login` method:
+  - [x] Store refresh token in database setelah generate
+- [x] Create logout endpoint yang revokes refresh token:
+  - [x] Extract token_id dari refresh token
+  - [x] Mark token as revoked in database
+- [x] Create cleanup job untuk delete expired refresh tokens (background worker implemented)
+- [x] Update auth handler untuk handle token rotation errors
 - [ ] Add token rotation tests
 
 **Database Migration**:
@@ -617,7 +617,7 @@ err := database.WithTransaction(db, func(tx *gorm.DB) error {
 | Sprint | Goal | Priority | Duration | Status |
 |--------|------|----------|----------|--------|
 | Sprint 1 | Rate Limiting & HSTS | 🔴 CRITICAL | 3-4 days | ✅ In Progress |
-| Sprint 2 | Token Rotation | 🔴 CRITICAL | 3-4 days | ⏳ Pending |
+| Sprint 2 | Token Rotation | 🔴 CRITICAL | 3-4 days | ✅ Completed |
 | Sprint 3 | Log Sanitization | 🟠 HIGH | 2-3 days | ⏳ Pending |
 | Sprint 4 | IDOR Protection | 🟠 HIGH | 4-5 days | ⏳ Pending |
 | Sprint 5 | File Upload Validation | 🟡 MEDIUM | 2-3 days | ⏳ Pending |

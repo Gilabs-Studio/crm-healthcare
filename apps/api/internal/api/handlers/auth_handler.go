@@ -1,12 +1,14 @@
 package handlers
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
+	"log"
+
 	"github.com/gilabs/crm-healthcare/api/internal/domain/auth"
 	authservice "github.com/gilabs/crm-healthcare/api/internal/service/auth"
 	"github.com/gilabs/crm-healthcare/api/pkg/errors"
 	"github.com/gilabs/crm-healthcare/api/pkg/response"
+	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 )
 
 type AuthHandler struct {
@@ -98,7 +100,31 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 			errors.ErrorResponse(c, "USER_NOT_FOUND", nil, nil)
 			return
 		}
-		errors.ErrorResponse(c, "REFRESH_TOKEN_INVALID", nil, nil)
+		if err == authservice.ErrUserInactive {
+			errors.ErrorResponse(c, "ACCOUNT_DISABLED", map[string]interface{}{
+				"reason": "User account is inactive",
+			}, nil)
+			return
+		}
+		if err == authservice.ErrRefreshTokenRevoked {
+			errors.ErrorResponse(c, "REFRESH_TOKEN_REVOKED", map[string]interface{}{
+				"reason": "Refresh token has been revoked",
+			}, nil)
+			return
+		}
+		if err == authservice.ErrRefreshTokenExpired {
+			errors.ErrorResponse(c, "REFRESH_TOKEN_EXPIRED", map[string]interface{}{
+				"reason": "Refresh token has expired",
+			}, nil)
+			return
+		}
+		if err == authservice.ErrRefreshTokenInvalid {
+			errors.ErrorResponse(c, "REFRESH_TOKEN_INVALID", map[string]interface{}{
+				"reason": "Refresh token is invalid",
+			}, nil)
+			return
+		}
+		errors.InternalServerErrorResponse(c, "")
 		return
 	}
 
@@ -107,15 +133,33 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 
 // Logout handles logout request
 // @Summary Logout user
-// @Description Logout user (invalidate token on client side)
+// @Description Logout user and revoke refresh token
 // @Tags auth
 // @Security BearerAuth
+// @Accept json
 // @Produce json
-// @Success 204
+// @Param request body map[string]string false "Refresh token (optional)"
+// @Success 200 {object} response.APIResponse
+// @Failure 400 {object} response.APIResponse
 // @Router /api/v1/auth/logout [post]
 func (h *AuthHandler) Logout(c *gin.Context) {
-	// In a stateless JWT system, logout is handled client-side
-	// Server can maintain a blacklist if needed
-	response.SuccessResponseNoContent(c)
+	var req struct {
+		RefreshToken string `json:"refresh_token"`
+	}
+
+	// Refresh token is optional - if not provided, we still return success
+	// This allows logout to work even if client doesn't have refresh token
+	if err := c.ShouldBindJSON(&req); err == nil && req.RefreshToken != "" {
+		// Revoke refresh token if provided
+		if err := h.authService.Logout(req.RefreshToken); err != nil {
+			// Log error but don't fail logout
+			// This allows logout to succeed even if token is invalid
+			log.Printf("Warning: Failed to revoke refresh token during logout: %v", err)
+		}
+	}
+
+	response.SuccessResponse(c, map[string]interface{}{
+		"message": "Logged out successfully",
+	}, nil)
 }
 

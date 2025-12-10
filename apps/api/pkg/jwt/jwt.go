@@ -100,7 +100,7 @@ func (m *JWTManager) ValidateToken(tokenString string) (*Claims, error) {
 	return claims, nil
 }
 
-// ValidateRefreshToken validates a refresh token
+// ValidateRefreshToken validates a refresh token and returns user ID
 func (m *JWTManager) ValidateRefreshToken(tokenString string) (string, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -122,5 +122,61 @@ func (m *JWTManager) ValidateRefreshToken(tokenString string) (string, error) {
 	}
 
 	return claims.Subject, nil
+}
+
+// ExtractRefreshTokenID extracts the token ID (jti) from a refresh token
+func (m *JWTManager) ExtractRefreshTokenID(tokenString string) (string, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, ErrInvalidToken
+		}
+		return []byte(m.secretKey), nil
+	})
+
+	if err != nil {
+		if errors.Is(err, jwt.ErrTokenExpired) {
+			return "", ErrExpiredToken
+		}
+		return "", ErrInvalidToken
+	}
+
+	claims, ok := token.Claims.(*jwt.RegisteredClaims)
+	if !ok || !token.Valid {
+		return "", ErrInvalidToken
+	}
+
+	if claims.ID == "" {
+		return "", ErrInvalidToken
+	}
+
+	return claims.ID, nil
+}
+
+// ValidateRefreshTokenWithID validates a refresh token and returns both user ID and token ID
+func (m *JWTManager) ValidateRefreshTokenWithID(tokenString string) (userID string, tokenID string, err error) {
+	token, err := jwt.ParseWithClaims(tokenString, &jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, ErrInvalidToken
+		}
+		return []byte(m.secretKey), nil
+	})
+
+	if err != nil {
+		if errors.Is(err, jwt.ErrTokenExpired) {
+			return "", "", ErrExpiredToken
+		}
+		return "", "", ErrInvalidToken
+	}
+
+	claims, ok := token.Claims.(*jwt.RegisteredClaims)
+	if !ok || !token.Valid {
+		return "", "", ErrInvalidToken
+	}
+
+	if claims.ID == "" {
+		return "", "", ErrInvalidToken
+	}
+
+	return claims.Subject, claims.ID, nil
 }
 

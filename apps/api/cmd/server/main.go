@@ -26,6 +26,7 @@ import (
 	pipelinerepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/pipeline"
 	productrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/product"
 	productcategoryrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/product_category"
+	refreshtokenrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/refresh_token"
 	reminderrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/reminder"
 	rolerepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/role"
 	taskrepo "github.com/gilabs/crm-healthcare/api/internal/repository/postgres/task"
@@ -95,6 +96,7 @@ func main() {
 
 	// Setup repositories
 	authRepo := auth.NewRepository(database.DB)
+	refreshTokenRepo := refreshtokenrepo.NewRepository(database.DB)
 	userRepo := userrepo.NewRepository(database.DB)
 	roleRepo := rolerepo.NewRepository(database.DB)
 	permissionRepo := permissionrepo.NewRepository(database.DB)
@@ -116,7 +118,7 @@ func main() {
 	aiSettingsRepo := aisettingsrepo.NewRepository(database.DB)
 
 	// Setup services
-	authService := authservice.NewService(authRepo, jwtManager)
+	authService := authservice.NewService(authRepo, refreshTokenRepo, jwtManager)
 	userService := userservice.NewService(userRepo, roleRepo)
 	profileService := userservice.NewProfileService(userRepo, activityRepo, dealRepo, visitReportRepo, taskRepo)
 	roleService := roleservice.NewService(roleRepo)
@@ -230,6 +232,14 @@ func main() {
 		1*time.Minute, // Run every 1 minute
 	)
 	reminderWorker.Start()
+
+	// Setup refresh token cleanup worker
+	// Run every 24 hours to clean up expired refresh tokens
+	refreshTokenCleanupWorker := worker.NewRefreshTokenCleanupWorker(
+		refreshTokenRepo,
+		24*time.Hour, // Run every 24 hours
+	)
+	refreshTokenCleanupWorker.Start()
 
 	// Setup router
 	router := setupRouter(

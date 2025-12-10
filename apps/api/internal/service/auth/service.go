@@ -2,8 +2,10 @@ package auth
 
 import (
 	"errors"
+	"time"
 
 	"github.com/gilabs/crm-healthcare/api/internal/domain/auth"
+	"github.com/gilabs/crm-healthcare/api/internal/domain/refresh_token"
 	"github.com/gilabs/crm-healthcare/api/internal/repository/interfaces"
 	"github.com/gilabs/crm-healthcare/api/pkg/jwt"
 	"golang.org/x/crypto/bcrypt"
@@ -11,20 +13,25 @@ import (
 )
 
 var (
-	ErrInvalidCredentials = errors.New("invalid credentials")
-	ErrUserNotFound       = errors.New("user not found")
-	ErrUserInactive       = errors.New("user is inactive")
+	ErrInvalidCredentials   = errors.New("invalid credentials")
+	ErrUserNotFound         = errors.New("user not found")
+	ErrUserInactive         = errors.New("user is inactive")
+	ErrRefreshTokenInvalid  = errors.New("refresh token is invalid")
+	ErrRefreshTokenRevoked  = errors.New("refresh token has been revoked")
+	ErrRefreshTokenExpired  = errors.New("refresh token has expired")
 )
 
 type Service struct {
-	repo      interfaces.AuthRepository
-	jwtManager *jwt.JWTManager
+	repo              interfaces.AuthRepository
+	refreshTokenRepo  interfaces.RefreshTokenRepository
+	jwtManager        *jwt.JWTManager
 }
 
-func NewService(repo interfaces.AuthRepository, jwtManager *jwt.JWTManager) *Service {
+func NewService(repo interfaces.AuthRepository, refreshTokenRepo interfaces.RefreshTokenRepository, jwtManager *jwt.JWTManager) *Service {
 	return &Service{
-		repo:       repo,
-		jwtManager: jwtManager,
+		repo:             repo,
+		refreshTokenRepo: refreshTokenRepo,
+		jwtManager:       jwtManager,
 	}
 }
 
@@ -66,6 +73,24 @@ func (s *Service) Login(req *auth.LoginRequest) (*auth.LoginResponse, error) {
 		return nil, err
 	}
 
+	// Extract token ID (jti) from refresh token
+	tokenID, err := s.jwtManager.ExtractRefreshTokenID(refreshToken)
+	if err != nil {
+		return nil, err
+	}
+
+	// Store refresh token in database
+	refreshTokenEntity := &refresh_token.RefreshToken{
+		UserID:    user.ID,
+		TokenID:   tokenID,
+		ExpiresAt: time.Now().Add(s.jwtManager.RefreshTokenTTL()),
+		Revoked:   false,
+	}
+
+	if err := s.refreshTokenRepo.Create(refreshTokenEntity); err != nil {
+		return nil, err
+	}
+
 	// Calculate expires in (seconds)
 	expiresIn := int(s.jwtManager.AccessTokenTTL().Seconds())
 
@@ -90,12 +115,36 @@ func (s *Service) Login(req *auth.LoginRequest) (*auth.LoginResponse, error) {
 	}, nil
 }
 
-// RefreshToken refreshes an access token using refresh token
+// RefreshToken refreshes an access token using refresh token with token rotation
 func (s *Service) RefreshToken(refreshToken string) (*auth.LoginResponse, error) {
-	// Validate refresh token
-	userID, err := s.jwtManager.ValidateRefreshToken(refreshToken)
+	// Validate refresh token and extract user ID and token ID
+	userID, tokenID, err := s.jwtManager.ValidateRefreshTokenWithID(refreshToken)
 	if err != nil {
+		return nil, ErrRefreshTokenInvalid
+	}
+
+	// Check if token exists in database
+	tokenEntity, err := s.refreshTokenRepo.FindByTokenID(tokenID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrRefreshTokenInvalid
+		}
 		return nil, err
+	}
+
+	// Check if token is revoked
+	if tokenEntity.Revoked {
+		return nil, ErrRefreshTokenRevoked
+	}
+
+	// Check if token is expired
+	if tokenEntity.IsExpired() {
+		return nil, ErrRefreshTokenExpired
+	}
+
+	// Verify user ID matches
+	if tokenEntity.UserID != userID {
+		return nil, ErrRefreshTokenInvalid
 	}
 
 	// Find user
@@ -115,6 +164,11 @@ func (s *Service) RefreshToken(refreshToken string) (*auth.LoginResponse, error)
 		roleCode = user.Role.Code
 	}
 
+	// Revoke old refresh token (token rotation)
+	if err := s.refreshTokenRepo.Revoke(tokenID); err != nil {
+		return nil, err
+	}
+
 	// Generate new tokens
 	accessToken, err := s.jwtManager.GenerateAccessToken(user.ID, user.Email, roleCode)
 	if err != nil {
@@ -123,6 +177,24 @@ func (s *Service) RefreshToken(refreshToken string) (*auth.LoginResponse, error)
 
 	newRefreshToken, err := s.jwtManager.GenerateRefreshToken(user.ID)
 	if err != nil {
+		return nil, err
+	}
+
+	// Extract token ID (jti) from new refresh token
+	newTokenID, err := s.jwtManager.ExtractRefreshTokenID(newRefreshToken)
+	if err != nil {
+		return nil, err
+	}
+
+	// Store new refresh token in database
+	newRefreshTokenEntity := &refresh_token.RefreshToken{
+		UserID:    user.ID,
+		TokenID:   newTokenID,
+		ExpiresAt: time.Now().Add(s.jwtManager.RefreshTokenTTL()),
+		Revoked:   false,
+	}
+
+	if err := s.refreshTokenRepo.Create(newRefreshTokenEntity); err != nil {
 		return nil, err
 	}
 
@@ -147,5 +219,19 @@ func (s *Service) RefreshToken(refreshToken string) (*auth.LoginResponse, error)
 		RefreshToken: newRefreshToken,
 		ExpiresIn:    expiresIn,
 	}, nil
+}
+
+// Logout revokes a refresh token
+func (s *Service) Logout(refreshToken string) error {
+	// Extract token ID from refresh token
+	tokenID, err := s.jwtManager.ExtractRefreshTokenID(refreshToken)
+	if err != nil {
+		// If token is invalid, we can't revoke it, but we don't return error
+		// This allows logout to succeed even if token is already invalid
+		return nil
+	}
+
+	// Revoke the token
+	return s.refreshTokenRepo.Revoke(tokenID)
 }
 
