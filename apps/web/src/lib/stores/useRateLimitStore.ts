@@ -109,6 +109,19 @@ export const useRateLimitStore = create<RateLimitState>()(
         }
         return { resetTime: null };
       },
+      // Auto-clear expired reset time when loading from localStorage
+      // This handles the case where API restarts and rate limit is reset
+      onRehydrateStorage: () => {
+        return (state) => {
+          if (state?.resetTime) {
+            const now = Math.floor(Date.now() / 1000);
+            // If reset time has expired, clear it
+            if (state.resetTime <= now) {
+              state.resetTime = null;
+            }
+          }
+        };
+      },
     }
   )
 );

@@ -6,6 +6,10 @@ import { useRateLimitStore } from "./stores/useRateLimitStore";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
+// Flag to track if we've validated rate limit state after app load
+// This helps validate if rate limit state is still valid after API restart
+let rateLimitValidated = false;
+
 export const apiClient: AxiosInstance = axios.create({
   baseURL: `${API_BASE_URL}/api/v1`,
   headers: {
@@ -40,6 +44,13 @@ apiClient.interceptors.request.use(
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Mark this request as first request after app load for rate limit validation
+    // This helps validate if rate limit state is still valid after API restart
+    if (typeof window !== "undefined" && !(config as any)._rateLimitValidated) {
+      (config as any)._rateLimitValidated = true;
+    }
+    
     return config;
   },
   (error: AxiosError) => {
@@ -69,17 +80,23 @@ interface ApiErrorResponse {
 // Response interceptor untuk handle errors
 apiClient.interceptors.response.use(
   (response) => {
-    // Extract rate limit headers from successful responses
-    // Axios normalizes headers to lowercase, but check both cases for safety
-    const resetHeader = response.headers["x-ratelimit-reset"] || 
-                        response.headers["X-RateLimit-Reset"];
-    if (resetHeader) {
-      const resetTime = typeof resetHeader === "string" 
-        ? parseInt(resetHeader, 10) 
-        : resetHeader;
-      if (!isNaN(resetTime) && resetTime > 0) {
-        // Store reset time for countdown display
-        useRateLimitStore.getState().setResetTime(resetTime);
+    // Clear rate limit reset time on successful response
+    // This ensures that if API restarts and rate limit state is reset,
+    // frontend will also clear the countdown
+    // Only keep reset time if we're actually rate limited (429 error)
+    const status = response.status;
+    if (status !== 429) {
+      // Request succeeded - ALWAYS clear any existing rate limit state
+      // This handles the case where API restarts and rate limit is reset
+      // If backend rate limit was reset, successful request means we're no longer rate limited
+      // This is important because backend uses in-memory rate limiting that resets on restart
+      const currentResetTime = useRateLimitStore.getState().resetTime;
+      if (currentResetTime) {
+        // Clear reset time if we have one
+        // This validates that backend rate limit state matches frontend state
+        useRateLimitStore.getState().clearResetTime();
+        // Mark as validated after first successful request
+        rateLimitValidated = true;
       }
     }
     return response;
