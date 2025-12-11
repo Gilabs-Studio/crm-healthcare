@@ -88,13 +88,14 @@ export function useAISettings() {
         usage_limit: settingsResponse.usage_limit,
         current_usage: settingsResponse.current_usage,
       }
-    : {
+    :       {
         enabled: true,
         data_privacy: {
           allow_visit_reports: true,
           allow_accounts: true,
           allow_contacts: true,
           allow_deals: true,
+          allow_leads: true,
           allow_activities: true,
           allow_tasks: true,
           allow_products: true,

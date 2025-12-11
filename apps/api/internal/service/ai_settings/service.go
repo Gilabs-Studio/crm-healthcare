@@ -34,6 +34,7 @@ func (s *Service) GetSettings() (*ai_settings.AISettingsResponse, error) {
 			AllowAccounts:     true,
 			AllowContacts:     true,
 			AllowDeals:        true,
+			AllowLeads:        true,
 			AllowActivities:   true,
 			AllowTasks:         true,
 			AllowProducts:      true,
