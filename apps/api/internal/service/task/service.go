@@ -18,6 +18,7 @@ var (
 	ErrDealNotFound     = errors.New("deal not found")
 	ErrReminderNotFound = errors.New("reminder not found")
 	ErrTaskAlreadyCompleted = errors.New("task already completed")
+	ErrCannotMarkCompletedInProgress = errors.New("cannot mark completed task as in progress")
 )
 
 type Service struct {
@@ -173,18 +174,25 @@ func (s *Service) CreateTask(req *task.CreateTaskRequest, createdBy string) (*ta
 		dealIDPtr = &req.DealID
 	}
 
+	// Set assigned_from if task is assigned to someone
+	var assignedFromPtr *string
+	if req.AssignedTo != "" && createdBy != "" {
+		assignedFromPtr = &createdBy
+	}
+
 	t := &task.Task{
-		Title:       req.Title,
-		Description: req.Description,
-		Type:        taskType,
-		Status:      "pending",
-		Priority:    priority,
-		DueDate:     req.DueDate,
-		AssignedTo:  assignedToPtr,
-		AccountID:   accountIDPtr,
-		ContactID:   contactIDPtr,
-		DealID:      dealIDPtr,
-		CreatedBy:   createdBy,
+		Title:        req.Title,
+		Description:  req.Description,
+		Type:         taskType,
+		Status:       "pending",
+		Priority:     priority,
+		DueDate:      req.DueDate,
+		AssignedTo:   assignedToPtr,
+		AssignedFrom: assignedFromPtr,
+		AccountID:    accountIDPtr,
+		ContactID:    contactIDPtr,
+		DealID:       dealIDPtr,
+		CreatedBy:    createdBy,
 	}
 
 	if err := s.taskRepo.Create(t); err != nil {
@@ -308,7 +316,7 @@ func (s *Service) DeleteTask(id string) error {
 }
 
 // AssignTask assigns a task to a user
-func (s *Service) AssignTask(id string, req *task.AssignTaskRequest) (*task.TaskResponse, error) {
+func (s *Service) AssignTask(id string, req *task.AssignTaskRequest, assignedBy string) (*task.TaskResponse, error) {
 	t, err := s.taskRepo.FindByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -328,6 +336,11 @@ func (s *Service) AssignTask(id string, req *task.AssignTaskRequest) (*task.Task
 
 	// Assign pointer to keep AssignedTo nullable
 	t.AssignedTo = &req.AssignedTo
+	
+	// Set assigned_from to the user who is assigning
+	if assignedBy != "" {
+		t.AssignedFrom = &assignedBy
+	}
 
 	if err := s.taskRepo.Update(t); err != nil {
 		return nil, err
@@ -371,6 +384,50 @@ func (s *Service) CompleteTask(id string) (*task.TaskResponse, error) {
 	}
 
 	return t.ToTaskResponse(), nil
+}
+
+// MarkInProgress marks a task as in progress
+func (s *Service) MarkInProgress(id string) (*task.TaskResponse, error) {
+	t, err := s.taskRepo.FindByID(id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrTaskNotFound
+		}
+		return nil, err
+	}
+
+	if t.Status == "completed" {
+		return nil, ErrCannotMarkCompletedInProgress
+	}
+
+	if t.Status == "in_progress" {
+		// Already in progress, return as is
+		return t.ToTaskResponse(), nil
+	}
+
+	t.Status = "in_progress"
+	// Clear completed_at if it was set
+	t.CompletedAt = nil
+
+	if err := s.taskRepo.Update(t); err != nil {
+		return nil, err
+	}
+
+	// Reload to get relations
+	t, err = s.taskRepo.FindByID(t.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return t.ToTaskResponse(), nil
+}
+
+// GetMyTasks returns tasks assigned to the logged-in user
+func (s *Service) GetMyTasks(userID string, req *task.ListTasksRequest) ([]task.TaskResponse, *PaginationResult, error) {
+	// Override AssignedTo filter to only show tasks assigned to the user
+	req.AssignedTo = userID
+	
+	return s.ListTasks(req)
 }
 
 // ListReminders returns a list of reminders with pagination

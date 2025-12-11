@@ -334,6 +334,7 @@ const AppSidebar = memo(function AppSidebar({
 
 const AutoCollapseSidebar = memo(function AutoCollapseSidebar() {
   const isMobile = useIsMobile();
+  const pathname = usePathname();
   const { setOpen } = useSidebar();
 
   useEffect(() => {
@@ -342,7 +343,66 @@ const AutoCollapseSidebar = memo(function AutoCollapseSidebar() {
     }
   }, [isMobile, setOpen]);
 
+  // Auto minimize sidebar when on AI chatbot page
+  useEffect(() => {
+    const isAIChatbotPage = pathname?.includes("/ai-chatbot");
+    if (isAIChatbotPage) {
+      setOpen(false);
+    }
+  }, [pathname, setOpen]);
+
   return null;
+});
+
+const AIChatbotLayout = memo(function AIChatbotLayout({
+  isAIChatbotPage,
+  navigationItems,
+  userName,
+  primaryAvatarUrl,
+  fallbackAvatarUrl,
+  error,
+  children,
+}: {
+  isAIChatbotPage: boolean;
+  navigationItems: NavigationItem[];
+  userName: string;
+  primaryAvatarUrl?: string;
+  fallbackAvatarUrl: string;
+  error: Error | null;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex min-h-screen w-full bg-sidebar">
+      <AppSidebar items={navigationItems} />
+      <SidebarInset 
+        className={`overflow-x-hidden transition-all duration-300 ${
+          isAIChatbotPage ? "w-full" : ""
+        }`}
+      >
+        {!isAIChatbotPage && (
+          <Header
+            userName={userName}
+            avatarUrl={primaryAvatarUrl}
+            fallbackAvatarUrl={fallbackAvatarUrl}
+          />
+        )}
+        <div 
+          className={`flex flex-1 flex-col ${
+            isAIChatbotPage 
+              ? "gap-0 p-0 h-screen" 
+              : "gap-4 p-4"
+          }`}
+        >
+          {!isAIChatbotPage && error && (
+            <div className="mb-2 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+              Failed to load menu permissions. Showing minimal navigation.
+            </div>
+          )}
+          {children}
+        </div>
+      </SidebarInset>
+    </div>
+  );
 });
 
 export const DashboardLayout = memo(function DashboardLayout({
@@ -460,27 +520,22 @@ export const DashboardLayout = memo(function DashboardLayout({
     return items;
   }, [permissionsData]);
 
+  const pathname = usePathname();
+  const isAIChatbotPage = pathname?.includes("/ai-chatbot");
+
   return (
     <SidebarProvider>
       <AutoCollapseSidebar />
-      <div className="flex min-h-screen w-full bg-sidebar">
-        <AppSidebar items={navigationItems} />
-        <SidebarInset className="overflow-x-hidden">
-          <Header
-            userName={userName}
-            avatarUrl={primaryAvatarUrl}
-            fallbackAvatarUrl={fallbackAvatarUrl}
-          />
-          <div className="flex flex-1 flex-col gap-4 p-4">
-            {error && (
-              <div className="mb-2 rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-xs text-destructive">
-                Failed to load menu permissions. Showing minimal navigation.
-              </div>
-            )}
-            {children}
-          </div>
-        </SidebarInset>
-      </div>
+      <AIChatbotLayout 
+        isAIChatbotPage={isAIChatbotPage}
+        navigationItems={navigationItems}
+        userName={userName}
+        primaryAvatarUrl={primaryAvatarUrl}
+        fallbackAvatarUrl={fallbackAvatarUrl}
+        error={error}
+      >
+        {children}
+      </AIChatbotLayout>
 
       {/* Notification Drawer */}
       <NotificationDrawer open={isDrawerOpen} onOpenChange={closeDrawer} />

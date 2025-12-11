@@ -29,5 +29,16 @@ func SetupVisitReportRoutes(router *gin.RouterGroup, visitReportHandler *handler
 		visitReports.PUT("/activity-types/:id", activityTypeHandler.Update)
 		visitReports.DELETE("/activity-types/:id", activityTypeHandler.Delete)
 	}
+
+	// Mobile-specific routes
+	mobile := router.Group("/mobile")
+	mobile.Use(middleware.AuthMiddleware(jwtManager))
+	{
+		mobileVisitReports := mobile.Group("/visit-reports")
+		{
+			// Get visit reports for logged-in user (sales rep)
+			mobileVisitReports.GET("/my-visit-reports", visitReportHandler.GetMyVisitReports)
+		}
+	}
 }
 

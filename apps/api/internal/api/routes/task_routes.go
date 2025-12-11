@@ -22,6 +22,7 @@ func SetupTaskRoutes(router *gin.RouterGroup, taskHandler *handlers.TaskHandler,
 		// Task actions
 		tasks.POST("/:id/assign", taskHandler.Assign)
 		tasks.POST("/:id/complete", taskHandler.Complete)
+		tasks.POST("/:id/mark-in-progress", taskHandler.MarkInProgress)
 		
 		// Reminder CRUD
 		tasks.GET("/reminders", taskHandler.ListReminders)
@@ -29,6 +30,17 @@ func SetupTaskRoutes(router *gin.RouterGroup, taskHandler *handlers.TaskHandler,
 		tasks.POST("/reminders", taskHandler.CreateReminder)
 		tasks.PUT("/reminders/:id", taskHandler.UpdateReminder)
 		tasks.DELETE("/reminders/:id", taskHandler.DeleteReminder)
+	}
+
+	// Mobile-specific routes
+	mobile := router.Group("/mobile")
+	mobile.Use(middleware.AuthMiddleware(jwtManager))
+	{
+		mobileTasks := mobile.Group("/tasks")
+		{
+			// Get tasks for logged-in user
+			mobileTasks.GET("/my-tasks", taskHandler.GetMyTasks)
+		}
 	}
 }
 

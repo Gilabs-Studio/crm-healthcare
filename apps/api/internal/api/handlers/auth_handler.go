@@ -163,3 +163,59 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 	}, nil)
 }
 
+// MobileLogin handles mobile login request
+// @Summary Mobile login user
+// @Description Authenticate user for mobile app and return JWT tokens (only sales role allowed)
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body auth.LoginRequest true "Login credentials"
+// @Success 200 {object} response.APIResponse
+// @Failure 400 {object} response.APIResponse
+// @Failure 401 {object} response.APIResponse
+// @Failure 403 {object} response.APIResponse
+// @Router /api/v1/auth/mobile/login [post]
+func (h *AuthHandler) MobileLogin(c *gin.Context) {
+	var req auth.LoginRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			errors.HandleValidationError(c, validationErrors)
+			return
+		}
+		errors.InvalidRequestBodyResponse(c)
+		return
+	}
+
+	loginResponse, err := h.authService.MobileLogin(&req)
+	if err != nil {
+		if err == authservice.ErrInvalidCredentials {
+			errors.ErrorResponse(c, "INVALID_CREDENTIALS", nil, nil)
+			return
+		}
+		if err == authservice.ErrUserInactive {
+			errors.ErrorResponse(c, "ACCOUNT_DISABLED", map[string]interface{}{
+				"reason": "User account is inactive",
+			}, nil)
+			return
+		}
+		if err == authservice.ErrRoleNotAllowed {
+			errors.ErrorResponse(c, "ROLE_INSUFFICIENT", map[string]interface{}{
+				"reason": "Only users with sales role can login via mobile app",
+			}, nil)
+			return
+		}
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	meta := &response.Meta{}
+	if userID, exists := c.Get("user_id"); exists {
+		if id, ok := userID.(string); ok {
+			meta.CreatedBy = id
+		}
+	}
+
+	response.SuccessResponse(c, loginResponse, meta)
+}
+

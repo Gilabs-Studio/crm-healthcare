@@ -32,6 +32,20 @@ func SeedTasks() error {
 	}
 	defaultUser := users[0]
 
+	// Get admin user for AssignedFrom
+	var adminUser user.User
+	if err := database.DB.Where("email = ?", "admin@example.com").First(&adminUser).Error; err != nil {
+		log.Printf("Warning: Admin user not found, using first user for assigned_from: %v", err)
+		adminUser = defaultUser
+	}
+
+	// Get sales user for AssignedTo
+	var salesUser user.User
+	if err := database.DB.Where("email = ?", "sales@example.com").First(&salesUser).Error; err != nil {
+		log.Printf("Warning: Sales user not found, using default user for assigned_to: %v", err)
+		salesUser = defaultUser
+	}
+
 	// Get accounts
 	var accounts []account.Account
 	if err := database.DB.Find(&accounts).Error; err != nil {
@@ -106,6 +120,59 @@ func SeedTasks() error {
 			AccountID:   &accountID3,
 			ContactID:   &contactID3,
 			CreatedBy:   defaultUser.ID,
+		},
+		// Tasks assigned from admin to sales user
+		{
+			Title:       "Kunjungi RS untuk presentasi produk baru",
+			Description: "Lakukan kunjungan ke rumah sakit untuk presentasi produk cardiovascular terbaru. Pastikan membawa sample dan brosur.",
+			Type:        "meeting",
+			Status:      "pending",
+			Priority:    "high",
+			DueDate:     &tomorrow,
+			AssignedTo:  &salesUser.ID,
+			AssignedFrom: &adminUser.ID,
+			AccountID:   &accountID1,
+			ContactID:   &contactID1,
+			CreatedBy:   adminUser.ID,
+		},
+		{
+			Title:       "Follow up dengan klien untuk closing deal",
+			Description: "Hubungi klien untuk follow up proposal yang sudah dikirim minggu lalu. Target closing deal bulan ini.",
+			Type:        "call",
+			Status:      "pending",
+			Priority:    "urgent",
+			DueDate:     &nextWeek,
+			AssignedTo:  &salesUser.ID,
+			AssignedFrom: &adminUser.ID,
+			AccountID:   &accountID2,
+			ContactID:   &contactID2,
+			CreatedBy:   adminUser.ID,
+		},
+		{
+			Title:       "Submit visit report kunjungan kemarin",
+			Description: "Lengkapi dan submit visit report untuk kunjungan ke apotek kemarin. Pastikan semua foto dan dokumentasi sudah lengkap.",
+			Type:        "general",
+			Status:      "in_progress",
+			Priority:    "medium",
+			DueDate:     &tomorrow,
+			AssignedTo:  &salesUser.ID,
+			AssignedFrom: &adminUser.ID,
+			AccountID:   &accountID3,
+			ContactID:   &contactID3,
+			CreatedBy:   adminUser.ID,
+		},
+		{
+			Title:       "Persiapan meeting dengan direktur rumah sakit",
+			Description: "Siapkan presentasi lengkap untuk meeting dengan direktur rumah sakit. Fokus pada produk premium dan value proposition.",
+			Type:        "meeting",
+			Status:      "pending",
+			Priority:    "high",
+			DueDate:     &nextWeek,
+			AssignedTo:  &salesUser.ID,
+			AssignedFrom: &adminUser.ID,
+			AccountID:   &accountID1,
+			ContactID:   &contactID1,
+			CreatedBy:   adminUser.ID,
 		},
 	}
 
