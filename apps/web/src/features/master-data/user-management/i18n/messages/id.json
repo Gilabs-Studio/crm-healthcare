@@ -150,6 +150,29 @@
       "cancel": "Batal",
       "save": "Simpan Permission",
       "saving": "Menyimpan..."
+    },
+    "mobilePermissions": {
+      "title": "Konfigurasi Permission Mobile",
+      "description": "Konfigurasi permission yang tersedia untuk akses aplikasi mobile. Permission ini mengontrol tindakan apa yang dapat dilakukan pengguna dengan role ini di aplikasi mobile.",
+      "cancel": "Batal",
+      "save": "Simpan Permission",
+      "saving": "Menyimpan...",
+      "saved": "Permission mobile berhasil disimpan"
+    },
+    "roleList": {
+      "addRole": "Tambah Role",
+      "name": "Nama",
+      "code": "Kode",
+      "description": "Deskripsi",
+      "status": "Status",
+      "permissions": "Permission",
+      "mobileAccess": "Mobile",
+      "actions": "Aksi",
+      "empty": "Tidak ada role",
+      "createTitle": "Buat Role",
+      "editTitle": "Edit Role",
+      "assignPermissionsTitle": "Atur Permission",
+      "configureMobilePermissions": "Konfigurasi Permission Mobile"
     }
   }
 }

@@ -270,6 +270,11 @@ func (r *repository) GetMobilePermissions(userID string) (*permission.MobilePerm
 					// Map action to permission
 					action := p.Action
 					permissionMap[mobileMenuCode][action] = true
+					
+					// Also map accounts permissions to contacts (contacts are typically part of accounts)
+					if mobileMenuCode == "accounts" && permissionMap["contacts"] != nil {
+						permissionMap["contacts"][action] = true
+					}
 				}
 			}
 		}

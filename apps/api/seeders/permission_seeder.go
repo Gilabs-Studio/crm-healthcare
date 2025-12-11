@@ -281,6 +281,28 @@ func SeedPermissions() error {
 			log.Printf("Assigned %d Task permissions to sales role", taskPermissionCount)
 		}
 
+		// Get Accounts permissions (VIEW, CREATE, EDIT, DELETE for mobile app)
+		var accountsPermissions []permission.Permission
+		if err := database.DB.Where("code IN (?)", []string{
+			"VIEW_ACCOUNTS",
+			"CREATE_ACCOUNTS",
+			"EDIT_ACCOUNTS",
+			"DELETE_ACCOUNTS",
+		}).Find(&accountsPermissions).Error; err == nil {
+			accountsPermissionCount := 0
+			for _, perm := range accountsPermissions {
+				if err := database.DB.Exec(
+					"INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?) ON CONFLICT DO NOTHING",
+					salesRole.ID, perm.ID,
+				).Error; err != nil {
+					log.Printf("Warning: Failed to assign permission %s to sales: %v", perm.Code, err)
+				} else {
+					accountsPermissionCount++
+				}
+			}
+			log.Printf("Assigned %d Accounts permissions to sales role", accountsPermissionCount)
+		}
+
 		// Also assign VIEW_DASHBOARD for mobile dashboard access
 		var dashboardPermission permission.Permission
 		if err := database.DB.Where("code = ?", "VIEW_DASHBOARD").First(&dashboardPermission).Error; err == nil {

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Edit, Trash2, Plus, Settings, Smartphone } from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
@@ -22,6 +23,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { AssignPermissionsDialog } from "./assign-permissions-dialog";
+import { MobilePermissionsDialog } from "./mobile-permissions-dialog";
 import type { CreateRoleFormData, UpdateRoleFormData } from "../schemas/role.schema";
 
 export function RoleList() {
@@ -41,6 +43,8 @@ export function RoleList() {
     createRole,
     updateRole,
   } = useRoleList();
+  
+  const [configuringMobilePermissions, setConfiguringMobilePermissions] = useState<string | null>(null);
   const t = useTranslations("userManagement.roleList");
 
   return (
@@ -107,7 +111,14 @@ export function RoleList() {
                     </TableCell>
                     <TableCell className="text-center">
                       {role.mobile_access ? (
-                        <Smartphone className="h-4 w-4 text-primary mx-auto" />
+                        <button
+                          onClick={() => setConfiguringMobilePermissions(role.id)}
+                          className="mx-auto p-2 rounded-md hover:bg-primary/10 active:bg-primary/20 transition-all cursor-pointer group border border-transparent hover:border-primary/20"
+                          aria-label={t("configureMobilePermissions") || "Configure Mobile Permissions"}
+                          title={t("configureMobilePermissions") || "Click to configure mobile permissions"}
+                        >
+                          <Smartphone className="h-4 w-4 text-primary group-hover:scale-110 group-hover:text-primary/80 transition-all" />
+                        </button>
                       ) : (
                         <span className="text-muted-foreground">-</span>
                       )}
@@ -190,6 +201,14 @@ export function RoleList() {
         <AssignPermissionsDialog
           roleId={assigningPermissions}
           onClose={() => setAssigningPermissions(null)}
+        />
+      )}
+
+      {/* Mobile Permissions Dialog */}
+      {configuringMobilePermissions && (
+        <MobilePermissionsDialog
+          roleId={configuringMobilePermissions}
+          onClose={() => setConfiguringMobilePermissions(null)}
         />
       )}
     </div>
