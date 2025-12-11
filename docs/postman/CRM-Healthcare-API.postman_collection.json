@@ -172,7 +172,7 @@
               "host": ["{{base_url}}"],
               "path": ["api", "v1", "auth", "mobile", "login"]
             },
-            "description": "Mobile login dengan email dan password. Hanya user dengan role 'sales' yang dapat login melalui endpoint ini. Response akan menyertakan JWT token dan refresh token."
+            "description": "Mobile login dengan email dan password. Hanya user dengan role yang memiliki mobile_access enabled yang dapat login melalui endpoint ini. Response akan menyertakan JWT token dan refresh token."
           },
           "response": [
             {
@@ -284,7 +284,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"ROLE_INSUFFICIENT\",\n    \"message\": \"Only users with sales role can login via mobile app\",\n    \"details\": {\n      \"reason\": \"Only users with sales role can login via mobile app\"\n    }\n  },\n  \"timestamp\": \"2024-01-15T10:30:45+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"ROLE_INSUFFICIENT\",\n    \"message\": \"Only users with role that has mobile_access enabled can login via mobile app\",\n    \"details\": {\n      \"reason\": \"Only users with role that has mobile_access enabled can login via mobile app\"\n    }\n  },\n  \"timestamp\": \"2024-01-15T10:30:45+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
             }
           ]
         },
@@ -4177,6 +4177,79 @@
     {
       "name": "Mobile",
       "item": [
+        {
+          "name": "Get Mobile Permissions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/mobile/permissions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "mobile", "permissions"]
+            },
+            "description": "Get mobile-specific permissions for the authenticated user. Returns permissions for mobile menus: dashboard, task, accounts, contacts, visit_reports with CRUD actions (VIEW, CREATE, EDIT, DELETE). Requires authentication token."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/auth/mobile/permissions",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "auth", "mobile", "permissions"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"menus\": [\n      {\n        \"menu\": \"dashboard\",\n        \"actions\": [\"VIEW\"]\n      },\n      {\n        \"menu\": \"task\",\n        \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n      },\n      {\n        \"menu\": \"accounts\",\n        \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n      },\n      {\n        \"menu\": \"contacts\",\n        \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n      },\n      {\n        \"menu\": \"visit_reports\",\n        \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n      }\n    ]\n  },\n  \"timestamp\": \"2024-01-15T10:30:45+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
+            },
+            {
+              "name": "Error Response - Unauthorized",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/auth/mobile/permissions",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "auth", "mobile", "permissions"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"UNAUTHORIZED\",\n    \"message\": \"Authentication required\"\n  },\n  \"timestamp\": \"2024-01-15T10:30:45+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
+            }
+          ]
+        },
         {
           "name": "Visit Reports",
           "item": [

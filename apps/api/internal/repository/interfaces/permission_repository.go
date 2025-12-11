@@ -23,6 +23,9 @@ type PermissionRepository interface {
 	
 	// GetUserPermissions returns hierarchical menu structure with permissions for a user
 	GetUserPermissions(userID string) (*permission.GetUserPermissionsResponse, error)
+	
+	// GetMobilePermissions returns mobile-specific permissions for a user
+	GetMobilePermissions(userID string) (*permission.MobilePermissionsResponse, error)
 }
 
 // MenuRepository defines the interface for menu repository

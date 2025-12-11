@@ -1,6 +1,8 @@
 package permission
 
 import (
+	"strings"
+
 	"github.com/gilabs/crm-healthcare/api/internal/domain/permission"
 	"github.com/gilabs/crm-healthcare/api/internal/repository/interfaces"
 	"gorm.io/gorm"
@@ -171,6 +173,135 @@ func (r *repository) buildMenuWithActions(menu permission.Menu, permissionMap ma
 	}
 
 	return menuResp
+}
+
+func (r *repository) GetMobilePermissions(userID string) (*permission.MobilePermissionsResponse, error) {
+	// Get user's role
+	var roleID string
+	var roleCode string
+	err := r.db.Table("users").Where("id = ?", userID).Pluck("role_id", &roleID).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Get role code to check if user is admin
+	err = r.db.Table("roles").Where("id = ?", roleID).Pluck("code", &roleCode).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if user is admin - admin has ALL permissions
+	isAdmin := roleCode == "admin"
+
+	// Get permissions for the role
+	var permissions []permission.Permission
+	if isAdmin {
+		// Admin: Get ALL permissions
+		if err := r.db.Find(&permissions).Error; err != nil {
+			return nil, err
+		}
+	} else {
+		// Non-admin: Get permissions for the role
+		permissions, err = r.GetByRoleID(roleID)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// Create a map of permissions by menu code for quick lookup
+	permissionMap := make(map[string]map[string]bool) // menu_code -> action -> has_access
+
+	// Mobile menu mapping: menu name/URL pattern -> mobile menu code
+	// We'll match menus by URL patterns
+	mobileMenuMapping := map[string]string{
+		"dashboard":     "dashboard",
+		"task":          "task",
+		"tasks":         "task",
+		"accounts":      "accounts",
+		"contacts":      "contacts",
+		"visit_reports": "visit_reports",
+		"visit-reports": "visit_reports",
+	}
+	
+	// Initialize map for all mobile menus
+	mobileMenuCodes := []string{"dashboard", "task", "accounts", "contacts", "visit_reports"}
+	for _, menuCode := range mobileMenuCodes {
+		permissionMap[menuCode] = make(map[string]bool)
+		permissionMap[menuCode]["VIEW"] = false
+		permissionMap[menuCode]["CREATE"] = false
+		permissionMap[menuCode]["EDIT"] = false
+		permissionMap[menuCode]["DELETE"] = false
+	}
+
+	// Build permission map based on user's permissions
+	for _, p := range permissions {
+		if p.MenuID != nil {
+			// Get menu URL to identify which mobile menu this belongs to
+			var menuURL string
+			err := r.db.Table("menus").Where("id = ?", *p.MenuID).Pluck("url", &menuURL).Error
+			if err == nil && menuURL != "" {
+				// Extract menu name from URL (e.g., "/sales-crm/tasks" -> "tasks", "/dashboard" -> "dashboard")
+				menuName := ""
+				parts := strings.Split(strings.Trim(menuURL, "/"), "/")
+				if len(parts) > 0 {
+					menuName = parts[len(parts)-1] // Get last part
+				}
+				
+				// Also check if URL contains the menu name (for cases like "/sales-crm/visit-reports")
+				menuURLLower := strings.ToLower(menuURL)
+				
+				// Check if this menu maps to a mobile menu
+				mobileMenuCode := ""
+				if code, exists := mobileMenuMapping[menuName]; exists {
+					mobileMenuCode = code
+				} else if strings.Contains(menuURLLower, "dashboard") {
+					mobileMenuCode = "dashboard"
+				} else if strings.Contains(menuURLLower, "task") {
+					mobileMenuCode = "task"
+				} else if strings.Contains(menuURLLower, "account") {
+					mobileMenuCode = "accounts"
+				} else if strings.Contains(menuURLLower, "contact") {
+					mobileMenuCode = "contacts"
+				} else if strings.Contains(menuURLLower, "visit") {
+					mobileMenuCode = "visit_reports"
+				}
+				
+				if mobileMenuCode != "" && permissionMap[mobileMenuCode] != nil {
+					// Map action to permission
+					action := p.Action
+					permissionMap[mobileMenuCode][action] = true
+				}
+			}
+		}
+	}
+
+	// Build response
+	result := &permission.MobilePermissionsResponse{
+		Menus: make([]permission.MobileMenuPermission, 0),
+	}
+
+	for _, menuCode := range mobileMenuCodes {
+		actions := make([]string, 0)
+		if permissionMap[menuCode]["VIEW"] {
+			actions = append(actions, "VIEW")
+		}
+		if permissionMap[menuCode]["CREATE"] {
+			actions = append(actions, "CREATE")
+		}
+		if permissionMap[menuCode]["EDIT"] {
+			actions = append(actions, "EDIT")
+		}
+		if permissionMap[menuCode]["DELETE"] {
+			actions = append(actions, "DELETE")
+		}
+
+		result.Menus = append(result.Menus, permission.MobileMenuPermission{
+			Menu:    menuCode,
+			Actions: actions,
+		})
+	}
+
+	return result, nil
 }
 
 // MenuRepository implementation

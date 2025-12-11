@@ -66,3 +66,18 @@ func (s *Service) GetUserPermissions(userID string) (*permission.GetUserPermissi
 	return s.permissionRepo.GetUserPermissions(userID)
 }
 
+// GetMobilePermissions returns mobile-specific permissions for a user
+// Returns permissions for: dashboard, task, accounts, contacts, visit reports with CRUD actions
+func (s *Service) GetMobilePermissions(userID string) (*permission.MobilePermissionsResponse, error) {
+	// Check if user exists
+	_, err := s.userRepo.FindByID(userID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrUserNotFound
+		}
+		return nil, err
+	}
+
+	return s.permissionRepo.GetMobilePermissions(userID)
+}
+

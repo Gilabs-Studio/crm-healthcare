@@ -1,6 +1,6 @@
 "use client";
 
-import { Edit, Trash2, Plus, Settings } from "lucide-react";
+import { Edit, Trash2, Plus, Settings, Smartphone } from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
   Table,
@@ -70,6 +70,7 @@ export function RoleList() {
                 <TableHead>{t("description")}</TableHead>
                 <TableHead className="w-[100px]">{t("status")}</TableHead>
                 <TableHead className="w-[120px]">{t("permissions")}</TableHead>
+                <TableHead className="w-[100px] text-center">{t("mobileAccess")}</TableHead>
                 <TableHead className="w-[120px] text-right">
                   {t("actions")}
                 </TableHead>
@@ -78,7 +79,7 @@ export function RoleList() {
             <TableBody>
               {roles.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                       {t("empty")}
                   </TableCell>
                 </TableRow>
@@ -103,6 +104,13 @@ export function RoleList() {
                       <Badge variant="outline" className="font-normal">
                         {role.permissions?.length || 0}
                       </Badge>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {role.mobile_access ? (
+                        <Smartphone className="h-4 w-4 text-primary mx-auto" />
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center justify-end gap-1">

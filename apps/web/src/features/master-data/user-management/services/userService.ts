@@ -54,14 +54,14 @@ export const roleService = {
     return response.data.data;
   },
 
-  async create(data: { name: string; code: string; description?: string; status?: string }): Promise<Role> {
+  async create(data: { name: string; code: string; description?: string; status?: string; mobile_access?: boolean }): Promise<Role> {
     const response = await apiClient.post<{ success: boolean; data: Role }>("/roles", data);
     return response.data.data;
   },
 
   async update(
     id: string,
-    data: { name?: string; code?: string; description?: string; status?: string }
+    data: { name?: string; code?: string; description?: string; status?: string; mobile_access?: boolean }
   ): Promise<Role> {
     const response = await apiClient.put<{ success: boolean; data: Role }>(`/roles/${id}`, data);
     return response.data.data;

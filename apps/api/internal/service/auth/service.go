@@ -259,12 +259,14 @@ func (s *Service) MobileLogin(req *auth.LoginRequest) (*auth.LoginResponse, erro
 
 	// Get role code
 	roleCode := "user"
+	mobileAccess := false
 	if user.Role != nil {
 		roleCode = user.Role.Code
+		mobileAccess = user.Role.MobileAccess
 	}
 
-	// Check if user has sales role (only sales role can login via mobile)
-	if roleCode != "sales" {
+	// Check if user's role has mobile access enabled
+	if !mobileAccess {
 		return nil, ErrRoleNotAllowed
 	}
 

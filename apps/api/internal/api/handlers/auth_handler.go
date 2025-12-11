@@ -201,7 +201,7 @@ func (h *AuthHandler) MobileLogin(c *gin.Context) {
 		}
 		if err == authservice.ErrRoleNotAllowed {
 			errors.ErrorResponse(c, "ROLE_INSUFFICIENT", map[string]interface{}{
-				"reason": "Only users with sales role can login via mobile app",
+				"reason": "Only users with role that has mobile_access enabled can login via mobile app",
 			}, nil)
 			return
 		}

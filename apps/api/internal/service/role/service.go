@@ -67,12 +67,19 @@ func (s *Service) Create(req *role.CreateRoleRequest) (*role.RoleResponse, error
 		status = "active"
 	}
 
+	// Set default mobile_access
+	mobileAccess := false
+	if req.MobileAccess != nil {
+		mobileAccess = *req.MobileAccess
+	}
+
 	// Create role
 	r := &role.Role{
 		Name:        req.Name,
 		Code:        req.Code,
 		Description: req.Description,
 		Status:      status,
+		MobileAccess: mobileAccess,
 	}
 
 	if err := s.roleRepo.Create(r); err != nil {
@@ -122,6 +129,10 @@ func (s *Service) Update(id string, req *role.UpdateRoleRequest) (*role.RoleResp
 
 	if req.Status != "" {
 		r.Status = req.Status
+	}
+
+	if req.MobileAccess != nil {
+		r.MobileAccess = *req.MobileAccess
 	}
 
 	if err := s.roleRepo.Update(r); err != nil {

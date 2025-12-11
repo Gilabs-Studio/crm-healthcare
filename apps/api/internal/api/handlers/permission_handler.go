@@ -1,10 +1,10 @@
 package handlers
 
 import (
-	"github.com/gin-gonic/gin"
 	permissionservice "github.com/gilabs/crm-healthcare/api/internal/service/permission"
 	"github.com/gilabs/crm-healthcare/api/pkg/errors"
 	"github.com/gilabs/crm-healthcare/api/pkg/response"
+	"github.com/gin-gonic/gin"
 )
 
 type PermissionHandler struct {
@@ -57,6 +57,40 @@ func (h *PermissionHandler) GetUserPermissions(c *gin.Context) {
 		if err == permissionservice.ErrUserNotFound {
 			errors.ErrorResponse(c, "USER_NOT_FOUND", map[string]interface{}{
 				"user_id": userID,
+			}, nil)
+			return
+		}
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	response.SuccessResponse(c, permissions, nil)
+}
+
+// GetMobilePermissions handles get mobile permissions request
+func (h *PermissionHandler) GetMobilePermissions(c *gin.Context) {
+	// Get user ID from JWT token (set by AuthMiddleware)
+	userID, exists := c.Get("user_id")
+	if !exists {
+		errors.ErrorResponse(c, "UNAUTHORIZED", map[string]interface{}{
+			"reason": "User ID not found in token",
+		}, nil)
+		return
+	}
+
+	userIDStr, ok := userID.(string)
+	if !ok {
+		errors.ErrorResponse(c, "UNAUTHORIZED", map[string]interface{}{
+			"reason": "Invalid user ID format",
+		}, nil)
+		return
+	}
+
+	permissions, err := h.permissionService.GetMobilePermissions(userIDStr)
+	if err != nil {
+		if err == permissionservice.ErrUserNotFound {
+			errors.ErrorResponse(c, "USER_NOT_FOUND", map[string]interface{}{
+				"user_id": userIDStr,
 			}, nil)
 			return
 		}
