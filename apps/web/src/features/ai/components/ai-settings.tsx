@@ -352,6 +352,25 @@ export function AISettings() {
 
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
+                <Label htmlFor="leads">Leads</Label>
+                <p className="text-sm text-muted-foreground">
+                  Allow AI to access lead management data
+                </p>
+              </div>
+              <Switch
+                id="leads"
+                checked={settings.data_privacy.allow_leads}
+                onCheckedChange={(checked) =>
+                  updateDataPrivacy("allow_leads", checked)
+                }
+                disabled={!settings.enabled}
+              />
+            </div>
+
+            <Separator />
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
                 <Label htmlFor="activities">Activities</Label>
                 <p className="text-sm text-muted-foreground">
                   Allow AI to access activity history

@@ -46,6 +46,7 @@ type DataPrivacySettings struct {
 	AllowAccounts     bool `json:"allow_accounts"`
 	AllowContacts     bool `json:"allow_contacts"`
 	AllowDeals        bool `json:"allow_deals"`
+	AllowLeads        bool `json:"allow_leads"`
 	AllowActivities   bool `json:"allow_activities"`
 	AllowTasks        bool `json:"allow_tasks"`
 	AllowProducts     bool `json:"allow_products"`

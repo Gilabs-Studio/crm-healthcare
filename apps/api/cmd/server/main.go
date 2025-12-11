@@ -188,6 +188,7 @@ func main() {
 		accountRepo,
 		contactRepo,
 		dealRepo,
+		leadRepo,
 		activityRepo,
 		taskRepo,
 		pipelineRepo,

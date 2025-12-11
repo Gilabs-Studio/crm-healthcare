@@ -12,6 +12,7 @@ import (
 	"github.com/gilabs/crm-healthcare/api/internal/domain/ai"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/ai_settings"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/contact"
+	"github.com/gilabs/crm-healthcare/api/internal/domain/lead"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/permission"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/pipeline"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/task"
@@ -32,6 +33,7 @@ type Service struct {
 	accountRepo      interfaces.AccountRepository
 	contactRepo      interfaces.ContactRepository
 	dealRepo         interfaces.DealRepository
+	leadRepo         interfaces.LeadRepository
 	activityRepo     interfaces.ActivityRepository
 	taskRepo         interfaces.TaskRepository
 	pipelineRepo     interfaces.PipelineRepository
@@ -47,6 +49,7 @@ func NewService(
 	accountRepo interfaces.AccountRepository,
 	contactRepo interfaces.ContactRepository,
 	dealRepo interfaces.DealRepository,
+	leadRepo interfaces.LeadRepository,
 	activityRepo interfaces.ActivityRepository,
 	taskRepo interfaces.TaskRepository,
 	pipelineRepo interfaces.PipelineRepository,
@@ -60,6 +63,7 @@ func NewService(
 		accountRepo:     accountRepo,
 		contactRepo:     contactRepo,
 		dealRepo:        dealRepo,
+		leadRepo:        leadRepo,
 		activityRepo:    activityRepo,
 		taskRepo:        taskRepo,
 		pipelineRepo:    pipelineRepo,
@@ -193,6 +197,8 @@ func (s *Service) checkDataPrivacy(dataType string, userID string) (bool, error)
 		privacyAllowed = dataPrivacy.AllowContacts
 	case "deal":
 		privacyAllowed = dataPrivacy.AllowDeals
+	case "lead":
+		privacyAllowed = dataPrivacy.AllowLeads
 	case "activity":
 		privacyAllowed = dataPrivacy.AllowActivities
 	case "task":
@@ -238,6 +244,8 @@ func (s *Service) checkDataPrivacy(dataType string, userID string) (bool, error)
 		requiredPermissionCode = "VIEW_CONTACTS"
 	case "deal":
 		requiredPermissionCode = "VIEW_PIPELINE" // Deals are part of pipeline
+	case "lead":
+		requiredPermissionCode = "VIEW_LEADS"
 	case "activity":
 		// Activities might not have specific permission, check if user is admin or has Sales CRM access
 		if s.isUserAdmin(userID) {
@@ -466,6 +474,14 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 			} else {
 				dataAccessInfo = "⚠️ Tidak dapat mengakses data account dengan ID tersebut. Data mungkin tidak ditemukan atau tidak memiliki akses."
 			}
+		case "lead":
+			lead, err := s.leadRepo.FindByID(contextID)
+			if err == nil {
+				leadJSON, _ := json.Marshal(lead)
+				contextData = string(leadJSON)
+			} else {
+				dataAccessInfo = "⚠️ Tidak dapat mengakses data lead dengan ID tersebut. Data mungkin tidak ditemukan atau tidak memiliki akses."
+			}
 		}
 	} else {
 		// Try to extract data from user message - ALWAYS try to get data
@@ -508,7 +524,7 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 					// Transform deals to user-friendly format with names
 					dealsFormatted := s.formatDealsForAI(deals)
 					dealsJSON, _ := json.Marshal(dealsFormatted)
-					contextData = fmt.Sprintf("REAL PIPELINE/DEALS DATA FROM DATABASE (showing %d deals for analytics/statistics calculation):\n%s\n\nCRITICAL INSTRUCTION FOR ANALYTICS: You have ALL deals data above. You MUST calculate statistics, conversion rates, averages, or any requested metrics using ONLY this real data. For conversion rate calculations (e.g., Qualification to Closed Won):\n1. Count deals with stage_name 'Qualification' (or stage_code 'qualification') as starting point\n2. Count deals with stage_name 'Closed Won' (or stage_code 'closed_won')\n3. Calculate: (Closed Won / Total Qualification) * 100\n4. Present the calculation clearly with the actual numbers from the data\n5. DO NOT create, invent, or make up any numbers - use ONLY the data provided\n6. Present data in Markdown table format when showing multiple deals\n7. ALWAYS show NAMES (account_name, contact_name, stage_name) instead of IDs\n8. For IDs, use format [Name](type://ID) to create clickable links\n9. If the data doesn't contain the specific stages needed for calculation, inform the user honestly\n10. Note: 'Lead' is NOT a pipeline stage. Leads are managed separately in Lead Management module. Pipeline starts from 'Qualification' stage after lead conversion.", len(deals), string(dealsJSON))
+					contextData = fmt.Sprintf("REAL PIPELINE/DEALS DATA FROM DATABASE (showing %d deals for analytics/statistics calculation):\n%s\n\nCRITICAL INSTRUCTION FOR ANALYTICS: You have ALL deals data above. You MUST calculate statistics, conversion rates, averages, or any requested metrics using ONLY this real data. For conversion rate calculations (e.g., Lead to Closed Won):\n1. Count deals with stage_name 'Lead' (or stage_code 'lead')\n2. Count deals with stage_name 'Closed Won' (or stage_code 'closed_won')\n3. Calculate: (Closed Won / Total Leads) * 100\n4. Present the calculation clearly with the actual numbers from the data\n5. DO NOT create, invent, or make up any numbers - use ONLY the data provided\n6. Present data in Markdown table format when showing multiple deals\n7. ALWAYS show NAMES (account_name, contact_name, stage_name) instead of IDs\n8. For IDs, use format [Name](type://ID) to create clickable links\n9. If the data doesn't contain the specific stages needed for calculation, inform the user honestly", len(deals), string(dealsJSON))
 					contextType = "deal"
 					fmt.Printf("Context data set with %d deals for analytics\n", len(deals))
 				} else {
@@ -584,6 +600,59 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 						fmt.Printf("Error fetching deals: %v\n", err)
 					}
 					dataAccessInfo = "⚠️ Tidak dapat mengakses data pipeline/deals dari database. Data mungkin tidak tersedia."
+				}
+				fmt.Printf("========================\n")
+			}
+		}
+		
+		// Check if user is asking for leads/lead management (only if not pipeline/deals)
+		if contextData == "" && (strings.Contains(messageLower, "lead") || strings.Contains(messageLower, "lead management") || 
+		   strings.Contains(messageLower, "prospek") || strings.Contains(messageLower, "calon pelanggan")) {
+			// Check data privacy and user permissions
+			allowed, _ := s.checkDataPrivacy("lead", userID)
+			if !allowed {
+				dataAccessInfo = "⚠️ Akses ke data leads tidak diizinkan berdasarkan pengaturan privasi data atau permission yang Anda miliki."
+			} else {
+				// Build request with optional status filter
+				req := &lead.ListLeadsRequest{
+					Page:    1,
+					PerPage: 20,
+				}
+				
+				// Extract status filter from message if mentioned
+				if strings.Contains(messageLower, "new") {
+					req.Status = "new"
+				} else if strings.Contains(messageLower, "contacted") {
+					req.Status = "contacted"
+				} else if strings.Contains(messageLower, "qualified") {
+					req.Status = "qualified"
+				} else if strings.Contains(messageLower, "unqualified") {
+					req.Status = "unqualified"
+				} else if strings.Contains(messageLower, "nurturing") {
+					req.Status = "nurturing"
+				} else if strings.Contains(messageLower, "disqualified") {
+					req.Status = "disqualified"
+				} else if strings.Contains(messageLower, "converted") {
+					req.Status = "converted"
+				} else if strings.Contains(messageLower, "lost") {
+					req.Status = "lost"
+				}
+				
+				leads, total, err := s.leadRepo.List(req)
+				fmt.Printf("=== DATA FETCH DEBUG ===\n")
+				fmt.Printf("Fetching leads - Error: %v, Count: %d, Total: %d, Status: %s\n", err, len(leads), total, req.Status)
+				if err == nil && len(leads) > 0 {
+					// Transform leads to user-friendly format
+					leadsFormatted := s.formatLeadsForAI(leads)
+					leadsJSON, _ := json.Marshal(leadsFormatted)
+					contextData = fmt.Sprintf("REAL LEADS DATA FROM DATABASE (showing %d of %d total leads):\n%s\n\nCRITICAL INSTRUCTION: You MUST use ONLY the data above. Present it in a Markdown table format. ALWAYS show NAMES (account_name, contact_name, assigned_user_name) instead of IDs. For IDs, use format [Name](type://ID) to create clickable links where type is 'lead', 'account', or 'contact'. IMPORTANT: Use the EXACT account_id and contact_id from the data above - DO NOT create or invent IDs. If contact_id is empty or null, do not create a contact link. DO NOT create, invent, or make up any data. DO NOT add columns that don't exist in the data.", len(leads), total, string(leadsJSON))
+					contextType = "lead"
+					fmt.Printf("Context data set with %d leads\n", len(leads))
+				} else {
+					if err != nil {
+						fmt.Printf("Error fetching leads: %v\n", err)
+					}
+					dataAccessInfo = "⚠️ Tidak dapat mengakses data leads dari database. Data mungkin tidak tersedia."
 				}
 				fmt.Printf("========================\n")
 			}
@@ -1334,6 +1403,108 @@ func (s *Service) formatAccountsForAI(accounts []account.Account) []AccountForma
 			Email:      acc.Email,
 			Status:     acc.Status,
 			CreatedAt:  acc.CreatedAt.Format("2006-01-02"),
+		})
+	}
+	
+	return formatted
+}
+
+// LeadFormatted represents a user-friendly lead format for AI
+type LeadFormatted struct {
+	ID                string `json:"id"`
+	FirstName         string `json:"first_name"`
+	LastName          string `json:"last_name"`
+	FullName          string `json:"full_name"`
+	CompanyName       string `json:"company_name"`
+	Email             string `json:"email"`
+	Phone             string `json:"phone"`
+	JobTitle          string `json:"job_title"`
+	LeadSource        string `json:"lead_source"`
+	LeadStatus        string `json:"lead_status"`
+	LeadScore         int    `json:"lead_score"`
+	AccountID         string `json:"account_id"`
+	AccountName       string `json:"account_name"` // Name instead of ID
+	ContactID         string `json:"contact_id"`
+	ContactName       string `json:"contact_name"` // Name instead of ID
+	AssignedTo        string `json:"assigned_to"`
+	AssignedUserName  string `json:"assigned_user_name"` // Name instead of ID
+	City              string `json:"city"`
+	Province          string `json:"province"`
+	CreatedAt         string `json:"created_at"`
+}
+
+// formatLeadsForAI transforms leads to user-friendly format with names
+func (s *Service) formatLeadsForAI(leads []lead.Lead) []LeadFormatted {
+	formatted := make([]LeadFormatted, 0, len(leads))
+	
+	for _, l := range leads {
+		// Build full name
+		fullName := strings.TrimSpace(l.FirstName + " " + l.LastName)
+		if fullName == "" {
+			fullName = "N/A"
+		}
+		
+		// Get account name
+		accountName := "N/A"
+		accountID := ""
+		if l.AccountID != nil && *l.AccountID != "" {
+			accountID = *l.AccountID
+			if l.Account != nil {
+				accountName = l.Account.Name
+			} else {
+				// Try to fetch if not preloaded
+				if account, err := s.accountRepo.FindByID(*l.AccountID); err == nil && account != nil {
+					accountName = account.Name
+				}
+			}
+		}
+		
+		// Get contact name
+		contactName := "N/A"
+		contactID := ""
+		if l.ContactID != nil && *l.ContactID != "" {
+			contactID = *l.ContactID
+			if l.Contact != nil {
+				contactName = l.Contact.Name
+			} else {
+				// Try to fetch if not preloaded
+				if contact, err := s.contactRepo.FindByID(*l.ContactID); err == nil && contact != nil {
+					contactName = contact.Name
+				}
+			}
+		}
+		
+		// Get assigned user name
+		assignedUserName := "N/A"
+		assignedTo := ""
+		if l.AssignedTo != nil && *l.AssignedTo != "" {
+			assignedTo = *l.AssignedTo
+			if l.AssignedUser != nil {
+				assignedUserName = l.AssignedUser.Name
+			}
+		}
+		
+		formatted = append(formatted, LeadFormatted{
+			ID:               l.ID,
+			FirstName:        l.FirstName,
+			LastName:         l.LastName,
+			FullName:         fullName,
+			CompanyName:      l.CompanyName,
+			Email:            l.Email,
+			Phone:            l.Phone,
+			JobTitle:         l.JobTitle,
+			LeadSource:       l.LeadSource,
+			LeadStatus:       l.LeadStatus,
+			LeadScore:        l.LeadScore,
+			AccountID:        accountID,
+			AccountName:      accountName,
+			ContactID:        contactID,
+			ContactName:      contactName,
+			AssignedTo:       assignedTo,
+			AssignedUserName: assignedUserName,
+			City:             l.City,
+			Province:         l.Province,
+			CreatedAt:        l.CreatedAt.Format("2006-01-02"),
 		})
 	}
 	
