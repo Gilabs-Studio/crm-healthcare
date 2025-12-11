@@ -168,12 +168,22 @@ export function LeadsTable() {
                       )}
                     </td>
                     <td className="py-3 px-2">
-                      <div className="flex items-center gap-2">
-                        <Mail className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
-                        <span className="truncate max-w-[200px]" title={lead.email ?? "-"}>
-                          {lead.email ?? "-"}
-                        </span>
-                      </div>
+                      {lead.email ? (
+                        <a
+                          href={`mailto:${lead.email}`}
+                          className="flex items-center gap-2 font-medium text-primary hover:underline group"
+                        >
+                          <Mail className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
+                          <span className="truncate max-w-[200px]" title={lead.email}>
+                            {lead.email}
+                          </span>
+                        </a>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Mail className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                          <span className="truncate max-w-[200px] text-muted-foreground">-</span>
+                        </div>
+                      )}
                     </td>
                     <td className="py-3 px-2">
                       <Badge variant={statusVariant} className="text-xs capitalize">

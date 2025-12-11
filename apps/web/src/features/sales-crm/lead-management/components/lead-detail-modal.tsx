@@ -195,7 +195,14 @@ export function LeadDetailModal({ leadId, open, onOpenChange, onLeadUpdated }: L
                       <Mail className="h-4 w-4" />
                       <span>{t("sections.email")}</span>
                     </div>
-                    <div className="text-base">{lead.email}</div>
+                    <div className="text-base font-medium">
+                      <a
+                        href={`mailto:${lead.email}`}
+                        className="text-primary hover:underline"
+                      >
+                        {lead.email}
+                      </a>
+                    </div>
                   </div>
 
                   {lead.phone && (

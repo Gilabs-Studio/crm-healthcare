@@ -165,7 +165,12 @@ export function LeadList() {
       id: "email",
       header: t("table.email"),
       accessor: (row) => (
-        <span className="text-sm">{row.email}</span>
+        <a
+          href={`mailto:${row.email}`}
+          className="text-sm font-medium text-primary hover:underline"
+        >
+          {row.email}
+        </a>
       ),
       className: "w-[200px]",
     },
