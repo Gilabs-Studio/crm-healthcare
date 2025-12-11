@@ -10,6 +10,7 @@ import '../../notifications/presentation/notification_list_screen.dart';
 import '../../tasks/presentation/task_list_screen.dart';
 import '../../tasks/presentation/task_form_screen.dart';
 import '../../tasks/application/task_provider.dart';
+import '../../permissions/hooks/use_has_permission.dart';
 import '../application/dashboard_provider.dart';
 import 'recent_activities_screen.dart';
 import 'widgets/activity_trends_widget.dart';
@@ -66,22 +67,24 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
       currentIndex: 0,
       title: l10n.dashboard,
       floatingActionButton: _tabController.index == 1
-          ? FloatingActionButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const TaskFormScreen(),
-                  ),
-                ).then((result) {
-                  // Refresh task list after creating task
-                  if (result != null && mounted) {
-                    ref.read(taskListProvider.notifier).refresh();
-                  }
-                });
-              },
-              child: const Icon(Icons.add),
-            )
+          ? (useHasCreatePermission(ref, '/tasks')
+              ? FloatingActionButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const TaskFormScreen(),
+                      ),
+                    ).then((result) {
+                      // Refresh task list after creating task
+                      if (result != null && mounted) {
+                        ref.read(taskListProvider.notifier).refresh();
+                      }
+                    });
+                  },
+                  child: const Icon(Icons.add),
+                )
+              : null)
           : null,
       actions: [
         // Recent Activities button

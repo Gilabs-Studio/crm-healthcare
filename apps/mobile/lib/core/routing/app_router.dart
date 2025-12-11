@@ -42,33 +42,39 @@ class AppRouter {
   static Map<String, WidgetBuilder> get routes => {
         AppRoutes.login: (_) => const LoginScreen(),
         AppRoutes.dashboard: (_) =>
-            const AuthGate(child: DashboardScreen()),
+            const AuthGate(child: DashboardScreen(), requiredRoute: AppRoutes.dashboard),
         AppRoutes.accounts: (_) =>
-            const AuthGate(child: AccountsScreen()),
+            const AuthGate(child: AccountsScreen(), requiredRoute: AppRoutes.accounts),
         AppRoutes.profile: (_) =>
-            const AuthGate(child: ProfileScreen()),
+            const AuthGate(child: ProfileScreen(), requiredRoute: AppRoutes.profile),
         AppRoutes.contacts: (context) {
           final args = ModalRoute.of(context)?.settings.arguments;
           final accountId = args is Map ? args['accountId'] as String? : null;
-          return AuthGate(child: ContactListScreen(accountId: accountId));
+          return AuthGate(
+            child: ContactListScreen(accountId: accountId),
+            requiredRoute: AppRoutes.contacts,
+          );
         },
         AppRoutes.visitReports: (_) =>
-            const AuthGate(child: ReportsScreen()),
+            const AuthGate(child: ReportsScreen(), requiredRoute: AppRoutes.visitReports),
         AppRoutes.visitReportsCreate: (_) =>
-            const AuthGate(child: VisitReportFormScreen()),
+            const AuthGate(child: VisitReportFormScreen(), requiredRoute: AppRoutes.visitReportsCreate),
         AppRoutes.tasks: (_) =>
-            const AuthGate(child: TaskListScreen()),
+            const AuthGate(child: TaskListScreen(), requiredRoute: AppRoutes.tasks),
         AppRoutes.tasksCreate: (_) =>
-            const AuthGate(child: TaskFormScreen()),
+            const AuthGate(child: TaskFormScreen(), requiredRoute: AppRoutes.tasksCreate),
         AppRoutes.tasksEdit: (context) {
           final args = ModalRoute.of(context)!.settings.arguments;
           final taskId = args is Map ? args['taskId'] as String? : null;
-          return AuthGate(child: TaskFormScreen(taskId: taskId));
+          return AuthGate(
+            child: TaskFormScreen(taskId: taskId),
+            requiredRoute: AppRoutes.tasksEdit,
+          );
         },
         AppRoutes.notifications: (_) =>
-            const AuthGate(child: NotificationListScreen()),
+            const AuthGate(child: NotificationListScreen(), requiredRoute: AppRoutes.notifications),
         AppRoutes.recentActivities: (_) =>
-            const AuthGate(child: RecentActivitiesScreen()),
+            const AuthGate(child: RecentActivitiesScreen(), requiredRoute: AppRoutes.recentActivities),
       };
 
   static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
@@ -83,6 +89,7 @@ class AppRouter {
         settings: settings,
         builder: (_) => AuthGate(
           child: AccountDetailScreen(accountId: pathSegments[1]),
+          requiredRoute: AppRoutes.accounts,
         ),
       );
     }
@@ -95,6 +102,7 @@ class AppRouter {
         settings: settings,
         builder: (_) => AuthGate(
           child: ContactDetailScreen(contactId: pathSegments[1]),
+          requiredRoute: AppRoutes.contacts,
         ),
       );
     }
@@ -108,6 +116,7 @@ class AppRouter {
         settings: settings,
         builder: (_) => AuthGate(
           child: VisitReportDetailScreen(visitReportId: pathSegments[1]),
+          requiredRoute: AppRoutes.visitReports,
         ),
       );
     }
@@ -120,6 +129,7 @@ class AppRouter {
         settings: settings,
         builder: (_) => AuthGate(
           child: const VisitReportFormScreen(),
+          requiredRoute: AppRoutes.visitReportsCreate,
         ),
       );
     }
@@ -134,6 +144,7 @@ class AppRouter {
         settings: settings,
         builder: (_) => AuthGate(
           child: TaskDetailScreen(taskId: pathSegments[1]),
+          requiredRoute: AppRoutes.tasks,
         ),
       );
     }
@@ -146,6 +157,7 @@ class AppRouter {
         settings: settings,
         builder: (_) => AuthGate(
           child: const TaskFormScreen(),
+          requiredRoute: AppRoutes.tasksCreate,
         ),
       );
     }

@@ -7,6 +7,7 @@ import '../data/models/task.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/widgets/error_widget.dart';
 import '../../../core/widgets/loading_widget.dart';
+import '../../permissions/hooks/use_has_permission.dart';
 import '../presentation/task_form_screen.dart';
 
 class TaskDetailScreen extends ConsumerStatefulWidget {
@@ -214,69 +215,86 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
             const SizedBox(height: 16),
           ],
           // Action Buttons
-          Row(
-            children: [
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: () => _handleEdit(task),
-                  icon: const Icon(Icons.edit_outlined),
-                  label: Text(l10n.edit),
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 48),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+          // Check permissions
+          Builder(
+            builder: (context) {
+              final hasEditPermission = useHasEditPermission(ref, '/tasks');
+              final hasDeletePermission = useHasDeletePermission(ref, '/tasks');
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (hasEditPermission) ...[
+                    Row(
+                      children: [
+                        Expanded(
+                          child: FilledButton.icon(
+                            onPressed: () => _handleEdit(task),
+                            icon: const Icon(Icons.edit_outlined),
+                            label: Text(l10n.edit),
+                            style: FilledButton.styleFrom(
+                              minimumSize: const Size(double.infinity, 48),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  if (task.status != 'completed' && task.status != 'cancelled') ...[
+                    FilledButton.icon(
+                      onPressed: () => _showCompleteDialog(context, task, l10n, colorScheme),
+                      icon: const Icon(Icons.check),
+                      label: Text(l10n.completeTask),
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size(double.infinity, 48),
+                        backgroundColor: Colors.green,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  OutlinedButton.icon(
+                    onPressed: () => _showAddReminderDialog(context, task, l10n, colorScheme),
+                    icon: const Icon(Icons.notifications_outlined),
+                    label: Text(l10n.addReminder),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 48),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          if (task.status != 'completed' && task.status != 'cancelled') ...[
-            FilledButton.icon(
-              onPressed: () => _showCompleteDialog(context, task, l10n, colorScheme),
-              icon: const Icon(Icons.check),
-              label: Text(l10n.completeTask),
-              style: FilledButton.styleFrom(
-                minimumSize: const Size(double.infinity, 48),
-                backgroundColor: Colors.green,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-          ],
-          OutlinedButton.icon(
-            onPressed: () => _showAddReminderDialog(context, task, l10n, colorScheme),
-            icon: const Icon(Icons.notifications_outlined),
-            label: Text(l10n.addReminder),
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size(double.infinity, 48),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          OutlinedButton.icon(
-            onPressed: _isDeleting ? null : () => _showDeleteDialog(context, task, l10n, colorScheme),
-            icon: _isDeleting
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.delete_outline),
-            label: Text(l10n.delete),
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size(double.infinity, 48),
-              foregroundColor: colorScheme.error,
-              side: BorderSide(color: colorScheme.error),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
+                  if (hasDeletePermission) ...[
+                    const SizedBox(height: 12),
+                    OutlinedButton.icon(
+                      onPressed: _isDeleting ? null : () => _showDeleteDialog(context, task, l10n, colorScheme),
+                      icon: _isDeleting
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.delete_outline),
+                      label: Text(l10n.delete),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(double.infinity, 48),
+                        foregroundColor: colorScheme.error,
+                        side: BorderSide(color: colorScheme.error),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              );
+            },
           ),
         ],
       ),

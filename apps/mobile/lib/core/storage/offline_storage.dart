@@ -18,6 +18,7 @@ class OfflineStorage {
     await HiveStorage.openBox(_contactsBox);
     await HiveStorage.openBox(_tasksBox);
     await HiveStorage.openBox(_visitReportsBox);
+    await HiveStorage.openBox('offline_generic');
   }
   
   /// Save accounts to offline storage
@@ -198,6 +199,38 @@ class OfflineStorage {
         await HiveStorage.clearBox(_visitReportsBox);
         break;
     }
+  }
+  
+  /// Generic get method for any data type
+  static Future<T?> get<T>(
+    String key,
+    T Function(Map<String, dynamic>) fromJson,
+  ) async {
+    // Use a generic box for permissions and other data
+    const boxName = 'offline_generic';
+    await HiveStorage.openBox(boxName);
+    final box = await HiveStorage.openBox(boxName);
+    final cachedData = box.get(key);
+    if (cachedData != null) {
+      try {
+        final json = jsonDecode(cachedData as String);
+        return fromJson(json as Map<String, dynamic>);
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  }
+  
+  /// Generic set method for any data type
+  static Future<void> set<T>(
+    String key,
+    Map<String, dynamic> data,
+  ) async {
+    const boxName = 'offline_generic';
+    await HiveStorage.openBox(boxName);
+    final box = await HiveStorage.openBox(boxName);
+    await box.put(key, jsonEncode(data));
   }
 }
 

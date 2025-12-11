@@ -5,6 +5,7 @@ import 'dart:async';
 import '../application/contact_provider.dart';
 import '../application/contact_state.dart';
 import '../presentation/contact_form_screen.dart';
+import '../../permissions/hooks/use_has_permission.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/widgets/error_widget.dart';
@@ -122,22 +123,24 @@ class _ContactListScreenState extends ConsumerState<ContactListScreen> {
         ),
         body: body,
         floatingActionButton: widget.accountId != null
-            ? FloatingActionButton(
-                onPressed: () async {
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ContactFormScreen(
-                        defaultAccountId: widget.accountId,
-                      ),
-                    ),
-                  );
-                  if (result != null && mounted) {
-                    await ref.read(contactListProvider.notifier).refresh();
-                  }
-                },
-                child: const Icon(Icons.add),
-              )
+            ? (useHasCreatePermission(ref, '/contacts')
+                ? FloatingActionButton(
+                    onPressed: () async {
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ContactFormScreen(
+                            defaultAccountId: widget.accountId,
+                          ),
+                        ),
+                      );
+                      if (result != null && mounted) {
+                        await ref.read(contactListProvider.notifier).refresh();
+                      }
+                    },
+                    child: const Icon(Icons.add),
+                  )
+                : null)
             : null,
     );
 

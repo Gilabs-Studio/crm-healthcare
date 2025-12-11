@@ -7,6 +7,7 @@ import '../../../core/widgets/main_scaffold.dart';
 import '../../contacts/presentation/contact_list_screen.dart';
 import '../../contacts/presentation/contact_form_screen.dart';
 import '../../contacts/application/contact_provider.dart';
+import '../../permissions/hooks/use_has_permission.dart';
 import '../application/account_provider.dart';
 import '../presentation/account_form_screen.dart';
 import 'account_list_screen.dart';
@@ -95,37 +96,47 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen>
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
+    // Check CREATE permissions
+    final hasCreateAccountPermission = useHasCreatePermission(ref, '/accounts');
+    final hasCreateContactPermission = useHasCreatePermission(ref, '/contacts');
+
+    // Show FAB only if user has permission for current tab
+    final showFAB = (_tabController.index == 0 && hasCreateAccountPermission) ||
+        (_tabController.index == 1 && hasCreateContactPermission);
+
     return MainScaffold(
       currentIndex: 1,
       title: null, // Remove title header
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          if (_tabController.index == 0) {
-            // Create Account
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const AccountFormScreen(),
-              ),
-            ).then((_) {
-              // Refresh list after creating
-              ref.read(accountListProvider.notifier).refresh();
-            });
-          } else {
-            // Create Contact
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const ContactFormScreen(),
-              ),
-            ).then((_) {
-              // Refresh list after creating
-              ref.read(contactListProvider.notifier).refresh();
-            });
-          }
-        },
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: showFAB
+          ? FloatingActionButton(
+              onPressed: () {
+                if (_tabController.index == 0) {
+                  // Create Account
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AccountFormScreen(),
+                    ),
+                  ).then((_) {
+                    // Refresh list after creating
+                    ref.read(accountListProvider.notifier).refresh();
+                  });
+                } else {
+                  // Create Contact
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ContactFormScreen(),
+                    ),
+                  ).then((_) {
+                    // Refresh list after creating
+                    ref.read(contactListProvider.notifier).refresh();
+                  });
+                }
+              },
+              child: const Icon(Icons.add),
+            )
+          : null,
       body: Column(
         children: [
           // Tab Bar with SafeArea and larger text

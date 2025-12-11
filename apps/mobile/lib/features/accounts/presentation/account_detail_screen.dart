@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../application/account_provider.dart';
 import '../data/models/account.dart';
 import '../presentation/account_form_screen.dart';
+import '../../permissions/hooks/use_has_permission.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/widgets/error_widget.dart';
@@ -268,42 +269,46 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: FilledButton.icon(
-                      onPressed: _isDeleting ? null : () => _handleEdit(account),
-                      icon: const Icon(Icons.edit_outlined),
-                      label: Text(l10n.edit),
-                      style: FilledButton.styleFrom(
-                        minimumSize: const Size(double.infinity, 48),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                  if (useHasEditPermission(ref, '/accounts')) ...[
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: FilledButton.icon(
+                        onPressed: _isDeleting ? null : () => _handleEdit(account),
+                        icon: const Icon(Icons.edit_outlined),
+                        label: Text(l10n.edit),
+                        style: FilledButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 48),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 ],
               ),
-              const SizedBox(height: 12),
-              OutlinedButton.icon(
-                onPressed: _isDeleting ? null : () => _handleDelete(account),
-                icon: _isDeleting
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.delete_outline),
-                label: Text(l10n.delete),
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 48),
-                  foregroundColor: colorScheme.error,
-                  side: BorderSide(color: colorScheme.error),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              if (useHasDeletePermission(ref, '/accounts')) ...[
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: _isDeleting ? null : () => _handleDelete(account),
+                  icon: _isDeleting
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.delete_outline),
+                  label: Text(l10n.delete),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 48),
+                    foregroundColor: colorScheme.error,
+                    side: BorderSide(color: colorScheme.error),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ],
           ),
         ),
