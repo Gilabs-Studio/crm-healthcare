@@ -52,6 +52,9 @@ type DashboardOverviewResponse struct {
 	// PipelineStages contains simplified pipeline stage distribution used by
 	// the sales pipeline progress bar in the dashboard.
 	PipelineStages []DashboardPipelineStageSummary `json:"pipeline_stages"`
+
+	// LeadStats contains lead statistics for the selected period.
+	LeadStats LeadStats `json:"lead_stats"`
 }
 
 // TargetStats represents sales target vs achievement metrics.
@@ -113,6 +116,17 @@ type DashboardPipelineStageSummary struct {
 	TotalValue          int64   `json:"total_value"`
 	TotalValueFormatted string  `json:"total_value_formatted"`
 	Percentage          float64 `json:"percentage"`
+}
+
+// LeadStats represents lead statistics.
+type LeadStats struct {
+	Total         int64   `json:"total"`
+	New           int64   `json:"new"`
+	Contacted     int64   `json:"contacted"`
+	Qualified     int64   `json:"qualified"`
+	Converted     int64   `json:"converted"`
+	Lost          int64   `json:"lost"`
+	ChangePercent float64 `json:"change_percent"`
 }
 
 // VisitStatisticsResponse represents visit statistics

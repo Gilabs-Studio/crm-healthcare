@@ -89,6 +89,15 @@ export interface DashboardOverview {
     deal_count: number;
     percentage: number;
   }>;
+  lead_stats?: {
+    total: number;
+    new: number;
+    contacted: number;
+    qualified: number;
+    converted: number;
+    lost: number;
+    change_percent: number;
+  };
 }
 
 export interface VisitStatistics {

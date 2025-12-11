@@ -7,6 +7,7 @@ import remarkGfm from "remark-gfm";
 import type { Components } from "react-markdown";
 import { useChat } from "../hooks/useChat";
 import { useAISettings } from "../hooks/useAISettings";
+import { useConversationStorage } from "../hooks/useConversationStorage";
 import { useAuthStore } from "@/features/auth/stores/useAuthStore";
 import {
   Select,
@@ -27,6 +28,7 @@ import { ContactDetailModal } from "@/features/sales-crm/account-management/comp
 import { TaskDetailModal } from "@/features/sales-crm/task-management/components/task-detail-modal";
 import { VisitReportDetailModal } from "@/features/sales-crm/visit-report/components/visit-report-detail-modal";
 import { DealDetailModal } from "@/features/sales-crm/pipeline-management/components/deal-detail-modal";
+import { LeadDetailModal } from "@/features/sales-crm/lead-management/components/lead-detail-modal";
 import { templateCategories, getTemplatesByCategory, type ChatTemplate } from "../data/chat-templates";
 
 interface Message {
@@ -76,6 +78,9 @@ export function Chatbot() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   
+  // Persist conversation to sessionStorage
+  const { clearConversation } = useConversationStorage(messages, setMessages);
+  
   // Use settings.model as default, but allow user to override via Select
   const [userSelectedModel, setUserSelectedModel] = useState<string | null>(null);
   const selectedModel = userSelectedModel || settings.model || "llama-3.1-8b";
@@ -89,6 +94,7 @@ export function Chatbot() {
   const [viewingTaskId, setViewingTaskId] = useState<string | null>(null);
   const [viewingVisitReportId, setViewingVisitReportId] = useState<string | null>(null);
   const [viewingDealId, setViewingDealId] = useState<string | null>(null);
+  const [viewingLeadId, setViewingLeadId] = useState<string | null>(null);
 
   // Get avatar URL from backend
   const userAvatarUrl = useMemo(() => {
@@ -126,6 +132,7 @@ export function Chatbot() {
     setViewingTaskId(null);
     setViewingVisitReportId(null);
     setViewingDealId(null);
+    setViewingLeadId(null);
     
     // Set the appropriate modal state based on type
     switch (type) {
@@ -143,6 +150,9 @@ export function Chatbot() {
         break;
       case 'deal':
         setViewingDealId(id);
+        break;
+      case 'lead':
+        setViewingLeadId(id);
         break;
       default:
         // Unknown type, open in new tab
@@ -723,12 +733,12 @@ export function Chatbot() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent align="start">
-                <SelectItem value="llama-3.1-8b">Llama 3.1 8B</SelectItem>
-                <SelectItem value="llama-3.1-70b">Llama 3.1 70B</SelectItem>
-                <SelectItem value="llama-3-8b">Llama 3 8B</SelectItem>
-                <SelectItem value="llama-3-70b">Llama 3 70B</SelectItem>
-                <SelectItem value="gpt-4">GPT-4</SelectItem>
-                <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
+                <SelectItem value="llama-3.1-8b">Llama-3.1-8B</SelectItem>
+                <SelectItem value="qwen-3-32b">Qwen-3-32B</SelectItem>
+                <SelectItem value="gpt-oss-120b">GPT-OSS-120B</SelectItem>
+                <SelectItem value="zai-glm-4.6">ZAI GLM 4.6</SelectItem>
+                <SelectItem value="llama-3.3-70b">Llama-3.3-70B</SelectItem>
+                <SelectItem value="qwen3-235b">Qwen3-235B (Instruct)</SelectItem>
               </SelectContent>
             </Select>
             
@@ -743,6 +753,7 @@ export function Chatbot() {
                   <div className="flex flex-col gap-1">
                     <button
                       onClick={() => {
+                        clearConversation();
                         setMessages([{
                           id: "initial-greeting",
                           role: "assistant",
@@ -873,6 +884,19 @@ export function Chatbot() {
           onOpenChange={(open) => {
             if (!open) {
               setViewingDealId(null);
+            }
+          }}
+        />
+      )}
+
+      {viewingLeadId && (
+        <LeadDetailModal
+          key={`lead-${viewingLeadId}`}
+          leadId={viewingLeadId}
+          open={!!viewingLeadId}
+          onOpenChange={(open) => {
+            if (!open) {
+              setViewingLeadId(null);
             }
           }}
         />

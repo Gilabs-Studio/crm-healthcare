@@ -8,6 +8,7 @@ import (
 	"github.com/gilabs/crm-healthcare/api/internal/domain/account"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/activity"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/dashboard"
+	leaddomain "github.com/gilabs/crm-healthcare/api/internal/domain/lead"
 	pipelinedomain "github.com/gilabs/crm-healthcare/api/internal/domain/pipeline"
 	taskdomain "github.com/gilabs/crm-healthcare/api/internal/domain/task"
 	"github.com/gilabs/crm-healthcare/api/internal/domain/user"
@@ -24,6 +25,7 @@ type Service struct {
 	dealRepo        interfaces.DealRepository
 	taskRepo        interfaces.TaskRepository
 	pipelineRepo    interfaces.PipelineRepository
+	leadRepo        interfaces.LeadRepository
 }
 
 func NewService(
@@ -34,6 +36,7 @@ func NewService(
 	dealRepo interfaces.DealRepository,
 	taskRepo interfaces.TaskRepository,
 	pipelineRepo interfaces.PipelineRepository,
+	leadRepo interfaces.LeadRepository,
 ) *Service {
 	return &Service{
 		visitReportRepo: visitReportRepo,
@@ -43,6 +46,7 @@ func NewService(
 		dealRepo:        dealRepo,
 		taskRepo:        taskRepo,
 		pipelineRepo:    pipelineRepo,
+		leadRepo:        leadRepo,
 	}
 }
 
@@ -112,11 +116,11 @@ func (s *Service) GetOverview(req *dashboard.DashboardRequest) (*dashboard.Dashb
 
 	// Calculate visit stats
 	visitStats := struct {
-		Total        int
-		Completed    int
-		Pending      int
-		Approved     int
-		Rejected     int
+		Total         int
+		Completed     int
+		Pending       int
+		Approved      int
+		Rejected      int
 		ChangePercent float64
 	}{
 		Total: len(visitReports),
@@ -146,9 +150,9 @@ func (s *Service) GetOverview(req *dashboard.DashboardRequest) (*dashboard.Dashb
 	}
 
 	accountStats := struct {
-		Total        int
-		Active       int
-		Inactive     int
+		Total         int
+		Active        int
+		Inactive      int
 		ChangePercent float64
 	}{
 		Total: len(accounts),
@@ -203,12 +207,41 @@ func (s *Service) GetOverview(req *dashboard.DashboardRequest) (*dashboard.Dashb
 		}
 	}
 
-	// Aggregate leads by source (using open deals as leads)
+	// Get lead statistics
+	leadStats := dashboard.LeadStats{}
+	if s.leadRepo != nil {
+		leads, _, err := s.leadRepo.List(&leaddomain.ListLeadsRequest{
+			Page:    1,
+			PerPage: 10000,
+		})
+		if err != nil && err != gorm.ErrRecordNotFound {
+			return nil, err
+		}
+
+		leadStats.Total = int64(len(leads))
+		for _, l := range leads {
+			switch l.LeadStatus {
+			case "new":
+				leadStats.New++
+			case "contacted", "nurturing":
+				// nurturing is still in contact/nurturing phase
+				leadStats.Contacted++
+			case "qualified":
+				leadStats.Qualified++
+			case "converted":
+				leadStats.Converted++
+			case "lost", "disqualified", "unqualified":
+				// unqualified and disqualified leads are considered lost
+				leadStats.Lost++
+			}
+		}
+	}
+
+	// Aggregate leads by source (using actual leads, not deals)
 	leadsBySource := dashboard.LeadsBySource{}
-	if s.dealRepo != nil {
-		deals, _, err := s.dealRepo.List(&pipelinedomain.ListDealsRequest{
-			Status: "open",
-			Page:   1,
+	if s.leadRepo != nil {
+		leads, _, err := s.leadRepo.List(&leaddomain.ListLeadsRequest{
+			Page:    1,
 			PerPage: 10000,
 		})
 		if err != nil && err != gorm.ErrRecordNotFound {
@@ -216,13 +249,16 @@ func (s *Service) GetOverview(req *dashboard.DashboardRequest) (*dashboard.Dashb
 		}
 
 		sourceCounts := make(map[string]int64)
-		for _, d := range deals {
-			source := d.Source
-			if source == "" {
-				source = "other"
+		for _, l := range leads {
+			// Only count non-converted, non-lost leads
+			if l.LeadStatus != "converted" && l.LeadStatus != "lost" && l.LeadStatus != "disqualified" {
+				source := l.LeadSource
+				if source == "" {
+					source = "other"
+				}
+				sourceCounts[source]++
+				leadsBySource.Total++
 			}
-			sourceCounts[source]++
-			leadsBySource.Total++
 		}
 
 		entries := make([]dashboard.LeadsBySourceEntry, 0, len(sourceCounts))
@@ -239,9 +275,9 @@ func (s *Service) GetOverview(req *dashboard.DashboardRequest) (*dashboard.Dashb
 	upcomingTasks := make([]dashboard.DashboardTaskSummary, 0)
 	if s.taskRepo != nil {
 		tasks, _, err := s.taskRepo.List(&taskdomain.ListTasksRequest{
-			Status:   "pending",
-			Page:     1,
-			PerPage:  10,
+			Status:  "pending",
+			Page:    1,
+			PerPage: 10,
 		})
 		if err != nil && err != gorm.ErrRecordNotFound {
 			return nil, err
@@ -266,13 +302,13 @@ func (s *Service) GetOverview(req *dashboard.DashboardRequest) (*dashboard.Dashb
 
 	if dealsSummary != nil {
 		dealsStats = dashboard.DealsStats{
-			TotalDeals:         dealsSummary.TotalDeals,
-			OpenDeals:          dealsSummary.OpenDeals,
-			WonDeals:           dealsSummary.WonDeals,
-			LostDeals:          dealsSummary.LostDeals,
-			TotalValue:         dealsSummary.TotalValue,
+			TotalDeals:          dealsSummary.TotalDeals,
+			OpenDeals:           dealsSummary.OpenDeals,
+			WonDeals:            dealsSummary.WonDeals,
+			LostDeals:           dealsSummary.LostDeals,
+			TotalValue:          dealsSummary.TotalValue,
 			TotalValueFormatted: dealsSummary.TotalValueFormatted,
-			ChangePercent:      0,
+			ChangePercent:       0,
 		}
 
 		revenueStats = dashboard.RevenueStats{
@@ -316,11 +352,11 @@ func (s *Service) GetOverview(req *dashboard.DashboardRequest) (*dashboard.Dashb
 			Rejected      int     `json:"rejected"`
 			ChangePercent float64 `json:"change_percent"`
 		}{
-			Total:        visitStats.Total,
-			Completed:    visitStats.Completed,
-			Pending:      visitStats.Pending,
-			Approved:     visitStats.Approved,
-			Rejected:     visitStats.Rejected,
+			Total:         visitStats.Total,
+			Completed:     visitStats.Completed,
+			Pending:       visitStats.Pending,
+			Approved:      visitStats.Approved,
+			Rejected:      visitStats.Rejected,
 			ChangePercent: visitStats.ChangePercent,
 		},
 		AccountStats: struct {
@@ -329,9 +365,9 @@ func (s *Service) GetOverview(req *dashboard.DashboardRequest) (*dashboard.Dashb
 			Inactive      int     `json:"inactive"`
 			ChangePercent float64 `json:"change_percent"`
 		}{
-			Total:        accountStats.Total,
-			Active:       accountStats.Active,
-			Inactive:     accountStats.Inactive,
+			Total:         accountStats.Total,
+			Active:        accountStats.Active,
+			Inactive:      accountStats.Inactive,
 			ChangePercent: accountStats.ChangePercent,
 		},
 		ActivityStats: struct {
@@ -341,10 +377,10 @@ func (s *Service) GetOverview(req *dashboard.DashboardRequest) (*dashboard.Dashb
 			Emails        int     `json:"emails"`
 			ChangePercent float64 `json:"change_percent"`
 		}{
-			Total:        activityStats.Total,
-			Visits:       activityStats.Visits,
-			Calls:        activityStats.Calls,
-			Emails:       activityStats.Emails,
+			Total:         activityStats.Total,
+			Visits:        activityStats.Visits,
+			Calls:         activityStats.Calls,
+			Emails:        activityStats.Emails,
 			ChangePercent: activityStats.ChangePercent,
 		},
 		Target:         targetStats,
@@ -353,6 +389,7 @@ func (s *Service) GetOverview(req *dashboard.DashboardRequest) (*dashboard.Dashb
 		LeadsBySource:  leadsBySource,
 		UpcomingTasks:  upcomingTasks,
 		PipelineStages: pipelineStages,
+		LeadStats:      leadStats,
 	}
 
 	return response, nil
@@ -458,13 +495,13 @@ func (s *Service) GetVisitStatistics(req *dashboard.DashboardRequest) (*dashboar
 			Start: start,
 			End:   end,
 		},
-		Total:        total,
-		Completed:    completed,
-		Pending:      pending,
-		Approved:     approved,
-		Rejected:     rejected,
-		ByStatus:     byStatus,
-		ByDate:       dateStats,
+		Total:         total,
+		Completed:     completed,
+		Pending:       pending,
+		Approved:      approved,
+		Rejected:      rejected,
+		ByStatus:      byStatus,
+		ByDate:        dateStats,
 		ChangePercent: 0, // Can be calculated by comparing with previous period
 	}
 
@@ -520,7 +557,7 @@ func (s *Service) GetPipelineSummary(req *dashboard.DashboardRequest) (*dashboar
 	byStage := make([]dashboard.DashboardPipelineStageSummary, 0, len(allStages))
 	for _, stage := range allStages {
 		dealStats, hasDeals := dealStatsByStageID[stage.ID]
-		
+
 		stageSummary := dashboard.DashboardPipelineStageSummary{
 			StageID:             stage.ID,
 			StageName:           stage.Name,
@@ -584,7 +621,7 @@ func formatNumber(n float64) string {
 	// Convert to string
 	str := fmt.Sprintf("%d", amount)
 	length := len(str)
-	
+
 	// Add thousand separators (dot for Indonesian format)
 	var parts []string
 	for i := length; i > 0; i -= 3 {
@@ -594,12 +631,12 @@ func formatNumber(n float64) string {
 		}
 		parts = append([]string{str[start:i]}, parts...)
 	}
-	
+
 	result := strings.Join(parts, ".")
 	if negative {
 		result = "-" + result
 	}
-	
+
 	return result
 }
 
@@ -750,12 +787,12 @@ func (s *Service) GetTopSalesRep(req *dashboard.DashboardRequest) ([]dashboard.T
 		if visitCount > 0 || accountCount > 0 || activityCount > 0 {
 			results = append(results, dashboard.TopSalesRepResponse{
 				SalesRep: struct {
-					ID   string `json:"id"`
-					Name string `json:"name"`
+					ID    string `json:"id"`
+					Name  string `json:"name"`
 					Email string `json:"email"`
 				}{
-					ID:   user.ID,
-					Name: user.Name,
+					ID:    user.ID,
+					Name:  user.Name,
 					Email: user.Email,
 				},
 				VisitCount:    visitCount,
@@ -913,4 +950,3 @@ func (s *Service) GetActivityTrends(req *dashboard.DashboardRequest) (*dashboard
 
 	return response, nil
 }
-

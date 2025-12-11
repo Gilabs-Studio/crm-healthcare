@@ -33,7 +33,7 @@ export interface ChatMessage {
 export interface ChatRequest {
   message: string;
   context?: string;
-  context_type?: "visit_report" | "deal" | "contact" | "account";
+  context_type?: "visit_report" | "deal" | "contact" | "account" | "lead";
   conversation_history?: ChatMessage[];
   model?: string;
 }
@@ -47,9 +47,6 @@ export interface AISettingsResponse {
   api_key?: string;
   data_privacy: AIDataPrivacySettings;
   timezone: string;
-  usage_limit?: number;
-  current_usage: number;
-  usage_reset_at?: string;
   created_at: string;
   updated_at: string;
 }
@@ -71,6 +68,7 @@ export interface AIDataPrivacySettings {
   allow_accounts: boolean;
   allow_contacts: boolean;
   allow_deals: boolean;
+  allow_leads: boolean;
   allow_activities: boolean;
   allow_tasks: boolean;
   allow_products: boolean;

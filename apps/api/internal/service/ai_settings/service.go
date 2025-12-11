@@ -34,6 +34,7 @@ func (s *Service) GetSettings() (*ai_settings.AISettingsResponse, error) {
 			AllowAccounts:     true,
 			AllowContacts:     true,
 			AllowDeals:        true,
+			AllowLeads:        true,
 			AllowActivities:   true,
 			AllowTasks:         true,
 			AllowProducts:      true,
@@ -77,9 +78,6 @@ func (s *Service) UpdateSettings(req *ai_settings.UpdateAISettingsRequest) (*ai_
 	}
 	if req.Timezone != "" {
 		settings.Timezone = req.Timezone
-	}
-	if req.UsageLimit != nil {
-		settings.UsageLimit = req.UsageLimit
 	}
 
 	if err := s.settingsRepo.UpdateSettings(settings); err != nil {

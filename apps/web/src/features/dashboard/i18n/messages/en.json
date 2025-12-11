@@ -42,6 +42,10 @@
       "title": "Total Revenue",
       "description": "Based on won deals in this period"
     },
+    "totalLeads": {
+      "title": "Total Leads",
+      "description": "{qualified} qualified, {converted} converted"
+    },
     "leadsBySource": {
       "title": "Leads by Source",
       "empty": "No leads for this period",
@@ -61,9 +65,12 @@
     "leadsTable": {
       "title": "Leads",
       "empty": "No leads found",
+      "emptyDescription": "Create your first lead to get started",
+      "error": "Failed to load leads. Please try again.",
       "columns": {
+        "name": "Name",
         "status": "Status",
-        "email": "Email / Account",
+        "email": "Email",
         "amount": "Amount"
       },
       "status": {

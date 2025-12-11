@@ -19,9 +19,6 @@ type AISettings struct {
 	BaseURL     string         `gorm:"type:text" json:"base_url,omitempty"` // Optional custom base URL
 	DataPrivacy datatypes.JSON `gorm:"type:jsonb" json:"data_privacy"`      // JSON object with data privacy settings
 	Timezone    string         `gorm:"type:varchar(50);default:'Asia/Jakarta'" json:"timezone"` // Timezone for AI context (e.g., "Asia/Jakarta", "UTC", "America/New_York")
-	UsageLimit  *int64         `gorm:"type:bigint" json:"usage_limit,omitempty"` // Monthly usage limit (tokens or requests)
-	CurrentUsage int64         `gorm:"type:bigint;not null;default:0" json:"current_usage"` // Current month usage
-	UsageResetAt *time.Time    `gorm:"type:timestamp" json:"usage_reset_at,omitempty"` // When to reset usage counter
 	CreatedAt   time.Time      `json:"created_at"`
 	UpdatedAt   time.Time      `json:"updated_at"`
 	DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"`
@@ -46,6 +43,7 @@ type DataPrivacySettings struct {
 	AllowAccounts     bool `json:"allow_accounts"`
 	AllowContacts     bool `json:"allow_contacts"`
 	AllowDeals        bool `json:"allow_deals"`
+	AllowLeads        bool `json:"allow_leads"`
 	AllowActivities   bool `json:"allow_activities"`
 	AllowTasks        bool `json:"allow_tasks"`
 	AllowProducts     bool `json:"allow_products"`
@@ -53,18 +51,15 @@ type DataPrivacySettings struct {
 
 // AISettingsResponse represents AI settings response DTO
 type AISettingsResponse struct {
-	ID           string               `json:"id"`
-	Enabled      bool                 `json:"enabled"`
-	Provider     string               `json:"provider"`
-	Model        string               `json:"model"`
-	BaseURL      string               `json:"base_url,omitempty"`
-	DataPrivacy  DataPrivacySettings  `json:"data_privacy"`
-	Timezone     string                `json:"timezone"`
-	UsageLimit   *int64                `json:"usage_limit,omitempty"`
-	CurrentUsage int64                 `json:"current_usage"`
-	UsageResetAt *time.Time            `json:"usage_reset_at,omitempty"`
-	CreatedAt    time.Time            `json:"created_at"`
-	UpdatedAt    time.Time            `json:"updated_at"`
+	ID          string              `json:"id"`
+	Enabled     bool                `json:"enabled"`
+	Provider    string              `json:"provider"`
+	Model       string              `json:"model"`
+	BaseURL     string              `json:"base_url,omitempty"`
+	DataPrivacy DataPrivacySettings `json:"data_privacy"`
+	Timezone    string              `json:"timezone"`
+	CreatedAt   time.Time           `json:"created_at"`
+	UpdatedAt   time.Time           `json:"updated_at"`
 }
 
 // ToAISettingsResponse converts AISettings to AISettingsResponse
@@ -83,18 +78,15 @@ func (a *AISettings) ToAISettingsResponse() *AISettingsResponse {
 	}
 
 	return &AISettingsResponse{
-		ID:           a.ID,
-		Enabled:      a.Enabled,
-		Provider:     a.Provider,
-		Model:        a.Model,
-		BaseURL:      a.BaseURL,
-		DataPrivacy:  dataPrivacy,
-		Timezone:     timezone,
-		UsageLimit:   a.UsageLimit,
-		CurrentUsage: a.CurrentUsage,
-		UsageResetAt: a.UsageResetAt,
-		CreatedAt:    a.CreatedAt,
-		UpdatedAt:    a.UpdatedAt,
+		ID:          a.ID,
+		Enabled:     a.Enabled,
+		Provider:    a.Provider,
+		Model:       a.Model,
+		BaseURL:     a.BaseURL,
+		DataPrivacy: dataPrivacy,
+		Timezone:    timezone,
+		CreatedAt:   a.CreatedAt,
+		UpdatedAt:   a.UpdatedAt,
 	}
 }
 
@@ -107,14 +99,5 @@ type UpdateAISettingsRequest struct {
 	BaseURL     string              `json:"base_url" binding:"omitempty"`
 	DataPrivacy *DataPrivacySettings `json:"data_privacy" binding:"omitempty"`
 	Timezone    string              `json:"timezone" binding:"omitempty"` // Timezone string (e.g., "Asia/Jakarta", "UTC")
-	UsageLimit  *int64              `json:"usage_limit" binding:"omitempty,min=0"`
-}
-
-// UsageStats represents usage statistics
-type UsageStats struct {
-	CurrentUsage int64     `json:"current_usage"`
-	UsageLimit   *int64    `json:"usage_limit,omitempty"`
-	UsageResetAt *time.Time `json:"usage_reset_at,omitempty"`
-	Percentage   float64   `json:"percentage"` // Usage percentage (0-100)
 }
 

@@ -134,6 +134,71 @@ export const chatTemplates: ChatTemplate[] = [
     description: "(Closed Won / Total Leads) * 100"
   },
   
+  // Lead Management Templates
+  {
+    id: "template-26",
+    name: "Tampilkan semua leads",
+    category: "Lead Management",
+    content: "Tampilkan semua leads yang ada di sistem",
+    description: "Menampilkan table dengan semua leads (new, contacted, qualified, converted, lost)"
+  },
+  {
+    id: "template-27",
+    name: "Leads yang qualified",
+    category: "Lead Management",
+    content: "Tampilkan semua leads yang sudah qualified",
+    description: "Filter leads dengan status qualified"
+  },
+  {
+    id: "template-28",
+    name: "Lead conversion rate",
+    category: "Lead Management",
+    content: "Berapa conversion rate dari qualified leads ke converted?",
+    description: "Calculate: (Converted Leads / Qualified Leads) * 100"
+  },
+  {
+    id: "template-29",
+    name: "Leads per source",
+    category: "Lead Management",
+    content: "Breakdown leads berdasarkan lead source (website, referral, cold_call, event, dll)",
+    description: "Group leads by lead_source, count per source"
+  },
+  {
+    id: "template-30",
+    name: "Conversion rate per lead source",
+    category: "Lead Management",
+    content: "Berapa conversion rate per lead source? Source mana yang paling efektif?",
+    description: "Calculate conversion rate grouped by lead_source"
+  },
+  {
+    id: "template-31",
+    name: "Leads yang perlu di-follow up",
+    category: "Lead Management",
+    content: "Leads mana yang perlu segera di-follow up? (leads yang sudah contacted tapi belum qualified)",
+    description: "Filter leads dengan status contacted, identify stale leads"
+  },
+  {
+    id: "template-32",
+    name: "Leads dengan score tinggi",
+    category: "Lead Management",
+    content: "Tampilkan leads dengan lead score tinggi (>= 70)",
+    description: "Filter leads by lead_score, sort by score descending"
+  },
+  {
+    id: "template-33",
+    name: "Analisis lengkap lead",
+    category: "Lead Management",
+    content: "Untuk lead [nama lead], tampilkan semua visit reports, activities, dan history yang terkait",
+    description: "Multi-entity data untuk satu lead"
+  },
+  {
+    id: "template-34",
+    name: "Leads yang bisa dikonversi",
+    category: "Lead Management",
+    content: "Leads mana yang sudah qualified dan siap untuk dikonversi menjadi deal?",
+    description: "Filter leads dengan status qualified, ready for conversion"
+  },
+  
   // Business Intelligence
   {
     id: "template-18",
@@ -205,7 +270,8 @@ export const templateCategories = [
   "Data Management",
   "Business Intelligence",
   "Sales Strategy",
-  "Context-Aware"
+  "Context-Aware",
+  "Lead Management"
 ] as const;
 
 export function getTemplatesByCategory(category: string): ChatTemplate[] {

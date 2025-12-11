@@ -18,7 +18,6 @@ export function useAISettings() {
       const response = await aiService.getSettings();
       return response.data;
     },
-    // No auto-refresh - only refresh when explicitly invalidated
   });
 
   // Update settings mutation
@@ -38,7 +37,7 @@ export function useAISettings() {
   });
 
   const updateDataPrivacy = (
-    key: keyof AISettingsResponse["data_privacy"],
+    key: string,
     value: boolean
   ) => {
     if (!settingsResponse) return;
@@ -47,7 +46,7 @@ export function useAISettings() {
       data_privacy: {
         ...settingsResponse.data_privacy,
         [key]: value,
-      },
+      } as AISettingsResponse["data_privacy"],
     });
   };
 
@@ -68,10 +67,6 @@ export function useAISettings() {
     updateMutation.mutate({ api_key: apiKey });
   };
 
-  const updateUsageLimit = (limit: number | undefined) => {
-    updateMutation.mutate({ usage_limit: limit });
-  };
-
   const updateTimezone = (timezone: string) => {
     updateMutation.mutate({ timezone });
   };
@@ -80,13 +75,11 @@ export function useAISettings() {
   const settings = settingsResponse
     ? {
         enabled: settingsResponse.enabled,
-        data_privacy: settingsResponse.data_privacy,
+        data_privacy: settingsResponse.data_privacy as AISettingsResponse["data_privacy"],
         provider: settingsResponse.provider,
         model: settingsResponse.model,
         base_url: settingsResponse.base_url,
         timezone: settingsResponse.timezone || "Asia/Jakarta",
-        usage_limit: settingsResponse.usage_limit,
-        current_usage: settingsResponse.current_usage,
       }
     : {
         enabled: true,
@@ -95,41 +88,27 @@ export function useAISettings() {
           allow_accounts: true,
           allow_contacts: true,
           allow_deals: true,
+          allow_leads: true,
           allow_activities: true,
           allow_tasks: true,
           allow_products: true,
-        },
+        } as AISettingsResponse["data_privacy"],
         provider: "cerebras",
         model: "llama-3.1-8b",
         base_url: undefined,
         timezone: "Asia/Jakarta",
-        usage_limit: undefined,
-        current_usage: 0,
       };
-
-  // Calculate usage stats
-  const usageStats = settingsResponse
-    ? {
-        current_usage: settingsResponse.current_usage,
-        usage_limit: settingsResponse.usage_limit,
-        percentage: settingsResponse.usage_limit
-          ? (settingsResponse.current_usage / settingsResponse.usage_limit) * 100
-          : 0,
-      }
-    : undefined;
 
   return {
     settings,
     isLoading,
     error,
-    usageStats,
     updateDataPrivacy,
     toggleEnabled,
     updateProvider,
     updateModel,
     updateAPIKey,
     updateTimezone,
-    updateUsageLimit,
     isUpdating: updateMutation.isPending,
     refetch: refetchSettings,
   };

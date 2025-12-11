@@ -11,12 +11,6 @@ type AISettingsRepository interface {
 	
 	// UpdateSettings updates AI settings
 	UpdateSettings(settings *ai_settings.AISettings) error
-	
-	// IncrementUsage increments current usage counter
-	IncrementUsage(tokens int64) error
-	
-	// ResetUsage resets usage counter (called monthly)
-	ResetUsage() error
 }
 
 

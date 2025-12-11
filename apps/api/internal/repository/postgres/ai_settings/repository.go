@@ -41,14 +41,4 @@ func (r *repository) UpdateSettings(settings *ai_settings.AISettings) error {
 	return r.db.Save(settings).Error
 }
 
-func (r *repository) IncrementUsage(tokens int64) error {
-	return r.db.Model(&ai_settings.AISettings{}).
-		Update("current_usage", gorm.Expr("current_usage + ?", tokens)).Error
-}
-
-func (r *repository) ResetUsage() error {
-	return r.db.Model(&ai_settings.AISettings{}).
-		Update("current_usage", 0).Error
-}
-
 

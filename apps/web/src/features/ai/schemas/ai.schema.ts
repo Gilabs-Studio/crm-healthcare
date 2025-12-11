@@ -17,7 +17,7 @@ export const chatSchema = z.object({
   message: z.string().min(1, "Message is required"),
   context: z.string().uuid().optional(),
   context_type: z
-    .enum(["visit_report", "deal", "contact", "account"])
+    .enum(["visit_report", "deal", "contact", "account", "lead"])
     .optional(),
   conversation_history: z.array(chatMessageSchema).optional(),
 });
@@ -31,6 +31,7 @@ export const aiSettingsSchema = z.object({
     allow_accounts: z.boolean(),
     allow_contacts: z.boolean(),
     allow_deals: z.boolean(),
+    allow_leads: z.boolean(),
     allow_activities: z.boolean(),
     allow_tasks: z.boolean(),
     allow_products: z.boolean(),

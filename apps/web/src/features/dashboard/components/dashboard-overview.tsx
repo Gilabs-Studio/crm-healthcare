@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useDashboardOverview } from "../hooks/useDashboard";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Target, Users, Briefcase, DollarSign } from "lucide-react";
+import { Target, Users, Briefcase, DollarSign, TrendingUp } from "lucide-react";
 
 export function DashboardOverview() {
   const t = useTranslations("dashboardOverview");
@@ -50,6 +50,15 @@ export function DashboardOverview() {
     total_revenue_formatted: "Rp 0", 
     change_percent: 0 
   };
+  const leadStats = overview.lead_stats ?? {
+    total: 0,
+    new: 0,
+    contacted: 0,
+    qualified: 0,
+    converted: 0,
+    lost: 0,
+    change_percent: 0,
+  };
 
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat("id-ID", {
@@ -59,7 +68,7 @@ export function DashboardOverview() {
     }).format(value);
 
   return (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
       {/* Target progress */}
       <Card>
         <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
@@ -136,6 +145,27 @@ export function DashboardOverview() {
           </div>
           <p className="text-xs text-muted-foreground mt-1">
             {t("totalRevenue.description")}
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Total leads */}
+      <Card>
+        <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
+          <CardTitle className="text-sm font-medium text-muted-foreground">
+            {t("totalLeads.title")}
+          </CardTitle>
+          <TrendingUp className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">
+            {leadStats.total}
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            {t("totalLeads.description", {
+              qualified: leadStats.qualified,
+              converted: leadStats.converted,
+            })}
           </p>
         </CardContent>
       </Card>

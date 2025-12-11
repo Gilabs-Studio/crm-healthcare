@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"strings"
+
 	"github.com/gilabs/crm-healthcare/api/internal/domain/ai"
 	aiservice "github.com/gilabs/crm-healthcare/api/internal/service/ai"
 	"github.com/gilabs/crm-healthcare/api/pkg/errors"
@@ -89,14 +91,33 @@ func (h *AIHandler) Chat(c *gin.Context) {
 	chatResponse, err := h.aiService.Chat(req.Message, req.Context, req.ContextType, history, req.Model, userIDStr)
 	if err != nil {
 		// Check for specific errors
-		if err.Error() == "AI service not configured: Cerebras API key is empty" {
+		errMsg := err.Error()
+		
+		if strings.Contains(errMsg, "AI service not configured") || strings.Contains(errMsg, "API key is empty") {
 			errors.ErrorResponse(c, "AI_SERVICE_NOT_CONFIGURED", map[string]interface{}{
 				"error": "Cerebras API key is not configured. Please set CEREBRAS_API_KEY environment variable",
 			}, nil)
 			return
 		}
+		
+		// Check for model not found errors
+		if strings.Contains(errMsg, "tidak ditemukan") || strings.Contains(errMsg, "does not exist") || strings.Contains(errMsg, "model_not_found") {
+			errors.ErrorResponse(c, "AI_MODEL_NOT_FOUND", map[string]interface{}{
+				"error": errMsg,
+			}, nil)
+			return
+		}
+		
+		// Check for unsupported model errors
+		if strings.Contains(errMsg, "tidak didukung") || strings.Contains(errMsg, "not supported") {
+			errors.ErrorResponse(c, "AI_MODEL_NOT_SUPPORTED", map[string]interface{}{
+				"error": errMsg,
+			}, nil)
+			return
+		}
+		
 		errors.ErrorResponse(c, "AI_CHAT_FAILED", map[string]interface{}{
-			"error": err.Error(),
+			"error": errMsg,
 		}, nil)
 		return
 	}

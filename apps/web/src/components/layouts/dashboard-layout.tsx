@@ -1,7 +1,7 @@
 "use client";
 
-import React, { memo, useMemo, useEffect } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import React, { memo, useMemo, useEffect, useState } from "react";
+import { useLocale } from "next-intl";
 import { Link, usePathname } from "@/i18n/routing";
 import { HelpCircle, Search, Settings } from "lucide-react";
 import { NotificationBadge } from "@/features/notifications/components/notification-badge";
@@ -70,13 +70,13 @@ const Header = memo(function Header({
   fallbackAvatarUrl: string;
 }) {
   const locale = useLocale();
-  const tSidebar = useTranslations("sidebar");
   const logout = useLogout();
   const pathname = usePathname();
 
   const [currentSrc, setCurrentSrc] = React.useState<string | undefined>(
     avatarUrl && avatarUrl.trim() !== "" ? avatarUrl : fallbackAvatarUrl
   );
+  const [mounted, setMounted] = useState(false);
 
   // Sync local image src when avatar url from store changes (e.g. after rehydration/refresh)
   React.useEffect(() => {
@@ -86,6 +86,15 @@ const Header = memo(function Header({
       setCurrentSrc(fallbackAvatarUrl);
     }
   }, [avatarUrl, fallbackAvatarUrl]);
+
+  // Ensure Popover only renders on client to avoid hydration mismatch
+  // Using setTimeout to defer state update and avoid cascading renders
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMounted(true);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 flex h-16 shrink-0 items-center gap-3 border-b bg-background/80 px-4 backdrop-blur">
@@ -150,50 +159,70 @@ const Header = memo(function Header({
         {/* Thin separator between lang toggle and avatar */}
         <div className="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-1/2 data-[orientation=vertical]:w-px mx-2 h-4 w-px" />
 
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="ghost"
-              className="flex h-8 w-8 items-center justify-center rounded-full p-0 hover:bg-muted transition-colors"
-            >
-              <Avatar className="h-8 w-8">
-                <AvatarImage
-                  src={currentSrc}
-                  alt={userName}
-                  onError={() => {
-                    if (currentSrc !== fallbackAvatarUrl) {
-                      setCurrentSrc(fallbackAvatarUrl);
-                    }
-                  }}
-                />
-              </Avatar>
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-56 p-2" align="end">
-            <div className="px-2 py-1.5 text-xs text-muted-foreground">
-              <div className="text-foreground text-sm font-medium">
-                {userName}
+        {mounted ? (
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                className="flex h-8 w-8 items-center justify-center rounded-full p-0 hover:bg-muted transition-colors"
+              >
+                <Avatar className="h-8 w-8">
+                  <AvatarImage
+                    src={currentSrc}
+                    alt={userName}
+                    onError={() => {
+                      if (currentSrc !== fallbackAvatarUrl) {
+                        setCurrentSrc(fallbackAvatarUrl);
+                      }
+                    }}
+                  />
+                </Avatar>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-56 p-2" align="end">
+              <div className="px-2 py-1.5 text-xs text-muted-foreground">
+                <div className="text-foreground text-sm font-medium">
+                  {userName}
+                </div>
               </div>
-            </div>
-            <Separator className="my-1" />
-            <div className="flex flex-col gap-1">
-              <Link
-                href="/profile"
-                className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-accent transition-colors"
-              >
-                <Settings className="h-4 w-4" />
-                Settings
-              </Link>
-              <button
-                type="button"
-                onClick={logout}
-                className="flex w-full items-center rounded-md px-2 py-1.5 text-left text-sm text-destructive hover:bg-destructive/10"
-              >
-                Logout
-              </button>
-            </div>
-          </PopoverContent>
-        </Popover>
+              <Separator className="my-1" />
+              <div className="flex flex-col gap-1">
+                <Link
+                  href="/profile"
+                  className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-accent transition-colors"
+                >
+                  <Settings className="h-4 w-4" />
+                  Settings
+                </Link>
+                <button
+                  type="button"
+                  onClick={logout}
+                  className="flex w-full items-center rounded-md px-2 py-1.5 text-left text-sm text-destructive hover:bg-destructive/10"
+                >
+                  Logout
+                </button>
+              </div>
+            </PopoverContent>
+          </Popover>
+        ) : (
+          <Button
+            variant="ghost"
+            className="flex h-8 w-8 items-center justify-center rounded-full p-0 hover:bg-muted transition-colors"
+            disabled
+          >
+            <Avatar className="h-8 w-8">
+              <AvatarImage
+                src={currentSrc}
+                alt={userName}
+                onError={() => {
+                  if (currentSrc !== fallbackAvatarUrl) {
+                    setCurrentSrc(fallbackAvatarUrl);
+                  }
+                }}
+              />
+            </Avatar>
+          </Button>
+        )}
       </div>
     </header>
   );

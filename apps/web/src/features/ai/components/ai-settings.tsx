@@ -17,6 +17,7 @@ import {
 import { useAISettings } from "../hooks/useAISettings";
 import { Loader2, Shield, Database, Key, Settings, Clock } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import type { AISettingsResponse } from "../types";
 
 // Common timezones for selection
 const TIMEZONES = [
@@ -38,14 +39,12 @@ export function AISettings() {
   const {
     settings,
     isLoading,
-    usageStats,
     updateDataPrivacy,
     toggleEnabled,
     updateProvider,
     updateModel,
     updateAPIKey,
     updateTimezone,
-    updateUsageLimit,
     isUpdating,
   } = useAISettings();
   
@@ -130,12 +129,12 @@ export function AISettings() {
                 <SelectValue placeholder="Select model" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="llama-3.1-8b">Llama 3.1 8B</SelectItem>
-                <SelectItem value="llama-3.1-70b">Llama 3.1 70B</SelectItem>
-                <SelectItem value="llama-3-8b">Llama 3 8B</SelectItem>
-                <SelectItem value="llama-3-70b">Llama 3 70B</SelectItem>
-                <SelectItem value="gpt-4">GPT-4</SelectItem>
-                <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
+                <SelectItem value="llama-3.1-8b">Llama-3.1-8B</SelectItem>
+                <SelectItem value="qwen-3-32b">Qwen-3-32B</SelectItem>
+                <SelectItem value="gpt-oss-120b">GPT-OSS-120B</SelectItem>
+                <SelectItem value="zai-glm-4.6">ZAI GLM 4.6</SelectItem>
+                <SelectItem value="llama-3.3-70b">Llama-3.3-70B</SelectItem>
+                <SelectItem value="qwen3-235b">Qwen3-235B (Instruct)</SelectItem>
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
@@ -213,52 +212,6 @@ export function AISettings() {
             </p>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="usage-limit">Monthly Usage Limit (Optional)</Label>
-            <Input
-              id="usage-limit"
-              type="number"
-              placeholder="e.g., 1000000"
-              value={settings.usage_limit || ""}
-              onChange={(e) => {
-                const value = e.target.value ? parseInt(e.target.value, 10) : undefined;
-                updateUsageLimit(value);
-              }}
-              disabled={isUpdating || !settings.enabled}
-            />
-            <p className="text-xs text-muted-foreground">
-              Set a monthly token usage limit. Leave empty for unlimited usage.
-            </p>
-          </div>
-
-          {usageStats && (
-            <>
-              <Separator />
-              <div className="space-y-2">
-                <Label>Current Usage</Label>
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">
-                      {usageStats.current_usage.toLocaleString()} tokens used
-                    </span>
-                    {usageStats.usage_limit && (
-                      <span className="text-muted-foreground">
-                        {usageStats.percentage.toFixed(1)}% of {usageStats.usage_limit.toLocaleString()}
-                      </span>
-                    )}
-                  </div>
-                  {usageStats.usage_limit && (
-                    <div className="w-full bg-muted rounded-full h-2">
-                      <div
-                        className="bg-primary h-2 rounded-full transition-all"
-                        style={{ width: `${Math.min(usageStats.percentage, 100)}%` }}
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-            </>
-          )}
         </CardContent>
       </Card>
 
@@ -344,6 +297,25 @@ export function AISettings() {
                 onCheckedChange={(checked) =>
                   updateDataPrivacy("allow_deals", checked)
                 }
+                disabled={!settings.enabled}
+              />
+            </div>
+
+            <Separator />
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="leads">Leads</Label>
+                <p className="text-sm text-muted-foreground">
+                  Allow AI to access lead management data
+                </p>
+              </div>
+              <Switch
+                id="leads"
+                checked={(settings.data_privacy as unknown as Record<string, boolean>).allow_leads ?? false}
+                onCheckedChange={(checked) => {
+                  updateDataPrivacy("allow_leads", checked);
+                }}
                 disabled={!settings.enabled}
               />
             </div>

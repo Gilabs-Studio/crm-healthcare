@@ -143,10 +143,23 @@ func (rl *rateLimiters) cleanupLimiters() {
 	}
 }
 
+// isLocalhost checks if the IP is localhost/127.0.0.1/::1
+func isLocalhost(ip string) bool {
+	return ip == "127.0.0.1" || ip == "::1" || ip == "localhost" || ip == ""
+}
+
 // RateLimitMiddleware creates a rate limiting middleware based on endpoint type
 func RateLimitMiddleware(limitType string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ip := c.ClientIP()
+		
+		// Skip rate limiting for localhost in development (to avoid issues during testing)
+		// In production, this should be removed or controlled via environment variable
+		if isLocalhost(ip) && (config.AppConfig.Server.Env == "development" || config.AppConfig.Server.Env == "dev") {
+			c.Next()
+			return
+		}
+		
 		var limiter *rate.Limiter
 		var limiterStruct *rateLimiter
 		var rule config.RateLimitRule
