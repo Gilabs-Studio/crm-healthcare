@@ -9,7 +9,6 @@ import '../../features/dashboard/presentation/dashboard_screen.dart';
 import '../../features/dashboard/presentation/recent_activities_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/tasks/presentation/task_detail_screen.dart';
-import '../../features/tasks/presentation/task_form_screen.dart';
 import '../../features/tasks/presentation/task_list_screen.dart';
 import '../../features/visit_reports/presentation/reports_screen.dart';
 import '../../features/visit_reports/presentation/visit_report_detail_screen.dart';
@@ -61,16 +60,7 @@ class AppRouter {
             const AuthGate(child: VisitReportFormScreen(), requiredRoute: AppRoutes.visitReportsCreate),
         AppRoutes.tasks: (_) =>
             const AuthGate(child: TaskListScreen(), requiredRoute: AppRoutes.tasks),
-        AppRoutes.tasksCreate: (_) =>
-            const AuthGate(child: TaskFormScreen(), requiredRoute: AppRoutes.tasksCreate),
-        AppRoutes.tasksEdit: (context) {
-          final args = ModalRoute.of(context)!.settings.arguments;
-          final taskId = args is Map ? args['taskId'] as String? : null;
-          return AuthGate(
-            child: TaskFormScreen(taskId: taskId),
-            requiredRoute: AppRoutes.tasksEdit,
-          );
-        },
+        // TaskFormScreen routes removed - sales users don't need create/edit tasks
         AppRoutes.notifications: (_) =>
             const AuthGate(child: NotificationListScreen(), requiredRoute: AppRoutes.notifications),
         AppRoutes.recentActivities: (_) =>
@@ -149,18 +139,7 @@ class AppRouter {
       );
     }
 
-    // Task Form: /tasks/create
-    if (pathSegments.length == 2 &&
-        pathSegments[0] == 'tasks' &&
-        pathSegments[1] == 'create') {
-      return MaterialPageRoute(
-        settings: settings,
-        builder: (_) => AuthGate(
-          child: const TaskFormScreen(),
-          requiredRoute: AppRoutes.tasksCreate,
-        ),
-      );
-    }
+    // Task Form routes removed - sales users don't need create/edit tasks
 
     return null;
   }

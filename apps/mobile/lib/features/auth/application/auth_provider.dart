@@ -38,10 +38,24 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       if (token != null && rememberMe) {
         // Token ada dan rememberMe = true → auto-login
-        state = AuthState.authenticated();
+        // Try to get user data from storage first
+        final savedUser = storage.getUser();
+        if (savedUser != null) {
+          // User data exists in storage, use it
+          state = AuthState.authenticated(user: savedUser);
+        } else {
+          // No user data in storage, try to refresh token to get user data
+          final refreshed = await refreshToken();
+          if (!refreshed) {
+            // Refresh failed, logout
+            state = AuthState.unauthenticated();
+          }
+          // If refresh succeeded, state is already set in refreshToken()
+        }
       } else if (token != null && !rememberMe) {
         // Token ada tapi rememberMe = false → hapus token (session only)
         await storage.clearAuthToken();
+        await storage.clearUser();
         state = AuthState.unauthenticated();
       } else {
         // Tidak ada token → unauthenticated
@@ -83,6 +97,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await storage.saveAuthToken(loginResponse.token);
       await storage.saveRefreshToken(loginResponse.refreshToken);
       await storage.setRememberMe(rememberMe);
+      // Save user data to storage for auto-login
+      await storage.saveUser(loginResponse.user);
 
       // Set authenticated state with user data
       state = AuthState(
@@ -104,6 +120,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> logout() async {
     final storage = await _ref.read(localStorageProvider.future);
     await storage.clearAuthToken();
+    await storage.clearUser();
     state = AuthState.unauthenticated();
   }
 
@@ -121,6 +138,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
       // Save new tokens to local storage
       await storage.saveAuthToken(loginResponse.token);
       await storage.saveRefreshToken(loginResponse.refreshToken);
+      // Save user data to storage
+      await storage.saveUser(loginResponse.user);
 
       // Update state with new user data
       state = AuthState(

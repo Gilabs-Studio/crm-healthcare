@@ -9,8 +9,6 @@ import '../../../core/l10n/app_localizations.dart';
 import '../../../core/widgets/error_widget.dart';
 import '../../../core/widgets/loading_widget.dart';
 import '../../../core/widgets/skeleton_widget.dart';
-import '../../permissions/hooks/use_has_permission.dart';
-import 'task_form_screen.dart';
 import 'widgets/task_card.dart';
 
 class TaskListScreen extends ConsumerStatefulWidget {
@@ -123,51 +121,13 @@ class _TaskListScreenState extends ConsumerState<TaskListScreen> {
       return body;
     }
 
-    // Check CREATE permission
-    final hasCreatePermission = useHasCreatePermission(ref, '/tasks');
-
+    // Sales users don't need create button - removed
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.tasks),
-        actions: [
-          if (hasCreatePermission)
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const TaskFormScreen(),
-                  ),
-                ).then((result) {
-                  // Refresh list after creating task
-                  if (result != null && mounted) {
-                    ref.read(taskListProvider.notifier).refresh();
-                  }
-                });
-              },
-            ),
-        ],
       ),
       body: body,
-      floatingActionButton: hasCreatePermission
-          ? FloatingActionButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const TaskFormScreen(),
-                  ),
-                ).then((result) {
-                  // Refresh list after creating task
-                  if (result != null && mounted) {
-                    ref.read(taskListProvider.notifier).refresh();
-                  }
-                });
-              },
-              child: const Icon(Icons.add),
-            )
-          : null,
+      // No FloatingActionButton for sales users
     );
   }
 

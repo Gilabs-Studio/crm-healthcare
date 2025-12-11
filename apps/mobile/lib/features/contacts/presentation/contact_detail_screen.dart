@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../application/contact_provider.dart';
 import '../data/models/contact.dart';
 import '../presentation/contact_form_screen.dart';
-import '../../permissions/hooks/use_has_permission.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/widgets/error_widget.dart';
 import '../../../core/widgets/loading_widget.dart';

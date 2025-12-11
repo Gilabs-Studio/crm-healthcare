@@ -62,8 +62,7 @@ class _PermissionGate extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final permissionsAsync = ref.watch(userPermissionsProvider);
-    final menus = permissionsAsync.value?.menus ?? [];
-
+    
     // Show loading while permissions are being fetched
     if (permissionsAsync.isLoading) {
       return const Scaffold(
@@ -74,10 +73,28 @@ class _PermissionGate extends ConsumerWidget {
       );
     }
 
-    // If error loading permissions, allow access (fallback)
+    // If error loading permissions, handle gracefully
     if (permissionsAsync.hasError) {
+      final error = permissionsAsync.error;
+      // If error is "User not authenticated", redirect to login
+      if (error.toString().contains('User not authenticated')) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Navigator.of(context).pushReplacementNamed(AppRoutes.login);
+        });
+        return const Scaffold(
+          backgroundColor: Colors.white,
+          body: Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      }
+      // For other errors, allow access (fallback) but log the error
+      debugPrint('Error loading permissions: $error');
       return child;
     }
+    
+    // Get menus from permissions
+    final menus = permissionsAsync.value?.menus ?? [];
 
     // Map mobile route to web URL
     final webUrl = PermissionHelper.getWebUrlForRoute(route);

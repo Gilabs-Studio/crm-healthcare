@@ -7,8 +7,6 @@ import '../data/models/task.dart';
 import '../../../core/l10n/app_localizations.dart';
 import '../../../core/widgets/error_widget.dart';
 import '../../../core/widgets/loading_widget.dart';
-import '../../permissions/hooks/use_has_permission.dart';
-import '../presentation/task_form_screen.dart';
 
 class TaskDetailScreen extends ConsumerStatefulWidget {
   const TaskDetailScreen({
@@ -23,7 +21,7 @@ class TaskDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
-  bool _isDeleting = false;
+  // Delete functionality removed - sales users don't need to delete tasks
 
   @override
   Widget build(BuildContext context) {
@@ -215,111 +213,44 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
             const SizedBox(height: 16),
           ],
           // Action Buttons
-          // Check permissions
-          Builder(
-            builder: (context) {
-              final hasEditPermission = useHasEditPermission(ref, '/tasks');
-              final hasDeletePermission = useHasDeletePermission(ref, '/tasks');
-
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (hasEditPermission) ...[
-                    Row(
-                      children: [
-                        Expanded(
-                          child: FilledButton.icon(
-                            onPressed: () => _handleEdit(task),
-                            icon: const Icon(Icons.edit_outlined),
-                            label: Text(l10n.edit),
-                            style: FilledButton.styleFrom(
-                              minimumSize: const Size(double.infinity, 48),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                  ],
-                  if (task.status != 'completed' && task.status != 'cancelled') ...[
-                    FilledButton.icon(
-                      onPressed: () => _showCompleteDialog(context, task, l10n, colorScheme),
-                      icon: const Icon(Icons.check),
-                      label: Text(l10n.completeTask),
-                      style: FilledButton.styleFrom(
-                        minimumSize: const Size(double.infinity, 48),
-                        backgroundColor: Colors.green,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                  ],
-                  OutlinedButton.icon(
-                    onPressed: () => _showAddReminderDialog(context, task, l10n, colorScheme),
-                    icon: const Icon(Icons.notifications_outlined),
-                    label: Text(l10n.addReminder),
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 48),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+          // Sales users can only complete tasks and add reminders (no edit/delete)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (task.status != 'completed' && task.status != 'cancelled') ...[
+                FilledButton.icon(
+                  onPressed: () => _showCompleteDialog(context, task, l10n, colorScheme),
+                  icon: const Icon(Icons.check),
+                  label: Text(l10n.completeTask),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 48),
+                    backgroundColor: Colors.green,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  if (hasDeletePermission) ...[
-                    const SizedBox(height: 12),
-                    OutlinedButton.icon(
-                      onPressed: _isDeleting ? null : () => _showDeleteDialog(context, task, l10n, colorScheme),
-                      icon: _isDeleting
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.delete_outline),
-                      label: Text(l10n.delete),
-                      style: OutlinedButton.styleFrom(
-                        minimumSize: const Size(double.infinity, 48),
-                        foregroundColor: colorScheme.error,
-                        side: BorderSide(color: colorScheme.error),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              );
-            },
+                ),
+                const SizedBox(height: 12),
+              ],
+              OutlinedButton.icon(
+                onPressed: () => _showAddReminderDialog(context, task, l10n, colorScheme),
+                icon: const Icon(Icons.notifications_outlined),
+                label: Text(l10n.addReminder),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Future<void> _handleEdit(Task task) async {
-    final result = await Navigator.push<Task>(
-      context,
-      MaterialPageRoute(
-        builder: (context) => TaskFormScreen(taskId: task.id),
-      ),
-    );
-
-    if (result != null && mounted) {
-      // Refresh detail
-      ref.invalidate(taskDetailProvider(widget.taskId));
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context)!.taskUpdatedSuccessfully),
-          backgroundColor: Colors.green,
-        ),
-      );
-    }
-  }
+  // Edit functionality removed - sales users don't need to edit tasks
 
   String _formatDueDate(DateTime date) {
     return DateFormat('MMM dd, yyyy • HH:mm').format(date);
@@ -380,66 +311,7 @@ class _TaskDetailScreenState extends ConsumerState<TaskDetailScreen> {
     );
   }
 
-  void _showDeleteDialog(
-    BuildContext context,
-    Task task,
-    AppLocalizations l10n,
-    ColorScheme colorScheme,
-  ) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.deleteTask),
-        content: Text(l10n.deleteTaskConfirmation),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              setState(() => _isDeleting = true);
-              final success = await ref
-                  .read(taskFormProvider.notifier)
-                  .deleteTask(task.id);
-              setState(() => _isDeleting = false);
-              if (mounted) {
-                if (success) {
-                  // Refresh task list before going back
-                  ref.read(taskListProvider.notifier).refresh();
-                  // Show success message before navigation
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(l10n.taskDeletedSuccessfully),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                  // Return true to indicate task was deleted and navigate back
-                  Navigator.pop(context, true);
-                } else {
-                  final error = ref.read(taskFormProvider).errorMessage;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(error ?? l10n.failedToDeleteTask),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              }
-            },
-            style: FilledButton.styleFrom(
-              backgroundColor: colorScheme.error,
-            ),
-            child: Text(l10n.delete),
-          ),
-        ],
-      ),
-    );
-  }
+  // Delete dialog removed - sales users don't need to delete tasks
 
   void _showAddReminderDialog(
     BuildContext context,

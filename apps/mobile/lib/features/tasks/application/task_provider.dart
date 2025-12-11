@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/cache/list_cache.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/connectivity_service.dart';
+import '../../auth/application/auth_provider.dart';
 import '../data/models/task.dart';
 import '../data/task_repository.dart';
 import 'task_state.dart';
@@ -16,7 +17,8 @@ final taskListProvider =
     StateNotifierProvider<TaskListNotifier, TaskListState>((ref) {
   final repository = ref.read(taskRepositoryProvider);
   final connectivity = ref.watch(connectivityServiceProvider);
-  return TaskListNotifier(repository, connectivity);
+  final authState = ref.watch(authProvider);
+  return TaskListNotifier(repository, connectivity, authState.user?.id);
 });
 
 final taskDetailProvider =
@@ -32,11 +34,12 @@ final taskFormProvider =
 });
 
 class TaskListNotifier extends StateNotifier<TaskListState> {
-  TaskListNotifier(this._repository, this._connectivity)
+  TaskListNotifier(this._repository, this._connectivity, this._userId)
       : super(const TaskListState());
 
   final TaskRepository _repository;
   final ConnectivityService _connectivity;
+  final String? _userId; // User ID for filtering assigned tasks
   final ListCache _cache = ListCache();
 
   Future<void> loadTasks({
@@ -111,12 +114,14 @@ class TaskListNotifier extends StateNotifier<TaskListState> {
     }
 
     try {
+      // For sales users, only show tasks assigned to them
       final response = await _repository.getTasks(
         page: page,
         perPage: 20,
         search: searchQuery.isNotEmpty ? searchQuery : null,
         status: statusFilter,
         priority: priorityFilter,
+        assignedTo: _userId, // Filter by assigned user
         forceRefresh: forceRefresh,
       );
 
