@@ -130,12 +130,12 @@ export function AISettings() {
                 <SelectValue placeholder="Select model" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="llama-3.1-8b">Llama 3.1 8B</SelectItem>
-                <SelectItem value="llama-3.1-70b">Llama 3.1 70B</SelectItem>
-                <SelectItem value="llama-3-8b">Llama 3 8B</SelectItem>
-                <SelectItem value="llama-3-70b">Llama 3 70B</SelectItem>
-                <SelectItem value="gpt-4">GPT-4</SelectItem>
-                <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
+                <SelectItem value="llama-3.1-8b">Llama-3.1-8B</SelectItem>
+                <SelectItem value="qwen-3-32b">Qwen-3-32B</SelectItem>
+                <SelectItem value="gpt-oss-120b">GPT-OSS-120B</SelectItem>
+                <SelectItem value="zai-glm-4.6">ZAI GLM 4.6</SelectItem>
+                <SelectItem value="llama-3.3-70b">Llama-3.3-70B</SelectItem>
+                <SelectItem value="qwen3-235b">Qwen3-235B (Instruct)</SelectItem>
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">

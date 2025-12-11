@@ -30,7 +30,7 @@ func NewClient(baseURL, apiKey, model string) *Client {
 		apiKey:  apiKey,
 		model:   model,
 		httpClient: &http.Client{
-			Timeout: 30 * time.Second,
+			Timeout: 120 * time.Second, // Increased timeout for longer responses
 		},
 	}
 }
@@ -170,7 +170,7 @@ func (c *Client) Generate(req *GenerateRequest) (*GenerateResponse, error) {
 func (c *Client) Chat(req *ChatRequest) (*ChatResponse, error) {
 	// Set defaults
 	if req.MaxTokens == 0 {
-		req.MaxTokens = 500
+		req.MaxTokens = 2000 // Increased default for longer responses
 	}
 	if req.Temperature == 0 {
 		req.Temperature = 0.7
@@ -222,15 +222,37 @@ func (c *Client) Chat(req *ChatRequest) (*ChatResponse, error) {
 		return nil, fmt.Errorf("failed to read response: %w", err)
 	}
 
+	// Log response for debugging (first 1000 chars)
+	bodyStr := string(body)
+	if len(bodyStr) > 1000 {
+		fmt.Printf("=== CEREBRAS API RESPONSE DEBUG ===\n")
+		fmt.Printf("Response length: %d bytes\n", len(body))
+		fmt.Printf("Response preview (first 1000 chars): %s\n", bodyStr[:1000])
+		fmt.Printf("Response preview (last 500 chars): %s\n", bodyStr[len(bodyStr)-500:])
+		fmt.Printf("===================================\n")
+	}
+
 	// Check status code
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API error: %s (status: %d)", string(body), resp.StatusCode)
+		// Try to parse error response for better error messages
+		var errorResponse struct {
+			Error struct {
+				Message string `json:"message"`
+				Type    string `json:"type"`
+				Code    string `json:"code"`
+			} `json:"error"`
+		}
+		if err := json.Unmarshal(body, &errorResponse); err == nil && errorResponse.Error.Message != "" {
+			return nil, fmt.Errorf("Cerebras API error (status %d): %s", resp.StatusCode, errorResponse.Error.Message)
+		}
+		return nil, fmt.Errorf("Cerebras API error (status %d): %s", resp.StatusCode, string(body))
 	}
 
 	// Parse response
 	var apiResponse struct {
 		Choices []struct {
-			Message ChatMessage `json:"message"`
+			Message      ChatMessage `json:"message"`
+			FinishReason string      `json:"finish_reason"` // "stop", "length", "content_filter"
 		} `json:"choices"`
 		Usage struct {
 			TotalTokens int `json:"total_tokens"`
@@ -258,9 +280,30 @@ func (c *Client) Chat(req *ChatRequest) (*ChatResponse, error) {
 		return nil, fmt.Errorf("no choices in response")
 	}
 
+	// Check if response was truncated due to token limit
+	messageContent := apiResponse.Choices[0].Message.Content
+	finishReason := apiResponse.Choices[0].FinishReason
+	
+	// Log finish reason for debugging
+	if finishReason != "" {
+		fmt.Printf("=== CEREBRAS FINISH REASON ===\n")
+		fmt.Printf("Finish reason: %s\n", finishReason)
+		fmt.Printf("Message length: %d characters\n", len(messageContent))
+		fmt.Printf("Tokens used: %d\n", apiResponse.Usage.TotalTokens)
+		fmt.Printf("=============================\n")
+	}
+	
+	// If response was truncated (finish_reason == "length"), add warning
+	if finishReason == "length" {
+		messageContent += "\n\n⚠️ *Catatan: Response mungkin terpotong karena mencapai batas token. Silakan coba pertanyaan yang lebih spesifik atau minta data dalam batch yang lebih kecil, atau gunakan model yang lebih advanced*"
+	}
+
 	return &ChatResponse{
-		Message: apiResponse.Choices[0].Message,
-		Tokens:  apiResponse.Usage.TotalTokens,
+		Message: ChatMessage{
+			Role:    apiResponse.Choices[0].Message.Role,
+			Content: messageContent,
+		},
+		Tokens: apiResponse.Usage.TotalTokens,
 	}, nil
 }
 
