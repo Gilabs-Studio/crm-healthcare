@@ -17,6 +17,7 @@ import {
 import { useAISettings } from "../hooks/useAISettings";
 import { Loader2, Shield, Database, Key, Settings, Clock } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import type { AISettingsResponse } from "../types";
 
 // Common timezones for selection
 const TIMEZONES = [
@@ -38,14 +39,12 @@ export function AISettings() {
   const {
     settings,
     isLoading,
-    usageStats,
     updateDataPrivacy,
     toggleEnabled,
     updateProvider,
     updateModel,
     updateAPIKey,
     updateTimezone,
-    updateUsageLimit,
     isUpdating,
   } = useAISettings();
   
@@ -213,52 +212,6 @@ export function AISettings() {
             </p>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="usage-limit">Monthly Usage Limit (Optional)</Label>
-            <Input
-              id="usage-limit"
-              type="number"
-              placeholder="e.g., 1000000"
-              value={settings.usage_limit || ""}
-              onChange={(e) => {
-                const value = e.target.value ? parseInt(e.target.value, 10) : undefined;
-                updateUsageLimit(value);
-              }}
-              disabled={isUpdating || !settings.enabled}
-            />
-            <p className="text-xs text-muted-foreground">
-              Set a monthly token usage limit. Leave empty for unlimited usage.
-            </p>
-          </div>
-
-          {usageStats && (
-            <>
-              <Separator />
-              <div className="space-y-2">
-                <Label>Current Usage</Label>
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">
-                      {usageStats.current_usage.toLocaleString()} tokens used
-                    </span>
-                    {usageStats.usage_limit && (
-                      <span className="text-muted-foreground">
-                        {usageStats.percentage.toFixed(1)}% of {usageStats.usage_limit.toLocaleString()}
-                      </span>
-                    )}
-                  </div>
-                  {usageStats.usage_limit && (
-                    <div className="w-full bg-muted rounded-full h-2">
-                      <div
-                        className="bg-primary h-2 rounded-full transition-all"
-                        style={{ width: `${Math.min(usageStats.percentage, 100)}%` }}
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-            </>
-          )}
         </CardContent>
       </Card>
 
@@ -359,10 +312,10 @@ export function AISettings() {
               </div>
               <Switch
                 id="leads"
-                checked={settings.data_privacy.allow_leads}
-                onCheckedChange={(checked) =>
-                  updateDataPrivacy("allow_leads", checked)
-                }
+                checked={(settings.data_privacy as unknown as Record<string, boolean>).allow_leads ?? false}
+                onCheckedChange={(checked) => {
+                  updateDataPrivacy("allow_leads", checked);
+                }}
                 disabled={!settings.enabled}
               />
             </div>

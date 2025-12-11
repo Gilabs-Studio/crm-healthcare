@@ -200,10 +200,6 @@ func (s *Service) checkDataPrivacy(dataType string, userID string) (bool, error)
 		privacyAllowed = dataPrivacy.AllowDeals
 	case "lead":
 		privacyAllowed = dataPrivacy.AllowLeads
-		fmt.Printf("=== DATA PRIVACY CHECK (LEAD) ===\n")
-		fmt.Printf("AllowLeads setting: %v\n", dataPrivacy.AllowLeads)
-		fmt.Printf("Privacy allowed: %v\n", privacyAllowed)
-		fmt.Printf("===============================\n")
 	case "activity":
 		privacyAllowed = dataPrivacy.AllowActivities
 	case "task":
@@ -216,10 +212,6 @@ func (s *Service) checkDataPrivacy(dataType string, userID string) (bool, error)
 
 	// If data privacy setting disallows, return false immediately
 	if !privacyAllowed {
-		fmt.Printf("=== DATA PRIVACY DENIED ===\n")
-		fmt.Printf("Data type: %s\n", dataType)
-		fmt.Printf("Privacy allowed: %v\n", privacyAllowed)
-		fmt.Printf("==========================\n")
 		return false, nil
 	}
 
@@ -277,12 +269,6 @@ func (s *Service) checkDataPrivacy(dataType string, userID string) (bool, error)
 
 	// Check if user has the required permission
 	hasPermission := s.hasUserPermission(userPerms, requiredPermissionCode)
-	if dataType == "lead" {
-		fmt.Printf("=== PERMISSION CHECK (LEAD) ===\n")
-		fmt.Printf("Required permission: %s\n", requiredPermissionCode)
-		fmt.Printf("Has permission: %v\n", hasPermission)
-		fmt.Printf("=============================\n")
-	}
 	return hasPermission, nil
 }
 
@@ -340,14 +326,6 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 	if selectedModel == "" {
 		selectedModel = settings.Model
 	}
-	
-	// Log model selection
-	fmt.Printf("=== MODEL SELECTION DEBUG ===\n")
-	fmt.Printf("Model from request: %s\n", model)
-	fmt.Printf("Model from settings: %s\n", settings.Model)
-	fmt.Printf("Selected model (final): %s\n", selectedModel)
-	fmt.Printf("Provider: %s\n", settings.Provider)
-	fmt.Printf("=============================\n")
 
 	// Get API key from settings or fallback to env
 	apiKey := settings.APIKey
@@ -367,17 +345,8 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 		// Get data privacy settings
 		var dataPrivacy ai_settings.DataPrivacySettings
 		
-		// Log for debugging
-		fmt.Printf("=== DATA PRIVACY QUERY DEBUG ===\n")
-		fmt.Printf("Settings.DataPrivacy is nil: %v\n", settings.DataPrivacy == nil)
-		if settings.DataPrivacy != nil {
-			fmt.Printf("Settings.DataPrivacy length: %d\n", len(settings.DataPrivacy))
-			fmt.Printf("Settings.DataPrivacy content: %s\n", string(settings.DataPrivacy))
-		}
-		
 		if settings.DataPrivacy != nil {
 			if err := json.Unmarshal(settings.DataPrivacy, &dataPrivacy); err == nil {
-				fmt.Printf("Successfully parsed data privacy settings\n")
 				privacyInfo := fmt.Sprintf("**PENGATURAN DATA PRIVACY:**\n\n")
 				privacyInfo += fmt.Sprintf("Akses ke data berikut diizinkan:\n\n")
 				if dataPrivacy.AllowAccounts {
@@ -416,22 +385,13 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 					privacyInfo += "✗ **Products** (Produk) - TIDAK diizinkan\n"
 				}
 				
-				fmt.Printf("Returning privacy info response\n")
-				fmt.Printf("===============================\n")
-				
 				// Return direct response about data privacy settings
 				return &ai.ChatResponse{
 					Message: privacyInfo + "\n\nIni adalah pengaturan data privacy yang saat ini aktif di sistem. Anda dapat mengubah pengaturan ini melalui halaman AI Settings.",
 					Tokens:  0, // No tokens consumed for this internal response
 				}, nil
-			} else {
-				fmt.Printf("Error parsing data privacy: %v\n", err)
 			}
 		}
-		
-		// If settings not found or parsing failed, check if we should use defaults
-		fmt.Printf("DataPrivacy is nil or parsing failed, using default message\n")
-		fmt.Printf("===============================\n")
 		
 		// Use default settings (all allowed) if DataPrivacy is nil
 		privacyInfo := fmt.Sprintf("**PENGATURAN DATA PRIVACY:**\n\n")
@@ -533,14 +493,11 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 				}
 				
 				deals, _, err := s.dealRepo.List(req)
-				fmt.Printf("=== ANALYTICS DATA FETCH DEBUG ===\n")
-				fmt.Printf("Fetching ALL deals for analytics - Error: %v, Count: %d\n", err, len(deals))
 				if err == nil && len(deals) > 0 {
 					// For analytics, limit to 50 deals max to prevent token overflow
 					maxDeals := 50
 					if len(deals) > maxDeals {
 						deals = deals[:maxDeals]
-						fmt.Printf("Limited deals to %d for analytics to prevent token overflow\n", maxDeals)
 					}
 					
 					// Transform deals to user-friendly format with names
@@ -551,14 +508,9 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 					instruction := fmt.Sprintf("REAL DEALS DATA (%d deals for analytics):\n%s\n\nCalculate statistics using ONLY this data. Present results clearly with actual numbers.", len(deals), string(dealsJSON))
 					contextData = instruction
 					contextType = "deal"
-					fmt.Printf("Context data set with %d deals for analytics (context size: %d chars)\n", len(deals), len(contextData))
 				} else {
-					if err != nil {
-						fmt.Printf("Error fetching deals for analytics: %v\n", err)
-					}
 					dataAccessInfo = "⚠️ Tidak dapat mengakses data pipeline/deals dari database untuk perhitungan statistik. Data mungkin tidak tersedia."
 				}
-				fmt.Printf("====================================\n")
 			}
 		}
 		
@@ -611,14 +563,11 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 				}
 				
 				deals, _, err := s.dealRepo.List(req)
-				fmt.Printf("=== DATA FETCH DEBUG ===\n")
-				fmt.Printf("Fetching deals/pipeline - Error: %v, Count: %d, StageID: %s\n", err, len(deals), stageID)
 				if err == nil && len(deals) > 0 {
 					// Limit number of deals to prevent token overflow (max 15 deals for large responses)
 					maxDeals := 15
 					if len(deals) > maxDeals {
 						deals = deals[:maxDeals]
-						fmt.Printf("Limited deals to %d to prevent token overflow\n", maxDeals)
 					}
 					
 					// Transform deals to user-friendly format with names
@@ -647,14 +596,7 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 		   (strings.Contains(messageLower, "tampilkan") && strings.Contains(messageLower, "lead")) ||
 		   (strings.Contains(messageLower, "data") && strings.Contains(messageLower, "lead"))) {
 			// Check data privacy and user permissions
-			allowed, err := s.checkDataPrivacy("lead", userID)
-			fmt.Printf("=== LEAD ACCESS CHECK DEBUG ===\n")
-			fmt.Printf("User ID: %s\n", userID)
-			fmt.Printf("Allowed: %v\n", allowed)
-			if err != nil {
-				fmt.Printf("Error: %v\n", err)
-			}
-			fmt.Printf("==============================\n")
+			allowed, _ := s.checkDataPrivacy("lead", userID)
 			if !allowed {
 				dataAccessInfo = "⚠️ Akses ke data leads tidak diizinkan berdasarkan pengaturan privasi data atau permission yang Anda miliki."
 			} else {
@@ -702,14 +644,9 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 					instruction := fmt.Sprintf("REAL LEADS DATA (showing %d of %d total):\n%s\n\nPresent in Markdown table. Use [Name](lead://id) for clickable links. Show only names, not IDs.", len(leads), total, string(leadsJSON))
 					contextData = instruction
 					contextType = "lead"
-					fmt.Printf("Context data set with %d leads (context size: %d chars)\n", len(leads), len(contextData))
 				} else {
-					if err != nil {
-						fmt.Printf("Error fetching leads: %v\n", err)
-					}
 					dataAccessInfo = "⚠️ Tidak dapat mengakses data leads dari database. Data mungkin tidak tersedia."
 				}
-				fmt.Printf("========================\n")
 			}
 		}
 		
@@ -726,22 +663,15 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 					Page:    1,
 					PerPage: 10,
 				})
-				fmt.Printf("=== DATA FETCH DEBUG ===\n")
-				fmt.Printf("Fetching accounts - Error: %v, Count: %d, Total: %d\n", err, len(accounts), total)
 				if err == nil && len(accounts) > 0 {
 					// Transform accounts to user-friendly format with names
 					accountsFormatted := s.formatAccountsForAI(accounts)
 					accountsJSON, _ := json.Marshal(accountsFormatted)
 					contextData = fmt.Sprintf("REAL ACCOUNTS DATA FROM DATABASE (showing %d of %d total accounts):\n%s\n\nCRITICAL INSTRUCTION: You MUST use ONLY the data above. Present it in a Markdown table format. CRITICAL: NEVER show IDs as separate columns - IDs are ONLY used in clickable links. ALWAYS show ONLY NAMES (name, category, city, province) in tables. For clickable actions that trigger detail components, the 'Nama Akun' (Name) column MUST be formatted as [Name](account://id) to create clickable links. Example: [RSUD Jakarta](account://ab868b77-e9b3-429f-ad8c-d55ac1f6561b). Use the EXACT id from the data above - DO NOT create or invent IDs. DO NOT create columns like 'ID', 'Account ID', etc. - these should NOT appear in tables. DO NOT create, invent, or make up any data. DO NOT add columns that don't exist in the data. AFTER presenting the table, ALWAYS provide 1-2 insights, ask 2-3 follow-up questions to understand what the user wants, and offer actionable recommendations.", len(accounts), total, string(accountsJSON))
 					contextType = "account" // Set context type for proper prompt
-					fmt.Printf("Context data set with %d accounts\n", len(accounts))
 				} else {
-					if err != nil {
-						fmt.Printf("Error fetching accounts: %v\n", err)
-					}
 					dataAccessInfo = "⚠️ Tidak dapat mengakses data accounts dari database. Data mungkin tidak tersedia."
 				}
-				fmt.Printf("========================\n")
 			}
 		}
 		
@@ -851,8 +781,6 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 				}
 				
 				tasks, _, err := s.taskRepo.List(req)
-				fmt.Printf("=== DATA FETCH DEBUG ===\n")
-				fmt.Printf("Fetching tasks - Error: %v, Count: %d, Status: %s\n", err, len(tasks), req.Status)
 				if err == nil && len(tasks) > 0 {
 					tasksJSON, _ := json.Marshal(tasks)
 					if contextData != "" {
@@ -862,16 +790,11 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 					if contextType == "" {
 						contextType = "task"
 					}
-					fmt.Printf("Context data set with %d tasks\n", len(tasks))
 				} else {
-					if err != nil {
-						fmt.Printf("Error fetching tasks: %v\n", err)
-					}
 					if dataAccessInfo == "" {
 						dataAccessInfo = "⚠️ Tidak dapat mengakses data tasks dari database. Data mungkin tidak tersedia."
 					}
 				}
-				fmt.Printf("========================\n")
 			}
 		}
 		
@@ -998,24 +921,17 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 					Page:    1,
 					PerPage: 10,
 				})
-				fmt.Printf("=== DATA FETCH DEBUG (GENERAL REQUEST) ===\n")
-				fmt.Printf("User asked for general data, fetching accounts - Error: %v, Count: %d, Total: %d\n", err, len(accounts), total)
 				if err == nil && len(accounts) > 0 {
 					// Transform accounts to user-friendly format with names
 					accountsFormatted := s.formatAccountsForAI(accounts)
 					accountsJSON, _ := json.Marshal(accountsFormatted)
 					contextData = fmt.Sprintf("REAL ACCOUNTS DATA FROM DATABASE (showing %d of %d total accounts):\n%s\n\nCRITICAL INSTRUCTION: You MUST use ONLY the data above. Present it in a Markdown table format. CRITICAL: NEVER show IDs as separate columns - IDs are ONLY used in clickable links. ALWAYS show ONLY NAMES (name, category, city, province) in tables. For clickable actions that trigger detail components, the 'Nama Akun' (Name) column MUST be formatted as [Name](account://id) to create clickable links. Example: [RSUD Jakarta](account://ab868b77-e9b3-429f-ad8c-d55ac1f6561b). Use the EXACT id from the data above - DO NOT create or invent IDs. DO NOT create columns like 'ID', 'Account ID', etc. - these should NOT appear in tables. DO NOT create, invent, or make up any data. DO NOT add columns that don't exist in the data. AFTER presenting the table, ALWAYS provide 1-2 insights, ask 2-3 follow-up questions to understand what the user wants, and offer actionable recommendations.", len(accounts), total, string(accountsJSON))
 					contextType = "account"
-					fmt.Printf("Context data set with %d accounts\n", len(accounts))
 				} else {
-					if err != nil {
-						fmt.Printf("Error fetching accounts: %v\n", err)
-					}
 					if dataAccessInfo == "" {
 						dataAccessInfo = "⚠️ Tidak dapat mengakses data dari database. Data mungkin tidak tersedia."
 					}
 				}
-				fmt.Printf("========================\n")
 			}
 		}
 	}
@@ -1037,32 +953,6 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 	
 	// Build system prompt based on context
 	systemPrompt := BuildSystemPrompt(contextID, contextType, contextData, dataAccessInfo, selectedModel, settings.Provider, currentTime, timezone)
-
-	// Logging untuk debugging
-	fmt.Printf("=== AI CHAT DEBUG ===\n")
-	fmt.Printf("User message: %s\n", message)
-	fmt.Printf("Selected model: %s\n", selectedModel)
-	fmt.Printf("Provider: %s\n", settings.Provider)
-	fmt.Printf("Context ID: %s\n", contextID)
-	fmt.Printf("Context Type: %s\n", contextType)
-	fmt.Printf("Context Data Length: %d\n", len(contextData))
-	if len(contextData) > 0 {
-		fmt.Printf("Context Data Preview (first 500 chars): %s\n", contextData[:min(500, len(contextData))])
-	}
-	fmt.Printf("Data Access Info: %s\n", dataAccessInfo)
-	fmt.Printf("System Prompt Length: %d\n", len(systemPrompt))
-	fmt.Printf("Conversation History Length: %d messages\n", len(conversationHistory))
-	if len(conversationHistory) > 0 {
-		fmt.Printf("Conversation History Preview:\n")
-		for i, msg := range conversationHistory {
-			if i >= 3 { // Show only first 3 messages
-				fmt.Printf("  ... and %d more messages\n", len(conversationHistory)-3)
-				break
-			}
-			fmt.Printf("  [%s]: %s (first 100 chars)\n", msg.Role, msg.Content[:min(100, len(msg.Content))])
-		}
-	}
-	fmt.Printf("========================\n")
 
 	// Build messages with conversation history
 	messages := []cerebras.ChatMessage{
@@ -1131,12 +1021,6 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 
 	// Check if model is in the available models map
 	if normalizedModel, exists := availableModels[selectedModel]; exists {
-		if normalizedModel != selectedModel {
-			fmt.Printf("=== MODEL NORMALIZATION ===\n")
-			fmt.Printf("Original model: %s\n", originalModel)
-			fmt.Printf("Normalized to: %s\n", normalizedModel)
-			fmt.Printf("===========================\n")
-		}
 		selectedModel = normalizedModel
 	} else {
 		// Model not found in available models
@@ -1145,9 +1029,6 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 			return nil, fmt.Errorf("model '%s' tidak didukung. Model yang tersedia: llama-3.1-8b, llama-3.3-70b, qwen-3-32b, qwen3-235b, gpt-oss-120b, zai-glm-4.6. Silakan pilih model yang valid.", originalModel)
 		}
 		// For other unknown models, let the API handle it (might be valid but not in our map)
-		fmt.Printf("=== MODEL NOT IN MAP (will try API) ===\n")
-		fmt.Printf("Model: %s (original: %s)\n", selectedModel, originalModel)
-		fmt.Printf("========================================\n")
 	}
 
 	// Calculate optimal MaxTokens based on context size
@@ -1167,10 +1048,6 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 	func() {
 		defer func() {
 			if r := recover(); r != nil {
-				fmt.Printf("=== PANIC RECOVERED IN AI CHAT ===\n")
-				fmt.Printf("Panic: %v\n", r)
-				fmt.Printf("User message: %s\n", message)
-				fmt.Printf("========================\n")
 				apiErr = fmt.Errorf("internal error: panic recovered: %v", r)
 			}
 		}()
@@ -1209,74 +1086,18 @@ func (s *Service) Chat(message string, contextID string, contextType string, con
 	
 	// Validate response
 	if response == nil {
-		fmt.Printf("=== NULL RESPONSE ERROR ===\n")
-		fmt.Printf("Response is nil from Cerebras API\n")
-		fmt.Printf("===========================\n")
 		return nil, fmt.Errorf("empty response from AI service")
 	}
 	
 	// Check if Message is nil (defensive check)
 	if response.Message.Content == "" {
-		fmt.Printf("=== EMPTY CONTENT ERROR ===\n")
-		fmt.Printf("Response message content is empty\n")
-		fmt.Printf("Response: %+v\n", response)
-		fmt.Printf("===========================\n")
 		return nil, fmt.Errorf("empty message content from AI service")
 	}
-
-	// Log response details for debugging
-	fmt.Printf("=== AI RESPONSE DEBUG ===\n")
-	fmt.Printf("Response length: %d characters\n", len(response.Message.Content))
-	fmt.Printf("Tokens used: %d\n", response.Tokens)
-	if len(response.Message.Content) > 500 {
-		fmt.Printf("Response preview (first 500 chars): %s\n", response.Message.Content[:500])
-		fmt.Printf("Response preview (last 200 chars): %s\n", response.Message.Content[len(response.Message.Content)-200:])
-	} else {
-		fmt.Printf("Full response: %s\n", response.Message.Content)
-	}
-	fmt.Printf("========================\n")
 
 	// Add data access info to response if needed
 	finalMessage := response.Message.Content
 	if dataAccessInfo != "" && !strings.Contains(finalMessage, dataAccessInfo) {
 		finalMessage = dataAccessInfo + "\n\n" + finalMessage
-	}
-
-	// Update usage tracking
-	usageLimit := int64(0)
-	if settings.UsageLimit != nil {
-		usageLimit = *settings.UsageLimit
-	}
-	
-	if usageLimit > 0 {
-		// Check if reset date has passed
-		if settings.UsageResetAt != nil && settings.UsageResetAt.Before(time.Now()) {
-			settings.CurrentUsage = 0
-			// Set reset date to the first day of the next month
-			now := time.Now()
-			nextMonth := time.Date(now.Year(), now.Month()+1, 1, 0, 0, 0, 0, now.Location())
-			settings.UsageResetAt = &nextMonth
-		}
-
-		// Increment usage
-		previousUsage := settings.CurrentUsage
-		settings.CurrentUsage += int64(response.Tokens)
-		
-		// Update settings in database
-		err = s.settingsRepo.UpdateSettings(settings)
-		if err != nil {
-			fmt.Printf("Warning: Failed to update AI usage: %v\n", err)
-		} else {
-			fmt.Printf("=== USAGE UPDATE DEBUG ===\n")
-			fmt.Printf("Tokens used: %d\n", response.Tokens)
-			fmt.Printf("Previous usage: %d\n", previousUsage)
-			fmt.Printf("New usage: %d\n", settings.CurrentUsage)
-			fmt.Printf("Usage limit: %d\n", usageLimit)
-			if usageLimit > 0 {
-				fmt.Printf("Usage percentage: %.2f%%\n", float64(settings.CurrentUsage)/float64(usageLimit)*100)
-			}
-			fmt.Printf("==========================\n")
-		}
 	}
 
 	return &ai.ChatResponse{

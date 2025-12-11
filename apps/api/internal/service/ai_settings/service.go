@@ -79,9 +79,6 @@ func (s *Service) UpdateSettings(req *ai_settings.UpdateAISettingsRequest) (*ai_
 	if req.Timezone != "" {
 		settings.Timezone = req.Timezone
 	}
-	if req.UsageLimit != nil {
-		settings.UsageLimit = req.UsageLimit
-	}
 
 	if err := s.settingsRepo.UpdateSettings(settings); err != nil {
 		return nil, fmt.Errorf("failed to update settings: %w", err)

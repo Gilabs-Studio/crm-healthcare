@@ -47,9 +47,6 @@ export interface AISettingsResponse {
   api_key?: string;
   data_privacy: AIDataPrivacySettings;
   timezone: string;
-  usage_limit?: number;
-  current_usage: number;
-  usage_reset_at?: string;
   created_at: string;
   updated_at: string;
 }

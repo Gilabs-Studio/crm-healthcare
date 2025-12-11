@@ -222,15 +222,6 @@ func (c *Client) Chat(req *ChatRequest) (*ChatResponse, error) {
 		return nil, fmt.Errorf("failed to read response: %w", err)
 	}
 
-	// Log response for debugging (first 1000 chars)
-	bodyStr := string(body)
-	if len(bodyStr) > 1000 {
-		fmt.Printf("=== CEREBRAS API RESPONSE DEBUG ===\n")
-		fmt.Printf("Response length: %d bytes\n", len(body))
-		fmt.Printf("Response preview (first 1000 chars): %s\n", bodyStr[:1000])
-		fmt.Printf("Response preview (last 500 chars): %s\n", bodyStr[len(bodyStr)-500:])
-		fmt.Printf("===================================\n")
-	}
 
 	// Check status code
 	if resp.StatusCode != http.StatusOK {
@@ -283,15 +274,6 @@ func (c *Client) Chat(req *ChatRequest) (*ChatResponse, error) {
 	// Check if response was truncated due to token limit
 	messageContent := apiResponse.Choices[0].Message.Content
 	finishReason := apiResponse.Choices[0].FinishReason
-	
-	// Log finish reason for debugging
-	if finishReason != "" {
-		fmt.Printf("=== CEREBRAS FINISH REASON ===\n")
-		fmt.Printf("Finish reason: %s\n", finishReason)
-		fmt.Printf("Message length: %d characters\n", len(messageContent))
-		fmt.Printf("Tokens used: %d\n", apiResponse.Usage.TotalTokens)
-		fmt.Printf("=============================\n")
-	}
 	
 	// If response was truncated (finish_reason == "length"), add warning
 	if finishReason == "length" {
