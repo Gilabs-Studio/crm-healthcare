@@ -13,7 +13,7 @@ class AuthRepository {
   }) async {
     try {
       final response = await _dio.post<Map<String, dynamic>>(
-        '/api/v1/auth/login',
+        '/api/v1/auth/mobile/login',
         data: {
           'email': email,
           'password': password,
