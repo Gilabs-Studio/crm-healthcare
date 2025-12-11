@@ -7,6 +7,7 @@ import remarkGfm from "remark-gfm";
 import type { Components } from "react-markdown";
 import { useChat } from "../hooks/useChat";
 import { useAISettings } from "../hooks/useAISettings";
+import { useConversationStorage } from "../hooks/useConversationStorage";
 import { useAuthStore } from "@/features/auth/stores/useAuthStore";
 import {
   Select,
@@ -76,6 +77,9 @@ export function Chatbot() {
   const { user } = useAuthStore();
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  
+  // Persist conversation to sessionStorage
+  const { clearConversation } = useConversationStorage(messages, setMessages);
   
   // Use settings.model as default, but allow user to override via Select
   const [userSelectedModel, setUserSelectedModel] = useState<string | null>(null);
@@ -749,6 +753,7 @@ export function Chatbot() {
                   <div className="flex flex-col gap-1">
                     <button
                       onClick={() => {
+                        clearConversation();
                         setMessages([{
                           id: "initial-greeting",
                           role: "assistant",
