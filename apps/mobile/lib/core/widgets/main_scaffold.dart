@@ -7,6 +7,7 @@ import '../../features/visit_reports/presentation/reports_screen.dart';
 import '../routing/app_router.dart';
 import 'auth_gate.dart';
 import 'bottom_nav_bar.dart';
+import 'offline_indicator.dart';
 
 class MainScaffold extends StatelessWidget {
   const MainScaffold({
@@ -89,7 +90,12 @@ class MainScaffold extends StatelessWidget {
               actions: actions,
             )
           : null,
-      body: body,
+      body: Column(
+        children: [
+          const OfflineIndicator(),
+          Expanded(child: body),
+        ],
+      ),
       bottomNavigationBar: BottomNavBar(
         currentIndex: currentIndex,
         onTap: onNavTap ?? ((index) => _handleNavTap(context, index)),

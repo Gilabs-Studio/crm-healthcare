@@ -1,11 +1,14 @@
 import 'package:dio/dio.dart';
 
+import '../../../core/network/connectivity_service.dart';
+import '../../../core/storage/offline_storage.dart';
 import 'models/task.dart';
 
 class TaskRepository {
-  TaskRepository(this._dio);
+  TaskRepository(this._dio, this._connectivity);
 
   final Dio _dio;
+  final ConnectivityService _connectivity;
 
   Future<TaskListResponse> getTasks({
     int page = 1,
@@ -19,99 +22,284 @@ class TaskRepository {
     String? contactId,
     DateTime? dueDateFrom,
     DateTime? dueDateTo,
+    bool forceRefresh = false,
   }) async {
-    try {
-      final queryParams = <String, dynamic>{
-        'page': page,
-        'per_page': perPage,
-      };
-
-      if (search != null && search.isNotEmpty) {
-        queryParams['search'] = search;
-      }
-      if (status != null && status.isNotEmpty) {
-        queryParams['status'] = status;
-      }
-      if (priority != null && priority.isNotEmpty) {
-        queryParams['priority'] = priority;
-      }
-      if (type != null && type.isNotEmpty) {
-        queryParams['type'] = type;
-      }
-      if (assignedTo != null && assignedTo.isNotEmpty) {
-        queryParams['assigned_to'] = assignedTo;
-      }
-      if (accountId != null && accountId.isNotEmpty) {
-        queryParams['account_id'] = accountId;
-      }
-      if (contactId != null && contactId.isNotEmpty) {
-        queryParams['contact_id'] = contactId;
-      }
-      if (dueDateFrom != null) {
-        queryParams['due_date_from'] = dueDateFrom.toIso8601String();
-      }
-      if (dueDateTo != null) {
-        queryParams['due_date_to'] = dueDateTo.toIso8601String();
-      }
-
-      final response = await _dio.get(
-        '/api/v1/tasks',
-        queryParameters: queryParams,
-      );
-
-      if (response.data is Map<String, dynamic>) {
-        final responseData = response.data as Map<String, dynamic>;
-        if (responseData['success'] == true) {
-          return TaskListResponse.fromJson(responseData);
-        } else {
-          throw Exception(
-            responseData['error']?['message'] ?? 'Failed to fetch tasks',
+    // 1. Try to load from cache first (offline-first) - only for first page and no filters
+    if (!forceRefresh && page == 1 && (search == null || search.isEmpty) && 
+        status == null && priority == null && accountId == null && contactId == null) {
+      final cachedTasks = await OfflineStorage.getTasks();
+      if (cachedTasks != null && cachedTasks.isNotEmpty) {
+        try {
+          final tasks = cachedTasks
+              .map((json) => Task.fromJson(json))
+              .toList();
+          return TaskListResponse(
+            items: tasks,
+            pagination: Pagination(
+              page: 1,
+              perPage: tasks.length,
+              total: tasks.length,
+              totalPages: 1,
+            ),
           );
+        } catch (e) {
+          // If parsing fails, continue to API call
         }
-      } else {
-        throw Exception('Invalid response format');
       }
-    } on DioException catch (e) {
-      if (e.response != null) {
-        final errorData = e.response!.data;
-        throw Exception(
-          errorData['error']?['message'] ?? 'Failed to fetch tasks',
-        );
-      } else {
-        throw Exception('Network error: ${e.message}');
-      }
-    } catch (e) {
-      throw Exception('Failed to fetch tasks: $e');
     }
+
+    // 2. If online, fetch from API
+    if (_connectivity.isOnline) {
+      try {
+        final queryParams = <String, dynamic>{
+          'page': page,
+          'per_page': perPage,
+        };
+
+        if (search != null && search.isNotEmpty) {
+          queryParams['search'] = search;
+        }
+        if (status != null && status.isNotEmpty) {
+          queryParams['status'] = status;
+        }
+        if (priority != null && priority.isNotEmpty) {
+          queryParams['priority'] = priority;
+        }
+        if (type != null && type.isNotEmpty) {
+          queryParams['type'] = type;
+        }
+        if (assignedTo != null && assignedTo.isNotEmpty) {
+          queryParams['assigned_to'] = assignedTo;
+        }
+        if (accountId != null && accountId.isNotEmpty) {
+          queryParams['account_id'] = accountId;
+        }
+        if (contactId != null && contactId.isNotEmpty) {
+          queryParams['contact_id'] = contactId;
+        }
+        if (dueDateFrom != null) {
+          queryParams['due_date_from'] = dueDateFrom.toIso8601String();
+        }
+        if (dueDateTo != null) {
+          queryParams['due_date_to'] = dueDateTo.toIso8601String();
+        }
+
+        final response = await _dio.get(
+          '/api/v1/tasks',
+          queryParameters: queryParams,
+        );
+
+        if (response.data is Map<String, dynamic>) {
+          final responseData = response.data as Map<String, dynamic>;
+          if (responseData['success'] == true) {
+            final taskListResponse = TaskListResponse.fromJson(responseData);
+            
+            // 3. Save to cache (only for first page and no filters)
+            if (page == 1 && (search == null || search.isEmpty) && 
+                status == null && priority == null && accountId == null && contactId == null) {
+              final tasksJson = taskListResponse.items
+                  .map((task) => task.toJson())
+                  .toList();
+              await OfflineStorage.saveTasks(tasksJson);
+            }
+            
+            return taskListResponse;
+          } else {
+            throw Exception(
+              responseData['error']?['message'] ?? 'Failed to fetch tasks',
+            );
+          }
+        } else {
+          throw Exception('Invalid response format');
+        }
+      } on DioException catch (e) {
+        // If API fails, try to return cached data if available
+        if (page == 1 && (search == null || search.isEmpty) && 
+            status == null && priority == null && accountId == null && contactId == null) {
+          final cachedTasks = await OfflineStorage.getTasks();
+          if (cachedTasks != null && cachedTasks.isNotEmpty) {
+            try {
+              final tasks = cachedTasks
+                  .map((json) => Task.fromJson(json))
+                  .toList();
+              return TaskListResponse(
+                items: tasks,
+                pagination: Pagination(
+                  page: 1,
+                  perPage: tasks.length,
+                  total: tasks.length,
+                  totalPages: 1,
+                ),
+              );
+            } catch (_) {
+              // Ignore parsing errors
+            }
+          }
+        }
+        
+        if (e.response != null) {
+          final errorData = e.response!.data;
+          throw Exception(
+            errorData['error']?['message'] ?? 'Failed to fetch tasks',
+          );
+        } else {
+          throw Exception('Network error: ${e.message}');
+        }
+      } catch (e) {
+        // If other error, try cached data
+        if (page == 1 && (search == null || search.isEmpty) && 
+            status == null && priority == null && accountId == null && contactId == null) {
+          final cachedTasks = await OfflineStorage.getTasks();
+          if (cachedTasks != null && cachedTasks.isNotEmpty) {
+            try {
+              final tasks = cachedTasks
+                  .map((json) => Task.fromJson(json))
+                  .toList();
+              return TaskListResponse(
+                items: tasks,
+                pagination: Pagination(
+                  page: 1,
+                  perPage: tasks.length,
+                  total: tasks.length,
+                  totalPages: 1,
+                ),
+              );
+            } catch (_) {
+              // Ignore parsing errors
+            }
+          }
+        }
+        throw Exception('Failed to fetch tasks: $e');
+      }
+    }
+
+    // 4. Offline: return cached data or throw error
+    if (page == 1 && (search == null || search.isEmpty) && 
+        status == null && priority == null && accountId == null && contactId == null) {
+      final cachedTasks = await OfflineStorage.getTasks();
+      if (cachedTasks != null && cachedTasks.isNotEmpty) {
+        try {
+          final tasks = cachedTasks
+              .map((json) => Task.fromJson(json))
+              .toList();
+          return TaskListResponse(
+            items: tasks,
+            pagination: Pagination(
+              page: 1,
+              perPage: tasks.length,
+              total: tasks.length,
+              totalPages: 1,
+            ),
+          );
+        } catch (e) {
+          throw Exception('Failed to load cached tasks: $e');
+        }
+      }
+    }
+    
+    throw Exception('No internet connection and no cached data available');
   }
 
   Future<Task> getTaskById(String id) async {
+    // 1. Try to load from cache first (offline-first)
+    final cachedTask = await OfflineStorage.getTaskDetail(id);
+    if (cachedTask != null) {
+      try {
+        final task = Task.fromJson(cachedTask);
+        // If online, fetch from API in background to update cache
+        if (_connectivity.isOnline) {
+          _fetchAndUpdateTaskDetail(id).catchError((_) {
+            // Ignore errors, use cached data
+          });
+        }
+        return task;
+      } catch (e) {
+        // If parsing fails, continue to API call
+      }
+    }
+
+    // 2. If online, fetch from API
+    if (_connectivity.isOnline) {
+      try {
+        final response = await _dio.get('/api/v1/tasks/$id');
+
+        if (response.data is Map<String, dynamic>) {
+          final responseData = response.data as Map<String, dynamic>;
+          if (responseData['success'] == true) {
+            final task = Task.fromJson(
+              responseData['data'] as Map<String, dynamic>,
+            );
+            
+            // 3. Save to cache
+            await OfflineStorage.saveTaskDetail(id, task.toJson());
+            
+            return task;
+          } else {
+            throw Exception(
+              responseData['error']?['message'] ?? 'Failed to fetch task',
+            );
+          }
+        } else {
+          throw Exception('Invalid response format');
+        }
+      } on DioException catch (e) {
+        // If API fails, try to return cached data if available
+        if (cachedTask != null) {
+          try {
+            return Task.fromJson(cachedTask);
+          } catch (_) {
+            // Ignore parsing errors
+          }
+        }
+        
+        if (e.response != null) {
+          final errorData = e.response!.data;
+          throw Exception(
+            errorData['error']?['message'] ?? 'Failed to fetch task',
+          );
+        } else {
+          throw Exception('Network error: ${e.message}');
+        }
+      } catch (e) {
+        // If other error, try cached data
+        if (cachedTask != null) {
+          try {
+            return Task.fromJson(cachedTask);
+          } catch (_) {
+            // Ignore parsing errors
+          }
+        }
+        throw Exception('Failed to fetch task: $e');
+      }
+    }
+
+    // 4. Offline: return cached data or throw error
+    if (cachedTask != null) {
+      try {
+        return Task.fromJson(cachedTask);
+      } catch (e) {
+        throw Exception('Failed to load cached task: $e');
+      }
+    }
+    
+    throw Exception('No internet connection and no cached data available');
+  }
+
+  /// Fetch task detail from API and update cache (background operation)
+  Future<void> _fetchAndUpdateTaskDetail(String id) async {
     try {
       final response = await _dio.get('/api/v1/tasks/$id');
-
       if (response.data is Map<String, dynamic>) {
         final responseData = response.data as Map<String, dynamic>;
         if (responseData['success'] == true) {
-          return Task.fromJson(responseData['data'] as Map<String, dynamic>);
-        } else {
-          throw Exception(
-            responseData['error']?['message'] ?? 'Failed to fetch task',
+          final task = Task.fromJson(
+            responseData['data'] as Map<String, dynamic>,
           );
+          await OfflineStorage.saveTaskDetail(id, task.toJson());
         }
-      } else {
-        throw Exception('Invalid response format');
       }
-    } on DioException catch (e) {
-      if (e.response != null) {
-        final errorData = e.response!.data;
-        throw Exception(
-          errorData['error']?['message'] ?? 'Failed to fetch task',
-        );
-      } else {
-        throw Exception('Network error: ${e.message}');
-      }
-    } catch (e) {
-      throw Exception('Failed to fetch task: $e');
+    } catch (_) {
+      // Ignore errors in background operation
     }
   }
 

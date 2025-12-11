@@ -245,8 +245,13 @@ Developer 3 bertanggung jawab untuk:
 - [x] Add loading states di semua screens
 - [x] Add error handling di semua screens
 - [x] Optimize app performance
-- [ ] Add offline support (optional untuk MVP)
-- [ ] Add app icon dan splash screen
+- [x] Add offline support (basic read-only) - ✅ **Phase 1 Completed**
+  - [x] Setup Hive storage infrastructure
+  - [x] Implement connectivity service
+  - [x] Create offline storage helper
+  - [x] Add offline indicator UI
+  - [ ] Update repositories for offline-first (pending - see docs/mobile/OFFLINE_SUPPORT_IMPLEMENTATION.md)
+- [x] Add app icon dan splash screen
 - [x] Add app versioning
 - [ ] Test di multiple devices (Android & iOS)
 - [x] Fix bugs

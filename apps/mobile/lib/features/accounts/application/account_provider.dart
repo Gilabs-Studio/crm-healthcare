@@ -2,13 +2,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/cache/list_cache.dart';
 import '../../../core/network/api_client.dart';
+import '../../../core/network/connectivity_service.dart';
 import '../data/account_repository.dart';
 import '../data/category_repository.dart';
 import '../data/models/account.dart';
 import 'account_state.dart';
 
 final accountRepositoryProvider = Provider<AccountRepository>((ref) {
-  return AccountRepository(ApiClient.dio);
+  final connectivity = ref.watch(connectivityServiceProvider);
+  return AccountRepository(ApiClient.dio, connectivity);
 });
 
 final categoryRepositoryProvider = Provider<CategoryRepository>((ref) {
@@ -23,7 +25,8 @@ final categoriesProvider = FutureProvider<List<Category>>((ref) async {
 final accountListProvider =
     StateNotifierProvider<AccountListNotifier, AccountListState>((ref) {
   final repository = ref.read(accountRepositoryProvider);
-  return AccountListNotifier(repository);
+  final connectivity = ref.watch(connectivityServiceProvider);
+  return AccountListNotifier(repository, connectivity);
 });
 
 final accountDetailProvider =
@@ -33,9 +36,11 @@ final accountDetailProvider =
 });
 
 class AccountListNotifier extends StateNotifier<AccountListState> {
-  AccountListNotifier(this._repository) : super(const AccountListState());
+  AccountListNotifier(this._repository, this._connectivity)
+      : super(const AccountListState());
 
   final AccountRepository _repository;
+  final ConnectivityService _connectivity;
   final ListCache _cache = ListCache();
 
   Future<void> loadAccounts({
@@ -101,6 +106,7 @@ class AccountListNotifier extends StateNotifier<AccountListState> {
         page: page,
         perPage: 20,
         search: searchQuery.isNotEmpty ? searchQuery : null,
+        forceRefresh: forceRefresh,
       );
 
       // Cache the response
@@ -126,6 +132,7 @@ class AccountListNotifier extends StateNotifier<AccountListState> {
           isLoading: false,
           isLoadingMore: false,
           errorMessage: null,
+          isOffline: !_connectivity.isOnline,
         );
       } else {
         state = state.copyWith(
@@ -133,6 +140,7 @@ class AccountListNotifier extends StateNotifier<AccountListState> {
           pagination: response.pagination,
           isLoadingMore: false,
           errorMessage: null,
+          isOffline: !_connectivity.isOnline,
         );
       }
     } catch (e) {
@@ -145,6 +153,7 @@ class AccountListNotifier extends StateNotifier<AccountListState> {
             isLoading: false,
             isLoadingMore: false,
             errorMessage: null,
+            isOffline: !_connectivity.isOnline,
           );
           return;
         }
@@ -154,6 +163,7 @@ class AccountListNotifier extends StateNotifier<AccountListState> {
         isLoading: false,
         isLoadingMore: false,
         errorMessage: e.toString().replaceFirst('Exception: ', ''),
+        isOffline: !_connectivity.isOnline,
       );
     }
   }

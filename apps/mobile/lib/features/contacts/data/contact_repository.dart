@@ -1,11 +1,14 @@
 import 'package:dio/dio.dart';
 
+import '../../../core/network/connectivity_service.dart';
+import '../../../core/storage/offline_storage.dart';
 import 'models/contact.dart';
 
 class ContactRepository {
-  ContactRepository(this._dio);
+  ContactRepository(this._dio, this._connectivity);
 
   final Dio _dio;
+  final ConnectivityService _connectivity;
 
   Future<ContactListResponse> getContacts({
     int page = 1,
@@ -13,75 +16,252 @@ class ContactRepository {
     String? search,
     String? accountId,
     String? roleId,
+    bool forceRefresh = false,
   }) async {
-    try {
-      final queryParams = <String, dynamic>{
-        'page': page,
-        'per_page': perPage,
-      };
-
-      if (search != null && search.isNotEmpty) {
-        queryParams['search'] = search;
-      }
-      if (accountId != null && accountId.isNotEmpty) {
-        queryParams['account_id'] = accountId;
-      }
-      if (roleId != null && roleId.isNotEmpty) {
-        queryParams['role_id'] = roleId;
-      }
-
-      final response = await _dio.get(
-        '/api/v1/contacts',
-        queryParameters: queryParams,
-      );
-
-      if (response.data['success'] == true) {
+    // 1. Try to load from cache first (offline-first) - only for first page and no filters
+    if (!forceRefresh && page == 1 && (search == null || search.isEmpty) && accountId == null) {
+      final cachedContacts = await OfflineStorage.getContacts();
+      if (cachedContacts != null && cachedContacts.isNotEmpty) {
         try {
-          return ContactListResponse.fromJson(response.data);
+          final contacts = cachedContacts
+              .map((json) => Contact.fromJson(json))
+              .toList();
+          return ContactListResponse(
+            items: contacts,
+            pagination: Pagination(
+              page: 1,
+              perPage: contacts.length,
+              total: contacts.length,
+              totalPages: 1,
+            ),
+          );
         } catch (e) {
+          // If parsing fails, continue to API call
+        }
+      }
+    }
+
+    // 2. If online, fetch from API
+    if (_connectivity.isOnline) {
+      try {
+        final queryParams = <String, dynamic>{
+          'page': page,
+          'per_page': perPage,
+        };
+
+        if (search != null && search.isNotEmpty) {
+          queryParams['search'] = search;
+        }
+        if (accountId != null && accountId.isNotEmpty) {
+          queryParams['account_id'] = accountId;
+        }
+        if (roleId != null && roleId.isNotEmpty) {
+          queryParams['role_id'] = roleId;
+        }
+
+        final response = await _dio.get(
+          '/api/v1/contacts',
+          queryParameters: queryParams,
+        );
+
+        if (response.data['success'] == true) {
+          try {
+            final contactListResponse = ContactListResponse.fromJson(response.data);
+            
+            // 3. Save to cache (only for first page and no filters)
+            if (page == 1 && (search == null || search.isEmpty) && accountId == null) {
+              final contactsJson = contactListResponse.items
+                  .map((contact) => contact.toJson())
+                  .toList();
+              await OfflineStorage.saveContacts(contactsJson);
+            }
+            
+            return contactListResponse;
+          } catch (e) {
+            throw Exception(
+              'Failed to parse contacts response: $e. Response: ${response.data}',
+            );
+          }
+        } else {
           throw Exception(
-            'Failed to parse contacts response: $e. Response: ${response.data}',
+            response.data['error']?['message'] ?? 'Failed to fetch contacts',
           );
         }
-      } else {
-        throw Exception(
-          response.data['error']?['message'] ?? 'Failed to fetch contacts',
-        );
+      } on DioException catch (e) {
+        // If API fails, try to return cached data if available
+        if (page == 1 && (search == null || search.isEmpty) && accountId == null) {
+          final cachedContacts = await OfflineStorage.getContacts();
+          if (cachedContacts != null && cachedContacts.isNotEmpty) {
+            try {
+              final contacts = cachedContacts
+                  .map((json) => Contact.fromJson(json))
+                  .toList();
+              return ContactListResponse(
+                items: contacts,
+                pagination: Pagination(
+                  page: 1,
+                  perPage: contacts.length,
+                  total: contacts.length,
+                  totalPages: 1,
+                ),
+              );
+            } catch (_) {
+              // Ignore parsing errors
+            }
+          }
+        }
+        
+        if (e.response != null) {
+          final error = e.response!.data;
+          if (error is Map<String, dynamic> && error['error'] != null) {
+            throw Exception(error['error']['message'] ?? 'Failed to fetch contacts');
+          }
+        }
+        throw Exception('Failed to fetch contacts: ${e.message}');
+      } catch (e) {
+        // If other error, try cached data
+        if (page == 1 && (search == null || search.isEmpty) && accountId == null) {
+          final cachedContacts = await OfflineStorage.getContacts();
+          if (cachedContacts != null && cachedContacts.isNotEmpty) {
+            try {
+              final contacts = cachedContacts
+                  .map((json) => Contact.fromJson(json))
+                  .toList();
+              return ContactListResponse(
+                items: contacts,
+                pagination: Pagination(
+                  page: 1,
+                  perPage: contacts.length,
+                  total: contacts.length,
+                  totalPages: 1,
+                ),
+              );
+            } catch (_) {
+              // Ignore parsing errors
+            }
+          }
+        }
+        throw Exception('Failed to fetch contacts: $e');
       }
-    } on DioException catch (e) {
-      if (e.response != null) {
-        final error = e.response!.data;
-        if (error is Map<String, dynamic> && error['error'] != null) {
-          throw Exception(error['error']['message'] ?? 'Failed to fetch contacts');
+    }
+
+    // 4. Offline: return cached data or throw error
+    if (page == 1 && (search == null || search.isEmpty) && accountId == null) {
+      final cachedContacts = await OfflineStorage.getContacts();
+      if (cachedContacts != null && cachedContacts.isNotEmpty) {
+        try {
+          final contacts = cachedContacts
+              .map((json) => Contact.fromJson(json))
+              .toList();
+          return ContactListResponse(
+            items: contacts,
+            pagination: Pagination(
+              page: 1,
+              perPage: contacts.length,
+              total: contacts.length,
+              totalPages: 1,
+            ),
+          );
+        } catch (e) {
+          throw Exception('Failed to load cached contacts: $e');
         }
       }
-      throw Exception('Failed to fetch contacts: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to fetch contacts: $e');
     }
+    
+    throw Exception('No internet connection and no cached data available');
   }
 
   Future<Contact> getContactById(String id) async {
+    // 1. Try to load from cache first (offline-first)
+    final cachedContact = await OfflineStorage.getContactDetail(id);
+    if (cachedContact != null) {
+      try {
+        final contact = Contact.fromJson(cachedContact);
+        // If online, fetch from API in background to update cache
+        if (_connectivity.isOnline) {
+          _fetchAndUpdateContactDetail(id).catchError((_) {
+            // Ignore errors, use cached data
+          });
+        }
+        return contact;
+      } catch (e) {
+        // If parsing fails, continue to API call
+      }
+    }
+
+    // 2. If online, fetch from API
+    if (_connectivity.isOnline) {
+      try {
+        final response = await _dio.get('/api/v1/contacts/$id');
+
+        if (response.data['success'] == true) {
+          final contact = Contact.fromJson(
+            response.data['data'] as Map<String, dynamic>,
+          );
+          
+          // 3. Save to cache
+          await OfflineStorage.saveContactDetail(id, contact.toJson());
+          
+          return contact;
+        } else {
+          throw Exception(
+            response.data['error']?['message'] ?? 'Failed to fetch contact',
+          );
+        }
+      } on DioException catch (e) {
+        // If API fails, try to return cached data if available
+        if (cachedContact != null) {
+          try {
+            return Contact.fromJson(cachedContact);
+          } catch (_) {
+            // Ignore parsing errors
+          }
+        }
+        
+        if (e.response != null) {
+          final error = e.response!.data;
+          if (error is Map<String, dynamic> && error['error'] != null) {
+            throw Exception(error['error']['message'] ?? 'Failed to fetch contact');
+          }
+        }
+        throw Exception('Failed to fetch contact: ${e.message}');
+      } catch (e) {
+        // If other error, try cached data
+        if (cachedContact != null) {
+          try {
+            return Contact.fromJson(cachedContact);
+          } catch (_) {
+            // Ignore parsing errors
+          }
+        }
+        throw Exception('Failed to fetch contact: $e');
+      }
+    }
+
+    // 4. Offline: return cached data or throw error
+    if (cachedContact != null) {
+      try {
+        return Contact.fromJson(cachedContact);
+      } catch (e) {
+        throw Exception('Failed to load cached contact: $e');
+      }
+    }
+    
+    throw Exception('No internet connection and no cached data available');
+  }
+
+  /// Fetch contact detail from API and update cache (background operation)
+  Future<void> _fetchAndUpdateContactDetail(String id) async {
     try {
       final response = await _dio.get('/api/v1/contacts/$id');
-
       if (response.data['success'] == true) {
-        return Contact.fromJson(response.data['data'] as Map<String, dynamic>);
-      } else {
-        throw Exception(
-          response.data['error']?['message'] ?? 'Failed to fetch contact',
+        final contact = Contact.fromJson(
+          response.data['data'] as Map<String, dynamic>,
         );
+        await OfflineStorage.saveContactDetail(id, contact.toJson());
       }
-    } on DioException catch (e) {
-      if (e.response != null) {
-        final error = e.response!.data;
-        if (error is Map<String, dynamic> && error['error'] != null) {
-          throw Exception(error['error']['message'] ?? 'Failed to fetch contact');
-        }
-      }
-      throw Exception('Failed to fetch contact: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to fetch contact: $e');
+    } catch (_) {
+      // Ignore errors in background operation
     }
   }
 

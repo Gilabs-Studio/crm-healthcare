@@ -2,13 +2,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/cache/list_cache.dart';
 import '../../../core/network/api_client.dart';
+import '../../../core/network/connectivity_service.dart';
 import '../data/contact_repository.dart';
 import '../data/role_repository.dart';
 import '../data/models/contact.dart';
 import 'contact_state.dart';
 
 final contactRepositoryProvider = Provider<ContactRepository>((ref) {
-  return ContactRepository(ApiClient.dio);
+  final connectivity = ref.watch(connectivityServiceProvider);
+  return ContactRepository(ApiClient.dio, connectivity);
 });
 
 final roleRepositoryProvider = Provider<RoleRepository>((ref) {
@@ -23,7 +25,8 @@ final rolesProvider = FutureProvider<List<Role>>((ref) async {
 final contactListProvider =
     StateNotifierProvider<ContactListNotifier, ContactListState>((ref) {
   final repository = ref.read(contactRepositoryProvider);
-  return ContactListNotifier(repository);
+  final connectivity = ref.watch(connectivityServiceProvider);
+  return ContactListNotifier(repository, connectivity);
 });
 
 final contactDetailProvider =
@@ -33,9 +36,11 @@ final contactDetailProvider =
 });
 
 class ContactListNotifier extends StateNotifier<ContactListState> {
-  ContactListNotifier(this._repository) : super(const ContactListState());
+  ContactListNotifier(this._repository, this._connectivity)
+      : super(const ContactListState());
 
   final ContactRepository _repository;
+  final ConnectivityService _connectivity;
   final ListCache _cache = ListCache();
 
   Future<void> loadContacts({
@@ -109,6 +114,7 @@ class ContactListNotifier extends StateNotifier<ContactListState> {
         perPage: 20,
         search: searchQuery.isNotEmpty ? searchQuery : null,
         accountId: filterAccountId,
+        forceRefresh: forceRefresh,
       );
 
       // Cache the response
@@ -136,6 +142,7 @@ class ContactListNotifier extends StateNotifier<ContactListState> {
           isLoading: false,
           isLoadingMore: false,
           errorMessage: null,
+          isOffline: !_connectivity.isOnline,
         );
       } else {
         state = state.copyWith(
@@ -143,6 +150,7 @@ class ContactListNotifier extends StateNotifier<ContactListState> {
           pagination: response.pagination,
           isLoadingMore: false,
           errorMessage: null,
+          isOffline: !_connectivity.isOnline,
         );
       }
     } catch (e) {
@@ -155,6 +163,7 @@ class ContactListNotifier extends StateNotifier<ContactListState> {
             isLoading: false,
             isLoadingMore: false,
             errorMessage: null,
+            isOffline: !_connectivity.isOnline,
           );
           return;
         }
@@ -164,6 +173,7 @@ class ContactListNotifier extends StateNotifier<ContactListState> {
         isLoading: false,
         isLoadingMore: false,
         errorMessage: e.toString().replaceFirst('Exception: ', ''),
+        isOffline: !_connectivity.isOnline,
       );
     }
   }

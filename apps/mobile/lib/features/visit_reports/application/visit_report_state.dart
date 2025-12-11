@@ -8,6 +8,7 @@ class VisitReportListState {
     this.errorMessage,
     this.pagination,
     this.searchQuery = '',
+    this.isOffline = false,
   });
 
   final List<VisitReport> visitReports;
@@ -16,6 +17,7 @@ class VisitReportListState {
   final String? errorMessage;
   final Pagination? pagination;
   final String searchQuery;
+  final bool isOffline;
 
   VisitReportListState copyWith({
     List<VisitReport>? visitReports,
@@ -24,6 +26,7 @@ class VisitReportListState {
     String? errorMessage,
     Pagination? pagination,
     String? searchQuery,
+    bool? isOffline,
     bool clearVisitReports = false,
   }) {
     return VisitReportListState(
@@ -35,6 +38,7 @@ class VisitReportListState {
       errorMessage: errorMessage,
       pagination: pagination ?? this.pagination,
       searchQuery: searchQuery ?? this.searchQuery,
+      isOffline: isOffline ?? this.isOffline,
     );
   }
 }

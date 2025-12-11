@@ -7,6 +7,8 @@ import 'core/l10n/app_localizations.dart';
 import 'core/l10n/locale_provider.dart';
 import 'core/network/api_client.dart';
 import 'core/routing/app_router.dart';
+import 'core/storage/hive_storage.dart';
+import 'core/storage/offline_storage.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 import 'core/utils/app_info.dart';
@@ -17,6 +19,10 @@ void main() async {
   
   // Initialize app info
   await AppInfo.initialize();
+  
+  // Initialize Hive storage for offline support
+  await HiveStorage.init();
+  await OfflineStorage.init();
   
   runApp(
     const ProviderScope(

@@ -9,6 +9,7 @@ class ContactListState {
     this.pagination,
     this.searchQuery = '',
     this.accountId,
+    this.isOffline = false,
   });
 
   final List<Contact> contacts;
@@ -18,6 +19,7 @@ class ContactListState {
   final Pagination? pagination;
   final String searchQuery;
   final String? accountId;
+  final bool isOffline;
 
   ContactListState copyWith({
     List<Contact>? contacts,
@@ -27,6 +29,7 @@ class ContactListState {
     Pagination? pagination,
     String? searchQuery,
     String? accountId,
+    bool? isOffline,
     bool clearContacts = false,
   }) {
     return ContactListState(
@@ -37,6 +40,7 @@ class ContactListState {
       pagination: pagination ?? this.pagination,
       searchQuery: searchQuery ?? this.searchQuery,
       accountId: accountId ?? this.accountId,
+      isOffline: isOffline ?? this.isOffline,
     );
   }
 }

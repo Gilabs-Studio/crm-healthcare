@@ -8,6 +8,7 @@ class AccountListState {
     this.errorMessage,
     this.pagination,
     this.searchQuery = '',
+    this.isOffline = false,
   });
 
   final List<Account> accounts;
@@ -16,6 +17,7 @@ class AccountListState {
   final String? errorMessage;
   final Pagination? pagination;
   final String searchQuery;
+  final bool isOffline;
 
   AccountListState copyWith({
     List<Account>? accounts,
@@ -24,6 +26,7 @@ class AccountListState {
     String? errorMessage,
     Pagination? pagination,
     String? searchQuery,
+    bool? isOffline,
     bool clearAccounts = false,
   }) {
     return AccountListState(
@@ -33,6 +36,7 @@ class AccountListState {
       errorMessage: errorMessage,
       pagination: pagination ?? this.pagination,
       searchQuery: searchQuery ?? this.searchQuery,
+      isOffline: isOffline ?? this.isOffline,
     );
   }
 }
