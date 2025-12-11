@@ -21,6 +21,8 @@ type Task struct {
 	CompletedAt  *time.Time     `gorm:"type:timestamp" json:"completed_at"`
 	AssignedTo   *string        `gorm:"type:uuid;index" json:"assigned_to"` // User ID (optional)
 	AssignedUser *UserRef       `gorm:"foreignKey:AssignedTo" json:"assigned_user,omitempty"`
+	AssignedFrom *string        `gorm:"type:uuid;index" json:"assigned_from"` // User ID who assigned the task (optional)
+	AssignedFromUser *UserRef   `gorm:"foreignKey:AssignedFrom" json:"assigned_from_user,omitempty"`
 	AccountID    *string        `gorm:"type:uuid;index" json:"account_id"` // Optional: link to account
 	Account      *AccountRef    `gorm:"foreignKey:AccountID" json:"account,omitempty"`
 	ContactID    *string        `gorm:"type:uuid;index" json:"contact_id"` // Optional: link to contact
@@ -105,6 +107,8 @@ type TaskResponse struct {
 	CompletedAt *time.Time        `json:"completed_at"`
 	AssignedTo  string            `json:"assigned_to"`
 	AssignedUser *UserRefResponse `json:"assigned_user,omitempty"`
+	AssignedFrom string           `json:"assigned_from"`
+	AssignedFromUser *UserRefResponse `json:"assigned_from_user,omitempty"`
 	AccountID   string            `json:"account_id"`
 	Account     *AccountRefResponse `json:"account,omitempty"`
 	ContactID   string            `json:"contact_id"`
@@ -155,6 +159,7 @@ func (t *Task) ToTaskResponse() *TaskResponse {
 		DueDate:     t.DueDate,
 		CompletedAt: t.CompletedAt,
 		AssignedTo:  "",
+		AssignedFrom: "",
 		AccountID:   "",
 		ContactID:   "",
 		DealID:      "",
@@ -181,6 +186,18 @@ func (t *Task) ToTaskResponse() *TaskResponse {
 			ID:    t.AssignedUser.ID,
 			Name:  t.AssignedUser.Name,
 			Email: t.AssignedUser.Email,
+		}
+	}
+
+	if t.AssignedFrom != nil {
+		resp.AssignedFrom = *t.AssignedFrom
+	}
+
+	if t.AssignedFromUser != nil {
+		resp.AssignedFromUser = &UserRefResponse{
+			ID:    t.AssignedFromUser.ID,
+			Name:  t.AssignedFromUser.Name,
+			Email: t.AssignedFromUser.Email,
 		}
 	}
 

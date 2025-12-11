@@ -273,7 +273,15 @@ func (h *TaskHandler) Assign(c *gin.Context) {
 		return
 	}
 
-	assignedTask, err := h.taskService.AssignTask(id, &req)
+	// Get user ID from context
+	userID := ""
+	if userIDVal, exists := c.Get("user_id"); exists {
+		if id, ok := userIDVal.(string); ok {
+			userID = id
+		}
+	}
+
+	assignedTask, err := h.taskService.AssignTask(id, &req, userID)
 	if err != nil {
 		if err == taskservice.ErrTaskNotFound {
 			errors.ErrorResponse(c, "NOT_FOUND", map[string]interface{}{
@@ -293,10 +301,8 @@ func (h *TaskHandler) Assign(c *gin.Context) {
 	}
 
 	meta := &response.Meta{}
-	if userID, exists := c.Get("user_id"); exists {
-		if id, ok := userID.(string); ok {
-			meta.UpdatedBy = id
-		}
+	if userID != "" {
+		meta.UpdatedBy = userID
 	}
 
 	response.SuccessResponse(c, assignedTask, meta)
@@ -504,6 +510,107 @@ func (h *TaskHandler) DeleteReminder(c *gin.Context) {
 	}
 
 	response.SuccessResponseDeleted(c, "reminder", id, meta)
+}
+
+// MarkInProgress handles mark task as in progress request
+func (h *TaskHandler) MarkInProgress(c *gin.Context) {
+	id := c.Param("id")
+
+	updatedTask, err := h.taskService.MarkInProgress(id)
+	if err != nil {
+		if err == taskservice.ErrTaskNotFound {
+			errors.ErrorResponse(c, "NOT_FOUND", map[string]interface{}{
+				"resource":    "task",
+				"resource_id": id,
+			}, nil)
+			return
+		}
+		if err == taskservice.ErrCannotMarkCompletedInProgress {
+			errors.ErrorResponse(c, "CONFLICT", map[string]interface{}{
+				"message": "Cannot mark completed task as in progress",
+			}, nil)
+			return
+		}
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	meta := &response.Meta{}
+	if userID, exists := c.Get("user_id"); exists {
+		if id, ok := userID.(string); ok {
+			meta.UpdatedBy = id
+		}
+	}
+
+	response.SuccessResponse(c, updatedTask, meta)
+}
+
+// GetMyTasks handles get tasks for logged-in user request (mobile endpoint)
+func (h *TaskHandler) GetMyTasks(c *gin.Context) {
+	var req task.ListTasksRequest
+
+	if err := c.ShouldBindQuery(&req); err != nil {
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			errors.HandleValidationError(c, validationErrors)
+			return
+		}
+		errors.InvalidQueryParamResponse(c)
+		return
+	}
+
+	// Get user ID from context
+	userID := ""
+	if userIDVal, exists := c.Get("user_id"); exists {
+		if id, ok := userIDVal.(string); ok {
+			userID = id
+		}
+	}
+
+	if userID == "" {
+		errors.ErrorResponse(c, "UNAUTHORIZED", map[string]interface{}{
+			"message": "User ID not found in context",
+		}, nil)
+		return
+	}
+
+	tasks, pagination, err := h.taskService.GetMyTasks(userID, &req)
+	if err != nil {
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	meta := &response.Meta{
+		Pagination: &response.PaginationMeta{
+			Page:       pagination.Page,
+			PerPage:    pagination.PerPage,
+			Total:      pagination.Total,
+			TotalPages: pagination.TotalPages,
+			HasNext:    pagination.Page < pagination.TotalPages,
+			HasPrev:    pagination.Page > 1,
+		},
+		Filters: map[string]interface{}{},
+	}
+
+	if req.Search != "" {
+		meta.Filters["search"] = req.Search
+	}
+	if req.Status != "" {
+		meta.Filters["status"] = req.Status
+	}
+	if req.Priority != "" {
+		meta.Filters["priority"] = req.Priority
+	}
+	if req.Type != "" {
+		meta.Filters["type"] = req.Type
+	}
+	if req.DueDateFrom != nil {
+		meta.Filters["due_date_from"] = req.DueDateFrom.Format("2006-01-02")
+	}
+	if req.DueDateTo != nil {
+		meta.Filters["due_date_to"] = req.DueDateTo.Format("2006-01-02")
+	}
+
+	response.SuccessResponse(c, tasks, meta)
 }
 
 

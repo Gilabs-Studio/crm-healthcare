@@ -104,7 +104,7 @@ export function DataTable<T extends { id: string }>({
   // Mobile card view
   if (isMobile) {
     return (
-      <div className="border rounded-lg">
+      <div className="border border-border/60 rounded-lg bg-card shadow-sm overflow-hidden">
         {isLoading ? (
           <div className="p-4 space-y-3">
             {Array.from({ length: 5 }, (_, i) => (
@@ -115,14 +115,14 @@ export function DataTable<T extends { id: string }>({
           <>
             {data.length === 0 ? (
               <div className="text-center text-muted-foreground py-12 px-4">
-                {emptyMessage}
+                <div className="text-sm">{emptyMessage}</div>
               </div>
             ) : (
-              <div className="divide-y">
+              <div className="divide-y divide-border/50">
                 {data.map((row) => (
                   <div
                     key={row.id}
-                    className="p-4 hover:bg-muted/30 transition-colors border-b last:border-b-0"
+                    className="p-4 hover:bg-accent/40 transition-all duration-200 border-b border-border/30 last:border-b-0 active:bg-accent/50"
                   >
                     <div className="space-y-2.5">
                       {columns.map((column, index) => {
@@ -132,14 +132,14 @@ export function DataTable<T extends { id: string }>({
                             key={column.id}
                             className={cn(
                               "flex flex-col gap-1",
-                              isFirstColumn && "pb-2 border-b border-border/50"
+                              isFirstColumn && "pb-2 border-b border-primary/20"
                             )}
                           >
-                            <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                            <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                               {column.header}
                             </div>
                             <div className={cn(
-                              "text-sm",
+                              "text-sm transition-colors",
                               isFirstColumn && "font-semibold text-foreground"
                             )}>
                               {column.accessor(row)}
@@ -155,11 +155,11 @@ export function DataTable<T extends { id: string }>({
 
             {/* Mobile Pagination */}
             {pagination && (
-              <div className="border-t bg-muted/30 px-4 py-3 space-y-3">
+              <div className="border-t border-border/60 bg-gradient-to-b from-muted/40 to-muted/20 px-4 py-3 space-y-3">
                 {/* Rows per page selector */}
                 {onPerPageChange && (
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="rows-per-page-mobile" className="text-sm">
+                    <Label htmlFor="rows-per-page-mobile" className="text-sm font-medium text-foreground">
                       Rows per page
                     </Label>
                     <Select
@@ -171,7 +171,7 @@ export function DataTable<T extends { id: string }>({
                     >
                       <SelectTrigger
                         id="rows-per-page-mobile"
-                        className="w-20 h-8 text-sm"
+                        className="w-20 h-8 text-sm border-border/60 hover:border-primary/40 transition-colors"
                       >
                         <SelectValue />
                       </SelectTrigger>
@@ -213,6 +213,7 @@ export function DataTable<T extends { id: string }>({
                             }
                             disabled={!pagination.has_prev || isLoading}
                             className={cn(
+                              "transition-all duration-200",
                               (!pagination.has_prev || isLoading) &&
                                 "pointer-events-none opacity-50 cursor-not-allowed"
                             )}
@@ -221,7 +222,7 @@ export function DataTable<T extends { id: string }>({
                         </PaginationItem>
 
                         <PaginationItem>
-                          <span className="px-3 py-1 text-sm">
+                          <span className="px-3 py-1 text-sm font-medium text-foreground">
                             Page {pagination.page} of {pagination.total_pages}
                           </span>
                         </PaginationItem>
@@ -231,6 +232,7 @@ export function DataTable<T extends { id: string }>({
                             onClick={() => onPageChange?.(pagination.page + 1)}
                             disabled={!pagination.has_next || isLoading}
                             className={cn(
+                              "transition-all duration-200",
                               (!pagination.has_next || isLoading) &&
                                 "pointer-events-none opacity-50 cursor-not-allowed"
                             )}
@@ -251,62 +253,78 @@ export function DataTable<T extends { id: string }>({
 
   // Desktop table view
   return (
-    <div className="border rounded-lg">
+    <div className="border border-border/60 rounded-lg bg-card shadow-sm overflow-hidden">
       {isLoading ? (
         <div className="p-4 space-y-3">
           {Array.from({ length: 5 }, (_, i) => (
-            <Skeleton key={`skeleton-row-${i}`} className="h-10 w-full" />
+            <Skeleton key={`skeleton-row-${i}`} className="h-10 w-full rounded-md" />
           ))}
         </div>
       ) : (
         <>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                {columns.map((column) => (
-                  <TableHead
-                    key={column.id}
-                    className={cn(column.className)}
-                  >
-                    {column.header}
-                  </TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="text-center text-muted-foreground py-8"
-                  >
-                    {emptyMessage}
-                  </TableCell>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-gradient-to-b from-muted/50 to-muted/30 border-b border-border/60 hover:bg-muted/50">
+                  {columns.map((column) => (
+                    <TableHead
+                      key={column.id}
+                      className={cn(
+                        "font-semibold text-foreground/90 uppercase tracking-wider text-xs px-6 py-4",
+                        column.className
+                      )}
+                    >
+                      {column.header}
+                    </TableHead>
+                  ))}
                 </TableRow>
-              ) : (
-                data.map((row) => (
-                  <TableRow key={row.id} className="hover:bg-muted/50">
-                    {columns.map((column) => (
-                      <TableCell
-                        key={column.id}
-                        className={cn(column.className)}
-                      >
-                        {column.accessor(row)}
-                      </TableCell>
-                    ))}
+              </TableHeader>
+              <TableBody>
+                {data.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="text-center text-muted-foreground py-12 px-6"
+                    >
+                      <div className="text-sm">{emptyMessage}</div>
+                    </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                ) : (
+                  data.map((row, rowIndex) => (
+                    <TableRow 
+                      key={row.id} 
+                      className={cn(
+                        "hover:bg-accent/40 transition-all duration-200 border-b border-border/30",
+                        "hover:shadow-sm",
+                        rowIndex % 2 === 0 && "bg-card",
+                        rowIndex % 2 === 1 && "bg-muted/20"
+                      )}
+                    >
+                      {columns.map((column) => (
+                        <TableCell
+                          key={column.id}
+                          className={cn(
+                            "transition-colors duration-150 px-6 py-4",
+                            column.className
+                          )}
+                        >
+                          {column.accessor(row)}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
 
           {pagination && (
-            <div className="border-t bg-muted/30 px-6 py-4">
+            <div className="border-t border-border/60 bg-gradient-to-b from-muted/40 to-muted/20 px-6 py-4">
               <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
                 {/* Rows per page selector */}
                 {onPerPageChange && (
                   <div className="flex items-center gap-3 order-3 lg:order-1">
-                    <Label htmlFor="rows-per-page" className="text-sm whitespace-nowrap">
+                    <Label htmlFor="rows-per-page" className="text-sm whitespace-nowrap font-medium text-foreground">
                       Rows per page
                     </Label>
                     <Select
@@ -319,7 +337,7 @@ export function DataTable<T extends { id: string }>({
                     >
                       <SelectTrigger
                         id="rows-per-page"
-                        className="w-fit whitespace-nowrap h-9"
+                        className="w-fit whitespace-nowrap h-9 border-border/60 hover:border-primary/40 transition-colors"
                       >
                         <SelectValue placeholder="Select rows" />
                       </SelectTrigger>
@@ -336,7 +354,7 @@ export function DataTable<T extends { id: string }>({
 
                 {/* Page number information */}
                 <div className="flex grow justify-center lg:justify-end text-sm whitespace-nowrap text-muted-foreground order-2 lg:order-2">
-                  <p className="text-sm whitespace-nowrap text-muted-foreground" aria-live="polite">
+                  <p className="text-sm whitespace-nowrap" aria-live="polite">
                     <span className="text-foreground font-semibold">
                       {(pagination.page - 1) * pagination.per_page + 1}-
                       {Math.min(
@@ -358,7 +376,7 @@ export function DataTable<T extends { id: string }>({
                       <button
                         type="button"
                         onClick={() => onResetFilters()}
-                        className="text-xs font-medium text-muted-foreground hover:text-primary underline-offset-4 hover:underline"
+                        className="text-xs font-medium text-muted-foreground hover:text-primary transition-colors duration-200 underline-offset-4 hover:underline"
                       >
                         Reset filters
                       </button>
@@ -370,8 +388,12 @@ export function DataTable<T extends { id: string }>({
                             onClick={() => onPageChange?.(1)}
                             disabled={!pagination.has_prev || isLoading}
                             className={cn(
+                              "transition-all duration-200",
                               (!pagination.has_prev || isLoading) &&
-                                "pointer-events-none opacity-50 cursor-not-allowed"
+                                "pointer-events-none opacity-50 cursor-not-allowed",
+                              pagination.has_prev &&
+                                !isLoading &&
+                                "hover:bg-accent hover:text-accent-foreground"
                             )}
                             aria-disabled={!pagination.has_prev || isLoading}
                           />
@@ -384,8 +406,12 @@ export function DataTable<T extends { id: string }>({
                             }
                             disabled={!pagination.has_prev || isLoading}
                             className={cn(
+                              "transition-all duration-200",
                               (!pagination.has_prev || isLoading) &&
-                                "pointer-events-none opacity-50 cursor-not-allowed"
+                                "pointer-events-none opacity-50 cursor-not-allowed",
+                              pagination.has_prev &&
+                                !isLoading &&
+                                "hover:bg-accent hover:text-accent-foreground"
                             )}
                             aria-disabled={!pagination.has_prev || isLoading}
                           />
@@ -413,8 +439,13 @@ export function DataTable<T extends { id: string }>({
                                 disabled={isLoading}
                                 isActive={isActive}
                                 className={cn(
+                                  "transition-all duration-200",
                                   isLoading &&
-                                    "pointer-events-none opacity-50 cursor-not-allowed"
+                                    "pointer-events-none opacity-50 cursor-not-allowed",
+                                  isActive &&
+                                    "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 font-semibold",
+                                  !isActive &&
+                                    "hover:bg-accent hover:text-accent-foreground"
                                 )}
                               >
                                 {pageNumber}
@@ -428,8 +459,12 @@ export function DataTable<T extends { id: string }>({
                             onClick={() => onPageChange?.(pagination.page + 1)}
                             disabled={!pagination.has_next || isLoading}
                             className={cn(
+                              "transition-all duration-200",
                               (!pagination.has_next || isLoading) &&
-                                "pointer-events-none opacity-50 cursor-not-allowed"
+                                "pointer-events-none opacity-50 cursor-not-allowed",
+                              pagination.has_next &&
+                                !isLoading &&
+                                "hover:bg-accent hover:text-accent-foreground"
                             )}
                             aria-disabled={!pagination.has_next || isLoading}
                           />
@@ -442,8 +477,12 @@ export function DataTable<T extends { id: string }>({
                             }
                             disabled={!pagination.has_next || isLoading}
                             className={cn(
+                              "transition-all duration-200",
                               (!pagination.has_next || isLoading) &&
-                                "pointer-events-none opacity-50 cursor-not-allowed"
+                                "pointer-events-none opacity-50 cursor-not-allowed",
+                              pagination.has_next &&
+                                !isLoading &&
+                                "hover:bg-accent hover:text-accent-foreground"
                             )}
                             aria-disabled={!pagination.has_next || isLoading}
                           />

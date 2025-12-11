@@ -21,6 +21,7 @@ func (r *repository) FindByID(id string) (*task.Task, error) {
 	var t task.Task
 	err := r.db.
 		Preload("AssignedUser").
+		Preload("AssignedFromUser").
 		Preload("Account").
 		Preload("Contact").
 		Preload("Deal").
@@ -106,6 +107,7 @@ func (r *repository) List(req *task.ListTasksRequest) ([]task.Task, int64, error
 	// Fetch data with preload
 	err := query.
 		Preload("AssignedUser").
+		Preload("AssignedFromUser").
 		Preload("Account").
 		Preload("Contact").
 		Preload("Deal").
@@ -127,11 +129,12 @@ func (r *repository) Create(t *task.Task) error {
 func (r *repository) Update(t *task.Task) error {
 	// Clear relations to avoid updating them
 	t.AssignedUser = nil
+	t.AssignedFromUser = nil
 	t.Account = nil
 	t.Contact = nil
 	t.Deal = nil
 
-	return r.db.Model(t).Omit("AssignedUser", "Account", "Contact", "Deal").Updates(t).Error
+	return r.db.Model(t).Omit("AssignedUser", "AssignedFromUser", "Account", "Contact", "Deal").Updates(t).Error
 }
 
 func (r *repository) Delete(id string) error {

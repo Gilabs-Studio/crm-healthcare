@@ -37,6 +37,12 @@ func SeedRoles() error {
 			Status:      "active",
 		},
 		{
+			Name:        "Sales",
+			Code:        "sales",
+			Description: "Sales role for mobile app access",
+			Status:      "active",
+		},
+		{
 			Name:        "Viewer",
 			Code:        "viewer",
 			Description: "Viewer role with read-only access",

@@ -461,3 +461,74 @@ func (h *VisitReportHandler) UploadPhoto(c *gin.Context) {
 	response.SuccessResponse(c, visitReport, nil)
 }
 
+// GetMyVisitReports handles get visit reports for logged-in user request (mobile endpoint)
+func (h *VisitReportHandler) GetMyVisitReports(c *gin.Context) {
+	var req visit_report.ListVisitReportsRequest
+
+	if err := c.ShouldBindQuery(&req); err != nil {
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			errors.HandleValidationError(c, validationErrors)
+			return
+		}
+		errors.InvalidQueryParamResponse(c)
+		return
+	}
+
+	// Get user ID from context
+	userID := ""
+	if userIDVal, exists := c.Get("user_id"); exists {
+		if id, ok := userIDVal.(string); ok {
+			userID = id
+		}
+	}
+
+	if userID == "" {
+		errors.ErrorResponse(c, "UNAUTHORIZED", map[string]interface{}{
+			"message": "User ID not found in context",
+		}, nil)
+		return
+	}
+
+	visitReports, pagination, err := h.visitReportService.GetMyVisitReports(userID, &req)
+	if err != nil {
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	meta := &response.Meta{
+		Pagination: &response.PaginationMeta{
+			Page:       pagination.Page,
+			PerPage:    pagination.PerPage,
+			Total:      pagination.Total,
+			TotalPages: pagination.TotalPages,
+			HasNext:    pagination.Page < pagination.TotalPages,
+			HasPrev:    pagination.Page > 1,
+		},
+		Filters: map[string]interface{}{},
+	}
+
+	if req.Search != "" {
+		meta.Filters["search"] = req.Search
+	}
+	if req.Status != "" {
+		meta.Filters["status"] = req.Status
+	}
+	if req.AccountID != "" {
+		meta.Filters["account_id"] = req.AccountID
+	}
+	if req.DealID != "" {
+		meta.Filters["deal_id"] = req.DealID
+	}
+	if req.LeadID != "" {
+		meta.Filters["lead_id"] = req.LeadID
+	}
+	if req.StartDate != "" {
+		meta.Filters["start_date"] = req.StartDate
+	}
+	if req.EndDate != "" {
+		meta.Filters["end_date"] = req.EndDate
+	}
+
+	response.SuccessResponse(c, visitReports, meta)
+}
+

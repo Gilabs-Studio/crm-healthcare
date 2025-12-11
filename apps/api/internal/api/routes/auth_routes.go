@@ -12,6 +12,9 @@ func SetupAuthRoutes(router *gin.RouterGroup, authHandler *handlers.AuthHandler,
 	{
 		// Login endpoint with rate limiting (5 requests per 15 minutes)
 		auth.POST("/login", middleware.RateLimitMiddleware("login"), authHandler.Login)
+		// Mobile login endpoint with rate limiting (5 requests per 15 minutes)
+		// Only users with "sales" role can login via this endpoint
+		auth.POST("/mobile/login", middleware.RateLimitMiddleware("mobile_login"), authHandler.MobileLogin)
 		// Refresh token endpoint with rate limiting (10 requests per hour)
 		auth.POST("/refresh", middleware.RateLimitMiddleware("refresh"), authHandler.RefreshToken)
 		// Logout endpoint (authenticated, no rate limit needed)
