@@ -27,6 +27,7 @@ import { ContactDetailModal } from "@/features/sales-crm/account-management/comp
 import { TaskDetailModal } from "@/features/sales-crm/task-management/components/task-detail-modal";
 import { VisitReportDetailModal } from "@/features/sales-crm/visit-report/components/visit-report-detail-modal";
 import { DealDetailModal } from "@/features/sales-crm/pipeline-management/components/deal-detail-modal";
+import { LeadDetailModal } from "@/features/sales-crm/lead-management/components/lead-detail-modal";
 import { templateCategories, getTemplatesByCategory, type ChatTemplate } from "../data/chat-templates";
 
 interface Message {
@@ -89,6 +90,7 @@ export function Chatbot() {
   const [viewingTaskId, setViewingTaskId] = useState<string | null>(null);
   const [viewingVisitReportId, setViewingVisitReportId] = useState<string | null>(null);
   const [viewingDealId, setViewingDealId] = useState<string | null>(null);
+  const [viewingLeadId, setViewingLeadId] = useState<string | null>(null);
 
   // Get avatar URL from backend
   const userAvatarUrl = useMemo(() => {
@@ -126,6 +128,7 @@ export function Chatbot() {
     setViewingTaskId(null);
     setViewingVisitReportId(null);
     setViewingDealId(null);
+    setViewingLeadId(null);
     
     // Set the appropriate modal state based on type
     switch (type) {
@@ -143,6 +146,9 @@ export function Chatbot() {
         break;
       case 'deal':
         setViewingDealId(id);
+        break;
+      case 'lead':
+        setViewingLeadId(id);
         break;
       default:
         // Unknown type, open in new tab
@@ -873,6 +879,19 @@ export function Chatbot() {
           onOpenChange={(open) => {
             if (!open) {
               setViewingDealId(null);
+            }
+          }}
+        />
+      )}
+
+      {viewingLeadId && (
+        <LeadDetailModal
+          key={`lead-${viewingLeadId}`}
+          leadId={viewingLeadId}
+          open={!!viewingLeadId}
+          onOpenChange={(open) => {
+            if (!open) {
+              setViewingLeadId(null);
             }
           }}
         />

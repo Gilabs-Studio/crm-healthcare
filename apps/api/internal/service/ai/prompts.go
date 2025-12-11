@@ -44,30 +44,46 @@ func BuildVisitReportContext(visitReport *visit_report.VisitReport, account *acc
 		}
 	}
 
-	// Account Information
-	sb.WriteString("\n=== HEALTHCARE FACILITY (ACCOUNT) ===\n")
-	sb.WriteString(fmt.Sprintf("- Facility Name: %s\n", account.Name))
-	sb.WriteString(fmt.Sprintf("- Account ID: %s\n", account.ID))
-	if account.Category != nil && account.Category.Name != "" {
-		sb.WriteString(fmt.Sprintf("- Facility Type/Category: %s\n", account.Category.Name))
+	// Account Information (if account is provided)
+	if account != nil {
+		sb.WriteString("\n=== HEALTHCARE FACILITY (ACCOUNT) ===\n")
+		sb.WriteString(fmt.Sprintf("- Facility Name: %s\n", account.Name))
+		sb.WriteString(fmt.Sprintf("- Account ID: %s\n", account.ID))
+		if account.Category != nil && account.Category.Name != "" {
+			sb.WriteString(fmt.Sprintf("- Facility Type/Category: %s\n", account.Category.Name))
+		}
+		if account.Address != "" {
+			sb.WriteString(fmt.Sprintf("- Address: %s\n", account.Address))
+		}
+		if account.City != "" {
+			sb.WriteString(fmt.Sprintf("- City: %s\n", account.City))
+		}
+		if account.Province != "" {
+			sb.WriteString(fmt.Sprintf("- Province: %s\n", account.Province))
+		}
+		if account.Phone != "" {
+			sb.WriteString(fmt.Sprintf("- Phone: %s\n", account.Phone))
+		}
+		if account.Email != "" {
+			sb.WriteString(fmt.Sprintf("- Email: %s\n", account.Email))
+		}
+		if account.Status != "" {
+			sb.WriteString(fmt.Sprintf("- Status: %s\n", account.Status))
+		}
+	} else if visitReport.AccountID != nil && *visitReport.AccountID != "" {
+		// Account ID exists but account entity not loaded
+		sb.WriteString("\n=== HEALTHCARE FACILITY (ACCOUNT) ===\n")
+		sb.WriteString(fmt.Sprintf("- Account ID: %s\n", *visitReport.AccountID))
+		sb.WriteString("- Note: Account information not fully loaded.\n")
 	}
-	if account.Address != "" {
-		sb.WriteString(fmt.Sprintf("- Address: %s\n", account.Address))
-	}
-	if account.City != "" {
-		sb.WriteString(fmt.Sprintf("- City: %s\n", account.City))
-	}
-	if account.Province != "" {
-		sb.WriteString(fmt.Sprintf("- Province: %s\n", account.Province))
-	}
-	if account.Phone != "" {
-		sb.WriteString(fmt.Sprintf("- Phone: %s\n", account.Phone))
-	}
-	if account.Email != "" {
-		sb.WriteString(fmt.Sprintf("- Email: %s\n", account.Email))
-	}
-	if account.Status != "" {
-		sb.WriteString(fmt.Sprintf("- Status: %s\n", account.Status))
+
+	// Lead Information (if visit report is linked to a lead)
+	if visitReport.LeadID != nil && *visitReport.LeadID != "" {
+		sb.WriteString("\n=== LEAD INFORMATION ===\n")
+		sb.WriteString(fmt.Sprintf("- Lead ID: %s\n", *visitReport.LeadID))
+		sb.WriteString("- Note: This visit report is linked to a lead. The lead may be converted to an opportunity/deal later.\n")
+		sb.WriteString("- Business Rule: Visit reports can be created based on Lead, Deal, or Account (via tab selection).\n")
+		sb.WriteString("- When a lead is converted, all associated visit reports and activities are automatically migrated to the new account/deal.\n")
 	}
 
 	// Contact Information
@@ -77,6 +93,13 @@ func BuildVisitReportContext(visitReport *visit_report.VisitReport, account *acc
 		if visitReport.ContactID != nil {
 			sb.WriteString(fmt.Sprintf("- Contact ID: %s\n", *visitReport.ContactID))
 		}
+	}
+
+	// Deal Information (if visit report is linked to a deal)
+	if visitReport.DealID != nil && *visitReport.DealID != "" {
+		sb.WriteString("\n=== DEAL/OPPORTUNITY INFORMATION ===\n")
+		sb.WriteString(fmt.Sprintf("- Deal ID: %s\n", *visitReport.DealID))
+		sb.WriteString("- Note: This visit report is linked to a deal/opportunity in the sales pipeline.\n")
 	}
 
 	// Recent Activities Context
@@ -191,6 +214,17 @@ YOUR EXPERTISE INCLUDES:
 YOUR CAPABILITIES:
 - Analyze sales visit reports and provide actionable insights
 - Answer questions about accounts (hospitals, clinics, pharmacies, distributors)
+- Help with lead management (tracking, qualification, conversion to opportunities)
+  * Understand lead status flow: new → contacted → qualified → converted/lost (or unqualified → nurturing/disqualified)
+  * Explain lead scoring system (0-100 scale) and qualification criteria
+  * Guide on lead conversion process and best practices:
+    - Only "qualified" leads can be converted to opportunities/deals
+    - Lead status must be "qualified" before conversion (cannot convert "new", "contacted", or other statuses)
+    - Converted leads cannot be deleted (for data integrity and traceability)
+    - When converting: system automatically creates account (if requested), creates contact (optional), creates deal in pipeline starting from "Qualification" stage, migrates all visit reports and activities to new account/deal, updates lead status to "converted" and links to new deal/account/contact
+    - Deal created from conversion includes LeadID for traceability back to source lead
+  * Help with lead source analysis and conversion rate optimization
+  * Explain pre-conversion account creation: accounts can be created from leads before conversion (useful for early account setup)
 - Help with contact management and relationship building
 - Assist with deal/opportunity management and pipeline forecasting
 - Provide guidance on sales strategies and best practices
@@ -237,7 +271,7 @@ RESPONSE FORMATTING:
 - DO NOT use HTML tables, plain text tables, or any other format - ONLY Markdown tables
 - DO NOT mention "dalam format Markdown" or "Markdown format" in your responses - just use the format directly
 - CRITICAL: ALWAYS show NAMES (account_name, contact_name, stage_name, etc.) in tables, NOT IDs
-- For IDs, use Markdown link format: [Name](type://ID) where type is deal, account, contact, visit, or task
+- For IDs, use Markdown link format: [Name](type://ID) where type is lead, deal, account, contact, visit, or task
   Example: [RSUD Jakarta](account://ab868b77-e9b3-429f-ad8c-d55ac1f6561b)
   Example: [Kontrak RSUD Jakarta 2024](deal://878a8f5a-4e38-43de-afdc-4dda9bffc0ae)
 - NEVER show raw UUIDs in tables - always use names with clickable links
@@ -261,25 +295,46 @@ CRITICAL DATA USAGE RULES - ABSOLUTELY NO HALLUCINATION:
   * "Maaf, saya tidak memiliki akses ke data [specific analysis] yang Anda minta. Data yang tersedia tidak mencakup informasi tersebut. Untuk melakukan analisis ini, saya memerlukan data yang lebih spesifik atau terstruktur."
   * DO NOT create fake trend data, fake dates, or fake numbers
   * DO NOT create tables with sequential numbers (1, 2, 3, 4...) or patterns
-- FOR CONVERSION RATE CALCULATIONS: When user asks about conversion rate (e.g., "conversion rate dari Lead ke Closed Won"), you MUST:
+- FOR CONVERSION RATE CALCULATIONS: When user asks about conversion rate (e.g., "conversion rate dari Qualification ke Closed Won"), you MUST:
   * Use the deals data provided in context
   * Count deals by stage_name or stage_code:
-    - Count deals with stage_name "Lead" (or stage_code "lead") as total leads
+    - Count deals with stage_name "Qualification" (or stage_code "qualification") as starting point (first pipeline stage after lead conversion)
     - Count deals with stage_name "Closed Won" (or stage_code "closed_won") as closed won deals
-  * Calculate: Conversion Rate = (Closed Won / Total Leads) * 100
+  * Calculate: Conversion Rate = (Closed Won / Total Qualification) * 100
   * Present the calculation clearly showing:
-    - Total Leads: [actual count from data]
+    - Total Qualification: [actual count from data]
     - Closed Won: [actual count from data]
     - Conversion Rate: [calculated percentage]%
   * If data doesn't contain both stages, inform user honestly
   * DO NOT create fake numbers - use ONLY the actual data provided
+  * Note: "Lead" is NOT a pipeline stage. Leads are managed separately in Lead Management module. Pipeline starts from "Qualification" stage after lead conversion.
   * Example response format:
     "Berdasarkan data deals yang tersedia:
-    - Total Leads: 15 deals
+    - Total Qualification: 15 deals
     - Closed Won: 5 deals
     - Conversion Rate: (5 / 15) * 100 = 33.33%
     
-    Conversion rate dari Lead ke Closed Won adalah 33.33%."
+    Conversion rate dari Qualification ke Closed Won adalah 33.33%."
+- FOR LEAD CONVERSION RATE CALCULATIONS: When user asks about lead conversion rate (e.g., "lead conversion rate", "berapa lead yang converted"), you MUST:
+  * Use the leads data provided in context
+  * Count leads by lead_status:
+    - Count leads with lead_status "qualified" as qualified leads
+    - Count leads with lead_status "converted" as converted leads
+  * Calculate: Lead Conversion Rate = (Converted Leads / Qualified Leads) * 100
+  * Present the calculation clearly showing:
+    - Total Qualified Leads: [actual count from data]
+    - Converted Leads: [actual count from data]
+    - Lead Conversion Rate: [calculated percentage]%
+  * You can also calculate conversion rate by lead_source if data is available
+  * If data doesn't contain both statuses, inform user honestly
+  * DO NOT create fake numbers - use ONLY the actual data provided
+  * Example response format:
+    "Berdasarkan data leads yang tersedia:
+    - Total Qualified Leads: 20 leads
+    - Converted Leads: 8 leads
+    - Lead Conversion Rate: (8 / 20) * 100 = 40%
+    
+    Conversion rate dari qualified leads ke converted adalah 40%."
 - FOR STATISTICS/ANALYTICS QUERIES: When user asks for statistics, averages, comparisons, or analytics:
   * Use ALL the data provided in context
   * Calculate metrics using ONLY the real data (count, sum, average, percentage, etc.)
@@ -360,28 +415,28 @@ IMPORTANT GUIDELINES:
 	weekdayStr := currentTime.Weekday().String()
 	monthStr := currentTime.Month().String()
 	yearStr := fmt.Sprintf("%d", currentTime.Year())
-	
+
 	// Calculate days until major holidays/events (for Indonesia context)
 	now := currentTime
 	year := now.Year()
-	
+
 	// Christmas (December 25)
 	christmas := time.Date(year, 12, 25, 0, 0, 0, 0, currentTime.Location())
 	daysUntilChristmas := int(christmas.Sub(now).Hours() / 24)
-	
+
 	// New Year (January 1, next year)
 	newYear := time.Date(year+1, 1, 1, 0, 0, 0, 0, currentTime.Location())
 	daysUntilNewYear := int(newYear.Sub(now).Hours() / 24)
-	
+
 	// Calculate approximate Lebaran (Idul Fitri) - typically in April/May, varies by lunar calendar
 	// For 2025, approximate Lebaran is around March 30-April 1
 	lebaran2025 := time.Date(2025, 3, 30, 0, 0, 0, 0, currentTime.Location())
 	daysUntilLebaran := int(lebaran2025.Sub(now).Hours() / 24)
-	
+
 	// Build time context
-	timeContext := fmt.Sprintf("\n\nCURRENT DATE AND TIME:\n- Date: %s (%s)\n- Time: %s\n- Timezone: %s\n- Year: %s\n- Month: %s\n\nTIME HORIZON CONTEXT:\n", 
+	timeContext := fmt.Sprintf("\n\nCURRENT DATE AND TIME:\n- Date: %s (%s)\n- Time: %s\n- Timezone: %s\n- Year: %s\n- Month: %s\n\nTIME HORIZON CONTEXT:\n",
 		dateStr, weekdayStr, timeStr, timezone, yearStr, monthStr)
-	
+
 	// Add relevant upcoming events based on current date
 	if daysUntilChristmas >= 0 && daysUntilChristmas <= 60 {
 		timeContext += fmt.Sprintf("- Christmas is in %d days (December 25, %d)\n", daysUntilChristmas, year)
@@ -399,7 +454,7 @@ IMPORTANT GUIDELINES:
 			timeContext += fmt.Sprintf("- Next Lebaran (Idul Fitri) is approximately in %d days (around March 20, 2026)\n", daysUntilLebaran2026)
 		}
 	}
-	
+
 	timeContext += "\nCRITICAL TIME-AWARE RESPONSE RULES:\n"
 	timeContext += "- You MUST use the current date and time provided above to give contextually appropriate responses\n"
 	timeContext += "- When discussing holidays, events, or seasonal topics, consider the time horizon (how far away events are)\n"
@@ -411,10 +466,10 @@ IMPORTANT GUIDELINES:
 	timeContext += "- For forecast revenue queries: Calculate and show the total expected revenue and weighted revenue based on probability\n"
 	timeContext += "- For probability-based predictions: Show deals with their probability percentages and weighted values\n"
 	timeContext += "- Consider seasonal factors in pharmaceutical sales (e.g., flu season, holiday periods, etc.) based on current month\n"
-	
+
 	// Add model and provider information
 	modelInfo := fmt.Sprintf("\n\nCURRENT AI CONFIGURATION:\n- Provider: %s\n- Model: %s\n\nIMPORTANT: If the user asks about your model, provider, or AI configuration, you MUST inform them about the current configuration above. For example, if asked 'llm model anda sekarang apa' or 'what model are you using', respond with: 'Saya menggunakan model %s dari provider %s.'", provider, model, model, provider)
-	
+
 	// Prepare additional info if available
 	var additionalInfo string
 	if dataAccessInfo != "" {
@@ -433,7 +488,7 @@ CRITICAL - ABSOLUTELY NO HALLUCINATION: You have REAL data from the database abo
 1. Use ONLY the data provided above - NEVER create, invent, make up, or hallucinate ANY data
 2. Present it in Markdown table format
 3. ALWAYS show NAMES (account_name, contact_name, stage_name, etc.) in tables, NOT raw IDs
-4. For IDs, use Markdown link format: [Name](type://ID) where type is deal, account, contact, visit, or task
+4. For IDs, use Markdown link format: [Name](type://ID) where type is lead, deal, account, contact, visit, or task
    Example: [RSUD Jakarta](account://ab868b77-e9b3-429f-ad8c-d55ac1f6561b)
    Example: [Kontrak RSUD Jakarta 2024](deal://878a8f5a-4e38-43de-afdc-4dda9bffc0ae)
 5. NEVER show raw UUIDs in tables - always use names with clickable links
@@ -441,11 +496,19 @@ CRITICAL - ABSOLUTELY NO HALLUCINATION: You have REAL data from the database abo
 7. DO NOT create, invent, make up, or hallucinate any data - this is STRICTLY FORBIDDEN
 7. If the data is empty, incomplete, or doesn't contain what the user is asking for, you MUST be HONEST and say "Maaf, saya tidak memiliki akses ke data [specific data] yang Anda minta. Data tersebut mungkin belum tersedia di sistem atau saya tidak memiliki akses ke data tersebut."
 8. FOR TREND/ANALYTICS: If user asks about trends, averages, or statistics, and the data doesn't contain the specific aggregated information needed, you MUST say "Maaf, saya tidak memiliki akses ke data [specific analysis] yang Anda minta. Data yang tersedia tidak mencakup informasi tersebut." DO NOT create fake trend data, fake dates, or fake numbers.
-9. FOR CONVERSION RATE: When user asks about conversion rate (e.g., "conversion rate dari Lead ke Closed Won"), calculate using the deals data:
-   - Count deals with stage_name "Lead" (or stage_code "lead")
+9. FOR CONVERSION RATE: When user asks about conversion rate (e.g., "conversion rate dari Qualification ke Closed Won"), calculate using the deals data:
+   - Count deals with stage_name "Qualification" (or stage_code "qualification") as starting point
    - Count deals with stage_name "Closed Won" (or stage_code "closed_won")
-   - Calculate: (Closed Won / Total Leads) * 100
+   - Calculate: (Closed Won / Total Qualification) * 100
    - Show the calculation steps and result clearly
+   - Use ONLY actual data from context - DO NOT invent numbers
+   - Note: "Lead" is NOT a pipeline stage. Leads are managed separately in Lead Management module. Pipeline starts from "Qualification" stage after lead conversion.
+10. FOR LEAD CONVERSION RATE: When user asks about lead conversion rate (e.g., "lead conversion rate", "berapa lead yang converted"), calculate using the leads data:
+   - Count leads with lead_status "qualified" as qualified leads
+   - Count leads with lead_status "converted" as converted leads
+   - Calculate: Lead Conversion Rate = (Converted Leads / Qualified Leads) * 100
+   - Show the calculation steps and result clearly
+   - You can also calculate conversion rate by lead_source if data is available
    - Use ONLY actual data from context - DO NOT invent numbers
 11. NEVER use these phrases: "contoh data", "example data", "data dari database", "Berikut beberapa data dari database", "yang terkait dengan", "data yang terkait", "akun-akun di bidang kesehatan", or ANY variation mentioning "database", "data dari", or "yang terkait"
 12. Present data naturally - use SIMPLE introductions like "Berikut daftar akun:", "Saya menemukan beberapa kontak:", or just start directly with a heading like "### Daftar Akun"
@@ -458,12 +521,14 @@ CRITICAL - ABSOLUTELY NO HALLUCINATION: You have REAL data from the database abo
 
 %s%s%s`, basePrompt, contextData, additionalInfo, timeContext, modelInfo)
 		}
-		return basePrompt + timeContext + modelInfo + "\n\nIMPORTANT: You do NOT have access to real data from the database. If the user asks about your model, provider, or AI configuration, you MUST inform them about the current configuration. If the user asks for data (accounts, contacts, deals, visit reports), you MUST inform them that you need specific context or that data is not available. NEVER create example data or sample data.\n\nYou can help with questions about:\n- Accounts (healthcare facilities) - but you need context ID\n- Contacts (doctors, pharmacists, procurement officers) - but you need context ID\n- Visit Reports (sales visits to healthcare facilities) - but you need context ID\n- Deals/Opportunities (sales pipeline) - but you need context ID\n- Tasks and follow-ups\n- Products and product positioning\n- Sales strategies and best practices\n\nHow can I assist you today?"
+		return basePrompt + timeContext + modelInfo + "\n\nIMPORTANT: You do NOT have access to real data from the database. If the user asks about your model, provider, or AI configuration, you MUST inform them about the current configuration. If the user asks for data (leads, accounts, contacts, deals, visit reports), you MUST inform them that you need specific context or that data is not available. NEVER create example data or sample data.\n\nYou can help with questions about:\n- Leads (sales leads, lead qualification, lead conversion) - but you need context ID\n  * Lead status flow: new → contacted → qualified → converted/lost (or unqualified → nurturing/disqualified)\n  * Lead scoring (0-100 scale) and qualification criteria\n  * Lead sources: website, referral, cold_call, event, social_media, email_campaign, partner, other\n  * Lead conversion process: Only qualified leads can be converted. Conversion automatically creates account (if requested), contact (optional), deal in pipeline (starting from Qualification stage). Auto-migration: all visit reports and activities linked to lead are automatically migrated to new account/deal. Lead status changes to converted and is linked to new deal/account/contact. Converted leads cannot be deleted (for data integrity). Deal created includes LeadID for traceability.\n  * Pre-conversion account creation: accounts can be created from leads before conversion\n- Accounts (healthcare facilities) - but you need context ID\n- Contacts (doctors, pharmacists, procurement officers) - but you need context ID\n- Visit Reports (sales visits to healthcare facilities, can be linked to Lead, Deal, or Account) - but you need context ID\n  * Business Rule: Visit reports must be linked to at least Lead ID or Account ID. If Deal ID is provided, Account ID is required.\n  * Visit reports can be created via tab-based selection: Lead, Deal, or Account\n  * Visit reports linked to leads are automatically migrated to account/deal when lead is converted\n- Deals/Opportunities (sales pipeline, created from Lead Conversion) - but you need context ID\n  * Deals are created via Lead Conversion process (not directly)\n  * Pipeline stages start from \"Qualification\" (first stage after lead conversion)\n  * \"Lead\" is NOT a pipeline stage - leads are managed separately in Lead Management module\n- Activities (can be linked to Lead, Account, or Deal) - but you need context ID\n  * Activities must be linked to at least one entity: Lead, Account, or Deal\n  * Activities linked to leads are automatically migrated to account/deal when lead is converted\n- Tasks (can be linked to Account, Contact, or Deal) - but you need context ID\n- Products and product positioning\n- Sales strategies and best practices\n\nHow can I assist you today?"
 	}
 
 	if contextData != "" {
 		var contextLabel string
 		switch contextType {
+		case "lead":
+			contextLabel = "LEAD"
 		case "visit_report":
 			contextLabel = "VISIT REPORT"
 		case "deal":
@@ -487,7 +552,7 @@ CRITICAL - ABSOLUTELY NO HALLUCINATION: You MUST use ONLY the data provided abov
 
 IMPORTANT: When presenting data:
 1. ALWAYS show NAMES (account_name, contact_name, stage_name, etc.) in tables, NOT raw IDs
-2. For IDs, use Markdown link format: [Name](type://ID) where type is deal, account, contact, visit, or task
+2. For IDs, use Markdown link format: [Name](type://ID) where type is lead, deal, account, contact, visit, or task
    Example: [RSUD Jakarta](account://ab868b77-e9b3-429f-ad8c-d55ac1f6561b)
    Example: [Kontrak RSUD Jakarta 2024](deal://878a8f5a-4e38-43de-afdc-4dda9bffc0ae)
 3. NEVER show raw UUIDs in tables - always use names with clickable links
@@ -510,9 +575,8 @@ Use this context to provide relevant, accurate, and actionable answers. Referenc
 	}
 
 	if dataAccessInfo != "" {
-		return basePrompt + timeContext + modelInfo + "\n\n" + dataAccessInfo + "\n\nYou can help with questions about:\n- Accounts (healthcare facilities)\n- Contacts (doctors, pharmacists, procurement officers)\n- Visit Reports (sales visits to healthcare facilities)\n- Deals/Opportunities (sales pipeline)\n- Tasks and follow-ups\n- Products and product positioning\n- Sales strategies and best practices\n\nHow can I assist you today?"
+		return basePrompt + timeContext + modelInfo + "\n\n" + dataAccessInfo + "\n\nYou can help with questions about:\n- Leads (sales leads, lead qualification, lead conversion)\n  * Lead status flow: new → contacted → qualified → converted/lost (or unqualified → nurturing/disqualified)\n  * Lead scoring (0-100 scale) and qualification criteria\n  * Lead sources: website, referral, cold_call, event, social_media, email_campaign, partner, other\n  * Lead conversion process: Only qualified leads can be converted. Conversion automatically creates account (if requested), contact (optional), deal in pipeline (starting from Qualification stage). Auto-migration: all visit reports and activities linked to lead are automatically migrated to new account/deal. Lead status changes to converted and is linked to new deal/account/contact. Converted leads cannot be deleted (for data integrity). Deal created includes LeadID for traceability.\n  * Pre-conversion account creation: accounts can be created from leads before conversion\n- Accounts (healthcare facilities)\n- Contacts (doctors, pharmacists, procurement officers)\n- Visit Reports (sales visits to healthcare facilities, can be linked to Lead, Deal, or Account)\n  * Business Rule: Visit reports must be linked to at least Lead ID or Account ID. If Deal ID is provided, Account ID is required.\n  * Visit reports can be created via tab-based selection: Lead, Deal, or Account\n  * Visit reports linked to leads are automatically migrated to account/deal when lead is converted\n- Deals/Opportunities (sales pipeline, created from Lead Conversion)\n  * Deals are created via Lead Conversion process (not directly)\n  * Pipeline stages start from \"Qualification\" (first stage after lead conversion)\n  * \"Lead\" is NOT a pipeline stage - leads are managed separately in Lead Management module\n- Activities (can be linked to Lead, Account, or Deal)\n  * Activities must be linked to at least one entity: Lead, Account, or Deal\n  * Activities linked to leads are automatically migrated to account/deal when lead is converted\n- Tasks (can be linked to Account, Contact, or Deal)\n- Products and product positioning\n- Sales strategies and best practices\n\nHow can I assist you today?"
 	}
 
 	return basePrompt + timeContext + modelInfo
 }
-

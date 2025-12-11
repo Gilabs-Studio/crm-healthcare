@@ -130,7 +130,7 @@ func main() {
 	activityService := activityservice.NewService(activityRepo, activityTypeRepo, accountRepo, contactRepo, userRepo)
 	activityTypeService := activitytypeservice.NewService(activityTypeRepo)
 	visitReportService := visitreportservice.NewService(visitReportRepo, accountRepo, contactRepo, userRepo, activityRepo)
-	dashboardService := dashboardservice.NewService(visitReportRepo, accountRepo, activityRepo, userRepo, dealRepo, taskRepo, pipelineRepo)
+	dashboardService := dashboardservice.NewService(visitReportRepo, accountRepo, activityRepo, userRepo, dealRepo, taskRepo, pipelineRepo, leadRepo)
 
 	// Setup file service with storage provider
 	var storageProvider fileservice.StorageProvider
