@@ -7,10 +7,13 @@ class PermissionRepository {
 
   final Dio _dio;
 
-  Future<UserPermissionsResponse> getUserPermissions(String userId) async {
+  /// Get mobile permissions for authenticated user
+  /// Uses mobile-specific endpoint: /api/v1/auth/mobile/permissions
+  /// No userId required - uses token to identify user
+  Future<UserPermissionsResponse> getMobilePermissions() async {
     try {
       final response = await _dio.get<Map<String, dynamic>>(
-        '/api/v1/users/$userId/permissions',
+        '/api/v1/auth/mobile/permissions',
       );
 
       // Parse API response format: { success: true, data: { menus: [...] } }
@@ -26,7 +29,7 @@ class PermissionRepository {
       }
 
       final data = responseData['data'] as Map<String, dynamic>;
-      return UserPermissionsResponse.fromJson(data);
+      return UserPermissionsResponse.fromMobileJson(data);
     } on DioException catch (e) {
       if (e.response != null) {
         final responseData = e.response!.data as Map<String, dynamic>?;
@@ -40,6 +43,13 @@ class PermissionRepository {
     } catch (e) {
       rethrow;
     }
+  }
+
+  /// Legacy method - kept for backward compatibility
+  /// Now redirects to mobile endpoint
+  @Deprecated('Use getMobilePermissions() instead')
+  Future<UserPermissionsResponse> getUserPermissions(String userId) async {
+    return getMobilePermissions();
   }
 }
 

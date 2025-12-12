@@ -31,44 +31,24 @@ final userPermissionsProvider = FutureProvider.autoDispose<UserPermissionsRespon
     throw Exception('User not authenticated');
   }
   
-  // Get user ID from auth state
+  // Get user ID for cache key (mobile endpoint doesn't require userId, but we need it for cache)
   final userId = authState.user?.id;
-  if (userId == null) {
-    // If user is authenticated but user data is null, try to get from storage or wait
-    // This can happen when app resumes and auth state is still loading
-    await Future.delayed(const Duration(milliseconds: 200));
-    final updatedAuthState = ref.read(authProvider);
-    final updatedUserId = updatedAuthState.user?.id;
-    if (updatedUserId == null) {
-      throw Exception('User not authenticated');
-    }
-    // Use updated user ID
+  final cacheKey = userId != null ? 'user_permissions_$userId' : 'user_permissions_mobile';
+
+  // Try to get from cache first
+  try {
     final cached = await OfflineStorage.get<UserPermissionsResponse>(
-      'user_permissions_$updatedUserId',
+      cacheKey,
       (json) => UserPermissionsResponse.fromJson(json),
     );
-    if (cached != null) {
-      return cached;
-    }
-    final permissions = await repository.getUserPermissions(updatedUserId);
-    await OfflineStorage.set('user_permissions_$updatedUserId', permissions.toJson());
-    return permissions;
-  }
-
-    // Try to get from cache first
-    try {
-      final cached = await OfflineStorage.get<UserPermissionsResponse>(
-        'user_permissions_$userId',
-        (json) => UserPermissionsResponse.fromJson(json),
-      );
     
     if (cached != null) {
       // Return cached data immediately, then refresh in background
       Future.microtask(() async {
         try {
-          final fresh = await repository.getUserPermissions(userId);
+          final fresh = await repository.getMobilePermissions();
           await OfflineStorage.set(
-            'user_permissions_$userId',
+            cacheKey,
             fresh.toJson(),
           );
         } catch (e) {
@@ -81,13 +61,13 @@ final userPermissionsProvider = FutureProvider.autoDispose<UserPermissionsRespon
     // Cache error, continue to fetch from API
   }
 
-  // Fetch from API
-  final permissions = await repository.getUserPermissions(userId);
+  // Fetch from mobile API endpoint (no userId required)
+  final permissions = await repository.getMobilePermissions();
   
   // Cache the result
   try {
     await OfflineStorage.set(
-      'user_permissions_$userId',
+      cacheKey,
       permissions.toJson(),
     );
   } catch (e) {

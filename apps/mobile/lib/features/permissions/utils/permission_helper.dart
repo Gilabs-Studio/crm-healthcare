@@ -158,10 +158,11 @@ class PermissionHelper {
     List<MenuWithActions> menus,
     String url,
   ) {
-    // Try common CREATE action codes
+    // Try common CREATE action codes (mobile API format)
+    final entityName = _getEntityNameFromUrl(url);
     final createCodes = [
-      'CREATE_${_getEntityNameFromUrl(url).toUpperCase()}',
-      'CREATE_${_getEntityNameFromUrl(url).toUpperCase()}S',
+      'CREATE_$entityName', // e.g., CREATE_TASK
+      'CREATE_${entityName}S', // e.g., CREATE_TASKS (fallback)
     ];
 
     for (final code in createCodes) {
@@ -178,12 +179,13 @@ class PermissionHelper {
     List<MenuWithActions> menus,
     String url,
   ) {
-    // Try common EDIT action codes
+    // Try common EDIT action codes (mobile API format)
+    final entityName = _getEntityNameFromUrl(url);
     final editCodes = [
-      'EDIT_${_getEntityNameFromUrl(url).toUpperCase()}',
-      'EDIT_${_getEntityNameFromUrl(url).toUpperCase()}S',
-      'UPDATE_${_getEntityNameFromUrl(url).toUpperCase()}',
-      'UPDATE_${_getEntityNameFromUrl(url).toUpperCase()}S',
+      'EDIT_$entityName', // e.g., EDIT_TASK
+      'EDIT_${entityName}S', // e.g., EDIT_TASKS (fallback)
+      'UPDATE_$entityName', // e.g., UPDATE_TASK
+      'UPDATE_${entityName}S', // e.g., UPDATE_TASKS (fallback)
     ];
 
     for (final code in editCodes) {
@@ -200,10 +202,11 @@ class PermissionHelper {
     List<MenuWithActions> menus,
     String url,
   ) {
-    // Try common DELETE action codes
+    // Try common DELETE action codes (mobile API format)
+    final entityName = _getEntityNameFromUrl(url);
     final deleteCodes = [
-      'DELETE_${_getEntityNameFromUrl(url).toUpperCase()}',
-      'DELETE_${_getEntityNameFromUrl(url).toUpperCase()}S',
+      'DELETE_$entityName', // e.g., DELETE_TASK
+      'DELETE_${entityName}S', // e.g., DELETE_TASKS (fallback)
     ];
 
     for (final code in deleteCodes) {
@@ -220,12 +223,13 @@ class PermissionHelper {
     // Remove leading slash and convert to entity name
     final cleanUrl = url.replaceAll('/', '').replaceAll('-', '_');
     
-    // Map common URLs to entity names
+    // Map common URLs to entity names (matching mobile API format)
     final urlToEntity = {
-      '/tasks': 'TASKS',
+      '/tasks': 'TASK', // Mobile API uses "task" not "tasks"
       '/visit-reports': 'VISIT_REPORTS',
       '/accounts': 'ACCOUNTS',
       '/contacts': 'CONTACTS',
+      '/dashboard': 'DASHBOARD',
     };
 
     return urlToEntity[url] ?? cleanUrl.toUpperCase();

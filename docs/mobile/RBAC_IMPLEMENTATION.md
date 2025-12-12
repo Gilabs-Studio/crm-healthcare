@@ -224,6 +224,12 @@ Action permissions control which CRUD operations are available to users.
 
 ### Endpoint
 
+**Mobile Endpoint** (Current):
+```
+GET /api/v1/auth/mobile/permissions
+```
+
+**Legacy Endpoint** (Deprecated):
 ```
 GET /api/v1/users/:id/permissions
 ```
@@ -235,7 +241,9 @@ Authorization: Bearer <access_token>
 Content-Type: application/json
 ```
 
-### Response Format
+**Note**: Mobile endpoint does not require `userId` in the path. User is identified from the authentication token.
+
+### Response Format (Mobile API)
 
 ```json
 {
@@ -243,26 +251,54 @@ Content-Type: application/json
   "data": {
     "menus": [
       {
-        "id": "string",
-        "name": "string",
-        "icon": "string",
-        "url": "string",
-        "children": [
-          // Nested menus (optional)
-        ],
-        "actions": [
-          {
-            "id": "string",
-            "code": "string",
-            "name": "string",
-            "access": boolean
-          }
-        ]
+        "menu": "dashboard",
+        "actions": ["VIEW"]
+      },
+      {
+        "menu": "task",
+        "actions": ["VIEW", "CREATE", "EDIT", "DELETE"]
+      },
+      {
+        "menu": "accounts",
+        "actions": ["VIEW", "CREATE", "EDIT", "DELETE"]
+      },
+      {
+        "menu": "contacts",
+        "actions": ["VIEW", "CREATE", "EDIT", "DELETE"]
+      },
+      {
+        "menu": "visit_reports",
+        "actions": ["VIEW", "CREATE", "EDIT", "DELETE"]
       }
     ]
-  }
+  },
+  "timestamp": "2024-01-15T10:30:45+07:00",
+  "request_id": "req_abc123xyz"
 }
 ```
+
+### Menu Name Mapping
+
+The mobile API uses simplified menu names that are mapped to internal URLs:
+
+| API Menu Name | Internal URL | Display Name |
+|---------------|--------------|--------------|
+| `dashboard` | `/dashboard` | Dashboard |
+| `task` | `/tasks` | Tasks |
+| `accounts` | `/accounts` | Accounts |
+| `contacts` | `/contacts` | Contacts |
+| `visit_reports` | `/visit-reports` | Visit Reports |
+
+### Action Code Normalization
+
+The mobile API returns simple action codes (e.g., `"VIEW"`, `"CREATE"`) that are normalized to full action codes:
+
+| API Action | Normalized Code | Example |
+|------------|----------------|---------|
+| `VIEW` | `VIEW_<MENU>` | `VIEW_DASHBOARD`, `VIEW_TASK` |
+| `CREATE` | `CREATE_<MENU>` | `CREATE_TASK`, `CREATE_ACCOUNTS` |
+| `EDIT` | `EDIT_<MENU>` | `EDIT_TASK`, `EDIT_ACCOUNTS` |
+| `DELETE` | `DELETE_<MENU>` | `DELETE_TASK`, `DELETE_ACCOUNTS` |
 
 ### Error Response
 
@@ -312,13 +348,22 @@ class UserPermissionsResponse {
 
 ```dart
 class PermissionRepository {
-  Future<UserPermissionsResponse> getUserPermissions(String userId) async {
+  /// Get mobile permissions for authenticated user
+  /// Uses mobile-specific endpoint: /api/v1/auth/mobile/permissions
+  /// No userId required - uses token to identify user
+  Future<UserPermissionsResponse> getMobilePermissions() async {
     final response = await _dio.get<Map<String, dynamic>>(
-      '/api/v1/users/$userId/permissions',
+      '/api/v1/auth/mobile/permissions',
     );
     
-    // Parse and return permissions
-    return UserPermissionsResponse.fromJson(response.data!['data']);
+    // Parse mobile API response format
+    return UserPermissionsResponse.fromMobileJson(response.data!['data']);
+  }
+  
+  /// Legacy method - kept for backward compatibility
+  @Deprecated('Use getMobilePermissions() instead')
+  Future<UserPermissionsResponse> getUserPermissions(String userId) async {
+    return getMobilePermissions();
   }
 }
 ```
@@ -332,14 +377,18 @@ final userPermissionsProvider = FutureProvider.autoDispose<UserPermissionsRespon
   final repository = ref.read(permissionRepositoryProvider);
   final authState = ref.watch(authProvider);
   
-  final userId = authState.user?.id;
-  if (userId == null) {
+  // Check authentication
+  if (authState.status != AuthStatus.authenticated) {
     throw Exception('User not authenticated');
   }
+  
+  // Get user ID for cache key (mobile endpoint doesn't require userId)
+  final userId = authState.user?.id;
+  final cacheKey = userId != null ? 'user_permissions_$userId' : 'user_permissions_mobile';
 
   // Try cache first
   final cached = await OfflineStorage.get<UserPermissionsResponse>(
-    'user_permissions_$userId',
+    cacheKey,
     (json) => UserPermissionsResponse.fromJson(json),
   );
   
@@ -347,8 +396,8 @@ final userPermissionsProvider = FutureProvider.autoDispose<UserPermissionsRespon
     // Return cached, refresh in background
     Future.microtask(() async {
       try {
-        final fresh = await repository.getUserPermissions(userId);
-        await OfflineStorage.set('user_permissions_$userId', fresh.toJson());
+        final fresh = await repository.getMobilePermissions();
+        await OfflineStorage.set(cacheKey, fresh.toJson());
       } catch (e) {
         // Ignore refresh errors
       }
@@ -356,9 +405,9 @@ final userPermissionsProvider = FutureProvider.autoDispose<UserPermissionsRespon
     return cached;
   }
 
-  // Fetch from API
-  final permissions = await repository.getUserPermissions(userId);
-  await OfflineStorage.set('user_permissions_$userId', permissions.toJson());
+  // Fetch from mobile API endpoint (no userId required)
+  final permissions = await repository.getMobilePermissions();
+  await OfflineStorage.set(cacheKey, permissions.toJson());
   return permissions;
 });
 ```
