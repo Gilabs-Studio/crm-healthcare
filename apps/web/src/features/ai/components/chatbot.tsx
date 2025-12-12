@@ -240,7 +240,7 @@ export function Chatbot() {
           const errorMessage: Message = {
             id: generateMessageId(),
             role: "assistant",
-            content: "Sorry, I encountered an error. Please try again.",
+            content: "Sorry, I encountered an error. Please try again, or you can try to change the model in the settings.",
             timestamp: new Date(),
           };
           setMessages((prev) => [...prev, errorMessage]);
