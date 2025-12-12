@@ -348,7 +348,7 @@ func setupRouter(
 		})
 
 		// Auth routes
-		routes.SetupAuthRoutes(v1, authHandler, permissionHandler, jwtManager)
+		routes.SetupAuthRoutes(v1, authHandler, permissionHandler, userHandler, jwtManager)
 
 		// User routes
 		routes.SetupUserRoutes(v1, userHandler, permissionHandler, jwtManager)

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/storage/local_storage.dart';
 import '../data/auth_repository.dart';
+import '../data/models/login_response.dart';
 import 'auth_state.dart';
 
 final localStorageProvider = FutureProvider<LocalStorage>((ref) async {
@@ -155,6 +156,18 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await logout();
       return false;
     }
+  }
+
+  /// Update user data in auth state (e.g., after profile update)
+  Future<void> updateUser(UserResponse user) async {
+    final storage = await _ref.read(localStorageProvider.future);
+    await storage.saveUser(user);
+    state = AuthState(
+      status: AuthStatus.authenticated,
+      isLoading: false,
+      errorMessage: null,
+      user: user,
+    );
   }
 
   String _extractErrorMessage(dynamic error) {

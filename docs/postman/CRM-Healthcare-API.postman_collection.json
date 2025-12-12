@@ -4387,6 +4387,357 @@
           ]
         },
         {
+          "name": "Profile",
+          "item": [
+            {
+              "name": "Get My Profile",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/auth/mobile/profile",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "auth", "mobile", "profile"]
+                },
+                "description": "Get complete profile for the authenticated user (Mobile). Returns user information, stats (visits, deals, tasks), recent activities, and transactions. Uses user ID from JWT token, no need for :id in path."
+              },
+              "response": [
+                {
+                  "name": "Success Response",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/auth/mobile/profile",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "auth", "mobile", "profile"]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": true,\n  \"data\": {\n    \"user\": {\n      \"id\": \"user_abc123\",\n      \"email\": \"sales@example.com\",\n      \"name\": \"Sales User\",\n      \"avatar_url\": \"https://api.dicebear.com/7.x/lorelei/svg?seed=sales@example.com\",\n      \"role_id\": \"role_xyz789\",\n      \"role\": {\n        \"id\": \"role_xyz789\",\n        \"name\": \"Sales Rep\",\n        \"code\": \"sales_rep\"\n      },\n      \"status\": \"active\",\n      \"created_at\": \"2024-01-15T10:30:45+07:00\",\n      \"updated_at\": \"2024-01-15T10:30:45+07:00\"\n    },\n    \"stats\": {\n      \"visits\": 10,\n      \"deals\": 5,\n      \"tasks\": 15\n    },\n    \"activities\": [\n      {\n        \"id\": \"activity_001\",\n        \"title\": \"Visit Report\",\n        \"description\": \"Visit to Hospital ABC\",\n        \"type\": \"visit\",\n        \"date\": \"2024-01-15T10:30:45+07:00\"\n      },\n      {\n        \"id\": \"activity_002\",\n        \"title\": \"Task Created\",\n        \"description\": \"Follow up with client\",\n        \"type\": \"task\",\n        \"date\": \"2024-01-14T09:00:00+07:00\"\n      },\n      {\n        \"id\": \"activity_003\",\n        \"title\": \"Deal Updated\",\n        \"description\": \"Deal moved to Proposal stage\",\n        \"type\": \"deal\",\n        \"date\": \"2024-01-13T14:20:00+07:00\"\n      }\n    ],\n    \"transactions\": [\n      {\n        \"id\": \"deal_001\",\n        \"product\": \"New Deal Opportunity\",\n        \"status\": \"paid\",\n        \"date\": \"2024-01-15T10:30:45+07:00\",\n        \"amount\": 50000000\n      },\n      {\n        \"id\": \"deal_002\",\n        \"product\": \"Another Deal\",\n        \"status\": \"pending\",\n        \"date\": \"2024-01-10T08:00:00+07:00\",\n        \"amount\": 30000000\n      }\n    ]\n  },\n  \"timestamp\": \"2024-01-15T10:30:45+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
+                },
+                {
+                  "name": "Error Response - Unauthorized",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/auth/mobile/profile",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "auth", "mobile", "profile"]
+                    }
+                  },
+                  "status": "Unauthorized",
+                  "code": 401,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"UNAUTHORIZED\",\n    \"message\": \"Authentication token is invalid or expired\",\n    \"details\": {\n      \"reason\": \"User ID not found in token\"\n    }\n  },\n  \"timestamp\": \"2024-01-15T10:30:45+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
+                }
+              ]
+            },
+            {
+              "name": "Update My Profile",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Updated Name\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/auth/mobile/profile",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "auth", "mobile", "profile"]
+                },
+                "description": "Update profile information for the authenticated user (Mobile). Currently only supports updating name. Uses user ID from JWT token, no need for :id in path."
+              },
+              "response": [
+                {
+                  "name": "Success Response",
+                  "originalRequest": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"name\": \"Updated Name\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/auth/mobile/profile",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "auth", "mobile", "profile"]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"user_abc123\",\n    \"email\": \"sales@example.com\",\n    \"name\": \"Updated Name\",\n    \"avatar_url\": \"https://api.dicebear.com/7.x/lorelei/svg?seed=sales@example.com\",\n    \"role_id\": \"role_xyz789\",\n    \"role\": {\n      \"id\": \"role_xyz789\",\n      \"name\": \"Sales Rep\",\n      \"code\": \"sales_rep\"\n    },\n    \"status\": \"active\",\n    \"created_at\": \"2024-01-15T10:30:45+07:00\",\n    \"updated_at\": \"2024-01-15T11:00:00+07:00\"\n  },\n  \"meta\": {\n    \"updated_by\": \"user_abc123\"\n  },\n  \"timestamp\": \"2024-01-15T11:00:00+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
+                },
+                {
+                  "name": "Error Response - Validation Error",
+                  "originalRequest": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"name\": \"AB\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/auth/mobile/profile",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "auth", "mobile", "profile"]
+                    }
+                  },
+                  "status": "Bad Request",
+                  "code": 400,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"VALIDATION_ERROR\",\n    \"message\": \"Invalid request data\",\n    \"field_errors\": [\n      {\n        \"field\": \"name\",\n        \"code\": \"min\",\n        \"message\": \"Field must be at least 3 characters\"\n      }\n    ]\n  },\n  \"timestamp\": \"2024-01-15T11:00:00+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
+                }
+              ]
+            },
+            {
+              "name": "Change My Password",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"current_password\": \"oldpassword123\",\n  \"password\": \"newpassword123\",\n  \"confirm_password\": \"newpassword123\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/auth/mobile/password",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "auth", "mobile", "password"]
+                },
+                "description": "Change password for the authenticated user (Mobile). Requires current password verification and password confirmation. Uses user ID from JWT token, no need for :id in path."
+              },
+              "response": [
+                {
+                  "name": "Success Response",
+                  "originalRequest": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"current_password\": \"oldpassword123\",\n  \"password\": \"newpassword123\",\n  \"confirm_password\": \"newpassword123\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/auth/mobile/password",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "auth", "mobile", "password"]
+                    }
+                  },
+                  "status": "No Content",
+                  "code": 204,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": ""
+                },
+                {
+                  "name": "Error Response - Invalid Current Password",
+                  "originalRequest": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"current_password\": \"wrongpassword\",\n  \"password\": \"newpassword123\",\n  \"confirm_password\": \"newpassword123\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/auth/mobile/password",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "auth", "mobile", "password"]
+                    }
+                  },
+                  "status": "Unauthorized",
+                  "code": 401,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"INVALID_CREDENTIALS\",\n    \"message\": \"Invalid email or password\",\n    \"details\": {\n      \"field\": \"current_password\"\n    }\n  },\n  \"timestamp\": \"2024-01-15T11:00:00+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
+                },
+                {
+                  "name": "Error Response - Passwords Do Not Match",
+                  "originalRequest": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"current_password\": \"oldpassword123\",\n  \"password\": \"newpassword123\",\n  \"confirm_password\": \"differentpassword\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/auth/mobile/password",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "auth", "mobile", "password"]
+                    }
+                  },
+                  "status": "Bad Request",
+                  "code": 400,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"VALIDATION_ERROR\",\n    \"message\": \"Invalid request data\",\n    \"field_errors\": [\n      {\n        \"field\": \"confirm_password\",\n        \"code\": \"INVALID_FORMAT\",\n        \"message\": \"Passwords do not match\"\n      }\n    ]\n  },\n  \"timestamp\": \"2024-01-15T11:00:00+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
+                }
+              ]
+            }
+          ],
+          "description": "Profile Management endpoints untuk Mobile Application - Get, update profile, and change password for authenticated user"
+        },
+        {
           "name": "Visit Reports",
           "item": [
             {

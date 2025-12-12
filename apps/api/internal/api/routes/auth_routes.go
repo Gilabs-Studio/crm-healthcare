@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupAuthRoutes(router *gin.RouterGroup, authHandler *handlers.AuthHandler, permissionHandler *handlers.PermissionHandler, jwtManager *jwt.JWTManager) {
+func SetupAuthRoutes(router *gin.RouterGroup, authHandler *handlers.AuthHandler, permissionHandler *handlers.PermissionHandler, userHandler *handlers.UserHandler, jwtManager *jwt.JWTManager) {
 	auth := router.Group("/auth")
 	{
 		// Login endpoint with rate limiting (5 requests per 15 minutes)
@@ -22,6 +22,15 @@ func SetupAuthRoutes(router *gin.RouterGroup, authHandler *handlers.AuthHandler,
 		
 		// Mobile permissions endpoint (authenticated)
 		auth.GET("/mobile/permissions", middleware.AuthMiddleware(jwtManager), permissionHandler.GetMobilePermissions)
+		
+		// Mobile profile endpoints (authenticated)
+		mobile := auth.Group("/mobile")
+		mobile.Use(middleware.AuthMiddleware(jwtManager))
+		{
+			mobile.GET("/profile", userHandler.GetMyProfile)
+			mobile.PUT("/profile", userHandler.UpdateMyProfile)
+			mobile.PUT("/password", userHandler.ChangeMyPassword)
+		}
 	}
 }
 
