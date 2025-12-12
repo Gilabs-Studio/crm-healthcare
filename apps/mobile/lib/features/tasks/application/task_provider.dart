@@ -2,18 +2,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/cache/list_cache.dart';
 import '../../../core/network/api_client.dart';
+import '../../../core/network/connectivity_service.dart';
+import '../../auth/application/auth_provider.dart';
 import '../data/models/task.dart';
 import '../data/task_repository.dart';
 import 'task_state.dart';
 
 final taskRepositoryProvider = Provider<TaskRepository>((ref) {
-  return TaskRepository(ApiClient.dio);
+  final connectivity = ref.watch(connectivityServiceProvider);
+  return TaskRepository(ApiClient.dio, connectivity);
 });
 
 final taskListProvider =
     StateNotifierProvider<TaskListNotifier, TaskListState>((ref) {
   final repository = ref.read(taskRepositoryProvider);
-  return TaskListNotifier(repository);
+  final connectivity = ref.watch(connectivityServiceProvider);
+  final authState = ref.watch(authProvider);
+  return TaskListNotifier(repository, connectivity, authState.user?.id);
 });
 
 final taskDetailProvider =
@@ -29,9 +34,12 @@ final taskFormProvider =
 });
 
 class TaskListNotifier extends StateNotifier<TaskListState> {
-  TaskListNotifier(this._repository) : super(const TaskListState());
+  TaskListNotifier(this._repository, this._connectivity, this._userId)
+      : super(const TaskListState());
 
   final TaskRepository _repository;
+  final ConnectivityService _connectivity;
+  final String? _userId; // User ID for filtering assigned tasks
   final ListCache _cache = ListCache();
 
   Future<void> loadTasks({
@@ -106,12 +114,15 @@ class TaskListNotifier extends StateNotifier<TaskListState> {
     }
 
     try {
+      // For sales users, only show tasks assigned to them
       final response = await _repository.getTasks(
         page: page,
         perPage: 20,
         search: searchQuery.isNotEmpty ? searchQuery : null,
         status: statusFilter,
         priority: priorityFilter,
+        assignedTo: _userId, // Filter by assigned user
+        forceRefresh: forceRefresh,
       );
 
       // Cache the response
@@ -141,6 +152,7 @@ class TaskListNotifier extends StateNotifier<TaskListState> {
           isLoading: false,
           isLoadingMore: false,
           errorMessage: null,
+          isOffline: !_connectivity.isOnline,
         );
       } else {
         state = state.copyWith(
@@ -148,6 +160,7 @@ class TaskListNotifier extends StateNotifier<TaskListState> {
           pagination: response.pagination,
           isLoadingMore: false,
           errorMessage: null,
+          isOffline: !_connectivity.isOnline,
         );
       }
     } catch (e) {
@@ -160,6 +173,7 @@ class TaskListNotifier extends StateNotifier<TaskListState> {
             isLoading: false,
             isLoadingMore: false,
             errorMessage: null,
+            isOffline: !_connectivity.isOnline,
           );
           return;
         }
@@ -169,6 +183,7 @@ class TaskListNotifier extends StateNotifier<TaskListState> {
         isLoading: false,
         isLoadingMore: false,
         errorMessage: e.toString().replaceFirst('Exception: ', ''),
+        isOffline: !_connectivity.isOnline,
       );
     }
   }

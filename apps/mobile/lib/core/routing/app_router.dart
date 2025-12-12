@@ -9,7 +9,6 @@ import '../../features/dashboard/presentation/dashboard_screen.dart';
 import '../../features/dashboard/presentation/recent_activities_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/tasks/presentation/task_detail_screen.dart';
-import '../../features/tasks/presentation/task_form_screen.dart';
 import '../../features/tasks/presentation/task_list_screen.dart';
 import '../../features/visit_reports/presentation/reports_screen.dart';
 import '../../features/visit_reports/presentation/visit_report_detail_screen.dart';
@@ -42,33 +41,30 @@ class AppRouter {
   static Map<String, WidgetBuilder> get routes => {
         AppRoutes.login: (_) => const LoginScreen(),
         AppRoutes.dashboard: (_) =>
-            const AuthGate(child: DashboardScreen()),
+            const AuthGate(child: DashboardScreen(), requiredRoute: AppRoutes.dashboard),
         AppRoutes.accounts: (_) =>
-            const AuthGate(child: AccountsScreen()),
+            const AuthGate(child: AccountsScreen(), requiredRoute: AppRoutes.accounts),
         AppRoutes.profile: (_) =>
-            const AuthGate(child: ProfileScreen()),
+            const AuthGate(child: ProfileScreen(), requiredRoute: AppRoutes.profile),
         AppRoutes.contacts: (context) {
           final args = ModalRoute.of(context)?.settings.arguments;
           final accountId = args is Map ? args['accountId'] as String? : null;
-          return AuthGate(child: ContactListScreen(accountId: accountId));
+          return AuthGate(
+            child: ContactListScreen(accountId: accountId),
+            requiredRoute: AppRoutes.contacts,
+          );
         },
         AppRoutes.visitReports: (_) =>
-            const AuthGate(child: ReportsScreen()),
+            const AuthGate(child: ReportsScreen(), requiredRoute: AppRoutes.visitReports),
         AppRoutes.visitReportsCreate: (_) =>
-            const AuthGate(child: VisitReportFormScreen()),
+            const AuthGate(child: VisitReportFormScreen(), requiredRoute: AppRoutes.visitReportsCreate),
         AppRoutes.tasks: (_) =>
-            const AuthGate(child: TaskListScreen()),
-        AppRoutes.tasksCreate: (_) =>
-            const AuthGate(child: TaskFormScreen()),
-        AppRoutes.tasksEdit: (context) {
-          final args = ModalRoute.of(context)!.settings.arguments;
-          final taskId = args is Map ? args['taskId'] as String? : null;
-          return AuthGate(child: TaskFormScreen(taskId: taskId));
-        },
+            const AuthGate(child: TaskListScreen(), requiredRoute: AppRoutes.tasks),
+        // TaskFormScreen routes removed - sales users don't need create/edit tasks
         AppRoutes.notifications: (_) =>
-            const AuthGate(child: NotificationListScreen()),
+            const AuthGate(child: NotificationListScreen(), requiredRoute: AppRoutes.notifications),
         AppRoutes.recentActivities: (_) =>
-            const AuthGate(child: RecentActivitiesScreen()),
+            const AuthGate(child: RecentActivitiesScreen(), requiredRoute: AppRoutes.recentActivities),
       };
 
   static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
@@ -83,6 +79,7 @@ class AppRouter {
         settings: settings,
         builder: (_) => AuthGate(
           child: AccountDetailScreen(accountId: pathSegments[1]),
+          requiredRoute: AppRoutes.accounts,
         ),
       );
     }
@@ -95,6 +92,7 @@ class AppRouter {
         settings: settings,
         builder: (_) => AuthGate(
           child: ContactDetailScreen(contactId: pathSegments[1]),
+          requiredRoute: AppRoutes.contacts,
         ),
       );
     }
@@ -108,6 +106,7 @@ class AppRouter {
         settings: settings,
         builder: (_) => AuthGate(
           child: VisitReportDetailScreen(visitReportId: pathSegments[1]),
+          requiredRoute: AppRoutes.visitReports,
         ),
       );
     }
@@ -120,6 +119,7 @@ class AppRouter {
         settings: settings,
         builder: (_) => AuthGate(
           child: const VisitReportFormScreen(),
+          requiredRoute: AppRoutes.visitReportsCreate,
         ),
       );
     }
@@ -134,21 +134,12 @@ class AppRouter {
         settings: settings,
         builder: (_) => AuthGate(
           child: TaskDetailScreen(taskId: pathSegments[1]),
+          requiredRoute: AppRoutes.tasks,
         ),
       );
     }
 
-    // Task Form: /tasks/create
-    if (pathSegments.length == 2 &&
-        pathSegments[0] == 'tasks' &&
-        pathSegments[1] == 'create') {
-      return MaterialPageRoute(
-        settings: settings,
-        builder: (_) => AuthGate(
-          child: const TaskFormScreen(),
-        ),
-      );
-    }
+    // Task Form routes removed - sales users don't need create/edit tasks
 
     return null;
   }

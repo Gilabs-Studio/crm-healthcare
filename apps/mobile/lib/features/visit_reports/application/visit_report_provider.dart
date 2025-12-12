@@ -4,20 +4,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/cache/list_cache.dart';
 import '../../../core/network/api_client.dart';
+import '../../../core/network/connectivity_service.dart';
 import '../data/visit_report_repository.dart';
 import '../data/models/visit_report.dart';
 import 'visit_report_state.dart';
 
 final visitReportRepositoryProvider =
     Provider<VisitReportRepository>((ref) {
-  return VisitReportRepository(ApiClient.dio);
+  final connectivity = ref.watch(connectivityServiceProvider);
+  return VisitReportRepository(ApiClient.dio, connectivity);
 });
 
 final visitReportListProvider =
     StateNotifierProvider<VisitReportListNotifier, VisitReportListState>(
   (ref) {
     final repository = ref.read(visitReportRepositoryProvider);
-    return VisitReportListNotifier(repository);
+    final connectivity = ref.watch(connectivityServiceProvider);
+    return VisitReportListNotifier(repository, connectivity);
   },
 );
 
@@ -36,10 +39,11 @@ final visitReportFormProvider =
 );
 
 class VisitReportListNotifier extends StateNotifier<VisitReportListState> {
-  VisitReportListNotifier(this._repository)
+  VisitReportListNotifier(this._repository, this._connectivity)
       : super(const VisitReportListState());
 
   final VisitReportRepository _repository;
+  final ConnectivityService _connectivity;
   final ListCache _cache = ListCache();
 
   Future<void> loadVisitReports({
@@ -105,6 +109,7 @@ class VisitReportListNotifier extends StateNotifier<VisitReportListState> {
         page: page,
         perPage: 20,
         search: searchQuery.isNotEmpty ? searchQuery : null,
+        forceRefresh: forceRefresh,
       );
 
       // Cache the response
@@ -130,6 +135,7 @@ class VisitReportListNotifier extends StateNotifier<VisitReportListState> {
           isLoading: false,
           isLoadingMore: false,
           errorMessage: null,
+          isOffline: !_connectivity.isOnline,
         );
       } else {
         state = state.copyWith(
@@ -137,6 +143,7 @@ class VisitReportListNotifier extends StateNotifier<VisitReportListState> {
           pagination: response.pagination,
           isLoadingMore: false,
           errorMessage: null,
+          isOffline: !_connectivity.isOnline,
         );
       }
     } catch (e) {
@@ -149,6 +156,7 @@ class VisitReportListNotifier extends StateNotifier<VisitReportListState> {
             isLoading: false,
             isLoadingMore: false,
             errorMessage: null,
+            isOffline: !_connectivity.isOnline,
           );
           return;
         }
@@ -158,6 +166,7 @@ class VisitReportListNotifier extends StateNotifier<VisitReportListState> {
         isLoading: false,
         isLoadingMore: false,
         errorMessage: e.toString().replaceFirst('Exception: ', ''),
+        isOffline: !_connectivity.isOnline,
       );
     }
   }

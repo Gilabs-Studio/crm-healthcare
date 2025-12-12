@@ -33,6 +33,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _passwordController.text,
       rememberMe: _rememberMe,
     );
+    
+    // Check for error and show toast
+    final state = ref.read(authProvider);
+    if (state.errorMessage != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(state.errorMessage!),
+          backgroundColor: Theme.of(context).colorScheme.error,
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(16),
+          duration: const Duration(seconds: 4),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      );
+    }
   }
 
   @override
@@ -199,16 +216,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                         ],
                       ),
-                      // Error Message
-                      if (state.errorMessage != null) ...[
-                        const SizedBox(height: 8),
-                        Text(
-                          state.errorMessage!,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: colorScheme.error,
-                          ),
-                        ),
-                      ],
                       const SizedBox(height: 24),
                       // Log In Button
                       SizedBox(

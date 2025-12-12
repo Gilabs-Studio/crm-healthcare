@@ -10,8 +10,10 @@ class DashboardState {
   final bool isLoading;
   final bool isLoadingOverview;
   final bool isLoadingSecondary;
+  final bool isLoadingRecentActivities;
   final String? errorMessage;
   final String selectedPeriod;
+  final bool isOffline;
 
   DashboardState({
     this.overview,
@@ -23,8 +25,10 @@ class DashboardState {
     this.isLoading = false,
     this.isLoadingOverview = false,
     this.isLoadingSecondary = false,
+    this.isLoadingRecentActivities = false,
     this.errorMessage,
     this.selectedPeriod = 'today',
+    this.isOffline = false,
   });
 
   DashboardState copyWith({
@@ -37,8 +41,10 @@ class DashboardState {
     bool? isLoading,
     bool? isLoadingOverview,
     bool? isLoadingSecondary,
+    bool? isLoadingRecentActivities,
     String? errorMessage,
     String? selectedPeriod,
+    bool? isOffline,
     bool clearOverview = false,
     bool clearRecentActivities = false,
     bool clearTopAccounts = false,
@@ -63,8 +69,10 @@ class DashboardState {
       isLoading: isLoading ?? this.isLoading,
       isLoadingOverview: isLoadingOverview ?? this.isLoadingOverview,
       isLoadingSecondary: isLoadingSecondary ?? this.isLoadingSecondary,
+      isLoadingRecentActivities: isLoadingRecentActivities ?? this.isLoadingRecentActivities,
       errorMessage: errorMessage ?? this.errorMessage,
       selectedPeriod: selectedPeriod ?? this.selectedPeriod,
+      isOffline: isOffline ?? this.isOffline,
     );
   }
 }

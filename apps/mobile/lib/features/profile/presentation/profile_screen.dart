@@ -6,8 +6,13 @@ import '../../../core/l10n/app_localizations.dart';
 import '../../../core/l10n/locale_provider.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/utils/app_info.dart';
+import '../../../core/widgets/error_widget.dart';
 import '../../../core/widgets/main_scaffold.dart';
-import '../../auth/application/auth_provider.dart';
+import '../../auth/application/auth_provider.dart' as auth;
+import '../../auth/data/models/login_response.dart';
+import '../application/profile_provider.dart';
+import '../data/models/profile.dart';
+import '../data/profile_repository.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -94,158 +99,535 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
+  void _showEditProfileDialog(
+    BuildContext context,
+    WidgetRef ref,
+    String currentName,
+    AppLocalizations l10n,
+  ) {
+    final nameController = TextEditingController(text: currentName);
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Edit Profile'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: InputDecoration(
+                  labelText: l10n.name,
+                  hintText: 'Enter your name',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final name = nameController.text.trim();
+              if (name.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('Name is required'),
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                  ),
+                );
+                return;
+              }
+
+              try {
+                final request = UpdateProfileRequest(name: name);
+                final updatedUser = await ref.read(updateProfileProvider(request).future);
+                
+                // Update auth state with new user data
+                final authNotifier = ref.read(auth.authProvider.notifier);
+                
+                // Convert ProfileUser to UserResponse for auth state
+                final userResponse = UserResponse(
+                  id: updatedUser.id,
+                  email: updatedUser.email,
+                  name: updatedUser.name,
+                  avatarUrl: updatedUser.avatarUrl,
+                  role: updatedUser.role?.name ?? '',
+                  status: updatedUser.status,
+                  createdAt: updatedUser.createdAt,
+                  updatedAt: updatedUser.updatedAt,
+                );
+                
+                // Update auth state (this will also save to storage)
+                await authNotifier.updateUser(userResponse);
+                
+                // Refresh profile
+                ref.invalidate(profileProvider);
+                
+                if (context.mounted) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('Profile updated successfully'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  final errorMessage = _extractErrorMessage(e);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(errorMessage),
+                      backgroundColor: Theme.of(context).colorScheme.error,
+                      behavior: SnackBarBehavior.floating,
+                      margin: const EdgeInsets.all(16),
+                      duration: const Duration(seconds: 4),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  );
+                }
+              }
+            },
+            child: Text(l10n.save),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showChangePasswordDialog(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations l10n,
+  ) {
+    final currentPasswordController = TextEditingController();
+    final newPasswordController = TextEditingController();
+    final confirmPasswordController = TextEditingController();
+    bool obscureCurrentPassword = true;
+    bool obscureNewPassword = true;
+    bool obscureConfirmPassword = true;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Change Password'),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: currentPasswordController,
+                  obscureText: obscureCurrentPassword,
+                  decoration: InputDecoration(
+                    labelText: 'Current Password',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    filled: true,
+                    fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 16,
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        obscureCurrentPassword
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          obscureCurrentPassword = !obscureCurrentPassword;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: newPasswordController,
+                  obscureText: obscureNewPassword,
+                  decoration: InputDecoration(
+                    labelText: 'New Password',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    filled: true,
+                    fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 16,
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        obscureNewPassword
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          obscureNewPassword = !obscureNewPassword;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: confirmPasswordController,
+                  obscureText: obscureConfirmPassword,
+                  decoration: InputDecoration(
+                    labelText: 'Confirm Password',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    filled: true,
+                    fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 16,
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        obscureConfirmPassword
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          obscureConfirmPassword = !obscureConfirmPassword;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: () async {
+                final currentPassword = currentPasswordController.text;
+                final newPassword = newPasswordController.text;
+                final confirmPassword = confirmPasswordController.text;
+
+                if (currentPassword.isEmpty || newPassword.isEmpty || confirmPassword.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('All fields are required'),
+                      backgroundColor: Theme.of(context).colorScheme.error,
+                    ),
+                  );
+                  return;
+                }
+
+                if (newPassword != confirmPassword) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('Passwords do not match'),
+                      backgroundColor: Theme.of(context).colorScheme.error,
+                    ),
+                  );
+                  return;
+                }
+
+                try {
+                  final request = ChangePasswordRequest(
+                    currentPassword: currentPassword,
+                    password: newPassword,
+                    confirmPassword: confirmPassword,
+                  );
+                  await ref.read(changePasswordProvider(request).future);
+
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text('Password changed successfully'),
+                        backgroundColor: Colors.green,
+                        behavior: SnackBarBehavior.floating,
+                        margin: const EdgeInsets.all(16),
+                        duration: const Duration(seconds: 3),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    final errorMessage = _extractErrorMessage(e);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(errorMessage),
+                        backgroundColor: Theme.of(context).colorScheme.error,
+                        behavior: SnackBarBehavior.floating,
+                        margin: const EdgeInsets.all(16),
+                        duration: const Duration(seconds: 4),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    );
+                  }
+                }
+              },
+              child: Text(l10n.save),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _extractErrorMessage(dynamic error) {
+    // Handle ProfileException (custom exception)
+    if (error is ProfileException) {
+      return error.message;
+    }
+    
+    // Handle regular Exception
+    if (error is Exception) {
+      final errorString = error.toString();
+      // Remove "Exception: " prefix if present
+      if (errorString.startsWith('Exception: ')) {
+        return errorString.substring(11);
+      }
+      return errorString;
+    }
+    
+    // Handle String errors
+    if (error is String) {
+      return error;
+    }
+    
+    // Fallback to toString()
+    final errorString = error.toString();
+    if (errorString.startsWith('Exception: ')) {
+      return errorString.substring(11);
+    }
+    
+    return errorString;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-    final authState = ref.watch(authProvider);
+    final profileAsync = ref.watch(profileProvider);
+    final authState = ref.watch(auth.authProvider);
     final user = authState.user;
     final themeMode = ref.watch(themeModeProvider);
     final themeNotifier = ref.read(themeModeProvider.notifier);
     final locale = ref.watch(localeProvider);
     final localeNotifier = ref.read(localeProvider.notifier);
 
-    // Use user data from auth state, fallback to placeholder if not available
-    final userName = user?.name.isNotEmpty == true ? user!.name : 'User';
-    final userEmail = user?.email.isNotEmpty == true ? user!.email : 'user@example.com';
-    final userRole = user?.role.isNotEmpty == true ? user!.role : 'Sales Rep';
-
-    // Get current theme mode label
-    final themeLabel = _getThemeLabel(themeMode, l10n);
-    final themeIcon = _getThemeIcon(themeMode);
-    final languageLabel = _getLanguageLabel(locale, l10n);
-
     return MainScaffold(
       currentIndex: 3,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Profile Header - Modern & Minimalistic
-              SizedBox(
-                width: double.infinity,
-                child: Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surface,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.04),
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
+        child: profileAsync.when(
+          loading: () => const Center(
+            child: CircularProgressIndicator(),
+          ),
+          error: (error, stackTrace) => ErrorStateWidget(
+            message: _extractErrorMessage(error),
+            onRetry: () {
+              ref.invalidate(profileProvider);
+            },
+          ),
+          data: (profile) {
+            // Get profile data from API, fallback to auth state user
+            final profileUser = profile.user;
+            final userName = profileUser.name.isNotEmpty 
+                ? profileUser.name 
+                : (user?.name ?? 'User');
+            final userEmail = profileUser.email.isNotEmpty 
+                ? profileUser.email 
+                : (user?.email ?? 'user@example.com');
+            final userRole = profileUser.role?.name.isNotEmpty == true 
+                ? profileUser.role!.name 
+                : (user?.role ?? 'Sales Rep');
+            final avatarUrl = profileUser.avatarUrl ?? user?.avatarUrl;
+
+            // Get current theme mode label
+            final themeLabel = _getThemeLabel(themeMode, l10n);
+            final themeIcon = _getThemeIcon(themeMode);
+            final languageLabel = _getLanguageLabel(locale, l10n);
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Profile Header - Modern & Minimalistic
+                  SizedBox(
+                    width: double.infinity,
+                    child: Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surface,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.04),
+                            blurRadius: 10,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      // Avatar
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: theme.colorScheme.primary.withOpacity(0.3),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
+                      child: Row(
+                        children: [
+                          // Avatar
+                          Container(
+                            width: 80,
+                            height: 80,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: theme.colorScheme.primary.withOpacity(0.3),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                        child: ClipOval(
-                          child: user?.avatarUrl != null &&
-                                  user!.avatarUrl!.isNotEmpty
-                              ? _buildAvatarImage(
-                                  user.avatarUrl!,
-                                  userName,
-                                  theme,
-                                )
-                              : Container(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: [
-                                        theme.colorScheme.primary,
-                                        theme.colorScheme.primary
-                                            .withOpacity(0.8),
-                                      ],
-                                    ),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      userName.substring(0, 1).toUpperCase(),
-                                      style: theme.textTheme.headlineLarge
-                                          ?.copyWith(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 32,
+                            child: ClipOval(
+                              child: avatarUrl != null && avatarUrl.isNotEmpty
+                                  ? _buildAvatarImage(
+                                      avatarUrl,
+                                      userName,
+                                      theme,
+                                    )
+                                  : Container(
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                          colors: [
+                                            theme.colorScheme.primary,
+                                            theme.colorScheme.primary
+                                                .withOpacity(0.8),
+                                          ],
+                                        ),
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          userName.substring(0, 1).toUpperCase(),
+                                          style: theme.textTheme.headlineLarge
+                                              ?.copyWith(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 32,
+                                          ),
+                                        ),
                                       ),
                                     ),
+                            ),
+                          ),
+                          const SizedBox(width: 20),
+                          // User Info
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                // Name
+                                Text(
+                                  userName,
+                                  style: theme.textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: theme.colorScheme.onSurface,
+                                    fontSize: 20,
                                   ),
                                 ),
-                        ),
-                      ),
-                      const SizedBox(width: 20),
-                      // User Info
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            // Name
-                            Text(
-                              userName,
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: theme.colorScheme.onSurface,
-                                fontSize: 20,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            // Email
-                            Text(
-                              userEmail,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: theme.colorScheme.onSurface.withOpacity(0.7),
-                                fontSize: 14,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            // Role Badge
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.primary.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Text(
-                                userRole,
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.primary,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 12,
+                                const SizedBox(height: 6),
+                                // Email
+                                Text(
+                                  userEmail,
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: theme.colorScheme.onSurface.withOpacity(0.7),
+                                    fontSize: 14,
+                                  ),
                                 ),
-                              ),
+                                const SizedBox(height: 8),
+                                // Role Badge
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.primary.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Text(
+                                    userRole,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.primary,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 32),
-              // Settings Section
-              _SectionTitle(title: l10n.settings),
-              const SizedBox(height: 16),
-              // Notifications
+                  const SizedBox(height: 32),
+                  // Settings Section
+                  _SectionTitle(title: l10n.settings),
+                  const SizedBox(height: 16),
+                  // Edit Profile
+                  _SettingsCard(
+                    child: _SettingsTile(
+                      icon: Icons.edit_outlined,
+                      title: 'Edit Profile',
+                      subtitle: 'Update your profile information',
+                      onTap: () => _showEditProfileDialog(context, ref, userName, l10n),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Change Password
+                  _SettingsCard(
+                    child: _SettingsTile(
+                      icon: Icons.lock_outline,
+                      title: 'Change Password',
+                      subtitle: 'Update your password',
+                      onTap: () => _showChangePasswordDialog(context, ref, l10n),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Notifications
               _SettingsCard(
                 child: _SettingsTile(
                   icon: Icons.notifications_outlined,
@@ -345,7 +727,7 @@ class ProfileScreen extends ConsumerWidget {
                     );
 
                     if (confirmed == true) {
-                      await ref.read(authProvider.notifier).logout();
+                      await ref.read(auth.authProvider.notifier).logout();
                     }
                   },
                   style: OutlinedButton.styleFrom(
@@ -369,8 +751,10 @@ class ProfileScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 24),
-            ],
-          ),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );

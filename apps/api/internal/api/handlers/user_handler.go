@@ -303,3 +303,162 @@ func (h *UserHandler) ChangePassword(c *gin.Context) {
 
 	response.SuccessResponseNoContent(c)
 }
+
+// GetMyProfile handles get current user profile request (mobile endpoint)
+// Uses user ID from JWT token, no need for :id in path
+func (h *UserHandler) GetMyProfile(c *gin.Context) {
+	// Get user ID from JWT token (set by AuthMiddleware)
+	userID, exists := c.Get("user_id")
+	if !exists {
+		errors.ErrorResponse(c, "UNAUTHORIZED", map[string]interface{}{
+			"reason": "User ID not found in token",
+		}, nil)
+		return
+	}
+
+	userIDStr, ok := userID.(string)
+	if !ok {
+		errors.ErrorResponse(c, "UNAUTHORIZED", map[string]interface{}{
+			"reason": "Invalid user ID format",
+		}, nil)
+		return
+	}
+
+	profile, err := h.profileService.GetProfile(userIDStr)
+	if err != nil {
+		if err == userservice.ErrUserNotFound {
+			errors.ErrorResponse(c, "USER_NOT_FOUND", map[string]interface{}{
+				"resource":    "user",
+				"resource_id": userIDStr,
+			}, nil)
+			return
+		}
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	// Create meta (empty but present for consistency)
+	meta := &response.Meta{}
+
+	response.SuccessResponse(c, profile, meta)
+}
+
+// UpdateMyProfile handles update current user profile request (mobile endpoint)
+// Uses user ID from JWT token, no need for :id in path
+func (h *UserHandler) UpdateMyProfile(c *gin.Context) {
+	// Get user ID from JWT token (set by AuthMiddleware)
+	userID, exists := c.Get("user_id")
+	if !exists {
+		errors.ErrorResponse(c, "UNAUTHORIZED", map[string]interface{}{
+			"reason": "User ID not found in token",
+		}, nil)
+		return
+	}
+
+	userIDStr, ok := userID.(string)
+	if !ok {
+		errors.ErrorResponse(c, "UNAUTHORIZED", map[string]interface{}{
+			"reason": "Invalid user ID format",
+		}, nil)
+		return
+	}
+
+	var req user.UpdateProfileRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			errors.HandleValidationError(c, validationErrors)
+			return
+		}
+		errors.InvalidRequestBodyResponse(c)
+		return
+	}
+
+	updatedUser, err := h.profileService.UpdateProfile(userIDStr, &req)
+	if err != nil {
+		if err == userservice.ErrUserNotFound {
+			errors.ErrorResponse(c, "USER_NOT_FOUND", map[string]interface{}{
+				"resource":    "user",
+				"resource_id": userIDStr,
+			}, nil)
+			return
+		}
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	// Create meta with updated_by
+	meta := &response.Meta{}
+	if uid, exists := c.Get("user_id"); exists {
+		if id, ok := uid.(string); ok {
+			meta.UpdatedBy = id
+		}
+	}
+
+	response.SuccessResponse(c, updatedUser, meta)
+}
+
+// ChangeMyPassword handles change current user password request (mobile endpoint)
+// Uses user ID from JWT token, no need for :id in path
+func (h *UserHandler) ChangeMyPassword(c *gin.Context) {
+	// Get user ID from JWT token (set by AuthMiddleware)
+	userID, exists := c.Get("user_id")
+	if !exists {
+		errors.ErrorResponse(c, "UNAUTHORIZED", map[string]interface{}{
+			"reason": "User ID not found in token",
+		}, nil)
+		return
+	}
+
+	userIDStr, ok := userID.(string)
+	if !ok {
+		errors.ErrorResponse(c, "UNAUTHORIZED", map[string]interface{}{
+			"reason": "Invalid user ID format",
+		}, nil)
+		return
+	}
+
+	var req user.ChangePasswordRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			errors.HandleValidationError(c, validationErrors)
+			return
+		}
+		errors.InvalidRequestBodyResponse(c)
+		return
+	}
+
+	err := h.profileService.ChangePassword(userIDStr, &req)
+	if err != nil {
+		if err == userservice.ErrUserNotFound {
+			errors.ErrorResponse(c, "USER_NOT_FOUND", map[string]interface{}{
+				"resource":    "user",
+				"resource_id": userIDStr,
+			}, nil)
+			return
+		}
+		if err.Error() == "current password is incorrect" {
+			errors.ErrorResponse(c, "INVALID_CREDENTIALS", map[string]interface{}{
+				"field": "current_password",
+				"reason": "Current password is incorrect",
+			}, nil)
+			return
+		}
+		if err.Error() == "passwords do not match" {
+			errors.ErrorResponse(c, "VALIDATION_ERROR", nil, []response.FieldError{
+				{
+					Field:   "confirm_password",
+					Code:    "INVALID_FORMAT",
+					Message: "Passwords do not match",
+				},
+			})
+			return
+		}
+		errors.InternalServerErrorResponse(c, "")
+		return
+	}
+
+	// Change password returns 204 No Content (no body) as per standard
+	response.SuccessResponseNoContent(c)
+}

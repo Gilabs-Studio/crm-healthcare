@@ -8,8 +8,6 @@ import '../../../core/widgets/main_scaffold.dart';
 import '../../notifications/application/notification_provider.dart';
 import '../../notifications/presentation/notification_list_screen.dart';
 import '../../tasks/presentation/task_list_screen.dart';
-import '../../tasks/presentation/task_form_screen.dart';
-import '../../tasks/application/task_provider.dart';
 import '../application/dashboard_provider.dart';
 import 'recent_activities_screen.dart';
 import 'widgets/activity_trends_widget.dart';
@@ -65,24 +63,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
     return MainScaffold(
       currentIndex: 0,
       title: l10n.dashboard,
-      floatingActionButton: _tabController.index == 1
-          ? FloatingActionButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const TaskFormScreen(),
-                  ),
-                ).then((result) {
-                  // Refresh task list after creating task
-                  if (result != null && mounted) {
-                    ref.read(taskListProvider.notifier).refresh();
-                  }
-                });
-              },
-              child: const Icon(Icons.add),
-            )
-          : null,
+      // Sales users don't need create task button - removed
+      floatingActionButton: null,
       actions: [
         // Recent Activities button
         IconButton(
@@ -184,6 +166,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
               labelColor: colorScheme.primary,
               unselectedLabelColor: colorScheme.onSurface.withOpacity(0.7),
               indicatorColor: colorScheme.primary,
+              dividerColor: Colors.transparent, // Remove bottom border
+              indicatorSize: TabBarIndicatorSize.label, // Make indicator match label width
+              indicator: UnderlineTabIndicator(
+                borderSide: BorderSide(
+                  width: 3,
+                  color: colorScheme.primary,
+                ),
+                insets: const EdgeInsets.symmetric(horizontal: -20), // Make border longer
+              ),
               tabs: [
                 Tab(text: 'Overview'),
                 Tab(text: l10n.tasks),

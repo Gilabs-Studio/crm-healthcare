@@ -1,11 +1,14 @@
 import 'package:dio/dio.dart';
 
+import '../../../core/network/connectivity_service.dart';
+import '../../../core/storage/offline_storage.dart';
 import 'models/account.dart';
 
 class AccountRepository {
-  AccountRepository(this._dio);
+  AccountRepository(this._dio, this._connectivity);
 
   final Dio _dio;
+  final ConnectivityService _connectivity;
 
   Future<AccountListResponse> getAccounts({
     int page = 1,
@@ -14,78 +17,258 @@ class AccountRepository {
     String? status,
     String? categoryId,
     String? assignedTo,
+    bool forceRefresh = false,
   }) async {
-    try {
-      final queryParams = <String, dynamic>{
-        'page': page,
-        'per_page': perPage,
-      };
-
-      if (search != null && search.isNotEmpty) {
-        queryParams['search'] = search;
-      }
-      if (status != null && status.isNotEmpty) {
-        queryParams['status'] = status;
-      }
-      if (categoryId != null && categoryId.isNotEmpty) {
-        queryParams['category_id'] = categoryId;
-      }
-      if (assignedTo != null && assignedTo.isNotEmpty) {
-        queryParams['assigned_to'] = assignedTo;
-      }
-
-      final response = await _dio.get(
-        '/api/v1/accounts',
-        queryParameters: queryParams,
-      );
-
-      if (response.data['success'] == true) {
+    // 1. Try to load from cache first (offline-first) - only for first page and no search
+    if (!forceRefresh && page == 1 && (search == null || search.isEmpty)) {
+      final cachedAccounts = await OfflineStorage.getAccounts();
+      if (cachedAccounts != null && cachedAccounts.isNotEmpty) {
         try {
-          return AccountListResponse.fromJson(response.data);
+          // Convert cached data to Account objects
+          final accounts = cachedAccounts
+              .map((json) => Account.fromJson(json))
+              .toList();
+          
+          // Return cached response
+          return AccountListResponse(
+            items: accounts,
+            pagination: Pagination(
+              page: 1,
+              perPage: accounts.length,
+              total: accounts.length,
+              totalPages: 1,
+            ),
+          );
         } catch (e) {
+          // If parsing fails, continue to API call
+        }
+      }
+    }
+
+    // 2. If online, fetch from API
+    if (_connectivity.isOnline) {
+      try {
+        final queryParams = <String, dynamic>{
+          'page': page,
+          'per_page': perPage,
+        };
+
+        if (search != null && search.isNotEmpty) {
+          queryParams['search'] = search;
+        }
+        if (status != null && status.isNotEmpty) {
+          queryParams['status'] = status;
+        }
+        if (categoryId != null && categoryId.isNotEmpty) {
+          queryParams['category_id'] = categoryId;
+        }
+        if (assignedTo != null && assignedTo.isNotEmpty) {
+          queryParams['assigned_to'] = assignedTo;
+        }
+
+        final response = await _dio.get(
+          '/api/v1/accounts',
+          queryParameters: queryParams,
+        );
+
+        if (response.data['success'] == true) {
+          try {
+            final accountListResponse = AccountListResponse.fromJson(response.data);
+            
+            // 3. Save to cache (only for first page and no search)
+            if (page == 1 && (search == null || search.isEmpty)) {
+              final accountsJson = accountListResponse.items
+                  .map((account) => account.toJson())
+                  .toList();
+              await OfflineStorage.saveAccounts(accountsJson);
+            }
+            
+            return accountListResponse;
+          } catch (e) {
+            throw Exception(
+              'Failed to parse accounts response: $e. Response: ${response.data}',
+            );
+          }
+        } else {
           throw Exception(
-            'Failed to parse accounts response: $e. Response: ${response.data}',
+            response.data['error']?['message'] ?? 'Failed to fetch accounts',
           );
         }
-      } else {
-        throw Exception(
-          response.data['error']?['message'] ?? 'Failed to fetch accounts',
-        );
+      } on DioException catch (e) {
+        // If API fails, try to return cached data if available
+        if (page == 1 && (search == null || search.isEmpty)) {
+          final cachedAccounts = await OfflineStorage.getAccounts();
+          if (cachedAccounts != null && cachedAccounts.isNotEmpty) {
+            try {
+              final accounts = cachedAccounts
+                  .map((json) => Account.fromJson(json))
+                  .toList();
+              return AccountListResponse(
+                items: accounts,
+                pagination: Pagination(
+                  page: 1,
+                  perPage: accounts.length,
+                  total: accounts.length,
+                  totalPages: 1,
+                ),
+              );
+            } catch (_) {
+              // Ignore parsing errors
+            }
+          }
+        }
+        
+        if (e.response != null) {
+          final error = e.response!.data;
+          if (error is Map<String, dynamic> && error['error'] != null) {
+            throw Exception(error['error']['message'] ?? 'Failed to fetch accounts');
+          }
+        }
+        throw Exception('Failed to fetch accounts: ${e.message}');
+      } catch (e) {
+        // If other error, try cached data
+        if (page == 1 && (search == null || search.isEmpty)) {
+          final cachedAccounts = await OfflineStorage.getAccounts();
+          if (cachedAccounts != null && cachedAccounts.isNotEmpty) {
+            try {
+              final accounts = cachedAccounts
+                  .map((json) => Account.fromJson(json))
+                  .toList();
+              return AccountListResponse(
+                items: accounts,
+                pagination: Pagination(
+                  page: 1,
+                  perPage: accounts.length,
+                  total: accounts.length,
+                  totalPages: 1,
+                ),
+              );
+            } catch (_) {
+              // Ignore parsing errors
+            }
+          }
+        }
+        throw Exception('Failed to fetch accounts: $e');
       }
-    } on DioException catch (e) {
-      if (e.response != null) {
-        final error = e.response!.data;
-        if (error is Map<String, dynamic> && error['error'] != null) {
-          throw Exception(error['error']['message'] ?? 'Failed to fetch accounts');
+    }
+
+    // 4. Offline: return cached data or throw error
+    if (page == 1 && (search == null || search.isEmpty)) {
+      final cachedAccounts = await OfflineStorage.getAccounts();
+      if (cachedAccounts != null && cachedAccounts.isNotEmpty) {
+        try {
+          final accounts = cachedAccounts
+              .map((json) => Account.fromJson(json))
+              .toList();
+          return AccountListResponse(
+            items: accounts,
+            pagination: Pagination(
+              page: 1,
+              perPage: accounts.length,
+              total: accounts.length,
+              totalPages: 1,
+            ),
+          );
+        } catch (e) {
+          throw Exception('Failed to load cached accounts: $e');
         }
       }
-      throw Exception('Failed to fetch accounts: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to fetch accounts: $e');
     }
+    
+    throw Exception('No internet connection and no cached data available');
   }
 
   Future<Account> getAccountById(String id) async {
+    // 1. Try to load from cache first (offline-first)
+    final cachedAccount = await OfflineStorage.getAccountDetail(id);
+    if (cachedAccount != null) {
+      try {
+        final account = Account.fromJson(cachedAccount);
+        // If online, fetch from API in background to update cache
+        if (_connectivity.isOnline) {
+          _fetchAndUpdateAccountDetail(id).catchError((_) {
+            // Ignore errors, use cached data
+          });
+        }
+        return account;
+      } catch (e) {
+        // If parsing fails, continue to API call
+      }
+    }
+
+    // 2. If online, fetch from API
+    if (_connectivity.isOnline) {
+      try {
+        final response = await _dio.get('/api/v1/accounts/$id');
+
+        if (response.data['success'] == true) {
+          final account = Account.fromJson(
+            response.data['data'] as Map<String, dynamic>,
+          );
+          
+          // 3. Save to cache
+          await OfflineStorage.saveAccountDetail(id, account.toJson());
+          
+          return account;
+        } else {
+          throw Exception(
+            response.data['error']?['message'] ?? 'Failed to fetch account',
+          );
+        }
+      } on DioException catch (e) {
+        // If API fails, try to return cached data if available
+        if (cachedAccount != null) {
+          try {
+            return Account.fromJson(cachedAccount);
+          } catch (_) {
+            // Ignore parsing errors
+          }
+        }
+        
+        if (e.response != null) {
+          final error = e.response!.data;
+          if (error is Map<String, dynamic> && error['error'] != null) {
+            throw Exception(error['error']['message'] ?? 'Failed to fetch account');
+          }
+        }
+        throw Exception('Failed to fetch account: ${e.message}');
+      } catch (e) {
+        // If other error, try cached data
+        if (cachedAccount != null) {
+          try {
+            return Account.fromJson(cachedAccount);
+          } catch (_) {
+            // Ignore parsing errors
+          }
+        }
+        throw Exception('Failed to fetch account: $e');
+      }
+    }
+
+    // 4. Offline: return cached data or throw error
+    if (cachedAccount != null) {
+      try {
+        return Account.fromJson(cachedAccount);
+      } catch (e) {
+        throw Exception('Failed to load cached account: $e');
+      }
+    }
+    
+    throw Exception('No internet connection and no cached data available');
+  }
+
+  /// Fetch account detail from API and update cache (background operation)
+  Future<void> _fetchAndUpdateAccountDetail(String id) async {
     try {
       final response = await _dio.get('/api/v1/accounts/$id');
-
       if (response.data['success'] == true) {
-        return Account.fromJson(response.data['data'] as Map<String, dynamic>);
-      } else {
-        throw Exception(
-          response.data['error']?['message'] ?? 'Failed to fetch account',
+        final account = Account.fromJson(
+          response.data['data'] as Map<String, dynamic>,
         );
+        await OfflineStorage.saveAccountDetail(id, account.toJson());
       }
-    } on DioException catch (e) {
-      if (e.response != null) {
-        final error = e.response!.data;
-        if (error is Map<String, dynamic> && error['error'] != null) {
-          throw Exception(error['error']['message'] ?? 'Failed to fetch account');
-        }
-      }
-      throw Exception('Failed to fetch account: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to fetch account: $e');
+    } catch (_) {
+      // Ignore errors in background operation
     }
   }
 

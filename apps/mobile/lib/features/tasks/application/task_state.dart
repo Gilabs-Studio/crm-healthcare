@@ -10,6 +10,7 @@ class TaskListState {
     this.searchQuery = '',
     this.selectedStatus,
     this.selectedPriority,
+    this.isOffline = false,
   });
 
   final List<Task> tasks;
@@ -20,6 +21,7 @@ class TaskListState {
   final String searchQuery;
   final String? selectedStatus;
   final String? selectedPriority;
+  final bool isOffline;
 
   TaskListState copyWith({
     List<Task>? tasks,
@@ -30,6 +32,7 @@ class TaskListState {
     String? searchQuery,
     String? selectedStatus,
     String? selectedPriority,
+    bool? isOffline,
     bool clearTasks = false,
   }) {
     return TaskListState(
@@ -41,6 +44,7 @@ class TaskListState {
       searchQuery: searchQuery ?? this.searchQuery,
       selectedStatus: selectedStatus,
       selectedPriority: selectedPriority,
+      isOffline: isOffline ?? this.isOffline,
     );
   }
 }

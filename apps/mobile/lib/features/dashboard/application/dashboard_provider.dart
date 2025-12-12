@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/network/connectivity_service.dart';
 import '../data/dashboard_cache.dart';
 import '../data/dashboard_repository.dart';
 import '../data/models/dashboard.dart';
@@ -13,14 +14,16 @@ final dashboardRepositoryProvider = Provider<DashboardRepository>((ref) {
 final dashboardProvider =
     StateNotifierProvider<DashboardNotifier, DashboardState>((ref) {
   final repository = ref.watch(dashboardRepositoryProvider);
-  return DashboardNotifier(repository);
+  final connectivity = ref.watch(connectivityServiceProvider);
+  return DashboardNotifier(repository, connectivity);
 });
 
 class DashboardNotifier extends StateNotifier<DashboardState> {
   final DashboardRepository _repository;
+  final ConnectivityService _connectivity;
   final DashboardCache _cache = DashboardCache();
 
-  DashboardNotifier(this._repository) : super(DashboardState()) {
+  DashboardNotifier(this._repository, this._connectivity) : super(DashboardState()) {
     loadDashboard();
   }
 
@@ -66,6 +69,7 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
           isLoading: false,
           isLoadingOverview: false,
           isLoadingSecondary: false,
+          isOffline: !_connectivity.isOnline,
         );
       }
     }
@@ -77,6 +81,7 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
       isLoadingSecondary: true,
       errorMessage: null,
       selectedPeriod: selectedPeriod,
+      isOffline: !_connectivity.isOnline,
     );
 
     try {
@@ -93,6 +98,7 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
         state = state.copyWith(
           overview: overview,
           isLoadingOverview: false,
+          isOffline: !_connectivity.isOnline,
         );
       } catch (e) {
         print('Error loading overview: $e');
@@ -105,6 +111,7 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
           state = state.copyWith(
             overview: cachedOverview,
             isLoadingOverview: false,
+            isOffline: !_connectivity.isOnline,
           );
         } else {
           throw e;
@@ -127,6 +134,7 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
         isLoading: false,
         isLoadingSecondary: false,
         errorMessage: null,
+        isOffline: !_connectivity.isOnline,
       );
     } catch (e, stackTrace) {
       print('Dashboard load error: $e');
@@ -138,6 +146,7 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
         isLoadingOverview: false,
         isLoadingSecondary: false,
         errorMessage: errorMessage,
+        isOffline: !_connectivity.isOnline,
       );
     }
   }
@@ -235,8 +244,9 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
         return 'Connection timeout. Please check your internet connection and try again.';
       }
       if (errorMessage.contains('Failed host lookup') || 
-          errorMessage.contains('SocketException')) {
-        return 'Unable to connect to server. Please check your internet connection.';
+          errorMessage.contains('SocketException') ||
+          errorMessage.contains('No internet connection')) {
+        return 'No internet connection. Showing cached data.';
       }
       
       return errorMessage.isNotEmpty 
@@ -244,6 +254,10 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
           : 'Network error occurred. Please try again.';
     }
     final errorString = error.toString();
+    // Check for offline-specific error messages
+    if (errorString.contains('No internet connection and no cached data available')) {
+      return 'No internet connection and no cached data available.';
+    }
     if (errorString.startsWith('Exception: ')) {
       return errorString.substring(11);
     }
