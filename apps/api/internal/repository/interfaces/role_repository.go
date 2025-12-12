@@ -29,5 +29,11 @@ type RoleRepository interface {
 	
 	// GetPermissions gets all permissions for a role
 	GetPermissions(roleID string) ([]string, error)
+	
+	// GetMobilePermissions gets mobile permissions for a role
+	GetMobilePermissions(roleID string, role *role.Role) (*role.GetMobilePermissionsResponse, error)
+	
+	// UpdateMobilePermissions updates mobile permissions for a role
+	UpdateMobilePermissions(roleID string, req *role.UpdateMobilePermissionsRequest) error
 }
 

@@ -92,3 +92,19 @@ type AssignPermissionsRequest struct {
 	PermissionIDs []string `json:"permission_ids" binding:"required,min=1,dive,uuid"`
 }
 
+// GetMobilePermissionsResponse represents mobile permissions response for a role
+type GetMobilePermissionsResponse struct {
+	Menus []MobileMenuPermission `json:"menus"`
+}
+
+// MobileMenuPermission represents a mobile menu with CRUD permissions
+type MobileMenuPermission struct {
+	Menu    string   `json:"menu"`    // dashboard, task, accounts, contacts, visit_reports
+	Actions []string `json:"actions"` // VIEW, CREATE, EDIT, DELETE
+}
+
+// UpdateMobilePermissionsRequest represents update mobile permissions request DTO
+type UpdateMobilePermissionsRequest struct {
+	Menus []MobileMenuPermission `json:"menus" binding:"required,min=1,dive"`
+}
+

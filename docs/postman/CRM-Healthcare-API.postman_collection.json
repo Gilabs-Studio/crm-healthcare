@@ -824,6 +824,142 @@
             },
             "description": "Assign permissions to a role"
           }
+        },
+        {
+          "name": "Get Mobile Permissions for Role",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/roles/:id/mobile-permissions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "roles", ":id", "mobile-permissions"],
+              "variable": [
+                {"key": "id", "value": "role_id"}
+              ]
+            },
+            "description": "Get mobile-specific permissions for a role. Returns permissions for mobile menus: dashboard, task, accounts, contacts, visit_reports with CRUD actions (VIEW, CREATE, EDIT, DELETE)."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/roles/:id/mobile-permissions",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "roles", ":id", "mobile-permissions"],
+                  "variable": [
+                    {"key": "id", "value": "role_id"}
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"menus\": [\n      {\n        \"menu\": \"dashboard\",\n        \"actions\": [\"VIEW\"]\n      },\n      {\n        \"menu\": \"task\",\n        \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n      },\n      {\n        \"menu\": \"accounts\",\n        \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n      },\n      {\n        \"menu\": \"contacts\",\n        \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n      },\n      {\n        \"menu\": \"visit_reports\",\n        \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n      }\n    ]\n  },\n  \"timestamp\": \"2024-01-15T10:30:45+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Mobile Permissions for Role",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"menus\": [\n    {\n      \"menu\": \"dashboard\",\n      \"actions\": [\"VIEW\"]\n    },\n    {\n      \"menu\": \"task\",\n      \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n    },\n    {\n      \"menu\": \"accounts\",\n      \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n    },\n    {\n      \"menu\": \"contacts\",\n      \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n    },\n    {\n      \"menu\": \"visit_reports\",\n      \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/roles/:id/mobile-permissions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "roles", ":id", "mobile-permissions"],
+              "variable": [
+                {"key": "id", "value": "role_id"}
+              ]
+            },
+            "description": "Update mobile-specific permissions for a role. Configure which permissions are available for mobile app access. These permissions control what actions users with this role can perform in the mobile application."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"menus\": [\n    {\n      \"menu\": \"dashboard\",\n      \"actions\": [\"VIEW\"]\n    },\n    {\n      \"menu\": \"task\",\n      \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n    },\n    {\n      \"menu\": \"accounts\",\n      \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n    },\n    {\n      \"menu\": \"contacts\",\n      \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n    },\n    {\n      \"menu\": \"visit_reports\",\n      \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/roles/:id/mobile-permissions",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "roles", ":id", "mobile-permissions"],
+                  "variable": [
+                    {"key": "id", "value": "role_id"}
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"menus\": [\n      {\n        \"menu\": \"dashboard\",\n        \"actions\": [\"VIEW\"]\n      },\n      {\n        \"menu\": \"task\",\n        \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n      },\n      {\n        \"menu\": \"accounts\",\n        \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n      },\n      {\n        \"menu\": \"contacts\",\n        \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n      },\n      {\n        \"menu\": \"visit_reports\",\n        \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n      }\n    ]\n  },\n  \"timestamp\": \"2024-01-15T10:30:45+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
+            }
+          ]
         }
       ]
     },

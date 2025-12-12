@@ -146,3 +146,12 @@ export interface UpdateRoleFormData {
   mobile_access?: boolean;
 }
 
+export interface MobileMenuPermission {
+  menu: string; // dashboard, task, accounts, contacts, visit_reports
+  actions: string[]; // VIEW, CREATE, EDIT, DELETE
+}
+
+export interface MobilePermissionsResponse {
+  menus: MobileMenuPermission[];
+}
+

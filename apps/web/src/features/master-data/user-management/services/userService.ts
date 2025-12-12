@@ -78,6 +78,21 @@ export const roleService = {
     );
     return response.data.data;
   },
+
+  async getMobilePermissions(roleId: string): Promise<MobilePermissionsResponse> {
+    const response = await apiClient.get<{ success: boolean; data: MobilePermissionsResponse }>(
+      `/roles/${roleId}/mobile-permissions`
+    );
+    return response.data.data;
+  },
+
+  async updateMobilePermissions(roleId: string, permissions: MobilePermissionsResponse): Promise<MobilePermissionsResponse> {
+    const response = await apiClient.put<{ success: boolean; data: MobilePermissionsResponse }>(
+      `/roles/${roleId}/mobile-permissions`,
+      permissions
+    );
+    return response.data.data;
+  },
 };
 
 export const permissionService = {
