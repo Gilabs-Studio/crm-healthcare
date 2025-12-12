@@ -16,6 +16,7 @@ export interface Role {
   code: string;
   description?: string;
   status: "active" | "inactive";
+  mobile_access?: boolean;
   permissions?: Permission[];
   created_at: string;
   updated_at: string;
@@ -134,6 +135,7 @@ export interface CreateRoleFormData {
   code: string;
   description?: string;
   status?: "active" | "inactive";
+  mobile_access?: boolean;
 }
 
 export interface UpdateRoleFormData {
@@ -141,5 +143,15 @@ export interface UpdateRoleFormData {
   code?: string;
   description?: string;
   status?: "active" | "inactive";
+  mobile_access?: boolean;
+}
+
+export interface MobileMenuPermission {
+  menu: string; // dashboard, task, accounts, contacts, visit_reports
+  actions: string[]; // VIEW, CREATE, EDIT, DELETE
+}
+
+export interface MobilePermissionsResponse {
+  menus: MobileMenuPermission[];
 }
 

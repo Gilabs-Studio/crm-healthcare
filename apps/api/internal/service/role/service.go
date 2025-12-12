@@ -3,7 +3,7 @@ package role
 import (
 	"errors"
 
-	"github.com/gilabs/crm-healthcare/api/internal/domain/role"
+	roledomain "github.com/gilabs/crm-healthcare/api/internal/domain/role"
 	"github.com/gilabs/crm-healthcare/api/internal/repository/interfaces"
 	"gorm.io/gorm"
 )
@@ -24,13 +24,13 @@ func NewService(roleRepo interfaces.RoleRepository) *Service {
 }
 
 // List returns a list of roles
-func (s *Service) List() ([]role.RoleResponse, error) {
+func (s *Service) List() ([]roledomain.RoleResponse, error) {
 	roles, err := s.roleRepo.List()
 	if err != nil {
 		return nil, err
 	}
 
-	responses := make([]role.RoleResponse, len(roles))
+	responses := make([]roledomain.RoleResponse, len(roles))
 	for i, r := range roles {
 		responses[i] = *r.ToRoleResponse()
 	}
@@ -39,7 +39,7 @@ func (s *Service) List() ([]role.RoleResponse, error) {
 }
 
 // GetByID returns a role by ID
-func (s *Service) GetByID(id string) (*role.RoleResponse, error) {
+func (s *Service) GetByID(id string) (*roledomain.RoleResponse, error) {
 	r, err := s.roleRepo.FindByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -51,7 +51,7 @@ func (s *Service) GetByID(id string) (*role.RoleResponse, error) {
 }
 
 // Create creates a new role
-func (s *Service) Create(req *role.CreateRoleRequest) (*role.RoleResponse, error) {
+func (s *Service) Create(req *roledomain.CreateRoleRequest) (*roledomain.RoleResponse, error) {
 	// Check if code already exists
 	_, err := s.roleRepo.FindByCode(req.Code)
 	if err == nil {
@@ -67,12 +67,19 @@ func (s *Service) Create(req *role.CreateRoleRequest) (*role.RoleResponse, error
 		status = "active"
 	}
 
+	// Set default mobile_access
+	mobileAccess := false
+	if req.MobileAccess != nil {
+		mobileAccess = *req.MobileAccess
+	}
+
 	// Create role
-	r := &role.Role{
+	r := &roledomain.Role{
 		Name:        req.Name,
 		Code:        req.Code,
 		Description: req.Description,
 		Status:      status,
+		MobileAccess: mobileAccess,
 	}
 
 	if err := s.roleRepo.Create(r); err != nil {
@@ -89,7 +96,7 @@ func (s *Service) Create(req *role.CreateRoleRequest) (*role.RoleResponse, error
 }
 
 // Update updates a role
-func (s *Service) Update(id string, req *role.UpdateRoleRequest) (*role.RoleResponse, error) {
+func (s *Service) Update(id string, req *roledomain.UpdateRoleRequest) (*roledomain.RoleResponse, error) {
 	// Find role
 	r, err := s.roleRepo.FindByID(id)
 	if err != nil {
@@ -122,6 +129,10 @@ func (s *Service) Update(id string, req *role.UpdateRoleRequest) (*role.RoleResp
 
 	if req.Status != "" {
 		r.Status = req.Status
+	}
+
+	if req.MobileAccess != nil {
+		r.MobileAccess = *req.MobileAccess
 	}
 
 	if err := s.roleRepo.Update(r); err != nil {
@@ -163,5 +174,33 @@ func (s *Service) AssignPermissions(roleID string, permissionIDs []string) error
 	}
 
 	return s.roleRepo.AssignPermissions(roleID, permissionIDs)
+}
+
+// GetMobilePermissions returns mobile permissions for a role
+func (s *Service) GetMobilePermissions(roleID string) (*roledomain.GetMobilePermissionsResponse, error) {
+	// Check if role exists
+	r, err := s.roleRepo.FindByID(roleID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrRoleNotFound
+		}
+		return nil, err
+	}
+
+	return s.roleRepo.GetMobilePermissions(roleID, r)
+}
+
+// UpdateMobilePermissions updates mobile permissions for a role
+func (s *Service) UpdateMobilePermissions(roleID string, req *roledomain.UpdateMobilePermissionsRequest) error {
+	// Check if role exists
+	_, err := s.roleRepo.FindByID(roleID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return ErrRoleNotFound
+		}
+		return err
+	}
+
+	return s.roleRepo.UpdateMobilePermissions(roleID, req)
 }
 

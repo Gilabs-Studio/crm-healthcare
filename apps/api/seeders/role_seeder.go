@@ -23,24 +23,35 @@ func SeedRoles() error {
 			Code:        "admin",
 			Description: "Administrator with full access",
 			Status:      "active",
+			MobileAccess: false,
 		},
 		{
 			Name:        "Doctor",
 			Code:        "doctor",
 			Description: "Doctor role for medical operations",
 			Status:      "active",
+			MobileAccess: false,
 		},
 		{
 			Name:        "Pharmacist",
 			Code:        "pharmacist",
 			Description: "Pharmacist role for pharmacy operations",
 			Status:      "active",
+			MobileAccess: false,
+		},
+		{
+			Name:        "Sales",
+			Code:        "sales",
+			Description: "Sales role for mobile app access",
+			Status:      "active",
+			MobileAccess: true, // Only sales role can access mobile app
 		},
 		{
 			Name:        "Viewer",
 			Code:        "viewer",
 			Description: "Viewer role with read-only access",
 			Status:      "active",
+			MobileAccess: false,
 		},
 	}
 

@@ -166,9 +166,6 @@ export function Chatbot() {
     }
   }, [messages]);
 
-  // Note: Custom links are now rendered as <span> elements, so no document-level listener needed
-  // The onClick handler in the span component will handle clicks directly
-
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.style.height = "auto";
@@ -497,7 +494,7 @@ export function Chatbot() {
       >
         {messages.length === 1 && messages[0].id === "initial-greeting" ? (
           // Empty state - Modern minimalist welcome
-          <div className="flex flex-col items-center justify-center min-h-full px-6 py-16">
+          <div className="flex flex-col items-center justify-center min-h-full px-4 sm:px-6 py-16">
             <div className="max-w-4xl w-full space-y-10">
               {/* Welcome Message */}
               <div className="text-center space-y-4">
@@ -511,7 +508,7 @@ export function Chatbot() {
 
               {/* Template Selector */}
               <div className="space-y-5">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-3">
                   <h2 className="text-base font-medium text-foreground">Quick Templates</h2>
                   <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                     <SelectTrigger className="w-[180px] border-border/50 rounded-lg">
@@ -575,7 +572,7 @@ export function Chatbot() {
                   message.role === "user" ? "bg-muted/10" : "bg-background"
                 }`}
               >
-                <div className="flex gap-5 px-6 py-8 max-w-4xl mx-auto">
+                <div className="flex gap-5 px-4 sm:px-6 py-8 max-w-4xl mx-auto">
                   {/* Avatar/Icon */}
                   <div className="shrink-0 w-9 h-9 mt-0.5">
                     {message.role === "user" && userAvatarUrl && (
@@ -692,7 +689,7 @@ export function Chatbot() {
             ))}
             {isPending && (
               <div className="group w-full bg-background">
-                <div className="flex gap-5 px-6 py-8 max-w-4xl mx-auto">
+                <div className="flex gap-5 px-4 sm:px-6 py-8 max-w-4xl mx-auto">
                   <div className="shrink-0 w-9 h-9 rounded-full bg-linear-to-br from-primary/20 to-primary/5 flex items-center justify-center ring-2 ring-primary/10 mt-0.5">
                     <svg
                       className="w-5 h-5 text-primary"
@@ -720,16 +717,16 @@ export function Chatbot() {
       </div>
 
       {/* Input Area - Fixed at bottom with integrated controls like ChatGPT */}
-      <div className="fixed bottom-0 left-0 right-0 z-20">
-        <div className="max-w-4xl mx-auto px-6 py-5">
+      <div className="fixed bottom-0 left-0 right-0 z-20 bg-background/95 backdrop-blur-sm border-t border-border">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-5">
           {/* Model Selector & Actions - Above textarea */}
-          <div className="flex items-center justify-between mb-3 px-1">
+          <div className="flex items-center justify-between mb-3 px-1 gap-2">
             <Select
               value={selectedModel || settings.model || ""}
               onValueChange={setUserSelectedModel}
               disabled={isPending}
             >
-              <SelectTrigger className="h-8 w-auto border-0 bg-transparent hover:bg-muted/50 px-2 py-0 text-xs font-medium rounded-lg gap-1.5">
+              <SelectTrigger className="h-8 w-auto min-w-[140px] sm:min-w-[160px] border-0 bg-transparent hover:bg-muted/50 px-2 py-0 text-xs font-medium rounded-lg gap-1.5">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent align="start">
@@ -793,8 +790,8 @@ export function Chatbot() {
             </div>
           </div>
 
-          {/* Textarea & Send Button */}
-          <div className="relative flex items-end gap-3">
+          {/* Textarea & Send Button - Responsive layout */}
+          <div className="relative flex items-end gap-2 sm:gap-3">
             <div className="flex-1 relative min-w-0">
               <textarea
                 ref={inputRef}
@@ -802,7 +799,7 @@ export function Chatbot() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Ask anything..."
-                className="w-full resize-none rounded-2xl border border-border bg-card px-5 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed min-h-14 max-h-40 leading-relaxed placeholder:text-muted-foreground/60 transition-all shadow-lg"
+                className="w-full resize-none rounded-2xl border border-border bg-card px-4 sm:px-5 py-3 sm:py-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed min-h-[52px] sm:min-h-14 max-h-40 leading-relaxed placeholder:text-muted-foreground/60 transition-all shadow-lg"
                 disabled={isPending || !settings.enabled}
                 rows={1}
               />
@@ -811,7 +808,7 @@ export function Chatbot() {
               onClick={handleSend}
               disabled={!input.trim() || isPending || !settings.enabled}
               size="icon"
-              className="h-14 w-14 rounded-2xl bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-[1.02] active:scale-95 shrink-0 shadow-lg"
+              className="h-[52px] w-[52px] sm:h-14 sm:w-14 rounded-2xl bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:scale-[1.02] active:scale-95 shrink-0 shadow-lg"
             >
               {isPending ? (
                 <Loader2 className="h-5 w-5 animate-spin" />

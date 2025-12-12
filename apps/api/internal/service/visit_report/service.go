@@ -823,6 +823,14 @@ func (s *Service) UploadPhoto(id string, req *visit_report.UploadPhotoRequest) (
 	return &response, nil
 }
 
+// GetMyVisitReports returns visit reports for the logged-in user (sales rep)
+func (s *Service) GetMyVisitReports(userID string, req *visit_report.ListVisitReportsRequest) ([]visit_report.VisitReportResponse, *PaginationResult, error) {
+	// Override SalesRepID filter to only show visit reports for the user
+	req.SalesRepID = userID
+	
+	return s.List(req)
+}
+
 // createActivity creates an activity record for a visit report
 func (s *Service) createActivity(vr *visit_report.VisitReport, activityType, description string) {
 	if s.activityRepo == nil {

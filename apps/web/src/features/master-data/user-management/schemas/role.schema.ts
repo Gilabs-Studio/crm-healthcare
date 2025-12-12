@@ -5,6 +5,7 @@ export const createRoleSchema = z.object({
   code: z.string().min(3, "Code must be at least 3 characters"),
   description: z.string().optional(),
   status: z.enum(["active", "inactive"]).optional().default("active"),
+  mobile_access: z.boolean().optional().default(false),
 });
 
 export const updateRoleSchema = z.object({
@@ -12,6 +13,7 @@ export const updateRoleSchema = z.object({
   code: z.string().min(3, "Code must be at least 3 characters").optional(),
   description: z.string().optional(),
   status: z.enum(["active", "inactive"]).optional(),
+  mobile_access: z.boolean().optional(),
 });
 
 export const assignPermissionsSchema = z.object({

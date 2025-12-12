@@ -15,6 +15,7 @@ type Role struct {
 	Code        string    `gorm:"type:varchar(50);uniqueIndex;not null" json:"code"`
 	Description string    `gorm:"type:text" json:"description"`
 	Status      string    `gorm:"type:varchar(20);not null;default:'active'" json:"status"`
+	MobileAccess bool     `gorm:"type:boolean;default:false" json:"mobile_access"`
 	Permissions []permission.Permission `gorm:"many2many:role_permissions;" json:"permissions,omitempty"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
@@ -41,6 +42,7 @@ type RoleResponse struct {
 	Code        string             `json:"code"`
 	Description string             `json:"description"`
 	Status      string             `json:"status"`
+	MobileAccess bool              `json:"mobile_access"`
 	Permissions []permission.PermissionResponse `json:"permissions,omitempty"`
 	CreatedAt   time.Time          `json:"created_at"`
 	UpdatedAt   time.Time          `json:"updated_at"`
@@ -54,6 +56,7 @@ func (r *Role) ToRoleResponse() *RoleResponse {
 		Code:        r.Code,
 		Description: r.Description,
 		Status:      r.Status,
+		MobileAccess: r.MobileAccess,
 		CreatedAt:   r.CreatedAt,
 		UpdatedAt:   r.UpdatedAt,
 	}
@@ -72,6 +75,7 @@ type CreateRoleRequest struct {
 	Code        string `json:"code" binding:"required,min=3"`
 	Description string `json:"description"`
 	Status      string `json:"status" binding:"omitempty,oneof=active inactive"`
+	MobileAccess *bool `json:"mobile_access"`
 }
 
 // UpdateRoleRequest represents update role request DTO
@@ -80,10 +84,27 @@ type UpdateRoleRequest struct {
 	Code        string `json:"code" binding:"omitempty,min=3"`
 	Description string `json:"description"`
 	Status      string `json:"status" binding:"omitempty,oneof=active inactive"`
+	MobileAccess *bool `json:"mobile_access"`
 }
 
 // AssignPermissionsRequest represents assign permissions to role request DTO
 type AssignPermissionsRequest struct {
 	PermissionIDs []string `json:"permission_ids" binding:"required,min=1,dive,uuid"`
+}
+
+// GetMobilePermissionsResponse represents mobile permissions response for a role
+type GetMobilePermissionsResponse struct {
+	Menus []MobileMenuPermission `json:"menus"`
+}
+
+// MobileMenuPermission represents a mobile menu with CRUD permissions
+type MobileMenuPermission struct {
+	Menu    string   `json:"menu"`    // dashboard, task, accounts, contacts, visit_reports
+	Actions []string `json:"actions"` // VIEW, CREATE, EDIT, DELETE
+}
+
+// UpdateMobilePermissionsRequest represents update mobile permissions request DTO
+type UpdateMobilePermissionsRequest struct {
+	Menus []MobileMenuPermission `json:"menus" binding:"required,min=1,dive"`
 }
 

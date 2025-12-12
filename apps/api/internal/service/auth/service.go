@@ -19,6 +19,7 @@ var (
 	ErrRefreshTokenInvalid  = errors.New("refresh token is invalid")
 	ErrRefreshTokenRevoked  = errors.New("refresh token has been revoked")
 	ErrRefreshTokenExpired  = errors.New("refresh token has expired")
+	ErrRoleNotAllowed       = errors.New("role not allowed for mobile login")
 )
 
 type Service struct {
@@ -233,5 +234,92 @@ func (s *Service) Logout(refreshToken string) error {
 
 	// Revoke the token
 	return s.refreshTokenRepo.Revoke(tokenID)
+}
+
+// MobileLogin authenticates a user for mobile app and returns tokens (only sales role allowed)
+func (s *Service) MobileLogin(req *auth.LoginRequest) (*auth.LoginResponse, error) {
+	// Find user by email
+	user, err := s.repo.FindByEmail(req.Email)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrInvalidCredentials
+		}
+		return nil, err
+	}
+
+	// Check if user is active
+	if user.Status != "active" {
+		return nil, ErrUserInactive
+	}
+
+	// Verify password
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
+		return nil, ErrInvalidCredentials
+	}
+
+	// Get role code
+	roleCode := "user"
+	mobileAccess := false
+	if user.Role != nil {
+		roleCode = user.Role.Code
+		mobileAccess = user.Role.MobileAccess
+	}
+
+	// Check if user's role has mobile access enabled
+	if !mobileAccess {
+		return nil, ErrRoleNotAllowed
+	}
+
+	// Generate tokens
+	accessToken, err := s.jwtManager.GenerateAccessToken(user.ID, user.Email, roleCode)
+	if err != nil {
+		return nil, err
+	}
+
+	refreshToken, err := s.jwtManager.GenerateRefreshToken(user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Extract token ID (jti) from refresh token
+	tokenID, err := s.jwtManager.ExtractRefreshTokenID(refreshToken)
+	if err != nil {
+		return nil, err
+	}
+
+	// Store refresh token in database
+	refreshTokenEntity := &refresh_token.RefreshToken{
+		UserID:    user.ID,
+		TokenID:   tokenID,
+		ExpiresAt: time.Now().Add(s.jwtManager.RefreshTokenTTL()),
+		Revoked:   false,
+	}
+
+	if err := s.refreshTokenRepo.Create(refreshTokenEntity); err != nil {
+		return nil, err
+	}
+
+	// Calculate expires in (seconds)
+	expiresIn := int(s.jwtManager.AccessTokenTTL().Seconds())
+
+	// Convert to auth response format
+	userResp := user.ToUserResponse()
+	authUserResp := &auth.UserResponse{
+		ID:        userResp.ID,
+		Email:     userResp.Email,
+		Name:      userResp.Name,
+		AvatarURL: userResp.AvatarURL,
+		Role:      roleCode,
+		Status:    userResp.Status,
+		CreatedAt: userResp.CreatedAt,
+		UpdatedAt: userResp.UpdatedAt,
+	}
+
+	return &auth.LoginResponse{
+		User:         authUserResp,
+		Token:        accessToken,
+		RefreshToken: refreshToken,
+		ExpiresIn:    expiresIn,
+	}, nil
 }
 

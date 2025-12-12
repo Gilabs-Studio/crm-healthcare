@@ -1,7 +1,7 @@
 import apiClient from "@/lib/api-client";
 import type { User, ListUsersResponse, UserResponse } from "../types";
 import type { CreateUserFormData, UpdateUserFormData } from "../schemas/user.schema";
-import type { ListRolesResponse, Role } from "../types";
+import type { ListRolesResponse, Role, MobilePermissionsResponse } from "../types";
 import type { ListPermissionsResponse, Permission, UserPermissionsApiResponse } from "../types";
 
 export const userService = {
@@ -54,14 +54,14 @@ export const roleService = {
     return response.data.data;
   },
 
-  async create(data: { name: string; code: string; description?: string; status?: string }): Promise<Role> {
+  async create(data: { name: string; code: string; description?: string; status?: string; mobile_access?: boolean }): Promise<Role> {
     const response = await apiClient.post<{ success: boolean; data: Role }>("/roles", data);
     return response.data.data;
   },
 
   async update(
     id: string,
-    data: { name?: string; code?: string; description?: string; status?: string }
+    data: { name?: string; code?: string; description?: string; status?: string; mobile_access?: boolean }
   ): Promise<Role> {
     const response = await apiClient.put<{ success: boolean; data: Role }>(`/roles/${id}`, data);
     return response.data.data;
@@ -75,6 +75,21 @@ export const roleService = {
     const response = await apiClient.put<{ success: boolean; data: Role }>(
       `/roles/${roleId}/permissions`,
       { permission_ids: permissionIds }
+    );
+    return response.data.data;
+  },
+
+  async getMobilePermissions(roleId: string): Promise<MobilePermissionsResponse> {
+    const response = await apiClient.get<{ success: boolean; data: MobilePermissionsResponse }>(
+      `/roles/${roleId}/mobile-permissions`
+    );
+    return response.data.data;
+  },
+
+  async updateMobilePermissions(roleId: string, permissions: MobilePermissionsResponse): Promise<MobilePermissionsResponse> {
+    const response = await apiClient.put<{ success: boolean; data: MobilePermissionsResponse }>(
+      `/roles/${roleId}/mobile-permissions`,
+      permissions
     );
     return response.data.data;
   },

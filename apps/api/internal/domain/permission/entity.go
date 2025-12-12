@@ -156,3 +156,14 @@ type MenuWithActionsResponse struct {
 	Actions   []ActionResponse        `json:"actions,omitempty"`
 }
 
+// MobilePermissionsResponse represents mobile permissions response
+type MobilePermissionsResponse struct {
+	Menus []MobileMenuPermission `json:"menus"`
+}
+
+// MobileMenuPermission represents a mobile menu with CRUD permissions
+type MobileMenuPermission struct {
+	Menu    string   `json:"menu"`    // dashboard, task, accounts, contacts, visit_reports
+	Actions []string `json:"actions"` // VIEW, CREATE, EDIT, DELETE
+}
+

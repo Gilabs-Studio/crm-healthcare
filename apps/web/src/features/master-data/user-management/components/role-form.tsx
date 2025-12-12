@@ -3,9 +3,11 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
+import { Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -42,9 +44,11 @@ export function RoleForm({ role, onSubmit, onCancel, isLoading = false }: RoleFo
           code: role.code,
           description: role.description || "",
           status: role.status,
+          mobile_access: role.mobile_access ?? false,
         }
       : {
           status: "active",
+          mobile_access: false,
         },
   });
 
@@ -104,6 +108,27 @@ export function RoleForm({ role, onSubmit, onCancel, isLoading = false }: RoleFo
           </SelectContent>
         </Select>
         {errors.status && <FieldError>{errors.status.message}</FieldError>}
+      </Field>
+
+      <Field>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Smartphone className="h-4 w-4 text-muted-foreground" />
+            <FieldLabel htmlFor="mobile_access" className="cursor-pointer">
+              {t("mobileAccessLabel") || "Mobile Access"}
+            </FieldLabel>
+          </div>
+          <Switch
+            id="mobile_access"
+            checked={watch("mobile_access") ?? false}
+            onCheckedChange={(checked) => setValue("mobile_access", checked)}
+            disabled={isLoading}
+          />
+        </div>
+        <p className="text-xs text-muted-foreground mt-1">
+          {t("mobileAccessHint") || "Allow users with this role to access mobile app"}
+        </p>
+        {errors.mobile_access && <FieldError>{errors.mobile_access.message}</FieldError>}
       </Field>
 
       <div className="flex justify-end gap-2 pt-4">

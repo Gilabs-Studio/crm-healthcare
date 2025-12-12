@@ -20,7 +20,7 @@ func SeedUsers() error {
 	}
 
 	// Get roles
-	var adminRole, doctorRole, pharmacistRole, viewerRole role.Role
+	var adminRole, doctorRole, pharmacistRole, salesRole, viewerRole role.Role
 	if err := database.DB.Where("code = ?", "admin").First(&adminRole).Error; err != nil {
 		return err
 	}
@@ -28,6 +28,9 @@ func SeedUsers() error {
 		return err
 	}
 	if err := database.DB.Where("code = ?", "pharmacist").First(&pharmacistRole).Error; err != nil {
+		return err
+	}
+	if err := database.DB.Where("code = ?", "sales").First(&salesRole).Error; err != nil {
 		return err
 	}
 	if err := database.DB.Where("code = ?", "viewer").First(&viewerRole).Error; err != nil {
@@ -42,36 +45,44 @@ func SeedUsers() error {
 
 	users := []user.User{
 		{
-			Email:    "admin@example.com",
-			Password: string(hashedPassword),
-			Name:     "Admin User",
+			Email:     "admin@example.com",
+			Password:  string(hashedPassword),
+			Name:      "Admin User",
 			AvatarURL: "https://api.dicebear.com/7.x/lorelei/svg?seed=admin@example.com",
-			RoleID:   adminRole.ID,
-			Status:   "active",
+			RoleID:    adminRole.ID,
+			Status:    "active",
 		},
 		{
-			Email:    "doctor@example.com",
-			Password: string(hashedPassword),
-			Name:     "Doctor User",
+			Email:     "doctor@example.com",
+			Password:  string(hashedPassword),
+			Name:      "Doctor User",
 			AvatarURL: "https://api.dicebear.com/7.x/lorelei/svg?seed=doctor@example.com",
-			RoleID:   doctorRole.ID,
-			Status:   "active",
+			RoleID:    doctorRole.ID,
+			Status:    "active",
 		},
 		{
-			Email:    "pharmacist@example.com",
-			Password: string(hashedPassword),
-			Name:     "Pharmacist User",
+			Email:     "pharmacist@example.com",
+			Password:  string(hashedPassword),
+			Name:      "Pharmacist User",
 			AvatarURL: "https://api.dicebear.com/7.x/lorelei/svg?seed=pharmacist@example.com",
-			RoleID:   pharmacistRole.ID,
-			Status:   "active",
+			RoleID:    pharmacistRole.ID,
+			Status:    "active",
 		},
 		{
-			Email:    "viewer@example.com",
-			Password: string(hashedPassword),
-			Name:     "Viewer User",
+			Email:     "sales@example.com",
+			Password:  string(hashedPassword),
+			Name:      "Sales User",
+			AvatarURL: "https://api.dicebear.com/7.x/lorelei/svg?seed=sales@example.com",
+			RoleID:    salesRole.ID,
+			Status:    "active",
+		},
+		{
+			Email:     "viewer@example.com",
+			Password:  string(hashedPassword),
+			Name:      "Viewer User",
 			AvatarURL: "https://api.dicebear.com/7.x/lorelei/svg?seed=viewer@example.com",
-			RoleID:   viewerRole.ID,
-			Status:   "active",
+			RoleID:    viewerRole.ID,
+			Status:    "active",
 		},
 	}
 
@@ -85,4 +96,3 @@ func SeedUsers() error {
 	log.Println("Users seeded successfully")
 	return nil
 }
-

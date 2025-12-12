@@ -131,6 +131,164 @@
           ]
         },
         {
+          "name": "Mobile Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const jsonData = pm.response.json();",
+                  "    if (jsonData.success && jsonData.data.token) {",
+                  "        pm.environment.set(\"token\", jsonData.data.token);",
+                  "        pm.environment.set(\"refresh_token\", jsonData.data.refresh_token);",
+                  "        pm.environment.set(\"user_id\", jsonData.data.user.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"sales@example.com\",\n  \"password\": \"sales123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/mobile/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "mobile", "login"]
+            },
+            "description": "Mobile login dengan email dan password. Hanya user dengan role yang memiliki mobile_access enabled yang dapat login melalui endpoint ini. Response akan menyertakan JWT token dan refresh token."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"sales@example.com\",\n  \"password\": \"admin123\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/auth/mobile/login",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "auth", "mobile", "login"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"user\": {\n      \"id\": \"user_abc123\",\n      \"email\": \"sales@example.com\",\n      \"name\": \"Sales User\",\n      \"role\": \"sales\",\n      \"status\": \"active\",\n      \"created_at\": \"2024-01-15T10:30:45+07:00\",\n      \"updated_at\": \"2024-01-15T10:30:45+07:00\"\n    },\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n    \"refresh_token\": \"refresh_token_xyz789\",\n    \"expires_in\": 3600\n  },\n  \"timestamp\": \"2024-01-15T10:30:45+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
+            },
+            {
+              "name": "Error Response - Invalid Credentials",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"wrong@example.com\",\n  \"password\": \"wrongpassword\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/auth/mobile/login",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "auth", "mobile", "login"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"INVALID_CREDENTIALS\",\n    \"message\": \"Invalid email or password\"\n  },\n  \"timestamp\": \"2024-01-15T10:30:45+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
+            },
+            {
+              "name": "Error Response - Role Not Allowed",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"admin123\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/auth/mobile/login",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "auth", "mobile", "login"]
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"ROLE_INSUFFICIENT\",\n    \"message\": \"Only users with role that has mobile_access enabled can login via mobile app\",\n    \"details\": {\n      \"reason\": \"Only users with role that has mobile_access enabled can login via mobile app\"\n    }\n  },\n  \"timestamp\": \"2024-01-15T10:30:45+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
+            }
+          ]
+        },
+        {
           "name": "Refresh Token",
           "event": [
             {
@@ -666,6 +824,142 @@
             },
             "description": "Assign permissions to a role"
           }
+        },
+        {
+          "name": "Get Mobile Permissions for Role",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/roles/:id/mobile-permissions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "roles", ":id", "mobile-permissions"],
+              "variable": [
+                {"key": "id", "value": "role_id"}
+              ]
+            },
+            "description": "Get mobile-specific permissions for a role. Returns permissions for mobile menus: dashboard, task, accounts, contacts, visit_reports with CRUD actions (VIEW, CREATE, EDIT, DELETE)."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/roles/:id/mobile-permissions",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "roles", ":id", "mobile-permissions"],
+                  "variable": [
+                    {"key": "id", "value": "role_id"}
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"menus\": [\n      {\n        \"menu\": \"dashboard\",\n        \"actions\": [\"VIEW\"]\n      },\n      {\n        \"menu\": \"task\",\n        \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n      },\n      {\n        \"menu\": \"accounts\",\n        \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n      },\n      {\n        \"menu\": \"contacts\",\n        \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n      },\n      {\n        \"menu\": \"visit_reports\",\n        \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n      }\n    ]\n  },\n  \"timestamp\": \"2024-01-15T10:30:45+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Mobile Permissions for Role",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"menus\": [\n    {\n      \"menu\": \"dashboard\",\n      \"actions\": [\"VIEW\"]\n    },\n    {\n      \"menu\": \"task\",\n      \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n    },\n    {\n      \"menu\": \"accounts\",\n      \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n    },\n    {\n      \"menu\": \"contacts\",\n      \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n    },\n    {\n      \"menu\": \"visit_reports\",\n      \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/roles/:id/mobile-permissions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "roles", ":id", "mobile-permissions"],
+              "variable": [
+                {"key": "id", "value": "role_id"}
+              ]
+            },
+            "description": "Update mobile-specific permissions for a role. Configure which permissions are available for mobile app access. These permissions control what actions users with this role can perform in the mobile application."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"menus\": [\n    {\n      \"menu\": \"dashboard\",\n      \"actions\": [\"VIEW\"]\n    },\n    {\n      \"menu\": \"task\",\n      \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n    },\n    {\n      \"menu\": \"accounts\",\n      \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n    },\n    {\n      \"menu\": \"contacts\",\n      \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n    },\n    {\n      \"menu\": \"visit_reports\",\n      \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/roles/:id/mobile-permissions",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "roles", ":id", "mobile-permissions"],
+                  "variable": [
+                    {"key": "id", "value": "role_id"}
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"menus\": [\n      {\n        \"menu\": \"dashboard\",\n        \"actions\": [\"VIEW\"]\n      },\n      {\n        \"menu\": \"task\",\n        \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n      },\n      {\n        \"menu\": \"accounts\",\n        \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n      },\n      {\n        \"menu\": \"contacts\",\n        \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n      },\n      {\n        \"menu\": \"visit_reports\",\n        \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n      }\n    ]\n  },\n  \"timestamp\": \"2024-01-15T10:30:45+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
+            }
+          ]
         }
       ]
     },
@@ -3847,6 +4141,28 @@
                   }
                 },
                 {
+                  "name": "Mark In Progress",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}",
+                        "type": "text"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/tasks/:id/mark-in-progress",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "tasks", ":id", "mark-in-progress"],
+                      "variable": [
+                        {"key": "id", "value": "task_id"}
+                      ]
+                    },
+                    "description": "Mark a task as in progress. Cannot mark completed tasks as in progress."
+                  }
+                },
+                {
                   "name": "List Reminders",
                   "request": {
                     "method": "GET",
@@ -3998,10 +4314,83 @@
       "name": "Mobile",
       "item": [
         {
+          "name": "Get Mobile Permissions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/mobile/permissions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "mobile", "permissions"]
+            },
+            "description": "Get mobile-specific permissions for the authenticated user. Returns permissions for mobile menus: dashboard, task, accounts, contacts, visit_reports with CRUD actions (VIEW, CREATE, EDIT, DELETE). Requires authentication token."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/auth/mobile/permissions",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "auth", "mobile", "permissions"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"menus\": [\n      {\n        \"menu\": \"dashboard\",\n        \"actions\": [\"VIEW\"]\n      },\n      {\n        \"menu\": \"task\",\n        \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n      },\n      {\n        \"menu\": \"accounts\",\n        \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n      },\n      {\n        \"menu\": \"contacts\",\n        \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n      },\n      {\n        \"menu\": \"visit_reports\",\n        \"actions\": [\"VIEW\", \"CREATE\", \"EDIT\", \"DELETE\"]\n      }\n    ]\n  },\n  \"timestamp\": \"2024-01-15T10:30:45+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
+            },
+            {
+              "name": "Error Response - Unauthorized",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/auth/mobile/permissions",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "auth", "mobile", "permissions"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"UNAUTHORIZED\",\n    \"message\": \"Authentication required\"\n  },\n  \"timestamp\": \"2024-01-15T10:30:45+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
+            }
+          ]
+        },
+        {
           "name": "Visit Reports",
           "item": [
             {
-              "name": "List Visit Reports",
+              "name": "Get My Visit Reports",
               "request": {
                 "method": "GET",
                 "header": [
@@ -4012,23 +4401,57 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{base_url}}/api/v1/visit-reports?page=1&per_page=20",
+                  "raw": "{{base_url}}/api/v1/mobile/visit-reports/my-visit-reports?page=1&per_page=20",
                   "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "visit-reports"],
+                  "path": ["api", "v1", "mobile", "visit-reports", "my-visit-reports"],
                   "query": [
                     {"key": "page", "value": "1"},
                     {"key": "per_page", "value": "20"},
                     {"key": "search", "value": "", "disabled": true},
-                    {"key": "status", "value": "", "disabled": true},
+                    {"key": "status", "value": "", "disabled": true, "description": "draft, submitted, approved, rejected"},
                     {"key": "account_id", "value": "", "disabled": true},
                     {"key": "deal_id", "value": "", "disabled": true},
-                    {"key": "sales_rep_id", "value": "", "disabled": true},
+                    {"key": "lead_id", "value": "", "disabled": true},
                     {"key": "start_date", "value": "", "disabled": true},
                     {"key": "end_date", "value": "", "disabled": true}
                   ]
                 },
-                "description": "Get list of visit reports with pagination (Mobile). Filter by deal_id to get visit reports for a specific deal."
-              }
+                "description": "Get visit reports for the logged-in user (sales rep) (Mobile). Returns only visit reports where sales_rep_id matches the authenticated user ID. Supports filtering by status, account_id, deal_id, lead_id, and date range."
+              },
+              "response": [
+                {
+                  "name": "Success Response",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/mobile/visit-reports/my-visit-reports?page=1&per_page=20",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "mobile", "visit-reports", "my-visit-reports"],
+                      "query": [
+                        {"key": "page", "value": "1"},
+                        {"key": "per_page", "value": "20"}
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"vr_abc123\",\n      \"account_id\": \"account_xyz789\",\n      \"account\": {\n        \"id\": \"account_xyz789\",\n        \"name\": \"Rumah Sakit Umum\"\n      },\n      \"contact_id\": \"contact_def456\",\n      \"contact\": {\n        \"id\": \"contact_def456\",\n        \"name\": \"Dr. John Doe\"\n      },\n      \"deal_id\": \"deal_abc123\",\n      \"lead_id\": null,\n      \"sales_rep_id\": \"user_789\",\n      \"sales_rep\": {\n        \"id\": \"user_789\",\n        \"name\": \"Sales Rep Name\"\n      },\n      \"visit_date\": \"2024-01-15T00:00:00Z\",\n      \"check_in_time\": \"2024-01-15T10:00:00+07:00\",\n      \"check_out_time\": null,\n      \"check_in_location\": {\n        \"latitude\": -6.2088,\n        \"longitude\": 106.8456,\n        \"address\": \"Jl. Merdeka No. 123, Jakarta\"\n      },\n      \"check_out_location\": null,\n      \"purpose\": \"Sales visit to discuss new products\",\n      \"notes\": \"Meeting went well, discussed pricing\",\n      \"photos\": [\"https://example.com/photos/visit-123.jpg\"],\n      \"status\": \"submitted\",\n      \"approved_by\": null,\n      \"approved_at\": null,\n      \"rejection_reason\": null,\n      \"created_at\": \"2024-01-15T10:30:45+07:00\",\n      \"updated_at\": \"2024-01-15T10:30:45+07:00\"\n    }\n  ],\n  \"meta\": {\n    \"pagination\": {\n      \"page\": 1,\n      \"per_page\": 20,\n      \"total\": 10,\n      \"total_pages\": 1,\n      \"has_next\": false,\n      \"has_prev\": false\n    },\n    \"filters\": {}\n  },\n  \"timestamp\": \"2024-01-15T10:30:45+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
+                }
+              ]
             },
             {
               "name": "Get Visit Report by ID",
@@ -4248,6 +4671,451 @@
             }
           ],
           "description": "Visit Report Management endpoints untuk Mobile Application dengan check-in/out, GPS, dan dokumentasi foto"
+        },
+        {
+          "name": "Tasks",
+          "item": [
+            {
+              "name": "Get My Tasks",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/mobile/tasks/my-tasks?page=1&per_page=20",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "mobile", "tasks", "my-tasks"],
+                  "query": [
+                    {"key": "page", "value": "1"},
+                    {"key": "per_page", "value": "20"},
+                    {"key": "search", "value": "", "disabled": true},
+                    {"key": "status", "value": "", "disabled": true, "description": "pending, in_progress, completed, cancelled"},
+                    {"key": "priority", "value": "", "disabled": true, "description": "low, medium, high, urgent"},
+                    {"key": "type", "value": "", "disabled": true, "description": "general, call, email, meeting, follow_up"},
+                    {"key": "due_date_from", "value": "", "disabled": true},
+                    {"key": "due_date_to", "value": "", "disabled": true}
+                  ]
+                },
+                "description": "Get tasks assigned to the logged-in user (Mobile). Returns only tasks where assigned_to matches the authenticated user ID. Supports filtering by status, priority, type, and due date range."
+              },
+              "response": [
+                {
+                  "name": "Success Response",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/mobile/tasks/my-tasks?page=1&per_page=20",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "mobile", "tasks", "my-tasks"],
+                      "query": [
+                        {"key": "page", "value": "1"},
+                        {"key": "per_page", "value": "20"}
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"task_abc123\",\n      \"title\": \"Follow up with client\",\n      \"description\": \"Call client to discuss proposal\",\n      \"type\": \"call\",\n      \"status\": \"pending\",\n      \"priority\": \"high\",\n      \"due_date\": \"2024-01-20T10:00:00+07:00\",\n      \"completed_at\": null,\n      \"assigned_to\": \"user_789\",\n      \"assigned_user\": {\n        \"id\": \"user_789\",\n        \"name\": \"Sales Rep Name\",\n        \"email\": \"sales@example.com\"\n      },\n      \"assigned_from\": \"user_123\",\n      \"assigned_from_user\": {\n        \"id\": \"user_123\",\n        \"name\": \"Manager Name\",\n        \"email\": \"manager@example.com\"\n      },\n      \"account_id\": \"account_xyz789\",\n      \"account\": {\n        \"id\": \"account_xyz789\",\n        \"name\": \"Rumah Sakit Umum\"\n      },\n      \"contact_id\": \"contact_def456\",\n      \"contact\": {\n        \"id\": \"contact_def456\",\n        \"name\": \"Dr. John Doe\",\n        \"email\": \"doctor@example.com\",\n        \"phone\": \"081234567890\"\n      },\n      \"deal_id\": \"deal_abc123\",\n      \"deal\": {\n        \"id\": \"deal_abc123\",\n        \"title\": \"New Deal Opportunity\"\n      },\n      \"created_by\": \"user_123\",\n      \"created_at\": \"2024-01-15T10:30:45+07:00\",\n      \"updated_at\": \"2024-01-15T10:30:45+07:00\"\n    }\n  ],\n  \"meta\": {\n    \"pagination\": {\n      \"page\": 1,\n      \"per_page\": 20,\n      \"total\": 15,\n      \"total_pages\": 1,\n      \"has_next\": false,\n      \"has_prev\": false\n    },\n    \"filters\": {}\n  },\n  \"timestamp\": \"2024-01-15T10:30:45+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
+                }
+              ]
+            },
+            {
+              "name": "Get Task by ID",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/tasks/:id",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "tasks", ":id"],
+                  "variable": [
+                    {"key": "id", "value": "task_id"}
+                  ]
+                },
+                "description": "Get task details by ID (Mobile)"
+              }
+            },
+            {
+              "name": "Mark In Progress",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/tasks/:id/mark-in-progress",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "tasks", ":id", "mark-in-progress"],
+                  "variable": [
+                    {"key": "id", "value": "task_id"}
+                  ]
+                },
+                "description": "Mark a task as in progress (Mobile). Cannot mark completed tasks as in progress."
+              },
+              "response": [
+                {
+                  "name": "Success Response",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/tasks/:id/mark-in-progress",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "tasks", ":id", "mark-in-progress"],
+                      "variable": [
+                        {"key": "id", "value": "task_id"}
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"task_abc123\",\n    \"title\": \"Follow up with client\",\n    \"description\": \"Call client to discuss proposal\",\n    \"type\": \"call\",\n    \"status\": \"in_progress\",\n    \"priority\": \"high\",\n    \"due_date\": \"2024-01-20T10:00:00+07:00\",\n    \"completed_at\": null,\n    \"assigned_to\": \"user_789\",\n    \"assigned_user\": {\n      \"id\": \"user_789\",\n      \"name\": \"Sales Rep Name\",\n      \"email\": \"sales@example.com\"\n    },\n    \"assigned_from\": \"user_123\",\n    \"assigned_from_user\": {\n      \"id\": \"user_123\",\n      \"name\": \"Manager Name\",\n      \"email\": \"manager@example.com\"\n    },\n    \"created_by\": \"user_123\",\n    \"created_at\": \"2024-01-15T10:30:45+07:00\",\n    \"updated_at\": \"2024-01-15T11:00:00+07:00\"\n  },\n  \"meta\": {\n    \"updated_by\": \"user_789\"\n  },\n  \"timestamp\": \"2024-01-15T11:00:00+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
+                },
+                {
+                  "name": "Error Response - Task Already Completed",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/tasks/:id/mark-in-progress",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "tasks", ":id", "mark-in-progress"],
+                      "variable": [
+                        {"key": "id", "value": "task_id"}
+                      ]
+                    }
+                  },
+                  "status": "Conflict",
+                  "code": 409,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"CONFLICT\",\n    \"message\": \"Cannot mark completed task as in progress\",\n    \"details\": {\n      \"message\": \"Cannot mark completed task as in progress\"\n    }\n  },\n  \"timestamp\": \"2024-01-15T11:00:00+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
+                }
+              ]
+            },
+            {
+              "name": "Complete Task",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/tasks/:id/complete",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "tasks", ":id", "complete"],
+                  "variable": [
+                    {"key": "id", "value": "task_id"}
+                  ]
+                },
+                "description": "Mark a task as completed (Mobile)"
+              },
+              "response": [
+                {
+                  "name": "Success Response",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/tasks/:id/complete",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "tasks", ":id", "complete"],
+                      "variable": [
+                        {"key": "id", "value": "task_id"}
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"task_abc123\",\n    \"title\": \"Follow up with client\",\n    \"description\": \"Call client to discuss proposal\",\n    \"type\": \"call\",\n    \"status\": \"completed\",\n    \"priority\": \"high\",\n    \"due_date\": \"2024-01-20T10:00:00+07:00\",\n    \"completed_at\": \"2024-01-15T12:00:00+07:00\",\n    \"assigned_to\": \"user_789\",\n    \"assigned_user\": {\n      \"id\": \"user_789\",\n      \"name\": \"Sales Rep Name\",\n      \"email\": \"sales@example.com\"\n    },\n    \"assigned_from\": \"user_123\",\n    \"assigned_from_user\": {\n      \"id\": \"user_123\",\n      \"name\": \"Manager Name\",\n      \"email\": \"manager@example.com\"\n    },\n    \"created_by\": \"user_123\",\n    \"created_at\": \"2024-01-15T10:30:45+07:00\",\n    \"updated_at\": \"2024-01-15T12:00:00+07:00\"\n  },\n  \"meta\": {\n    \"updated_by\": \"user_789\"\n  },\n  \"timestamp\": \"2024-01-15T12:00:00+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
+                },
+                {
+                  "name": "Error Response - Task Already Completed",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/tasks/:id/complete",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "tasks", ":id", "complete"],
+                      "variable": [
+                        {"key": "id", "value": "task_id"}
+                      ]
+                    }
+                  },
+                  "status": "Conflict",
+                  "code": 409,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"CONFLICT\",\n    \"message\": \"Task is already completed\",\n    \"details\": {\n      \"message\": \"Task is already completed\"\n    }\n  },\n  \"timestamp\": \"2024-01-15T12:00:00+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
+                }
+              ]
+            },
+            {
+              "name": "List Reminders",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/tasks/reminders?page=1&per_page=20",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "tasks", "reminders"],
+                  "query": [
+                    {"key": "page", "value": "1"},
+                    {"key": "per_page", "value": "20"},
+                    {"key": "task_id", "value": "", "disabled": true},
+                    {"key": "reminder_type", "value": "", "disabled": true, "description": "in_app, email, sms"},
+                    {"key": "is_sent", "value": "", "disabled": true},
+                    {"key": "remind_at_from", "value": "", "disabled": true},
+                    {"key": "remind_at_to", "value": "", "disabled": true}
+                  ]
+                },
+                "description": "Get list of reminders with pagination (Mobile)"
+              }
+            },
+            {
+              "name": "Get Reminder by ID",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/tasks/reminders/:id",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "tasks", "reminders", ":id"],
+                  "variable": [
+                    {"key": "id", "value": "reminder_id"}
+                  ]
+                },
+                "description": "Get reminder details by ID (Mobile)"
+              }
+            },
+            {
+              "name": "Create Reminder",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"task_id\": \"task_id_here\",\n  \"remind_at\": \"2024-01-20T09:00:00+07:00\",\n  \"reminder_type\": \"in_app\",\n  \"message\": \"Don't forget to follow up with client\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/tasks/reminders",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "tasks", "reminders"]
+                },
+                "description": "Create a new reminder for a task (Mobile)"
+              },
+              "response": [
+                {
+                  "name": "Success Response",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{token}}"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"task_id\": \"task_id_here\",\n  \"remind_at\": \"2024-01-20T09:00:00+07:00\",\n  \"reminder_type\": \"in_app\",\n  \"message\": \"Don't forget to follow up with client\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{base_url}}/api/v1/tasks/reminders",
+                      "host": ["{{base_url}}"],
+                      "path": ["api", "v1", "tasks", "reminders"]
+                    }
+                  },
+                  "status": "Created",
+                  "code": 201,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"reminder_abc123\",\n    \"task_id\": \"task_id_here\",\n    \"task\": {\n      \"id\": \"task_id_here\",\n      \"title\": \"Follow up with client\"\n    },\n    \"remind_at\": \"2024-01-20T09:00:00+07:00\",\n    \"reminder_type\": \"in_app\",\n    \"is_sent\": false,\n    \"sent_at\": null,\n    \"message\": \"Don't forget to follow up with client\",\n    \"created_by\": \"user_789\",\n    \"created_at\": \"2024-01-15T10:30:45+07:00\",\n    \"updated_at\": \"2024-01-15T10:30:45+07:00\"\n  },\n  \"meta\": {\n    \"created_by\": \"user_789\"\n  },\n  \"timestamp\": \"2024-01-15T10:30:45+07:00\",\n  \"request_id\": \"req_abc123xyz\"\n}"
+                }
+              ]
+            },
+            {
+              "name": "Update Reminder",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"remind_at\": \"2024-01-20T10:00:00+07:00\",\n  \"reminder_type\": \"in_app\",\n  \"message\": \"Updated reminder message\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/tasks/reminders/:id",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "tasks", "reminders", ":id"],
+                  "variable": [
+                    {"key": "id", "value": "reminder_id"}
+                  ]
+                },
+                "description": "Update reminder information (Mobile)"
+              }
+            },
+            {
+              "name": "Delete Reminder",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/tasks/reminders/:id",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "tasks", "reminders", ":id"],
+                  "variable": [
+                    {"key": "id", "value": "reminder_id"}
+                  ]
+                },
+                "description": "Delete a reminder (Mobile)"
+              }
+            }
+          ],
+          "description": "Task Management endpoints untuk Mobile Application - Get tasks assigned to logged-in user, mark in progress, complete tasks, and manage reminders"
         }
       ],
       "description": "Endpoints untuk Mobile Application"

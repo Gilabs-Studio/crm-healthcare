@@ -231,6 +231,94 @@ func SeedPermissions() error {
 		log.Printf("Warning: Viewer role not found, skipping viewer permission assignment: %v", err)
 	}
 
+	// Assign permissions to sales role
+	// Full access to Visit Reports and Task management (for mobile app)
+	var salesRole role.Role
+	if err := database.DB.Where("code = ?", "sales").First(&salesRole).Error; err == nil {
+		// Get all Visit Reports permissions
+		var visitReportPermissions []permission.Permission
+		if err := database.DB.Where("code IN (?)", []string{
+			"VIEW_VISIT_REPORTS",
+			"CREATE_VISIT_REPORTS",
+			"EDIT_VISIT_REPORTS",
+			"DELETE_VISIT_REPORTS",
+			"APPROVE_VISIT_REPORTS",
+			"REJECT_VISIT_REPORTS",
+			"ACTIVITY",
+		}).Find(&visitReportPermissions).Error; err == nil {
+			salesPermissionCount := 0
+			for _, perm := range visitReportPermissions {
+				if err := database.DB.Exec(
+					"INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?) ON CONFLICT DO NOTHING",
+					salesRole.ID, perm.ID,
+				).Error; err != nil {
+					log.Printf("Warning: Failed to assign permission %s to sales: %v", perm.Code, err)
+				} else {
+					salesPermissionCount++
+				}
+			}
+			log.Printf("Assigned %d Visit Reports permissions to sales role", salesPermissionCount)
+		}
+
+		// Get Task permissions (VIEW, CREATE, EDIT for mobile app)
+		var taskPermissions []permission.Permission
+		if err := database.DB.Where("code IN (?)", []string{
+			"VIEW_TASKS",
+			"CREATE_TASKS",
+			"EDIT_TASKS",
+		}).Find(&taskPermissions).Error; err == nil {
+			taskPermissionCount := 0
+			for _, perm := range taskPermissions {
+				if err := database.DB.Exec(
+					"INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?) ON CONFLICT DO NOTHING",
+					salesRole.ID, perm.ID,
+				).Error; err != nil {
+					log.Printf("Warning: Failed to assign permission %s to sales: %v", perm.Code, err)
+				} else {
+					taskPermissionCount++
+				}
+			}
+			log.Printf("Assigned %d Task permissions to sales role", taskPermissionCount)
+		}
+
+		// Get Accounts permissions (VIEW, CREATE, EDIT, DELETE for mobile app)
+		var accountsPermissions []permission.Permission
+		if err := database.DB.Where("code IN (?)", []string{
+			"VIEW_ACCOUNTS",
+			"CREATE_ACCOUNTS",
+			"EDIT_ACCOUNTS",
+			"DELETE_ACCOUNTS",
+		}).Find(&accountsPermissions).Error; err == nil {
+			accountsPermissionCount := 0
+			for _, perm := range accountsPermissions {
+				if err := database.DB.Exec(
+					"INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?) ON CONFLICT DO NOTHING",
+					salesRole.ID, perm.ID,
+				).Error; err != nil {
+					log.Printf("Warning: Failed to assign permission %s to sales: %v", perm.Code, err)
+				} else {
+					accountsPermissionCount++
+				}
+			}
+			log.Printf("Assigned %d Accounts permissions to sales role", accountsPermissionCount)
+		}
+
+		// Also assign VIEW_DASHBOARD for mobile dashboard access
+		var dashboardPermission permission.Permission
+		if err := database.DB.Where("code = ?", "VIEW_DASHBOARD").First(&dashboardPermission).Error; err == nil {
+			if err := database.DB.Exec(
+				"INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?) ON CONFLICT DO NOTHING",
+				salesRole.ID, dashboardPermission.ID,
+			).Error; err != nil {
+				log.Printf("Warning: Failed to assign VIEW_DASHBOARD to sales: %v", err)
+			} else {
+				log.Printf("Assigned VIEW_DASHBOARD permission to sales role")
+			}
+		}
+	} else {
+		log.Printf("Warning: Sales role not found, skipping sales permission assignment: %v", err)
+	}
+
 	log.Println("Permissions seeded successfully")
 	return nil
 }
