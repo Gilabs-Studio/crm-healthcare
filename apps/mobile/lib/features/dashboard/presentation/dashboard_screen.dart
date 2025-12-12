@@ -166,6 +166,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
               labelColor: colorScheme.primary,
               unselectedLabelColor: colorScheme.onSurface.withOpacity(0.7),
               indicatorColor: colorScheme.primary,
+              dividerColor: Colors.transparent, // Remove bottom border
+              indicatorSize: TabBarIndicatorSize.label, // Make indicator match label width
+              indicator: UnderlineTabIndicator(
+                borderSide: BorderSide(
+                  width: 3,
+                  color: colorScheme.primary,
+                ),
+                insets: const EdgeInsets.symmetric(horizontal: -20), // Make border longer
+              ),
               tabs: [
                 Tab(text: 'Overview'),
                 Tab(text: l10n.tasks),

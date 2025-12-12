@@ -150,6 +150,15 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen>
                 labelColor: theme.colorScheme.primary,
                 unselectedLabelColor: theme.colorScheme.onSurface.withOpacity(0.7),
                 indicatorColor: theme.colorScheme.primary,
+                dividerColor: Colors.transparent, // Remove bottom border
+                indicatorSize: TabBarIndicatorSize.label, // Make indicator match label width
+                indicator: UnderlineTabIndicator(
+                  borderSide: BorderSide(
+                    width: 3,
+                    color: theme.colorScheme.primary,
+                  ),
+                  insets: const EdgeInsets.symmetric(horizontal: -20), // Make border longer
+                ),
                 labelStyle: theme.textTheme.titleMedium?.copyWith(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
